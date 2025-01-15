@@ -3,8 +3,9 @@
 namespace MyTelegram.Messenger.Services.Impl;
 
 // https://corefork.telegram.org/api/config
-public class AppConfigHelper : IAppConfigHelper, ISingletonDependency
+public partial class AppConfigHelper
 {
+    private static int _hash = 1170140452;
     private static IJSONValue? _jsonValue;
     public IJSONValue GetAppConfig()
     {

@@ -2,4 +2,6 @@
 public interface IAppConfigHelper
 {
     IJSONValue GetAppConfig();
+
+    int GetAppConfigHash();
 }
