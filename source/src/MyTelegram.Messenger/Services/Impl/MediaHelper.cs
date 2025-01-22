@@ -4,81 +4,11 @@ namespace MyTelegram.Messenger.Services.Impl;
 
 public class MediaHelper(
     IOptionsMonitor<MyTelegramMessengerServerOptions> options,
+    ICacheManager<UserCacheItem> cacheManager,
     ILogger<MediaHelper> logger)
     : IMediaHelper, ITransientDependency
 {
-    public async Task<IEncryptedFile> SaveEncryptedFileAsync(long reqMsgId,
-        IInputEncryptedFile encryptedFile)
-    {
-        var client = GrpcClientFactory.CreateMediaServiceClient(options.CurrentValue.FileServerGrpcServiceUrl);
-        var r = await client
-            .SaveEncryptedFileAsync(new SaveEncryptedFileRequest
-            {
-                EncryptedFile = ByteString.CopyFrom(encryptedFile.ToBytes()),
-                ReqMsgId = reqMsgId
-            }).ResponseAsync;
-
-        return new TEncryptedFile
-        {
-            AccessHash = r.AccessHash,
-            DcId = r.DcId,
-            Id = r.Id,
-            KeyFingerprint = r.KeyFingerprint,
-            Size = r.Size
-        };
-    }
-
-    public async Task<SavePhotoResult> SavePhotoAsync(long reqMsgId,
-        long userId,
-        long fileId,
-        bool hasVideo,
-        double? videoStartTs,
-        int parts,
-        string name,
-        string md5,
-        IVideoSize? videoEmojiMarkup = null
-        )
-    {
-        var client = GrpcClientFactory.CreateMediaServiceClient(options.CurrentValue.FileServerGrpcServiceUrl);
-
-        var r = await client.SavePhotoAsync(new SavePhotoRequest
-        {
-            FileId = fileId,
-            UserId = userId,
-            HasVideo = hasVideo,
-            Md5 = md5 ?? string.Empty,
-            Name = name ?? string.Empty,
-            Parts = parts,
-            ReqMsgId = reqMsgId,
-            VideoStartTs = videoStartTs ?? 0,
-            VideoEmojiMarkup = videoEmojiMarkup == null ? ByteString.Empty : ByteString.CopyFrom(videoEmojiMarkup.ToBytes())
-
-        }).ResponseAsync;
-
-        return new SavePhotoResult(r.PhotoId, r.Photo.Span.ToArray().ToTObject<IPhoto>());
-    }
-
-    public async Task<IMessageMedia> SaveMediaAsync(IInputMedia media)
-    {
-        try
-        {
-            var client = GrpcClientFactory.CreateMediaServiceClient(options.CurrentValue.FileServerGrpcServiceUrl);
-            var r = await client.SaveMediaAsync(new SaveMediaRequest
-            {
-                Media = ByteString.CopyFrom(media.ToBytes())
-            })
-                .ResponseAsync;
-
-            return r.Media.Span.ToArray().ToTObject<IMessageMedia>();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Save media failed");
-            throw new UserFriendlyException("FILE_ID_INVALID", 400);
-        }
-    }
-
-    public MessageType GeMessageType(IMessageMedia media)
+    public MessageType GeMessageType(IMessageMedia? media)
     {
         if (media == null)
         {
@@ -102,5 +32,246 @@ public class MediaHelper(
             TMessageMediaWebPage => MessageType.Url,
             _ => throw new ArgumentOutOfRangeException(nameof(media))
         };
+    }
+
+    public async Task<IEncryptedFile> SaveEncryptedFileAsync(long reqMsgId,
+            IInputEncryptedFile encryptedFile)
+    {
+        var client = GrpcClientFactory.CreateMediaServiceClient(options.CurrentValue.FileServerGrpcServiceUrl);
+        var r = await client
+            .SaveEncryptedFileAsync(new SaveEncryptedFileRequest
+            {
+                EncryptedFile = ByteString.CopyFrom(encryptedFile.ToBytes()),
+                ReqMsgId = reqMsgId
+            }).ResponseAsync;
+
+        return new TEncryptedFile
+        {
+            AccessHash = r.AccessHash,
+            DcId = r.DcId,
+            Id = r.Id,
+            KeyFingerprint = r.KeyFingerprint,
+            Size = r.Size
+        };
+    }
+
+    public Task<IMessageMedia?> SaveMediaAsync(IInputMedia? media)
+    {
+        return SaveMediaCoreAsync(media);
+    }
+
+    public async Task<SavePhotoResult> SavePhotoAsync(long reqMsgId,
+            long userId,
+        long fileId,
+        bool hasVideo,
+        double? videoStartTs,
+        int parts,
+        string? name,
+        string? md5,
+        IVideoSize? videoEmojiMarkup = null
+        )
+    {
+        var client = GrpcClientFactory.CreateMediaServiceClient(options.CurrentValue.FileServerGrpcServiceUrl);
+
+        var r = await client.SavePhotoAsync(new SavePhotoRequest
+        {
+            UserId = userId,
+            FileId = fileId,
+            HasVideo = hasVideo,
+            Md5 = md5 ?? string.Empty,
+            Name = name ?? string.Empty,
+            Parts = parts,
+            ReqMsgId = reqMsgId,
+            VideoStartTs = videoStartTs ?? 0,
+            VideoEmojiMarkup = videoEmojiMarkup == null ? ByteString.Empty : ByteString.CopyFrom(videoEmojiMarkup.ToBytes())
+
+        }).ResponseAsync;
+
+        return new SavePhotoResult(r.PhotoId, r.Photo.Memory.ToTObject<IPhoto>());
+    }
+
+    private async Task<TMessageMediaContact> CreateMediaContactAsync(TInputMediaContact inputMediaContact)
+    {
+        var cachedUserItem = await cacheManager
+                .GetAsync(UserCacheItem.GetCacheKey(inputMediaContact.PhoneNumber))
+            ;
+        return new TMessageMediaContact
+        {
+            FirstName = inputMediaContact.FirstName,
+            LastName = inputMediaContact.LastName ?? string.Empty,
+            PhoneNumber = inputMediaContact.PhoneNumber?.Replace(" ", string.Empty) ?? string.Empty,
+            Vcard = inputMediaContact.Vcard ?? string.Empty,
+            UserId = cachedUserItem?.UserId ?? 0
+        };
+    }
+
+    private IMessageMedia CreateMediaDice(TInputMediaDice inputMediaDice)
+    {
+        int value;// dice value: 1-6
+        switch (inputMediaDice.Emoticon)
+        {
+            case "🎰": // Slot machine, value: 0-65
+                value = Random.Shared.Next(0, 65);
+                break;
+            default:// dice value: 1-6
+                value = Random.Shared.Next(1, 7);
+                break;
+        }
+
+        return new TMessageMediaDice
+        {
+            Emoticon = inputMediaDice.Emoticon,
+            Value = value
+        };
+    }
+
+    private IMessageMedia CreateMediaGeoLive(TInputMediaGeoLive inputMediaGeoLive)
+    {
+        IGeoPoint geo = new TGeoPointEmpty();
+        if (inputMediaGeoLive.GeoPoint is TInputGeoPoint inputGeoPoint1)
+        {
+            geo = new TGeoPoint
+            {
+                AccuracyRadius = inputGeoPoint1.AccuracyRadius,
+                Lat = inputGeoPoint1.Lat,
+                Long = inputGeoPoint1.Long,
+                AccessHash = Random.Shared.NextInt64()
+            };
+        }
+
+        return new TMessageMediaGeoLive
+        {
+            Heading = inputMediaGeoLive.Heading,
+            Period = inputMediaGeoLive.Period ?? 0,
+            ProximityNotificationRadius = inputMediaGeoLive.ProximityNotificationRadius,
+            Geo = geo
+        };
+    }
+
+    private IMessageMedia CreateMediaGeoPoint(TInputMediaGeoPoint inputMediaGeoPoint)
+    {
+        switch (inputMediaGeoPoint.GeoPoint)
+        {
+            case TInputGeoPoint inputGeoPoint1:
+                return new TMessageMediaGeo
+                {
+                    Geo = new TGeoPoint
+                    {
+                        AccuracyRadius = inputGeoPoint1.AccuracyRadius,
+                        Lat = inputGeoPoint1.Lat,
+                        Long = inputGeoPoint1.Long,
+                        AccessHash = Random.Shared.NextInt64()
+                    }
+                };
+        }
+
+        return new TMessageMediaGeo
+        {
+            Geo = new TGeoPointEmpty()
+        };
+    }
+
+    private async Task<IMessageMedia?> CreateMediaOnFileServerAsync(IInputMedia media)
+    {
+        try
+        {
+            var client = GrpcClientFactory.CreateMediaServiceClient(options.CurrentValue.FileServerGrpcServiceUrl);
+            var r = await client.SaveMediaAsync(new SaveMediaRequest
+            {
+                Media = ByteString.CopyFrom(media.ToBytes())
+            })
+                .ResponseAsync;
+            return r.Media.Memory.ToTObject<IMessageMedia>();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Save media failed");
+            RpcErrors.RpcErrors400.FileIdInvalid.ThrowRpcError();
+        }
+
+        throw new InvalidOperationException();
+    }
+
+    private IMessageMedia CreateMediaPoll(TInputMediaPoll inputMediaPoll)
+    {
+        return new TMessageMediaPoll
+        {
+            Poll = inputMediaPoll.Poll,
+            Results = new TPollResults()
+        };
+    }
+
+    private Task<IMessageMedia> CreateMediaStoryAsync(TInputMediaStory inputMediaStory)
+    {
+        throw new NotImplementedException();
+    }
+
+    private IMessageMedia CreateMediaVenue(TInputMediaVenue inputMediaVenue)
+    {
+        TInputGeoPoint? inputGeoPoint = null;
+        if (inputMediaVenue.GeoPoint is TInputGeoPoint geoPoint)
+        {
+            inputGeoPoint = geoPoint;
+        }
+
+        return new TMessageMediaVenue
+        {
+            Title = inputMediaVenue.Title,
+            Address = inputMediaVenue.Address,
+            Provider = inputMediaVenue.Provider,
+            VenueId = inputMediaVenue.VenueId,
+            VenueType = inputMediaVenue.VenueType,
+            Geo = inputGeoPoint == null
+                ? new TGeoPointEmpty()
+                : new TGeoPoint
+                {
+                    AccuracyRadius = inputGeoPoint.AccuracyRadius,
+                    Lat = inputGeoPoint.Lat,
+                    Long = inputGeoPoint.Long
+                }
+        };
+    }
+
+    private Task<IMessageMedia> CreateMediaWebPageAsync(TInputMediaWebPage inputMediaWebPage)
+    {
+        throw new NotImplementedException();
+    }
+
+    private async Task<IMessageMedia?> SaveMediaCoreAsync(IInputMedia? media)
+    {
+        switch (media)
+        {
+            case TInputMediaContact inputMediaContact:
+                return await CreateMediaContactAsync(inputMediaContact);
+            case TInputMediaDice inputMediaDice:
+                return CreateMediaDice(inputMediaDice);
+            case TInputMediaDocument:
+            case TInputMediaDocumentExternal:
+            case TInputMediaPhoto:
+            case TInputMediaPhotoExternal:
+            case TInputMediaUploadedDocument:
+            case TInputMediaUploadedPhoto:
+                return await CreateMediaOnFileServerAsync(media);
+            case TInputMediaPaidMedia:
+            case TInputMediaGame:
+            case TInputMediaInvoice:
+                throw new NotImplementedException();
+            case TInputMediaEmpty:
+                return new TMessageMediaEmpty();
+            case TInputMediaGeoLive inputMediaGeoLive:
+                return CreateMediaGeoLive(inputMediaGeoLive);
+            case TInputMediaGeoPoint inputMediaGeoPoint:
+                return CreateMediaGeoPoint(inputMediaGeoPoint);
+            case TInputMediaPoll inputMediaPoll:
+                return CreateMediaPoll(inputMediaPoll);
+            case TInputMediaStory inputMediaStory:
+                return await CreateMediaStoryAsync(inputMediaStory);
+            case TInputMediaVenue inputMediaVenue:
+                return CreateMediaVenue(inputMediaVenue);
+            case TInputMediaWebPage inputMediaWebPage:
+                return await CreateMediaWebPageAsync(inputMediaWebPage);
+            default:
+                return null;
+        }
     }
 }

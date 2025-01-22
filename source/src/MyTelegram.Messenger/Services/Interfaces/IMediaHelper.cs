@@ -7,7 +7,7 @@ public interface IMediaHelper
     Task<IEncryptedFile> SaveEncryptedFileAsync(long reqMsgId,
         IInputEncryptedFile encryptedFile);
 
-    Task<IMessageMedia> SaveMediaAsync(IInputMedia media);
+    Task<IMessageMedia?> SaveMediaAsync(IInputMedia? media);
 
     Task<SavePhotoResult> SavePhotoAsync(long reqMsgId,
         long userId,
@@ -15,8 +15,8 @@ public interface IMediaHelper
         bool hasVideo,
         double? videoStartTs,
         int parts,
-        string name,
-        string md5,
+        string? name,
+        string? md5,
         IVideoSize? videoEmojiMarkup = null
     );
 }
