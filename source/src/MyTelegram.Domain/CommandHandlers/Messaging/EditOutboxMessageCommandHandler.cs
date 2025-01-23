@@ -12,7 +12,8 @@ public class EditOutboxMessageCommandHandler : CommandHandler<MessageAggregate, 
             command.EditDate,
             command.Entities,
             command.Media,
-            command.ReplyMarkup
+            command.ReplyMarkup,
+            command.InvertMedia
         );
 
         return Task.CompletedTask;

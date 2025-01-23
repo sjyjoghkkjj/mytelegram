@@ -112,7 +112,8 @@ public class MessageConverterLatest(
                         PostAuthor = item.PostAuthor,
                         SavedPeerId = item.SavedPeerId.ToPeer(),
                         Effect = item.Effect,
-                        Pinned = item.Pinned
+                        Pinned = item.Pinned,
+                        InvertMedia = item.InvertMedia
                     };
                     if (item.ToPeer.PeerType == PeerType.Channel)
                     {
@@ -250,7 +251,8 @@ public class MessageConverterLatest(
                         ReplyTo = ToMessageReplyHeader(readModel.ReplyTo),
                         ReplyMarkup = readModel.ReplyMarkup.ToTObject<IReplyMarkup>(),
                         SavedPeerId = readModel.SavedPeerId.ToPeer(),
-                        Effect = readModel.Effect
+                        Effect = readModel.Effect,
+                        InvertMedia = readModel.InvertMedia
                     };
                     if (m.GroupedId == 0)
                     {

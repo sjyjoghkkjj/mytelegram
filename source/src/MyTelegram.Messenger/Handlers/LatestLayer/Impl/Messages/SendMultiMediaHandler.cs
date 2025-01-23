@@ -84,7 +84,8 @@ internal sealed class SendMultiMediaHandler(
                 inputQuickReplyShortcut: obj.QuickReplyShortcut,
                 isSendGroupedMessage: true,
                 silent: obj.Silent,
-                scheduleDate: obj.ScheduleDate
+                scheduleDate: obj.ScheduleDate,
+                invertMedia: obj.InvertMedia
             );
             inputs.Add(sendMessageInput);
             //await _messageAppService.SendMessageAsync(sendMessageInput);

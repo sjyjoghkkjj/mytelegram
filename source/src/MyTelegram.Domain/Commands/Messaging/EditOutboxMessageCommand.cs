@@ -9,7 +9,9 @@ public class EditOutboxMessageCommand(
     int editDate,
     IMessageMedia? media,
     IReplyMarkup? replyMarkup,
-    List<long>? chatMembers)
+    List<long>? chatMembers,
+    bool invertMedia
+    )
     : RequestCommand2<MessageAggregate, MessageId, IExecutionResult>(aggregateId, requestInfo)
 {
     public int MessageId { get; } = messageId;
@@ -19,6 +21,7 @@ public class EditOutboxMessageCommand(
     public IMessageMedia? Media { get; } = media;
     public IReplyMarkup? ReplyMarkup { get; } = replyMarkup;
     public List<long>? ChatMembers { get; } = chatMembers;
+    public bool InvertMedia { get; } = invertMedia;
 
     protected override IEnumerable<byte[]> GetSourceIdComponents()
     {

@@ -13,7 +13,8 @@ public class EditInboxMessageCommandHandler : CommandHandler<MessageAggregate, M
             command.EditDate,
             command.Entities,
             command.Media,
-            command.ReplyMarkup
+            command.ReplyMarkup,
+            command.InvertMedia
         );
         return Task.CompletedTask;
     }

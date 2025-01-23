@@ -8,7 +8,8 @@ public class EditInboxMessageCommand(
     int editDate,
     TVector<IMessageEntity>? entities,
     IMessageMedia? media,
-    IReplyMarkup? replyMarkup
+    IReplyMarkup? replyMarkup,
+    bool invertMedia
 )
     : RequestCommand2<MessageAggregate, MessageId, IExecutionResult>(aggregateId, requestInfo)
 {
@@ -18,4 +19,5 @@ public class EditInboxMessageCommand(
     public TVector<IMessageEntity>? Entities { get; } = entities;
     public IMessageMedia? Media { get; } = media;
     public IReplyMarkup? ReplyMarkup { get; } = replyMarkup;
+    public bool InvertMedia { get; } = invertMedia;
 }

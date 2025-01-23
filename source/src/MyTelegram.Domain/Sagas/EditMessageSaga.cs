@@ -55,7 +55,8 @@ ISagaIsStartedBy<MessageAggregate, MessageId, OutboxMessageEditedEventV2>,
                     newItem.EditDate ?? DateTime.UtcNow.ToTimestamp(),
                     newItem.Entities,
                     newItem.Media,
-                    newItem.ReplyMarkup
+                    newItem.ReplyMarkup,
+                    newItem.InvertMedia
                 );
                 Publish(command);
             }

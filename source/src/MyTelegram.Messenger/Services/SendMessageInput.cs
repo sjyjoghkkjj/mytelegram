@@ -32,7 +32,8 @@ public record SendMessageInput
         bool isSendGroupedMessage = false,
         bool isSendQuickReplyMessage = false,
         bool silent = false,
-        int? scheduleDate = null
+        int? scheduleDate = null,
+        bool invertMedia = false
         )
     {
         RequestInfo = requestInfo;
@@ -62,6 +63,7 @@ public record SendMessageInput
         IsSendQuickReplyMessage = isSendQuickReplyMessage;
         Silent = silent;
         ScheduleDate = scheduleDate;
+        InvertMedia = invertMedia;
     }
 
     public bool ClearDraft { get; }
@@ -80,6 +82,7 @@ public record SendMessageInput
     public bool IsSendQuickReplyMessage { get; }
     public bool Silent { get; }
     public int? ScheduleDate { get; }
+    public bool InvertMedia { get; }
     public IMessageMedia? Media { get; }
     public string Message { get; }
     public string? MessageActionData { get; }

@@ -97,7 +97,8 @@ internal sealed class EditMessageHandler(
                 CurrentDate,
                 media,
                 obj.ReplyMarkup,
-                chatReadModel?.ChatMembers.Select(p => p.UserId).ToList()
+                chatReadModel?.ChatMembers.Select(p => p.UserId).ToList(),
+                obj.InvertMedia
             );
         await commandBus.PublishAsync(command, default);
 

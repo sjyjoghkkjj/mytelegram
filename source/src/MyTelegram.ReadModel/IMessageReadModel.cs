@@ -52,4 +52,5 @@ public interface IMessageReadModel : IReadModel, IHasReactions
     int? ScheduleDate { get; }
     int? TtlPeriod { get; }
     int? ExpirationTime { get; }
+    bool InvertMedia { get; }
 }

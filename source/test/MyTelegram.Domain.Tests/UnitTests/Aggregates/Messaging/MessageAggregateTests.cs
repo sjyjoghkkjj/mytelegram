@@ -23,7 +23,9 @@ public class MessageAggregateTests : TestsFor<MessageAggregate>
             DateTime.UtcNow.ToTimestamp(),
             null,
             null,
-            null);
+            null,
+            false
+            );
 
         var uncommittedEvent = Sut.UncommittedEvents.Single().AggregateEvent.ShouldBeOfType<OutboxMessageEditedEvent>();
         uncommittedEvent.NewMessage.ShouldBe(newMessage);
@@ -43,7 +45,9 @@ public class MessageAggregateTests : TestsFor<MessageAggregate>
                 DateTime.UtcNow.ToTimestamp(),
                 null,
                 null,
-                null));
+                null,
+                false
+                ));
 
         exception.Message.ShouldBe(RpcErrors.RpcErrors400.MessageEditTimeExpired.Message);
     }
@@ -61,7 +65,8 @@ public class MessageAggregateTests : TestsFor<MessageAggregate>
                 DateTime.UtcNow.ToTimestamp(),
                 null,
                 null,
-                null));
+                null,
+                false));
 
         exception.Message.ShouldBe(RpcErrors.RpcErrors403.MessageAuthorRequired.Message);
     }

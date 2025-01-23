@@ -87,6 +87,7 @@ public class MessageReadModel : IMessageReadModel,
     public bool CanSeeList { get; private set; }
 
     public int? ExpirationTime { get; private set; }
+    public bool InvertMedia { get; private set; }
 
     public Task ApplyAsync(IReadModelContext context,
         IDomainEvent<MessageAggregate, MessageId, OutboxMessageCreatedEvent> domainEvent,
@@ -155,6 +156,7 @@ public class MessageReadModel : IMessageReadModel,
             ExpirationTime = messageItem.Date + messageItem.TtlPeriod.Value;
         }
         Pinned = messageItem.Pinned;
+        InvertMedia = messageItem.InvertMedia;
 
         return Task.CompletedTask;
     }
@@ -207,6 +209,8 @@ public class MessageReadModel : IMessageReadModel,
             ExpirationTime = messageItem.Date + messageItem.TtlPeriod.Value;
         }
 
+        InvertMedia = InvertMedia;
+
         return Task.CompletedTask;
     }
 
@@ -220,6 +224,7 @@ public class MessageReadModel : IMessageReadModel,
         EditDate = item.EditDate;
         ReplyMarkup2 = item.ReplyMarkup;
         Media2 = item.Media;
+        InvertMedia = item.InvertMedia;
 
         return Task.CompletedTask;
     }
@@ -234,6 +239,7 @@ public class MessageReadModel : IMessageReadModel,
         EditDate = item.EditDate;
         ReplyMarkup2 = item.ReplyMarkup;
         Media2 = item.Media;
+        InvertMedia = item.InvertMedia;
 
         return Task.CompletedTask;
     }

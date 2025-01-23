@@ -160,7 +160,8 @@ internal sealed class SendMediaHandler(
             inputQuickReplyShortcut: obj.QuickReplyShortcut,
             replyMarkup: obj.ReplyMarkup,
             silent: obj.Silent,
-            scheduleDate: obj.ScheduleDate
+            scheduleDate: obj.ScheduleDate,
+            invertMedia: obj.InvertMedia
         );
         await messageAppService.SendMessageAsync([sendMessageInput]);
 

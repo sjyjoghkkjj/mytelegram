@@ -107,7 +107,8 @@ internal sealed class SendMessageHandler(
             effect: obj.Effect,
             inputQuickReplyShortcut: obj.QuickReplyShortcut,
             silent: obj.Silent,
-            scheduleDate: obj.ScheduleDate
+            scheduleDate: obj.ScheduleDate,
+            invertMedia: obj.InvertMedia
         );
 
         await messageAppService.SendMessageAsync([sendMessageInput]);

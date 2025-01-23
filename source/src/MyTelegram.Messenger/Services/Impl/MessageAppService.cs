@@ -337,7 +337,8 @@ public class MessageAppService(
             LinkedChannelId: linkedChannelId,
             Pts: pts,
             Silent: input.Silent,
-            Reply: reply
+            Reply: reply,
+            InvertMedia: input.InvertMedia
         );
 
         var sendMessageItem = new SendMessageItem(messageItem, input.ClearDraft, item.mentionedUserIds, chatMembers);

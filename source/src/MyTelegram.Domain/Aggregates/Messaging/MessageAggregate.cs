@@ -156,7 +156,8 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
         int editDate,
         TVector<IMessageEntity>? entities,
         IMessageMedia? media,
-        IReplyMarkup? replyMarkup
+        IReplyMarkup? replyMarkup,
+        bool invertMedia
     )
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
@@ -172,7 +173,8 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
             Message = newMessage,
             Entities = entities,
             ReplyMarkup = replyMarkup,
-            EditDate = editDate
+            EditDate = editDate,
+            InvertMedia = invertMedia
         };
 
         Emit(new InboxMessageEditedEventV2(
@@ -187,7 +189,8 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
         int editDate,
         TVector<IMessageEntity>? entities,
         IMessageMedia? media,
-        IReplyMarkup? replyMarkup
+        IReplyMarkup? replyMarkup,
+        bool invertMedia
     )
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
@@ -212,7 +215,8 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
             Entities = entities,
             Media = media,
             ReplyMarkup = replyMarkup,
-            EditDate = editDate
+            EditDate = editDate,
+            InvertMedia = invertMedia
         };
 
         Emit(new OutboxMessageEditedEventV2(requestInfo,
@@ -288,39 +292,6 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
         reply.RecentRepliers = recentRepliers;
         Emit(new ReplyChannelMessageCompletedEvent(requestInfo, _state.MessageItem.ToPeer.PeerId,
             _state.MessageItem.MessageId, reply, postChannelId, postMessageId));
-    }
-
-    public void StartUpdatePinnedMessage(RequestInfo requestInfo,
-        bool pinned,
-        bool pmOneSide,
-        bool silent,
-        int date,
-        long randomId,
-        string messageActionData)
-    {
-        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        var oldPmOneSide = pmOneSide;
-        if (!pinned)
-        {
-            oldPmOneSide = _state.PmOneSide;
-        }
-
-        var item = _state.MessageItem;
-        Emit(new UpdatePinnedMessageStartedEvent(requestInfo,
-            item.OwnerPeer.PeerId,
-            item.MessageId,
-            pinned,
-            oldPmOneSide,
-            silent,
-            date,
-            item.IsOut,
-            _state.InboxItems,
-            item.SenderPeer.PeerId,
-            _state.SenderMessageId,
-            item.ToPeer,
-            randomId,
-            messageActionData
-        ));
     }
 
     public void UpdateInboxMessagePinned(

@@ -49,7 +49,8 @@ public record MessageItem
     int? ScheduleMessageId = null,
     int? TtlPeriod = null,
     bool IsTtlFromDefaultSetting = false,
-    bool Pinned = false
+    bool Pinned = false,
+    bool InvertMedia = false
 );
 
 public record SendMessageItem(MessageItem MessageItem, bool ClearDraft = false, List<long>? MentionedUserIds = null, List<long>? ChatMembers = null);
