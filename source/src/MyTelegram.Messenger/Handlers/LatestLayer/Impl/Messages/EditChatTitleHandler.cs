@@ -32,7 +32,7 @@ internal sealed class EditChatTitleHandler : RpcResultObjectHandler<MyTelegram.S
             input.ToRequestInfo(),
             obj.Title,
             new TMessageActionChatEditTitle { Title = obj.Title }.ToBytes().ToHexString(),
-            _randomHelper.NextLong()
+            _randomHelper.NextInt64()
         );
         await _commandBus.PublishAsync(command, CancellationToken.None);
         return null!;

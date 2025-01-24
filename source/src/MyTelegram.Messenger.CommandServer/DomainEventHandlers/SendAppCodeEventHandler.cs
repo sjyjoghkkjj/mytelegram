@@ -40,7 +40,7 @@ public class SendAppCodeEventHandler(
                 MyTelegramServerDomainConsts.OfficialUserId,
                 new Peer(PeerType.User, domainEvent.AggregateEvent.UserId),
                 message,
-                randomHelper.NextLong(),
+                randomHelper.NextInt64(),
                 entities: entities
             );
 

@@ -35,7 +35,7 @@ internal sealed class CreateChannelHandler : RpcResultObjectHandler<MyTelegram.S
         RequestCreateChannel obj)
     {
         var channelId = await _idGenerator.NextLongIdAsync(IdType.ChannelId);
-        var accessHash = _randomHelper.NextLong();
+        var accessHash = _randomHelper.NextInt64();
         var date = DateTime.UtcNow.ToTimestamp();
 
         var megagroup = obj.Megagroup;
@@ -55,7 +55,7 @@ internal sealed class CreateChannelHandler : RpcResultObjectHandler<MyTelegram.S
             obj.Address,
             accessHash,
             date,
-            _randomHelper.NextLong(),
+            _randomHelper.NextInt64(),
             new TMessageActionChannelCreate { Title = obj.Title }.ToBytes().ToHexString(),
             obj.TtlPeriod,
             false,

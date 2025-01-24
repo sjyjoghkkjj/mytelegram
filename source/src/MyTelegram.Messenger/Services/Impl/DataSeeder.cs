@@ -83,7 +83,7 @@ public class DataSeeder(
         await u.LoadAsync(eventStore, snapshotStore, CancellationToken.None);
         if (u.IsNew)
         {
-            var accessHash = randomHelper.NextLong();
+            var accessHash = randomHelper.NextInt64();
             var createUserCommand =
                 new CreateUserCommand(aggregateId,
                     new RequestInfo(0, 0, 0, 0, Guid.Empty, 0, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()),

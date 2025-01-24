@@ -63,7 +63,7 @@ internal sealed class AddChatUserHandler : RpcResultObjectHandler<MyTelegram.Sch
                 peer.PeerId,
                 CurrentDate,
                 new TMessageActionChatAddUser { Users = new TVector<long>(peer.PeerId) }.ToBytes().ToHexString(),
-                _randomHelper.NextLong());
+                _randomHelper.NextInt64());
             await _commandBus.PublishAsync(command, CancellationToken.None);
             return null!;
         }

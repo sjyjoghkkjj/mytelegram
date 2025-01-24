@@ -126,7 +126,7 @@ internal sealed class SendMediaHandler(
         long? pollId = null;
         if (obj.Media is TInputMediaPoll inputMediaPoll)
         {
-            pollId = randomHelper.NextLong();
+            pollId = randomHelper.NextInt64();
             inputMediaPoll.Poll.Id = pollId.Value;
 
             await CreatePollAsync(toPeer, inputMediaPoll);

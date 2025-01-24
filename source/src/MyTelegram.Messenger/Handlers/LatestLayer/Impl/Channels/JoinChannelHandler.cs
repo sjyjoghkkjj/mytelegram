@@ -50,7 +50,7 @@ internal sealed class JoinChannelHandler(
                 null,
                 new List<long>(),
                 CurrentDate,
-                randomHelper.NextLong(),
+                randomHelper.NextInt64(),
                 new TMessageActionChatAddUser { Users = new TVector<long>(userIdList) }.ToBytes().ToHexString(),
                 ChatJoinType.ByRequest
                 );

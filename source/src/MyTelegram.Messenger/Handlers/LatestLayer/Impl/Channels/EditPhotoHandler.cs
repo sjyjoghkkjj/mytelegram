@@ -136,7 +136,7 @@ internal sealed class EditPhotoHandler : RpcResultObjectHandler<MyTelegram.Schem
             photoId,
             //photo.ToBytes(),
             new TMessageActionChatEditPhoto { Photo = photo }.ToBytes().ToHexString(),
-            _randomHelper.NextLong());
+            _randomHelper.NextInt64());
         await _commandBus.PublishAsync(command, CancellationToken.None);
 
         return null!;

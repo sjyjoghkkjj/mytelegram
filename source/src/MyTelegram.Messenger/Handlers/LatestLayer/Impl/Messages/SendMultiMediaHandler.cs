@@ -48,7 +48,7 @@ internal sealed class SendMultiMediaHandler(
         await accessHashHelper.CheckAccessHashAsync(obj.Peer);
         await accessHashHelper.CheckAccessHashAsync(obj.SendAs);
 
-        var groupId = randomHelper.NextLong();
+        var groupId = randomHelper.NextInt64();
         var groupItemCount = obj.MultiMedia.Count;
         var requestInfo = input.ToRequestInfo();
         int? replyToMsgId = null;

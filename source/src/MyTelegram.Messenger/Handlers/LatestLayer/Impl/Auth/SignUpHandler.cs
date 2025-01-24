@@ -36,7 +36,7 @@ internal sealed class SignUpHandler(
             input.ToRequestInfo(),
             obj.PhoneCodeHash,
             userId,
-            randomHelper.NextLong(),
+            randomHelper.NextInt64(),
             phoneNumber,
             obj.FirstName,
             obj.LastName);

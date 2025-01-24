@@ -12,5 +12,5 @@ public interface IRandomHelper
     int NextInt(int min,
         int max);
 
-    long NextLong();
+    long NextInt64();
 }

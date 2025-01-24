@@ -44,7 +44,7 @@ public class UserDomainEventHandler(
                 MyTelegramServerDomainConsts.OfficialUserId,
                 new Peer(PeerType.User, domainEvent.AggregateEvent.UserId/*, domainEvent.AggregateEvent.AccessHash*/),
                 welcomeMessage,
-                randomHelper.NextLong());
+                randomHelper.NextInt64());
 
             await messageAppService.SendMessageAsync([sendMessageInput]);
         }

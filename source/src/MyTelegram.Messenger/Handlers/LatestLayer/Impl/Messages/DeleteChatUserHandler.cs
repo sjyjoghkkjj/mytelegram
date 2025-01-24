@@ -44,7 +44,7 @@ internal sealed class DeleteChatUserHandler : RpcResultObjectHandler<MyTelegram.
             input.ToRequestInfo(),
             peer.PeerId,
             new TMessageActionChatDeleteUser { UserId = peer.PeerId }.ToBytes().ToHexString(),
-            _randomHelper.NextLong()
+            _randomHelper.NextInt64()
         );
         await _commandBus.PublishAsync(command, CancellationToken.None);
 

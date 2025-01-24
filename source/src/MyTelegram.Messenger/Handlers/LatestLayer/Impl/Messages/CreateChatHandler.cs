@@ -54,7 +54,7 @@ internal sealed class CreateChatHandler(
         if (options.Value.AutoCreateSuperGroup)
         {
             var channelId = await idGenerator.NextLongIdAsync(IdType.ChannelId);
-            var accessHash = randomHelper.NextLong();
+            var accessHash = randomHelper.NextInt64();
             var date = DateTime.UtcNow.ToTimestamp();
             var createChannelCommand = new CreateChannelCommand(ChannelId.Create(channelId),
                 input.ToRequestInfo(),
@@ -68,7 +68,7 @@ internal sealed class CreateChatHandler(
                 string.Empty,
                 accessHash,
                 date,
-                randomHelper.NextLong(),
+                randomHelper.NextInt64(),
                 new TMessageActionChannelCreate { Title = obj.Title }.ToBytes().ToHexString(),
                 null,
                 false,
@@ -99,7 +99,7 @@ internal sealed class CreateChatHandler(
                 privacyRestrictedUserIdList,
                 botList,
                 CurrentDate,
-                randomHelper.NextLong(),
+                randomHelper.NextInt64(),
                 new TMessageActionChatAddUser { Users = new TVector<long>(memberUserIdList) }.ToBytes().ToHexString(),
                 ChatJoinType.InvitedByAdmin
             );
@@ -108,7 +108,7 @@ internal sealed class CreateChatHandler(
         else
         {
             var chatId = await idGenerator.NextLongIdAsync(IdType.ChatId);
-            var randomId = randomHelper.NextLong();
+            var randomId = randomHelper.NextInt64();
             var messageActionData =
                 new TMessageActionChatCreate { Title = obj.Title, Users = new TVector<long>(memberUserIdList) }
                     .ToBytes()

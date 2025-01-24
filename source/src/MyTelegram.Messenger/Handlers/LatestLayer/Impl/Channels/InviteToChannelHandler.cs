@@ -96,7 +96,7 @@ internal sealed class InviteToChannelHandler(
                 privacyRestrictedUserIdList,
                 botList,
                 CurrentDate,
-                randomHelper.NextLong(),
+                randomHelper.NextInt64(),
                 new TMessageActionChatAddUser { Users = new TVector<long>(userIdList) }.ToBytes().ToHexString(),
                 ChatJoinType.InvitedByAdmin
                 );

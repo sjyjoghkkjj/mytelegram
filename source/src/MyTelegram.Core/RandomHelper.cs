@@ -41,11 +41,8 @@ public class RandomHelper : IRandomHelper
         return Random.Shared.Next();
     }
 
-    public long NextLong()
+    public long NextInt64()
     {
-        var bytes = new byte[8];
-        Random.Shared.NextBytes(bytes);
-
-        return BitConverter.ToInt64(bytes);
+        return Random.Shared.NextInt64();
     }
 }
