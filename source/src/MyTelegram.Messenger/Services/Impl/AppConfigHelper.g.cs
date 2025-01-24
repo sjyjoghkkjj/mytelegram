@@ -5,7 +5,7 @@ namespace MyTelegram.Messenger.Services.Impl;
 // https://corefork.telegram.org/api/config
 public partial class AppConfigHelper
 {
-    private static int _hash = 1170140452;
+    private static int _hash = 2130643969;
     private static IJSONValue? _jsonValue;
     public IJSONValue GetAppConfig()
     {
@@ -604,7 +604,7 @@ public partial class AppConfigHelper
                 // If false, the current user cannot create referral programs » for bots they own. (boolean)
                 new TJsonObjectValue { Key = "starref_program_allowed", Value = new TJsonBool { Value = false } },
 
-                // Start parameter referral program prefixes for referral links ». (string)
+                // Start parameter referral program prefixes for referral links ». (array of strings)
                 new TJsonObjectValue
                 {
                     Key = "starref_start_param_prefixes",
@@ -811,6 +811,8 @@ public partial class AppConfigHelper
                         ]
                     }
                 },
+
+                new TJsonObjectValue { Key = "forum_upgrade_participants_min", Value = new TJsonNumber { Value = 0 } },
 
             ]
         };
