@@ -19,9 +19,11 @@ public class MtpConnectionHandler(
             remoteEndPoint = new IPEndPoint(proxyProtocolFeature.SourceIp, proxyProtocolFeature.SourcePort);
             clientIp = proxyProtocolFeature.SourceIp.ToString();
         }
+
         var connectionTypeFeature = connection.Features.Get<ConnectionTypeFeature>();
 
-        logger.LogInformation("[ConnectionId: {ConnectionId}] New client connected, localPort: {LocalPort}({ConnectionType}), remoteEndPoint: {RemoteEndPoint}, online count: {OnlineCount}",
+        logger.LogInformation(
+            "[ConnectionId: {ConnectionId}] New client connected, localPort: {LocalPort}({ConnectionType}), remoteEndPoint: {RemoteEndPoint}, online count: {OnlineCount}",
             connection.ConnectionId,
             (connection.LocalEndPoint as IPEndPoint)?.Port,
             connectionTypeFeature?.ConnectionType,
@@ -37,18 +39,30 @@ public class MtpConnectionHandler(
             ConnectionType = connectionTypeFeature?.ConnectionType ?? ConnectionType.Generic
         };
         clientManager.AddClient(connection.ConnectionId, clientData);
+
         connection.ConnectionClosed.Register(() =>
         {
             if (clientManager.TryRemoveClient(connection.ConnectionId, out _))
             {
-                messageQueueProcessor.Enqueue(new ClientDisconnectedEvent(clientData.ConnectionId, clientData.AuthKeyId, 0), clientData.AuthKeyId);
-
+                messageQueueProcessor.Enqueue(
+                    new ClientDisconnectedEvent(clientData.ConnectionId, clientData.AuthKeyId, 0),
+                    clientData.AuthKeyId);
             }
-            logger.LogInformation("[ConnectionId: {ConnectionId}] Client disconnected, RemoteEndPoint: {RemoteEndPoint}",
+
+            logger.LogInformation(
+                "[ConnectionId: {ConnectionId}] Client disconnected, RemoteEndPoint: {RemoteEndPoint}",
                 connection.ConnectionId,
                 remoteEndPoint);
         });
-        _ = ProcessResponseQueueAsync(clientData, connection);
+
+        var processSendDataTask = ProcessSendDataAsync(clientData, connection);
+        var processReceiveDataTask = ProcessReceiveDataAsync(clientData, connection);
+
+        await Task.WhenAny(processSendDataTask, processReceiveDataTask);
+    }
+
+    private async Task ProcessReceiveDataAsync(ClientData clientData, ConnectionContext connection)
+    {
         var input = connection.Transport.Input;
         while (!connection.ConnectionClosed.IsCancellationRequested)
         {
@@ -86,38 +100,36 @@ public class MtpConnectionHandler(
             }
 
             input.AdvanceTo(buffer.Start, buffer.End);
-            if (result.IsCompleted)
+            if (result.IsCompleted || result.IsCanceled)
             {
                 break;
             }
         }
+
+        await input.CompleteAsync();
     }
 
-    private Task ProcessResponseQueueAsync(ClientData clientData, ConnectionContext connectionContext)
+    private async Task ProcessSendDataAsync(ClientData clientData, ConnectionContext connectionContext)
     {
-        Task.Run(async () =>
+        var queue = clientData.ResponseQueue;
+        while (await queue.Reader.WaitToReadAsync() && !connectionContext.ConnectionClosed.IsCancellationRequested)
         {
-            var queue = clientData.ResponseQueue;
-            while (await queue.Reader.WaitToReadAsync() && !connectionContext.ConnectionClosed.IsCancellationRequested)
+            while (queue.Reader.TryRead(out var response))
             {
-                while (queue.Reader.TryRead(out var response))
+                var encodedBytes =
+                    ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
+                try
                 {
-                    var encodedBytes = ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
-                    try
-                    {
-                        var totalCount = clientDataSender.EncodeData(response, clientData, encodedBytes);
-                        await connectionContext.Transport.Output.WriteAsync(encodedBytes.AsMemory()[..totalCount]);
-                        await connectionContext.Transport.Output.FlushAsync();
-                    }
-                    finally
-                    {
-                        ArrayPool<byte>.Shared.Return(encodedBytes);
-                    }
+                    var totalCount = clientDataSender.EncodeData(response, clientData, encodedBytes);
+                    await connectionContext.Transport.Output.WriteAsync(encodedBytes.AsMemory()[..totalCount]);
+                    await connectionContext.Transport.Output.FlushAsync();
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(encodedBytes);
                 }
             }
-        });
-
-        return Task.CompletedTask;
+        }
     }
 
     private Task ProcessDataAsync(IMtpMessage mtpMessage,
@@ -141,7 +153,7 @@ public class MtpConnectionHandler(
     {
         if (buffer.Length == 0)
         {
-            mtpMessage = default;
+            mtpMessage = null;
             return false;
         }
 
@@ -149,7 +161,7 @@ public class MtpConnectionHandler(
 
         if (reader.Remaining < 4)
         {
-            mtpMessage = default;
+            mtpMessage = null;
 
             return false;
         }
