@@ -58,6 +58,7 @@ public static class MyTelegramServerReadModelMongoDbExtensions
             .AddTransient<IAccessHashReadModelLocator, AccessHashReadModelLocator>()
             .AddTransient<IChatAdminReadModelLocator, ChatAdminReadModelLocator>()
             .AddTransient<IChatInviteImporterReadModelLocator, ChatInviteImporterReadModelLocator>()
+            .AddTransient<DraftReadModelLocator>()
             ;
 
 
@@ -76,7 +77,8 @@ public static class MyTelegramServerReadModelMongoDbExtensions
             .UseMongoDbReadModel<UserNameAggregate, UserNameId, UserNameReadModel>()
             .UseMongoDbReadModel<DeviceAggregate, DeviceId, DeviceReadModel>()
             .UseMongoDbReadModel<PushDeviceAggregate, PushDeviceId, PushDeviceReadModel>()
-            .UseMongoDbReadModel<DialogAggregate, DialogId, DraftReadModel>()            
+            //.UseMongoDbReadModel<DialogAggregate, DialogId, DraftReadModel>()
+            .UseMongoDbReadModel<DraftReadModel, DraftReadModelLocator>()
             .UseMongoDbReadModel<ReadingHistoryAggregate, ReadingHistoryId, ReadingHistoryReadModel>()
             //.UseMongoDbReadModel<RpcResultAggregate, RpcResultId, RpcResultReadModel>()
             .UseMongoDbReadModel<ReplyReadModel, IReplyReadModelLocator>()

@@ -6,12 +6,19 @@ namespace MyTelegram.Handlers.Messages;
 /// Clear all <a href="https://corefork.telegram.org/api/drafts">drafts</a>.
 /// See <a href="https://corefork.telegram.org/method/messages.clearAllDrafts" />
 ///</summary>
-internal sealed class ClearAllDraftsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestClearAllDrafts, IBool>,
+internal sealed class ClearAllDraftsHandler(IQueryProcessor queryProcessor, ICommandBus commandBus) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestClearAllDrafts, IBool>,
     Messages.IClearAllDraftsHandler
 {
-    protected override Task<IBool> HandleCoreAsync(IRequestInput input,
+    protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestClearAllDrafts obj)
     {
-        throw new NotImplementedException();
+        var drafts = await queryProcessor.ProcessAsync(new GetAllDraftQuery(input.UserId));
+        foreach (var draftReadModel in drafts)
+        {
+            var command = new DeleteDraftCommand(TempId.New, draftReadModel.OwnerPeerId, draftReadModel.Peer);
+            await commandBus.PublishAsync(command);
+        }
+
+        return new TBoolTrue();
     }
 }
