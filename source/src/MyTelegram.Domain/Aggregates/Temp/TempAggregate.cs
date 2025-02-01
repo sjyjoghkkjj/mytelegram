@@ -17,8 +17,13 @@ public class TempAggregate(TempId id) : AggregateRoot<TempAggregate, TempId>(id)
     IApply<UnpinAllMessagesStartedEvent>,
     IApply<UpdateMessagePinnedStartedEvent>,
     IApply<EditPeerFoldersStartedEvent>,
-    IApply<SendMessageStartedEvent>
+    IApply<SendMessageStartedEvent>,
+    IApply<DraftDeletedEvent>
 {
+    public void DeleteDraft(long ownerPeerId, Peer toPeer)
+    {
+        Emit(new DraftDeletedEvent(ownerPeerId, toPeer));
+    }
     public void StartSendMessage(RequestInfo requestInfo, List<SendMessageItem> sendMessageItems,
         bool isSendQuickReplyMessages,
         bool isSendGroupedMessages,
@@ -148,6 +153,11 @@ public class TempAggregate(TempId id) : AggregateRoot<TempAggregate, TempId>(id)
     }
 
     public void Apply(SendMessageStartedEvent aggregateEvent)
+    {
+
+    }
+
+    public void Apply(DraftDeletedEvent aggregateEvent)
     {
 
     }

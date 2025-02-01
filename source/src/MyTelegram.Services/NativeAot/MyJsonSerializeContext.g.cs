@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace MyTelegram.Services.NativeAot;
 
-// Count:74
+// Count:75
 // MyTelegram.Core
 [JsonSerializable(typeof(MyTelegram.Core.AcksDataReceivedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.AppCodeCreatedIntegrationEvent))]
@@ -54,6 +54,7 @@ namespace MyTelegram.Services.NativeAot;
 [JsonSerializable(typeof(MyTelegram.Core.SessionRevokedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.SetSessionPasswordStateEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.StickerDataReceivedEvent))]
+[JsonSerializable(typeof(MyTelegram.Core.TakeoutCacheItem))]
 [JsonSerializable(typeof(MyTelegram.Core.TransportErrorEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.UnRegisterAuthKeyEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.UnencryptedMessage))]

@@ -1,9 +1,12 @@
-﻿namespace MyTelegram.ReadModel.Impl;
+﻿using MyTelegram.Domain.Aggregates.Temp;
+using MyTelegram.Domain.Events.Temp;
+
+namespace MyTelegram.ReadModel.Impl;
 
 public class DraftReadModel : IDraftReadModel,
     IAmReadModelFor<DialogAggregate, DialogId, DraftSavedEvent>,
-    IAmReadModelFor<DialogAggregate, DialogId, DraftClearedEvent>
-
+    IAmReadModelFor<DialogAggregate, DialogId, DraftClearedEvent>,
+    IAmReadModelFor<TempAggregate,TempId,DraftDeletedEvent>
 {
     public virtual Draft Draft { get; protected set; } = null!;
     public virtual string Id { get; private set; } = null!;
@@ -27,6 +30,13 @@ public class DraftReadModel : IDraftReadModel,
         OwnerPeerId = domainEvent.AggregateEvent.OwnerPeerId;
         Peer = domainEvent.AggregateEvent.Peer;
         Draft = domainEvent.AggregateEvent.Draft;
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<TempAggregate, TempId, DraftDeletedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        context.MarkForDeletion();
+
         return Task.CompletedTask;
     }
 }
