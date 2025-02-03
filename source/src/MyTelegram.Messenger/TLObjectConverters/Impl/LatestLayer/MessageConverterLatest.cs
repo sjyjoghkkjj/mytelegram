@@ -171,7 +171,7 @@ public class MessageConverterLatest(
         long selfUserId)
     {
         var item = aggregateEvent.NewMessageItem;
-        var m = ToMessage(item, reactions: item.Reactions, recentReactions: item.RecentReactions);
+        var m = ToMessage(item, selfUserId, reactions: item.Reactions, recentReactions: item.RecentReactions);
 
         return m;
     }

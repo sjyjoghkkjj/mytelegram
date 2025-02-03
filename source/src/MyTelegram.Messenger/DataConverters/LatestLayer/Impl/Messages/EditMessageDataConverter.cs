@@ -7,6 +7,7 @@ public interface IEditMessageDataConverter :
     ILayeredDataConverter<InboxMessageEditCompletedSagaEvent, Schema.IUpdates>
 {
     IUpdates ToEditQuickReplyMessageUpdates(OutboxMessageEditCompletedSagaEvent data);
+    IUpdates ToEditMessageUpdates(OutboxMessageEditCompletedSagaEvent data, long selfUserId);
 }
 
 internal sealed class EditMessageDataConverter(ILayeredService<IMessageConverter> messageLayeredService)
@@ -35,7 +36,12 @@ internal sealed class EditMessageDataConverter(ILayeredService<IMessageConverter
         };
     }
 
-    public Schema.IUpdates Convert(OutboxMessageEditCompletedSagaEvent data)
+    public IUpdates ToEditMessageUpdates(OutboxMessageEditCompletedSagaEvent data, long selfUserId)
+    {
+        return ToEditMessageUpdatesCore(data, selfUserId);
+    }
+
+    private IUpdates ToEditMessageUpdatesCore(OutboxMessageEditCompletedSagaEvent data, long selfUserId)
     {
         IUpdate update = data.NewMessageItem.ToPeer.PeerType switch
         {
@@ -43,7 +49,7 @@ internal sealed class EditMessageDataConverter(ILayeredService<IMessageConverter
             {
                 Pts = data.NewMessageItem.Pts,
                 PtsCount = 1,
-                Message = messageLayeredService.GetConverter(data.RequestInfo.Layer).ToMessage(data, 0)
+                Message = messageLayeredService.GetConverter(data.RequestInfo.Layer).ToMessage(data, selfUserId)
             },
             _ => new TUpdateEditMessage
             {
@@ -61,6 +67,11 @@ internal sealed class EditMessageDataConverter(ILayeredService<IMessageConverter
             Date = DateTime.UtcNow.ToTimestamp(),
             Seq = 0
         };
+    }
+
+    public Schema.IUpdates Convert(OutboxMessageEditCompletedSagaEvent data)
+    {
+        return ToEditMessageUpdatesCore(data, data.RequestInfo.UserId);
     }
 
     public IUpdates ToEditQuickReplyMessageUpdates(OutboxMessageEditCompletedSagaEvent data)

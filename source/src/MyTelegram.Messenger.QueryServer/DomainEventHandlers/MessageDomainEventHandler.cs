@@ -74,7 +74,7 @@ public partial class MessageDomainEventHandler(
         // Channel message shares the same message,edit out message should notify channel member
         if (domainEvent.AggregateEvent.NewMessageItem.ToPeer.PeerType == PeerType.Channel)
         {
-            var channelEditUpdates = editMessageDataConverter.Convert(domainEvent.AggregateEvent);
+            var channelEditUpdates = editMessageDataConverter.ToEditMessageUpdates(domainEvent.AggregateEvent, -1);
 
             await PushUpdatesToPeerAsync(domainEvent.AggregateEvent.NewMessageItem.ToPeer,
                 channelEditUpdates,
