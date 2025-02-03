@@ -4,6 +4,8 @@ public class IdGenerator(
     IHiLoValueGeneratorCache cache,
     IHiLoValueGeneratorFactory factory,
     IQueryProcessor queryProcessor,
+    IEventStore eventStore,
+    ISnapshotStore snapshotStore,
     IHiLoStateBlockSizeHelper stateBlockSizeHelper,
     ILogger<IdGenerator> logger)
     : IIdGenerator, ITransientDependency
@@ -69,9 +71,14 @@ public class IdGenerator(
         var maxId = await GetMaxMessageIdAsync(id);
         if (maxId > 0)
         {
-            var blockSize = stateBlockSizeHelper.GetBlockSize(idType);
-            var high = maxId / blockSize;
-            return await cache.GetOrAddAsync(idType, id, () => Task.FromResult(new HiLoValueGeneratorState(blockSize, maxId, (high + 1) * blockSize + 1)));
+            var aggregate = new MessageAggregate(MessageId.Create(id, maxId + 1));
+            await aggregate.LoadAsync(eventStore, snapshotStore, CancellationToken.None);
+            if (aggregate.IsNew)
+            {
+                var blockSize = stateBlockSizeHelper.GetBlockSize(idType);
+                var high = maxId / blockSize;
+                return await cache.GetOrAddAsync(idType, id, () => Task.FromResult(new HiLoValueGeneratorState(blockSize, maxId, (high + 1) * blockSize + 1)));
+            }
         }
 
         return cache.GetOrAdd(idType, id);
