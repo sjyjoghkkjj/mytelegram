@@ -40,6 +40,7 @@ public class PeerHelper : IPeerHelper, ITransientDependency
         {
             PeerType.Self => new TPeerUser { UserId = peerId },
             PeerType.User => new TPeerUser { UserId = peerId },
+            PeerType.Empty => new TPeerUser { UserId = peerId },
             PeerType.Chat => new TPeerChat { ChatId = peerId },
             PeerType.Channel => new TPeerChannel { ChannelId = peerId },
             _ => throw new ArgumentOutOfRangeException(nameof(peerType),
