@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.NativeAot;
+﻿using MyTelegram.Domain.Sagas.Identities;
+
+namespace MyTelegram.Messenger.NativeAot;
 
 public class MySagaAggregateStore(
     IAggregateStore aggregateStore,
@@ -68,6 +70,9 @@ public class MySagaAggregateStore(
             case DeleteReplyMessagesSagaId deleteReplyMessagesSagaId:
                 domainEvents = await aggregateStore.UpdateAsync<DeleteReplyMessagesSaga, DeleteReplyMessagesSagaId>(deleteReplyMessagesSagaId, sourceId, updateSaga, cancellationToken);
 
+                break;
+            case EditPeerFoldersSagaId editPeerFoldersSagaId:
+                domainEvents = await aggregateStore.UpdateAsync<EditPeerFoldersSaga, EditPeerFoldersSagaId>(editPeerFoldersSagaId, sourceId, updateSaga, cancellationToken);
                 break;
             case EditExportedChatInviteSagaId editExportedChatInviteSagaId:
                 domainEvents = await aggregateStore.UpdateAsync<EditExportedChatInviteSaga, EditExportedChatInviteSagaId>(editExportedChatInviteSagaId, sourceId, updateSaga, cancellationToken);
