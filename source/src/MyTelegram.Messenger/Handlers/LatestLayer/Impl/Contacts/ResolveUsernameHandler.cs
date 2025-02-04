@@ -83,6 +83,7 @@ internal sealed class ResolveUsernameHandler(
                             if (channelReadModel != null)
                             {
                                 var photoReadModel = await photoAppService.GetAsync(channelReadModel.PhotoId);
+                                var channelMemberReadModel = await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(channelReadModel.ChannelId, input.UserId));
 
                                 return new TResolvedPeer
                                 {
@@ -91,8 +92,8 @@ internal sealed class ResolveUsernameHandler(
                                             input.UserId,
                                             channelReadModel,
                                             photoReadModel,
-                                            null, false)),
-                                    Peer = new TPeerChat { ChatId = userNameReadModel.PeerId },
+                                            channelMemberReadModel, channelMemberReadModel?.Left ?? true)),
+                                    Peer = new TPeerChannel { ChannelId = userNameReadModel.PeerId },
                                     Users = new TVector<IUser>()
                                 };
                             }
