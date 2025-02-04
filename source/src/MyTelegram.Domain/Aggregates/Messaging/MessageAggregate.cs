@@ -168,10 +168,13 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
         }
 
         var oldMessageItem = _state.MessageItem;
+        media ??= oldMessageItem.Media;
+
         var newMessageItem = oldMessageItem with
         {
             Message = newMessage,
             Entities = entities,
+            Media = media,
             ReplyMarkup = replyMarkup,
             EditDate = editDate,
             InvertMedia = invertMedia
@@ -209,6 +212,9 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
             newMessage = _state.MessageItem.Message;
         }
 
+        var oldMessageItem = _state.MessageItem;
+        media ??= oldMessageItem.Media;
+
         var newMessageItem = _state.MessageItem with
         {
             Message = newMessage,
@@ -220,7 +226,7 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
         };
 
         Emit(new OutboxMessageEditedEventV2(requestInfo,
-            _state.MessageItem,
+            oldMessageItem,
             newMessageItem
         ));
     }
