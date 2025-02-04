@@ -194,6 +194,14 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
         );
 
         var reqMsgId = _state.ForwardFromLinkedChannel ? 0 : _state.RequestInfo.ReqMsgId;
+        // Only the first message uses reqMsgId to reply to the client's RPC request
+        // Other messages are sent to the client via online push
+        // If reqMsgId==0, a push message will be sent to the target peer
+        if (_state.ForwardCount > 0)
+        {
+            reqMsgId = 0;
+        }
+
         var command = new StartSendMessageCommand(TempId.New, aggregateEvent.RequestInfo with
         {
             RequestId = Guid.NewGuid(),
