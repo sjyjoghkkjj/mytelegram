@@ -1,4 +1,7 @@
-﻿namespace MyTelegram.ReadModel.InMemory;
+﻿using EventFlow.Queries;
+using EventFlow.ReadStores.InMemory.Queries;
+
+namespace MyTelegram.ReadModel.InMemory;
 
 public static class MyTelegramReadModelInMemoryExtensions
 {
@@ -50,6 +53,13 @@ public static class MyTelegramReadModelInMemoryExtensions
         options.ServiceCollection.AddTransient<IReadModelStore<TReadModel>>(r =>
             r.GetRequiredService<IInMemoryReadStore<TReadModel>>());
 
+        options.ServiceCollection
+            .AddTransient<IQueryHandler<InMemoryQuery<TReadModel>, IReadOnlyCollection<TReadModel>>,
+                InMemoryQueryHandler<TReadModel>>();
+
+        options.ServiceCollection.AddSingleton<IReadModelStore<TReadModel>>(r =>
+            r.GetRequiredService<IMyInMemoryReadStore<TReadModel>>());
+
         return options;
     }
 
@@ -63,6 +73,13 @@ public static class MyTelegramReadModelInMemoryExtensions
             r.GetRequiredService<IMyInMemoryReadStore<TReadModel>>());
         options.ServiceCollection.AddTransient<IReadModelStore<TReadModel>>(r =>
             r.GetRequiredService<IInMemoryReadStore<TReadModel>>());
+
+        options.ServiceCollection
+            .AddTransient<IQueryHandler<InMemoryQuery<TReadModel>, IReadOnlyCollection<TReadModel>>,
+                InMemoryQueryHandler<TReadModel>>();
+
+        options.ServiceCollection.AddSingleton<IReadModelStore<TReadModel>>(r =>
+            r.GetRequiredService<IMyInMemoryReadStore<TReadModel>>());
 
         return options;
     }
