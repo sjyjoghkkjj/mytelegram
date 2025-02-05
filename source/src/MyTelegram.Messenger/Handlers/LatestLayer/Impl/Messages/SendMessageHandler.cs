@@ -153,11 +153,11 @@ internal sealed class SendMessageHandler(
                     isInviteUrlAdded = true;
                 }
             }
-            obj.Entities.Add(new TMessageEntityUrl
-            {
-                Offset = match.Groups[1].Index,
-                Length = match.Groups[1].Value.Length,
-            });
+            //obj.Entities.Add(new TMessageEntityUrl
+            //{
+            //    Offset = match.Groups[1].Index,
+            //    Length = match.Groups[1].Value.Length,
+            //});
         }
         return media;
     }

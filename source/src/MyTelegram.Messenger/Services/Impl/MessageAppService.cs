@@ -218,6 +218,22 @@ public class MessageAppService(
             }
         }
 
+        var pattern = @"(?:^|\s)(https?://[^\s]+)(?=\s|$)";
+        var matches = Regex.Matches(input.Message, pattern);
+        foreach (Match match in matches)
+        {
+            if (match.Success)
+            {
+                var entity = new TMessageEntityUrl
+                {
+                    Offset = match.Index,
+                    Length = match.Length,
+                };
+                entities ??= [];
+                entities.Add(entity);
+            }
+        }
+
         return (mentionedUserIds, entities);
     }
 
