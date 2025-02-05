@@ -1,4 +1,5 @@
-﻿using MyTelegram.Domain.Sagas.Identities;
+﻿using MyTelegram.Domain.Sagas;
+using MyTelegram.Domain.Sagas.Identities;
 
 namespace MyTelegram.Messenger.NativeAot;
 
@@ -185,9 +186,10 @@ public class MySagaAggregateStore(
                 break;
            
             case VoteSagaId voteSagaId:
-                domainEvents = await aggregateStore
-                    .UpdateAsync<VoteSaga, VoteSagaId>(voteSagaId, sourceId, updateSaga, cancellationToken)
-             ;
+                domainEvents = await aggregateStore.UpdateAsync<VoteSaga, VoteSagaId>(voteSagaId, sourceId, updateSaga, cancellationToken);
+                break;
+            case LeaveChannelSagaId leaveChannelSagaId:
+                domainEvents = await aggregateStore.UpdateAsync<LeaveChannelSaga, LeaveChannelSagaId>(leaveChannelSagaId, sourceId, updateSaga, cancellationToken);
                 break;
 
             case SendMessageSagaId sendMessageSagaId:
