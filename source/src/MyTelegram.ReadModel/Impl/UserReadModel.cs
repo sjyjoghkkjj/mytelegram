@@ -140,15 +140,8 @@ public class UserReadModel : IUserReadModel,
         IDomainEvent<UserAggregate, UserId, UserProfileUpdatedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(domainEvent.AggregateEvent.FirstName))
-        {
-            FirstName = domainEvent.AggregateEvent.FirstName;
-        }
-
-        if (!string.IsNullOrEmpty(domainEvent.AggregateEvent.LastName))
-        {
-            LastName = domainEvent.AggregateEvent.LastName;
-        }
+        FirstName = domainEvent.AggregateEvent.FirstName;
+        LastName = domainEvent.AggregateEvent.LastName;
 
         About = domainEvent.AggregateEvent.About;
         return Task.CompletedTask;

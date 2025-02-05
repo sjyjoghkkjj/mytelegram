@@ -105,6 +105,8 @@ public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, User
         string? about)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+
+        firstName ??= _state.FirstName;
         Emit(new UserProfileUpdatedEvent(requestInfo,
             _state.UserId,
             firstName,
