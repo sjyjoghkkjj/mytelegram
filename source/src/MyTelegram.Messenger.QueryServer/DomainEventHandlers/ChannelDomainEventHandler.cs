@@ -233,13 +233,26 @@ public class ChannelDomainEventHandler(
             domainEvent.AggregateEvent.Date);
     }
 
-    public Task HandleAsync(
+    public async Task HandleAsync(
         IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberLeftEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        return NotifyUpdateChannelAsync(domainEvent.AggregateEvent.RequestInfo,
-            domainEvent.AggregateEvent.ChannelId,
-            domainEvent.AggregateEvent.MemberUserId);
+        var channelReadModel = await channelAppService.GetAsync(domainEvent.AggregateEvent.ChannelId);
+        var photoReadModel = await photoAppService.GetAsync(channelReadModel!.PhotoId);
+        var channel = chatLayeredService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
+            .ToChannel(domainEvent.AggregateEvent.RequestInfo.UserId, channelReadModel, photoReadModel, null, true);
+        var updates = new TUpdates
+        {
+            Updates = [new TUpdateChannel
+            {
+                ChannelId = channelReadModel.ChannelId
+            }],
+            Users = [],
+            Chats = [channel]
+        };
+        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, updates);
+        await PushUpdatesToPeerAsync(domainEvent.AggregateEvent.RequestInfo.UserId.ToUserPeer(), updates,
+            excludeAuthKeyId: domainEvent.AggregateEvent.RequestInfo.PermAuthKeyId);
     }
 
     public Task HandleAsync(IDomainEvent<ChatInviteAggregate, ChatInviteId, ChatInviteCreatedEvent> domainEvent,
