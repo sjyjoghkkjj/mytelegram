@@ -3,7 +3,7 @@
 public class MessageFwdHeader(
     bool imported,
     bool savedOut,
-    Peer fromId,
+    Peer? fromId,
     string? fromName,
     int channelPost,
     string? postAuthor,
@@ -33,7 +33,7 @@ public class MessageFwdHeader(
     /// <summary>
     ///     The ID of the user that originally sent the message
     /// </summary>
-    public Peer FromId { get; init; } = fromId;
+    public Peer? FromId { get; init; } = fromId;
 
     /// <summary>
     ///     The name of the user that originally sent the message
