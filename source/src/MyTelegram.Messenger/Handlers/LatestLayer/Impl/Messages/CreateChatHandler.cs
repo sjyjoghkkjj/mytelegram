@@ -51,82 +51,57 @@ internal sealed class CreateChatHandler(
 
         memberUserIdList = memberUserIdList.Distinct().ToList();
 
-        if (options.Value.AutoCreateSuperGroup)
-        {
-            var channelId = await idGenerator.NextLongIdAsync(IdType.ChannelId);
-            var accessHash = randomHelper.NextInt64();
-            var date = DateTime.UtcNow.ToTimestamp();
-            var createChannelCommand = new CreateChannelCommand(ChannelId.Create(channelId),
-                input.ToRequestInfo(),
-                channelId,
-                input.UserId,
-                obj.Title,
-                //obj.Broadcast,
-                false,
-                true,
-                string.Empty,
-                string.Empty,
-                accessHash,
-                date,
-                randomHelper.NextInt64(),
-                new TMessageActionChannelCreate { Title = obj.Title }.ToBytes().ToHexString(),
-                null,
-                false,
-                null,
-                null,
-                null,
-                true
-            );
-            await commandBus.PublishAsync(createChannelCommand, CancellationToken.None);
+        var channelId = await idGenerator.NextLongIdAsync(IdType.ChannelId);
+        var accessHash = randomHelper.NextInt64();
+        var date = DateTime.UtcNow.ToTimestamp();
+        var createChannelCommand = new CreateChannelCommand(ChannelId.Create(channelId),
+            input.ToRequestInfo(),
+            channelId,
+            input.UserId,
+            obj.Title,
+            //obj.Broadcast,
+            false,
+            true,
+            string.Empty,
+            string.Empty,
+            accessHash,
+            date,
+            randomHelper.NextInt64(),
+            new TMessageActionChannelCreate { Title = obj.Title }.ToBytes().ToHexString(),
+            null,
+            false,
+            null,
+            null,
+            null,
+            true
+        );
+        await commandBus.PublishAsync(createChannelCommand, CancellationToken.None);
 
-            var privacyRestrictedUserIdList = new List<long>();
-            await privacyAppService.ApplyPrivacyListAsync(input.UserId, memberUserIdList,
-                privacyRestrictedUserIdList.Add, new List<PrivacyType>
-                {
+        var privacyRestrictedUserIdList = new List<long>();
+        await privacyAppService.ApplyPrivacyListAsync(input.UserId, memberUserIdList,
+            privacyRestrictedUserIdList.Add, new List<PrivacyType>
+            {
                     PrivacyType.ChatInvite
-                });
-            memberUserIdList.RemoveAll(privacyRestrictedUserIdList.Contains);
+            });
+        memberUserIdList.RemoveAll(privacyRestrictedUserIdList.Contains);
 
-            // all selected users are rejected to be added to chat or channel
+        // all selected users are rejected to be added to chat or channel
 
-            var command = new StartInviteToChannelCommand(
-                ChannelId.Create(channelId),
-                input.ToRequestInfo(),
-                channelId,
-                input.UserId,
-                1, //default maxMessageId 1
-                memberUserIdList,
-                privacyRestrictedUserIdList,
-                botList,
-                CurrentDate,
-                randomHelper.NextInt64(),
-                new TMessageActionChatAddUser { Users = new TVector<long>(memberUserIdList) }.ToBytes().ToHexString(),
-                ChatJoinType.InvitedByAdmin
-            );
-            await commandBus.PublishAsync(command);
-        }
-        else
-        {
-            var chatId = await idGenerator.NextLongIdAsync(IdType.ChatId);
-            var randomId = randomHelper.NextInt64();
-            var messageActionData =
-                new TMessageActionChatCreate { Title = obj.Title, Users = new TVector<long>(memberUserIdList) }
-                    .ToBytes()
-                    .ToHexString();
-
-            var command = new CreateChatCommand(ChatId.Create(chatId),
-                input.ToRequestInfo(),
-                chatId,
-                input.UserId,
-                obj.Title,
-                memberUserIdList,
-                CurrentDate,
-                randomId,
-                messageActionData,
-                obj.TtlPeriod
-            );
-            await commandBus.PublishAsync(command);
-        }
+        var command = new StartInviteToChannelCommand(
+            ChannelId.Create(channelId),
+            input.ToRequestInfo(),
+            channelId,
+            input.UserId,
+            1, //default maxMessageId 1
+            memberUserIdList,
+            privacyRestrictedUserIdList,
+            botList,
+            CurrentDate,
+            randomHelper.NextInt64(),
+            new TMessageActionChatAddUser { Users = new TVector<long>(memberUserIdList) }.ToBytes().ToHexString(),
+            ChatJoinType.InvitedByAdmin
+        );
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

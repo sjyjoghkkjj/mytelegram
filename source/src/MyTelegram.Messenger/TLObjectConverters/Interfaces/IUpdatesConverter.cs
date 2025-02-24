@@ -2,11 +2,6 @@
 
 public interface IUpdatesConverter : ILayeredConverter
 {
-    IUpdates ToMigrateChatUpdates(SendOutboxMessageCompletedSagaEvent aggregateEvent, IChannelReadModel channelReadModel,
-        IChatReadModel chatReadModel);
-
-    IUpdates ToMigrateChatUpdates(ReceiveInboxMessageCompletedSagaEvent aggregateEvent, long channelId);
-
     IUpdates ToChannelMessageUpdates(SendOutboxMessageCompletedSagaEvent aggregateEvent, bool mentioned = false);
 
     IUpdates ToCreateChannelUpdates(ChannelCreatedEvent channelCreatedEvent,
