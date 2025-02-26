@@ -8,40 +8,41 @@ public class MessageQueueProcessor<TData>(
     ILogger<MessageQueueProcessor<TData>> logger) : IMessageQueueProcessor<TData>
 {
     private readonly TimeSpan _idleTimeSpan = TimeSpan.FromMinutes(5);
-    private readonly ConcurrentDictionary<long, Channel<TData>> _queues = [];
+    private readonly ConcurrentDictionary<long, QueueItem> _queues = [];
     private readonly ConcurrentDictionary<long, CancellationTokenSource> _timeoutTokens = [];
 
     public void Enqueue(TData data, long key)
     {
-        if (_timeoutTokens.TryGetValue(key, out var cts))
+        var cts = _timeoutTokens.AddOrUpdate(
+            key,
+            _ => new CancellationTokenSource(),
+            (_, existingCts) =>
+            {
+                existingCts.Cancel();
+                return new CancellationTokenSource();
+            });
+
+        var queue = _queues.GetOrAdd(key, _ => CreateChannel());
+        if (!queue.IsProcessed)
         {
-            cts.Cancel();
+            queue.IsProcessed = true;
+            _ = ProcessAsync(queue.Channel);
         }
 
-        cts = new CancellationTokenSource();
-        _timeoutTokens.TryAdd(key, cts);
-
-        if (_queues.TryGetValue(key, out var channel))
-        {
-            channel.Writer.TryWrite(data);
-            _ = ProcessTimeoutTaskAsync(key, cts.Token);
-        }
-        else
-        {
-            channel = Channel.CreateUnbounded<TData>();
-            _queues.TryAdd(key, channel);
-            channel.Writer.TryWrite(data);
-
-            var task = ProcessAsync(channel);
-            var releaseQueueTask = ProcessTimeoutTaskAsync(key, cts.Token);
-            Task.WhenAll(task, releaseQueueTask);
-        }
+        queue.Channel.Writer.TryWrite(data);
+        _ = ProcessTimeoutTaskAsync(key, cts.Token);
     }
 
     public Task ProcessAsync(CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
-        //throw new NotImplementedException();
+    }
+
+    private QueueItem CreateChannel()
+    {
+        var channel = Channel.CreateUnbounded<TData>();
+
+        return new QueueItem(channel);
     }
 
     private async Task ProcessTimeoutTaskAsync(long key, CancellationToken cancellationToken)
@@ -58,7 +59,7 @@ public class MessageQueueProcessor<TData>(
     {
         if (_queues.TryRemove(key, out var queue))
         {
-            queue.Writer.Complete();
+            queue.Channel.Writer.Complete();
 
             _timeoutTokens.TryRemove(key, out var cts);
             cts?.Cancel();
@@ -81,5 +82,10 @@ public class MessageQueueProcessor<TData>(
                 }
             }
         }
+    }
+
+    public record QueueItem(Channel<TData> Channel)
+    {
+        public bool IsProcessed { get; set; }
     }
 }
