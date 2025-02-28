@@ -50,9 +50,10 @@ public class MtpConnectionHandler(
             }
 
             logger.LogInformation(
-                "[ConnectionId: {ConnectionId}] Client disconnected, RemoteEndPoint: {RemoteEndPoint}",
+                "[ConnectionId: {ConnectionId}] Client disconnected, remoteEndPoint: {RemoteEndPoint},authKeyId: {AuthKeyId}",
                 connection.ConnectionId,
-                remoteEndPoint);
+                remoteEndPoint,
+                clientData.AuthKeyId);
         });
 
         var processSendDataTask = ProcessSendDataAsync(clientData, connection);
@@ -120,6 +121,7 @@ public class MtpConnectionHandler(
                     ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
                 try
                 {
+                    clientManager.UpdateAuthKeyId(clientData, response.AuthKeyId, clientData.ConnectionId);
                     var totalCount = clientDataSender.EncodeData(response, clientData, encodedBytes);
                     await connectionContext.Transport.Output.WriteAsync(encodedBytes.AsMemory()[..totalCount]);
                     await connectionContext.Transport.Output.FlushAsync();

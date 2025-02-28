@@ -32,12 +32,16 @@ public class ClientDataSender(
     {
         if (!clientManager.TryGetClientData(data.ConnectionId, out var d))
         {
-            logger.LogWarning("Cannot find cached client info, skip sending message, connectionId: {ConnectionId}, authKeyId: {AuthKeyId}",
-                data.ConnectionId,
-                data.AuthKeyId
+            if (!clientManager.TryGetClientData(data.AuthKeyId, out d))
+            {
+                logger.LogWarning(
+                    "Cannot find cached client info, skip sending message, connectionId: {ConnectionId}, authKeyId: {AuthKeyId}",
+                    data.ConnectionId,
+                    data.AuthKeyId
                 );
-            messageQueueProcessor.Enqueue(new ClientDisconnectedEvent(data.ConnectionId, data.AuthKeyId, 0), 0);
-            return Task.CompletedTask;
+                messageQueueProcessor.Enqueue(new ClientDisconnectedEvent(data.ConnectionId, data.AuthKeyId, 0), 0);
+                return Task.CompletedTask;
+            }
         }
 
         d.ResponseQueue.Writer.TryWrite(data);
@@ -47,11 +51,6 @@ public class ClientDataSender(
 
     public int EncodeData(MTProto.EncryptedMessageResponse data, ClientData d, byte[] encodedBytes)
     {
-        if (d.AuthKeyId == 0)
-        {
-            d.AuthKeyId = data.AuthKeyId;
-        }
-
         return messageEncoder.Encode(d, data, encodedBytes);
     }
 

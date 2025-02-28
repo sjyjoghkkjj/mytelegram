@@ -72,7 +72,8 @@ public class WebSocketMiddleware(
         var processResponseQueueTask = ProcessResponseQueueAsync(clientData);
         await Task.WhenAll(writeTask, readTask, processResponseQueueTask);
         clientManager.RemoveClient(clientData.ConnectionId);
-        messageQueueProcessor.Enqueue(new ClientDisconnectedEvent(clientData.ConnectionId, clientData.AuthKeyId, 0), clientData.AuthKeyId);
+        messageQueueProcessor.Enqueue(new ClientDisconnectedEvent(clientData.ConnectionId, clientData.AuthKeyId, 0),
+            clientData.AuthKeyId);
     }
 
     private async Task ProcessResponseQueueAsync(ClientData clientData)
@@ -85,6 +86,7 @@ public class WebSocketMiddleware(
                 var encodedBytes = ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
                 try
                 {
+                    clientManager.UpdateAuthKeyId(clientData, response.AuthKeyId, clientData.ConnectionId);
                     var totalCount = clientDataSender.EncodeData(response, clientData, encodedBytes);
                     await clientData.WebSocket!.SendAsync(encodedBytes.AsMemory()[..totalCount], WebSocketMessageType.Binary, true, default);
                 }

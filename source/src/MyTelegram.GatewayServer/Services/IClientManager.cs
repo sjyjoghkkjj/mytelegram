@@ -13,4 +13,7 @@ public interface IClientManager
     bool TryRemoveClient(string connectionId,[NotNullWhen(true)]out ClientData? clientData);
 
     int GetOnlineCount();
+    bool TryGetClientData(long authKeyId, out ClientData? clientData);
+    void UpdateAuthKeyId(ClientData clientData, long authKeyId, string connectionId);
+    //bool ContainsAuthKey(long authKeyId);
 }
