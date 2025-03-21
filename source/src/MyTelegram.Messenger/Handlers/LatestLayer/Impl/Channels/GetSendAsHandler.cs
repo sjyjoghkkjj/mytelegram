@@ -13,73 +13,59 @@
 internal sealed class GetSendAsHandler(
     IQueryProcessor queryProcessor,
     IChatConverterService chatConverterService,
-    IUserConverterService userConverterService,
+    IChannelAppService channelAppService,
     ILayeredService<ISendAsPeerConverter> layeredSendAsPeerService,
     IAccessHashHelper accessHashHelper,
     IPhotoAppService photoAppService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestGetSendAs, MyTelegram.Schema.Channels.ISendAsPeers>,
+    : RpcResultObjectHandler<RequestGetSendAs, ISendAsPeers>,
         IGetSendAsHandler
 {
-    protected override async Task<MyTelegram.Schema.Channels.ISendAsPeers> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Channels.RequestGetSendAs obj)
+    protected override async Task<ISendAsPeers> HandleCoreAsync(IRequestInput input,
+        RequestGetSendAs obj)
     {
-        if (obj.Peer is TInputPeerEmpty)
-        {
-            return new TSendAsPeers
-            {
-                Chats = [],
-                Peers = [],
-                Users = []
-            };
-        }
-
         if (obj.Peer is TInputPeerChannel inputPeerChannel)
         {
             await accessHashHelper.CheckAccessHashAsync(inputPeerChannel.ChannelId, inputPeerChannel.AccessHash);
-            var channelReadModels = await queryProcessor.ProcessAsync(new GetSendAsQuery(inputPeerChannel.ChannelId));
-            var channelReadModel = channelReadModels.FirstOrDefault(p => p.ChannelId == inputPeerChannel.ChannelId);
-            if (channelReadModel == null)
-            {
-                RpcErrors.RpcErrors400.ChannelIdInvalid.ThrowRpcError();
-            }
 
-            if (channelReadModels.Any(p => p.CreatorId != input.UserId))
+            var channelReadModel = await channelAppService.GetAsync(inputPeerChannel.ChannelId);
+            // 1. Super group with linked channel
+            // 2. Channel: signature: true 
+            if (channelReadModel is { MegaGroup: true, LinkedChatId: not null } or { Broadcast: true, Signatures: true })
             {
-                var user = await userConverterService.GetUserAsync(input.UserId, input.UserId, layer: input.Layer);
+                var channelReadModels = await queryProcessor.ProcessAsync(new GetSendAsQuery(input.UserId));
 
-                return new TSendAsPeers
+                if (channelReadModel.MegaGroup && channelReadModel.CreatorId == input.UserId)
                 {
-                    Chats = [],
-                    Peers = new TVector<ISendAsPeer>([new TSendAsPeer
+                    channelReadModels = [.. channelReadModels, channelReadModel];
+                }
+                var channelMemberReadModels = await queryProcessor.ProcessAsync(
+                    new GetChannelMemberListByChannelIdListQuery(input.UserId,
+                        [.. channelReadModels.Select(p => p.ChannelId)]));
+                var photoReadModels = await photoAppService.GetPhotosAsync(channelReadModels);
+                var channels = chatConverterService.ToChannelList(input.UserId, channelReadModels,
+                    photoReadModels, channelMemberReadModels, layer: input.Layer);
+
+                var r = layeredSendAsPeerService.GetConverter(input.Layer).ToSendAsPeers(channels);
+                if (channelReadModel.Signatures && channelReadModel.CreatorId == input.UserId)
+                {
+                    r.Peers.Add(new TSendAsPeer
                     {
-                        Peer=new TPeerUser
+                        Peer = new TPeerUser
                         {
-                            UserId=input.UserId,
+                            UserId = input.UserId
                         }
-                    }]),
-                    Users = new TVector<IUser>([user])
-                };
+                    });
+                }
+
+                return r;
             }
-
-            var photoReadModels = await photoAppService.GetPhotosAsync(channelReadModels);
-            var channels = chatConverterService.ToChannelList(input.UserId, channelReadModels,
-                photoReadModels, [], [], false, input.Layer);
-
-            var r = layeredSendAsPeerService.GetConverter(input.Layer).ToSendAsPeers(channels);
-            if (channelReadModel!.Signatures && channelReadModel.CreatorId == input.UserId)
-            {
-                r.Peers.Add(new TSendAsPeer
-                {
-                    Peer = new TPeerUser
-                    {
-                        UserId = input.UserId
-                    }
-                });
-            }
-
-            return r;
         }
 
-        throw new NotImplementedException();
+        return new TSendAsPeers
+        {
+            Chats = [],
+            Peers = [],
+            Users = []
+        };
     }
 }
