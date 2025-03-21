@@ -624,7 +624,7 @@ public class ChannelDomainEventHandler(
 
     public async Task HandleAsync(IDomainEvent<ApproveJoinChannelSaga, ApproveJoinChannelSagaId, ApproveJoinChannelCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)
     {
-        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.UserId,
+        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
             domainEvent.AggregateEvent.ChannelId, false, false, domainEvent.AggregateEvent.RequestInfo.Layer);
         var updates = new TUpdates
         {
@@ -635,6 +635,25 @@ public class ChannelDomainEventHandler(
         };
 
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, updates);
+
+        // After joining a supergroup, a service message will be sent, so there is no need to notify current joiner.
+        // After joining a channel, no service message will be sent, so it is necessary to notify the current joiner.
+        if (domainEvent.AggregateEvent.Approved && domainEvent.AggregateEvent.Broadcast)
+        {
+            var channelForJoinedMember = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.UserId,
+                domainEvent.AggregateEvent.ChannelId, false, false);
+            var updatesForJoinedMember = new TUpdates
+            {
+                Updates = [new TUpdateChannel
+                {
+                    ChannelId=domainEvent.AggregateEvent.ChannelId
+                }],
+                Users = [],
+                Chats = [channelForJoinedMember],
+                Date = DateTime.UtcNow.ToTimestamp()
+            };
+            await PushUpdatesToPeerAsync(domainEvent.AggregateEvent.UserId.ToUserPeer(), updatesForJoinedMember);
+        }
     }
 
     public async Task HandleAsync(IDomainEvent<ImportChatInviteSaga, ImportChatInviteSagaId, ImportChatInviteCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)

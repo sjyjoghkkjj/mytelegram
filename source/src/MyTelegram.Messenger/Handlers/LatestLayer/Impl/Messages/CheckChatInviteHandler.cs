@@ -48,12 +48,15 @@ internal sealed class CheckChatInviteHandler(
         }
         var chatPhoto = await photoAppService.GetAsync(channelReadModel!.PhotoId);
 
+        var channelMemberReadModel =
+            await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(channelReadModel!.ChannelId,
+                input.UserId));
+
         // Public channel/Super group
-        if (!string.IsNullOrEmpty(channelReadModel.UserName) || !channelReadModel.Broadcast)
+        if (!string.IsNullOrEmpty(channelReadModel.UserName) ||
+            !channelReadModel.Broadcast ||
+            channelMemberReadModel is { Left: false, Kicked: false })
         {
-            var channelMemberReadModel =
-                await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(channelReadModel!.ChannelId,
-                    input.UserId));
             if (channelMemberReadModel != null)
             {
                 var channel = chatConverterService.ToChannel(input.UserId, channelReadModel, chatPhoto,

@@ -23,30 +23,32 @@ public class ApproveJoinChannelSaga : MyInMemoryAggregateSaga<ApproveJoinChannel
                 domainEvent.AggregateEvent.ChannelHistoryMinId,
                 domainEvent.AggregateEvent.Broadcast));
 
+            var inviterId = domainEvent.AggregateEvent.UserId;
+
             var command = new CreateChannelMemberCommand(
                 ChannelMemberId.Create(domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.UserId),
                 domainEvent.AggregateEvent.RequestInfo,
                 domainEvent.AggregateEvent.ChannelId,
                 domainEvent.AggregateEvent.UserId,
-                0,
+                inviterId,
                 DateTime.UtcNow.ToTimestamp(),
                 false,
                 domainEvent.AggregateEvent.InviteId,
-                false,
+                domainEvent.AggregateEvent.Broadcast,
                 ChatJoinType.ByRequest
             );
             Publish(command);
         }
         else
         {
-            Emit(new ApproveJoinChannelCompletedSagaEvent(domainEvent.AggregateEvent.RequestInfo, domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.UserId, domainEvent.AggregateEvent.Approved));
+            Emit(new ApproveJoinChannelCompletedSagaEvent(domainEvent.AggregateEvent.RequestInfo, domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.UserId, domainEvent.AggregateEvent.Approved, domainEvent.AggregateEvent.Broadcast));
             return CompleteAsync(cancellationToken);
         }
 
         return Task.CompletedTask;
     }
 
-    public Task HandleAsync(IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
+    public async Task HandleAsync(IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
     {
         var command = new IncrementParticipantCountCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId));
         Publish(command);
@@ -65,7 +67,8 @@ public class ApproveJoinChannelSaga : MyInMemoryAggregateSaga<ApproveJoinChannel
             Publish(createDialogCommand);
         }
 
-        return HandleJoinChannelCompletedAsync();
+        await HandleJoinChannelCompletedAsync();
+        Emit(new ApproveJoinChannelCompletedSagaEvent(_state.RequestInfo, _state.ChannelId, domainEvent.AggregateEvent.UserId, true, domainEvent.AggregateEvent.IsBroadcast));
     }
 
     private Task HandleJoinChannelCompletedAsync()
@@ -115,11 +118,12 @@ public class ApproveJoinChannelStartedSagaEvent(RequestInfo requestInfo, long ch
     public bool Broadcast { get; } = broadcast;
 }
 
-public class ApproveJoinChannelCompletedSagaEvent(RequestInfo requestInfo, long channelId, long userId, bool approved) : RequestAggregateEvent2<ApproveJoinChannelSaga, ApproveJoinChannelSagaId>(requestInfo)
+public class ApproveJoinChannelCompletedSagaEvent(RequestInfo requestInfo, long channelId, long userId, bool approved, bool broadcast) : RequestAggregateEvent2<ApproveJoinChannelSaga, ApproveJoinChannelSagaId>(requestInfo)
 {
     public long ChannelId { get; } = channelId;
     public long UserId { get; } = userId;
     public bool Approved { get; } = approved;
+    public bool Broadcast { get; } = broadcast;
 }
 
 
@@ -145,6 +149,6 @@ public class ApproveJoinChannelSagaState : AggregateState<ApproveJoinChannelSaga
 
     public void Apply(ApproveJoinChannelCompletedSagaEvent aggregateEvent)
     {
-        
+
     }
 }

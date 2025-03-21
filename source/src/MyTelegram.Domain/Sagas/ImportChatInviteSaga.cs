@@ -67,9 +67,9 @@ public class ImportChatInviteSaga :
         }
         else
         {
-
             var command = new CreateJoinChannelRequestCommand(
-                JoinChannelId.Create(domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.RequestInfo.UserId), domainEvent.AggregateEvent.RequestInfo,
+                JoinChannelId.Create(domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.RequestInfo.UserId),
+                domainEvent.AggregateEvent.RequestInfo,
                 domainEvent.AggregateEvent.ChannelId,
                 domainEvent.AggregateEvent.InviteId
                 );

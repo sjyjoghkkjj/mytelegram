@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MyTelegram.Domain.Aggregates.Channel;
+﻿namespace MyTelegram.Domain.Aggregates.Channel;
 
 public class JoinChannelId(string value) : Identity<JoinChannelId>(value)
 {
@@ -14,7 +8,7 @@ public class JoinChannelId(string value) : Identity<JoinChannelId>(value)
     }
 }
 
-public record JoinChannelSnapshot(long ChannelId, long UserId, int Date, long? InviteId, bool Approved) : ISnapshot;
+public record JoinChannelSnapshot(long ChannelId, long UserId, int Date, long? InviteId, /*long? InviterUserId, */bool Approved) : ISnapshot;
 
 public class JoinChannelState : AggregateState<JoinChannelAggregate, JoinChannelId, JoinChannelState>,
     IApply<JoinChannelRequestCreatedEvent>,
@@ -64,12 +58,6 @@ public class JoinChannelAggregate :
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new JoinChannelRequestUpdatedEvent(requestInfo, _state.ChannelId, userId, approved, _state.InviteId, topMessageId, channelHistoryMinId, broadcast));
     }
-
-    //public void HideChatJoinRequest2(RequestInfo requestInfo, long userId, bool approved, int topMessageId, int channelHistoryMinId, bool broadcast)
-    //{
-    //    Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-    //    Emit(new JoinChannelRequestUpdatedEvent(requestInfo, _state.ChannelId, userId, approved, _state.InviteId, topMessageId, channelHistoryMinId, broadcast));
-    //}
 
     public void Create(RequestInfo requestInfo, long channelId, long userId, long? inviteId)
     {
