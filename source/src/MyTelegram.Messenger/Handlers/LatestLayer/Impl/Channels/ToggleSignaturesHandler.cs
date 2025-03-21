@@ -1,4 +1,4 @@
-﻿// ReSharper disable All
+﻿using MyTelegram.Messenger.Services.Impl;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
@@ -12,12 +12,27 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 /// 400 CHAT_NOT_MODIFIED No changes were made to chat information because the new information you passed is identical to the current information.
 /// See <a href="https://corefork.telegram.org/method/channels.toggleSignatures" />
 ///</summary>
-internal sealed class ToggleSignaturesHandler : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestToggleSignatures, MyTelegram.Schema.IUpdates>,
-    Channels.IToggleSignaturesHandler
+internal sealed class ToggleSignaturesHandler(ICommandBus commandBus,
+    IChannelAdminRightsChecker channelAdminRightsChecker,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestToggleSignatures, MyTelegram.Schema.IUpdates>,
+        Channels.IToggleSignaturesHandler
 {
-    protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Channels.RequestToggleSignatures obj)
+    protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
+        RequestToggleSignatures obj)
     {
+        if (obj.Channel is TInputChannel inputChannel)
+        {
+            await accessHashHelper.CheckAccessHashAsync(inputChannel);
+            await channelAdminRightsChecker.CheckAdminRightAsync(inputChannel.ChannelId, input.UserId,
+                p => p.AdminRights.ChangeInfo, RpcErrors.RpcErrors403.ChatAdminRequired);
+            await commandBus.PublishAsync(
+                new ToggleSignatureCommand(ChannelId.Create(inputChannel.ChannelId), input.ToRequestInfo(),
+                    obj.SignaturesEnabled, obj.ProfilesEnabled));
+
+            return null!;
+        }
+
         throw new NotImplementedException();
     }
 }

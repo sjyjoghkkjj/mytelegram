@@ -16,6 +16,7 @@ public class ChannelReadModel : IChannelReadModel,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberBannedRightsChangedEvent>,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberJoinedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, DiscussionGroupUpdatedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelSignatureChangedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelColorUpdatedEvent>,
     IAmReadModelFor<ChannelAggregate,ChannelId, LinkedChannelChangedEvent>,
 
@@ -323,6 +324,13 @@ public class ChannelReadModel : IChannelReadModel,
 
 
 
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelSignatureChangedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        Signatures = domainEvent.AggregateEvent.SignatureEnabled;
+        SignatureProfiles = domainEvent.AggregateEvent.ProfilesEnabled;
+
+        return Task.CompletedTask;
+    }
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelColorUpdatedEvent> domainEvent, CancellationToken cancellationToken)
     {
         if (domainEvent.AggregateEvent.ForProfile)

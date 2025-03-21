@@ -24,6 +24,7 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     IApply<ChannelUserNameChangedEvent>,
     IApply<CheckChannelStateCompletedEvent>,
     IApply<ChatJoinRequestHiddenEvent>,
+    IApply<ChannelSignatureChangedEvent>,
     IApply<ChannelColorUpdatedEvent>,
     IApply<ChatInviteRequestPendingUpdatedEvent>,
     IApply<LinkedChannelChangedEvent>,
@@ -170,6 +171,11 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     {
         //Photo = aggregateEvent.Photo;
         PhotoId = aggregateEvent.PhotoId;
+    }
+
+    public void Apply(ChannelSignatureChangedEvent aggregateEvent)
+    {
+        SignatureEnabled = aggregateEvent.SignatureEnabled;
     }
 
     public void Apply(ChannelTitleEditedEvent aggregateEvent)

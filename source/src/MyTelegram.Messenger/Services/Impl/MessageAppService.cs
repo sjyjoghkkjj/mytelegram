@@ -45,10 +45,18 @@ public class MessageAppService(
                     break;
 
                 case PeerType.Channel:
-
-                    var sendAsPeerId =
-                        await queryProcessor.ProcessAsync(new GetSendAsPeerIdQuery(requestUserId, sendAs.PeerId));
-                    if (sendAsPeerId == null)
+                    var sendToChannelReadModel = await channelAppService.GetAsync(toPeer.PeerId);
+                    var sendAsChannelReadModel = await channelAppService.GetAsync(sendAs.PeerId);
+                    // Only channel/super group admin can use SendAs
+                    if (sendToChannelReadModel.CreatorId != requestUserId &&
+                        sendToChannelReadModel.AdminList.FirstOrDefault(p => p.UserId == requestUserId) == null)
+                    {
+                        RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
+                    }
+                    // We can only use the public channels created by the current user as SendAs
+                    if (sendAsChannelReadModel == null! ||
+                        sendAsChannelReadModel.CreatorId != requestUserId /*||
+                        string.IsNullOrEmpty(sendAsChannelReadModel.UserName)*/)
                     {
                         RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
                     }
@@ -166,7 +174,14 @@ public class MessageAppService(
 
         if (channelMemberReadModel == null)
         {
-            RpcErrors.RpcErrors403.ChatGuestSendForbidden.ThrowRpcError();
+            if (channelReadModel is { Broadcast: false, LinkedChatId: not null, JoinToSend: true })
+            {
+
+            }
+            else
+            {
+                RpcErrors.RpcErrors403.ChatGuestSendForbidden.ThrowRpcError();
+            }
         }
 
         if (channelMemberReadModel!.BannedRights != 0)
@@ -220,16 +235,24 @@ public class MessageAppService(
         var messageActionType = MessageActionType.None;
         var post = channelReadModel?.Broadcast ?? false;
         var linkedChannelId = channelReadModel?.Broadcast ?? false ? channelReadModel.LinkedChatId : null;
+        var sendAs = input.SendAs;
         string? postAuthor = null;
-
-        if (post && channelReadModel!.Signatures)
+        if (channelReadModel is { Signatures: true, Broadcast: true })
         {
-            if (input.SendAs?.PeerType != PeerType.Channel)
+            if (sendAs?.PeerType == PeerType.Channel)
             {
-                var sendAsUserId = input.SendAs?.PeerId ?? input.RequestInfo.UserId;
-                var userReadModel = await useReadModelCacheHelper.GetOrCreateAsync(sendAsUserId,
-                    () => queryProcessor.ProcessAsync(new GetUserByIdQuery(sendAsUserId)), p => p.Id);
-                postAuthor = $"{userReadModel!.FirstName} {userReadModel.LastName}";
+                var sendAsChannelReadModel = await channelAppService.GetAsync(sendAs?.PeerId);
+                postAuthor = sendAsChannelReadModel?.Title;
+            }
+            else
+            {
+                var userReadModel = await userAppService.GetAsync(input.RequestInfo.UserId);
+                postAuthor = $"{userReadModel.FirstName} {userReadModel.LastName}";
+            }
+
+            if (sendAs == null && channelReadModel.SignatureProfiles)
+            {
+                sendAs = input.RequestInfo.UserId.ToUserPeer();
             }
         }
 
@@ -289,7 +312,7 @@ public class MessageAppService(
             ReplyMarkup: input.ReplyMarkup,
             TopMsgId: input.TopMsgId,
             PostAuthor: postAuthor,
-            SendAs: input.SendAs,
+            SendAs: sendAs,
             Effect: input.Effect,
             ReplyToMsgItems: replyToMsgItems?.ToList(),
             LinkedChannelId: linkedChannelId,
@@ -385,7 +408,7 @@ public class MessageAppService(
                 await queryProcessor.ProcessAsync(new GetUserNameListByNamesQuery(mentionedUserNames, PeerType.User));
             mentionedUserIds.AddRange(mentionedUsers.Select(p => p.PeerId).Distinct().ToList());
 
-            entities ??= new TVector<IMessageEntity>();
+            entities ??= [];
             foreach (var messageEntityMention in mentions)
             {
                 entities.Add(messageEntityMention);
@@ -460,12 +483,12 @@ public class MessageAppService(
             AddPeerIdIfNeed(fwd?.FromId, userIdList, channelIdList);
             AddPeerIdIfNeed(fwd?.SavedFromId, userIdList, channelIdList);
             AddPeerIdIfNeed(fwd?.SavedFromPeer, userIdList, channelIdList);
+            AddPeerIdIfNeed(messageReadModel.SendAs, userIdList, channelIdList);
 
             extraChatUserIdList.Add(messageReadModel.SenderPeerId);
         }
 
-        var chatOrChannelPeers = chats?.Count > 0 ? chats.Select(peerHelper.GetPeer).ToList() : new List<Peer>(0);
-
+        var chatOrChannelPeers = chats?.Count > 0 ? chats.Select(peerHelper.GetPeer).ToList() : [];
 
         userIdList.Add(query.SelfUserId);
         userIdList.AddRange(extraChatUserIdList);
@@ -486,6 +509,7 @@ public class MessageAppService(
 
         var photoIds = new List<long>();
         photoIds.AddRange(channelList.Select(p => p.PhotoId ?? 0));
+        photoIds.AddRange(userList.Select(p => p.PersonalPhotoId ?? 0));
         photoIds.AddRange(userList.Select(p => p.ProfilePhotoId ?? 0));
         photoIds.AddRange(userList.Select(p => p.FallbackPhotoId ?? 0));
         photoIds.AddRange(contactList.Select(p => p.PhotoId ?? 0));
@@ -537,6 +561,7 @@ public class MessageAppService(
             photoList,
             pollReadModels,
             chosenOptions,
+            [],
             query.Limit == messageList.Count,
             query.IsSearchGlobal,
             pts,
