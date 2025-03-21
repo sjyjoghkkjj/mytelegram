@@ -23,6 +23,7 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     IApply<ChannelPhotoEditedEvent>,
     IApply<ChannelUserNameChangedEvent>,
     IApply<CheckChannelStateCompletedEvent>,
+    IApply<ChannelNoForwardsChangedEvent>,
     IApply<ChatJoinRequestHiddenEvent>,
     IApply<ChannelSignatureChangedEvent>,
     IApply<ChannelColorUpdatedEvent>,
@@ -160,6 +161,11 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     public void Apply(ChannelDeletedEvent aggregateEvent)
     {
         IsDeleted = true;
+    }
+
+    public void Apply(ChannelNoForwardsChangedEvent aggregateEvent)
+    {
+        NoForwards = aggregateEvent.Enabled;
     }
 
     public void Apply(ChannelParticipantCountChangedEvent aggregateEvent)

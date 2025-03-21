@@ -16,6 +16,7 @@ public class ChannelReadModel : IChannelReadModel,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberBannedRightsChangedEvent>,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberJoinedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, DiscussionGroupUpdatedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelNoForwardsChangedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelSignatureChangedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelColorUpdatedEvent>,
     IAmReadModelFor<ChannelAggregate,ChannelId, LinkedChannelChangedEvent>,
@@ -322,7 +323,12 @@ public class ChannelReadModel : IChannelReadModel,
     //}
 
 
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelNoForwardsChangedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        NoForwards = domainEvent.AggregateEvent.Enabled;
 
+        return Task.CompletedTask;
+    }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelSignatureChangedEvent> domainEvent, CancellationToken cancellationToken)
     {

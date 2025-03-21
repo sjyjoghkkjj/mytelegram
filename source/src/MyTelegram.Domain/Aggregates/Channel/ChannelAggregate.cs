@@ -330,7 +330,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         Emit(new SetChannelPtsEvent(senderPeerId, pts, messageId, date));
     }
 
-    //public void StartDeleteParticipantHistory(RequestInfo requestInfo, List<int> messageIds)
+    public void ToggleNoForwards(RequestInfo requestInfo, bool enabled)
     //{
     //    Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
     //    //var admin = _state.GetAdmin(requestInfo.UserId);
@@ -351,8 +351,8 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         string messageActionData)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-
-        // self join channel
+        CheckAdminRights(requestInfo, rights => rights.ChangeInfo);
+        Emit(new ChannelNoForwardsChangedEvent(requestInfo, _state.ChannelId, enabled));
         if (memberUserIdList.Count == 1 && memberUserIdList.ElementAt(0) == inviterId)
         {
         }
