@@ -6,7 +6,7 @@ public class
     public async Task<IReadOnlyCollection<long>> ExecuteQueryAsync(GetJoinedChannelIdListQuery query,
         CancellationToken cancellationToken)
     {
-        return await store.FindAsync(p => p.UserId == query.MemberUserId && query.ChannelIdList.Contains(p.ChannelId),
+        return await store.FindAsync(p => p.UserId == query.MemberUserId && !p.Left && !p.Kicked && query.ChannelIdList.Contains(p.ChannelId),
             p => p.ChannelId, cancellationToken: cancellationToken);
     }
 }
