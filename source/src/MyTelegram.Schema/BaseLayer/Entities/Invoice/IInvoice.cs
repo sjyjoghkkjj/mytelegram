@@ -84,4 +84,9 @@ public interface IInvoice : IObject
     /// Terms of service URL
     ///</summary>
     string? TermsUrl { get; set; }
+
+    ///<summary>
+    /// &nbsp;
+    ///</summary>
+    int? SubscriptionPeriod { get; set; }
 }

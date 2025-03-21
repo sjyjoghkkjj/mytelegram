@@ -47,7 +47,7 @@ public record GetChannelMemberListByChannelIdListQuery(
 public record GetChannelMembersByChannelIdQuery(
     long ChannelId,
     List<long> MemberUserIdList,
-    bool Kicked,
+    //bool? Kicked,
     int Offset,
     int Limit)
     : IQuery<IReadOnlyCollection<IChannelMemberReadModel>>;
@@ -89,11 +89,10 @@ public record GetContactUserIdListByTargetUserIdListQuery(long SelfUserId, List<
 public record GetContactsByPhonesQuery(long SelfUserId, List<string> Phones)
     : IQuery<IReadOnlyCollection<IContactReadModel>>;
 
-//public record GetDeviceByAuthKeyIdQuery(long AuthKeyId) : IQuery<IDeviceReadModel?>;
+public record GetDeviceByAuthKeyIdQuery(long AuthKeyId) : IQuery<IDeviceReadModel?>;
 
-//public record GetDeviceByHashQuery(long UserId, long Hash) : IQuery<IDeviceReadModel?>;
-
-//public record GetDeviceByUserIdQuery(long UserId) : IQuery<IReadOnlyCollection<IDeviceReadModel>>;
+public record GetDeviceByHashQuery(long UserId, long Hash) : IQuery<IDeviceReadModel?>;
+public record GetDeviceByUserIdQuery(long UserId) : IQuery<IReadOnlyCollection<IDeviceReadModel>>;
 
 public record GetDialogByIdQuery(DialogId Id) : IQuery<IDialogReadModel?>;
 
@@ -147,7 +146,7 @@ public record GetLatestAppCodeQuery(
 
 public record GetLinkedChannelIdQuery(long ChannelId) : IQuery<long?>;
 
-public record GetSendAsQuery(long LinkedChannelId) : IQuery<IReadOnlyCollection<IChannelReadModel>>;
+public record GetSendAsQuery(long SelfUserId) : IQuery<IReadOnlyCollection<IChannelReadModel>>;
 
 public record GetSendAsPeerIdQuery(long CreatorUserId, long LinkedChannelId) : IQuery<long?>;
 
@@ -166,14 +165,14 @@ public record GetMessageIdListQuery(
     int Limit)
     : IQuery<List<int>>;
 
-public record GetMessageReactionListQuery(
-    long SelfUserId,
-    long ToPeerId,
-    int MessageId,
-    long? ReactionId,
-    int? Offset,
-    int Limit)
-    : IQuery<IReadOnlyCollection<IUserReactionReadModel>>;
+//public record GetMessageReactionListQuery(
+//    long SelfUserId,
+//    long ToPeerId,
+//    int MessageId,
+//    long? ReactionId,
+//    int? Offset,
+//    int Limit)
+//    : IQuery<IReadOnlyCollection<IUserReactionReadModel>>;
 
 public record GetMessagesByIdListQuery(IList<string> MessageIdList) : IQuery<IReadOnlyCollection<IMessageReadModel>>;
 
@@ -196,7 +195,10 @@ public record GetMessagesQuery(
     int Pts,
     int ReplyToMsgId = 0,
     List<long>? JoinedChannelIdList = null,
-    MessageActionType? MessageActionType = null
+    MessageActionType? MessageActionType = null,
+    bool BroadcastsOnly = false,
+    bool GroupsOnly = false,
+    bool UsersOnly = false
 )
     : IQuery<IReadOnlyCollection<IMessageReadModel>>
 {
@@ -205,7 +207,7 @@ public record GetMessagesQuery(
 }
 
 public record GetMessagesReactionsQuery(long OwnerPeerId, List<int> MessageIds)
-    : IQuery<IReadOnlyCollection<IHasReactions>>;
+    : IQuery<IReadOnlyCollection<IReactionItem>>;
 
 public record GetMessageViewsQuery(
     long ChannelId,
@@ -327,9 +329,9 @@ public record GetPhotosByUserIdQuery(long UserId, IList<long> PhotoIds) : IQuery
 
 public record GetUserProfilePhotosQuery(long UserId) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
 
-//public record GetPhotosByPhotoIdLisQuery(IList<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
+public record GetPhotosByPhotoIdLisQuery(IList<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
 
-//public record GetPhotoByIdQuery(long PhotoId) : IQuery<IPhotoReadModel?>;
+public record GetPhotoByIdQuery(long PhotoId) : IQuery<IPhotoReadModel?>;
 
 public record GetUsersByPhoneNumberListQuery(List<string> PhoneNumbers) : IQuery<IReadOnlyCollection<IUserReadModel>>;
 
@@ -353,14 +355,14 @@ public record GetChatInviteByLinkQuery(string Link) : IQuery<IChatInviteReadMode
 
 public record GetRevokedChatInvitesQuery(long PeerId, long AdminId) : IQuery<IReadOnlyCollection<IChatInviteReadModel>>;
 
-public record GetChatInviteImportersQuery(
-    long PeerId,
-    ChatInviteRequestState? ChatInviteRequestState,
-    int? InviteId,
-    int OffsetDate,
-    long OffsetUserId,
-    string? Q,
-    int Limit) : IQuery<IReadOnlyCollection<IChatInviteImporterReadModel>>;
+//public record GetChatInviteImportersQuery(
+//    long PeerId,
+//    ChatInviteRequestState? ChatInviteRequestState,
+//    int? InviteId,
+//    int OffsetDate,
+//    long OffsetUserId,
+//    string? Q,
+//    int Limit) : IQuery<IReadOnlyCollection<IChatInviteImporterReadModel>>;
 
 public record GetUserNameListByNamesQuery(List<string> UserNames, PeerType? PeerType = null)
     : IQuery<IReadOnlyCollection<IUserNameReadModel>>;
@@ -401,7 +403,7 @@ public record GetMaxUserIdQuery : IQuery<long>;
 
 public record GetUnreadCountQuery(long OwnerUserId, long ToPeerId, int MaxMessageId) : IQuery<int>;
 
-//public record GetDocumentByIdQuery(long Id) : IQuery<IDocumentReadModel?>;
+public record GetDocumentByIdQuery(long Id) : IQuery<IDocumentReadModel?>;
 
 public record GetWallPapersQuery(long UserId) : IQuery<IReadOnlyCollection<IWallPaperReadModel>>;
 
@@ -409,7 +411,7 @@ public record GetWallPaperQuery(long WallPaperId) : IQuery<IWallPaperReadModel?>
 
 public record GetWallPaperBySlugQuery(string Slug) : IQuery<IWallPaperReadModel?>;
 
-//public record GetDocumentsByIdsQuery(IList<long> Ids) : IQuery<IReadOnlyCollection<IDocumentReadModel>>;
+public record GetDocumentsByIdsQuery(IList<long> Ids) : IQuery<IReadOnlyCollection<IDocumentReadModel>>;
 
 public record GetGlobalPrivacySettingsQuery(long UserId) : IQuery<GlobalPrivacySettings?>;
 
@@ -613,10 +615,26 @@ public record GetStoryReactionUniqueCountQuery(long OwnerPeerId, int StoryId) : 
 public record GetWebPageQuery(string Url) : IQuery<IWebPageReadModel?>;
 public record GetMessageSenderUserIdListQuery(long ChannelId, List<int> MessageIds) : IQuery<IReadOnlyCollection<long>>;
 public record GetEffectByIdQuery(long Id) : IQuery<IEffectReadModel?>;
+//public record GetMessageReactionsQuery(long UserId, long ToPeerId, int MessageId) : IQuery<List<IReaction>?>;
+public record GetAllMessageReactionListQuery(List<string> Ids) : IQuery<IReadOnlyCollection<IUserReactionReadModel>>;
+public record GetMessageReactionsQuery(long UserId, long ToPeerId, List<int> MessageIds) : IQuery<IReadOnlyCollection<IUserReactionReadModel>>;
 
-public record GetAuthKeyByAuthKeyIdQuery(long AuthKeyId) : IQuery<IAuthKeyReadModel?>;
-public record GetDeviceByUserIdQuery(long UserId) : IQuery<IReadOnlyCollection<IDeviceReadModel>>;
-public record GetDeviceByAuthKeyIdQuery(long AuthKeyId) : IQuery<IDeviceReadModel?>;
-public record GetDeviceByHashQuery(long UserId, long Hash) : IQuery<IDeviceReadModel?>;
-public record GetPhotoByIdQuery(long PhotoId) : IQuery<IPhotoReadModel?>;
-public record GetPhotosByPhotoIdLisQuery(IList<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
+public record GetMyMessageReactionsQuery(long UserId, long ToPeerId, int MessageId)
+    : IQuery<IReadOnlyCollection<IReaction>>;
+
+public record GetMessageReactionsListQuery(long UserId, Peer ToPeer, int MessageId, long? ReactionId, int Skip, int Limit) : IQuery<IReadOnlyCollection<IUserReactionReadModel>>;
+public record GetChannelIdsByKeywordQuery(long UserId, string Keyword, int Limit) : IQuery<IReadOnlyCollection<long>>;
+public record GetPendingRequestsCountQuery(long ChannelId) : IQuery<int>;
+public record GetRecentRequestUserIdListQuery(long ChannelId, int Limit) : IQuery<IReadOnlyCollection<long>>;
+public record GetChatInviteImportersQuery(long ChannelId,
+    ChatInviteRequestState? ChatInviteRequestState,
+    long? InviteId,
+    int? OffsetDate,
+    long? OffsetUserId,
+    string? Q,
+    int Limit) : IQuery<IReadOnlyCollection<IJoinChannelRequestReadModel>>;
+
+public record GetLeftChannelCountQuery(long UserId) : IQuery<int>;
+public record GetLeftChannelIdsQuery(long UserId, List<long>? ChannelIds = null, int OffsetChannelId = 0, int Limit = 500) : IQuery<IReadOnlyCollection<long>>;
+public record GetBotMembersByChannelIdQuery(long ChannelId) : IQuery<IReadOnlyCollection<IChannelMemberReadModel>>;
+public record GetJoinRequestQuery(long ChannelId, long UserId) : IQuery<IJoinChannelRequestReadModel?>;

@@ -57,10 +57,10 @@ namespace MyTelegram.Schema.Messages;
 /// 400 YOU_BLOCKED_USER You blocked this user.
 /// See <a href="https://corefork.telegram.org/method/messages.forwardMessages" />
 ///</summary>
-[TlObject(0x6d74da08)]
+[TlObject(0xbb9fa475)]
 public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0x6d74da08;
+    public uint ConstructorId => 0xbb9fa475;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -152,6 +152,7 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
     ///</summary>
     public MyTelegram.Schema.IInputQuickReplyShortcut? QuickReplyShortcut { get; set; }
     public int? VideoTimestamp { get; set; }
+    public long? AllowPaidStars { get; set; }
 
     public void ComputeFlag()
     {
@@ -167,6 +168,7 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
         if (SendAs != null) { Flags[13] = true; }
         if (QuickReplyShortcut != null) { Flags[17] = true; }
         if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[20] = true; }
+        if (/*AllowPaidStars != 0 &&*/ AllowPaidStars.HasValue) { Flags[21] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -183,6 +185,7 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
         if (Flags[13]) { writer.Write(SendAs); }
         if (Flags[17]) { writer.Write(QuickReplyShortcut); }
         if (Flags[20]) { writer.Write(VideoTimestamp.Value); }
+        if (Flags[21]) { writer.Write(AllowPaidStars.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -204,5 +207,6 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
         if (Flags[13]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
         if (Flags[17]) { QuickReplyShortcut = reader.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }
         if (Flags[20]) { VideoTimestamp = reader.ReadInt32(); }
+        if (Flags[21]) { AllowPaidStars = reader.ReadInt64(); }
     }
 }

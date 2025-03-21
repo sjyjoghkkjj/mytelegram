@@ -13,6 +13,7 @@ public interface ISavedStarGift : IObject
     bool Unsaved { get; set; }
     bool Refunded { get; set; }
     bool CanUpgrade { get; set; }
+    bool PinnedToTop { get; set; }
     MyTelegram.Schema.IPeer? FromId { get; set; }
     int Date { get; set; }
     MyTelegram.Schema.IStarGift Gift { get; set; }

@@ -6,6 +6,7 @@ public class ChannelPhotoEditedEvent(
     bool broadcast,
     long? photoId,
     IMessageAction messageAction,
+    long? linkedChannelId,
     long randomId)
     : RequestAggregateEvent2<ChannelAggregate, ChannelId>(requestInfo)
 {
@@ -13,5 +14,6 @@ public class ChannelPhotoEditedEvent(
     public bool Broadcast { get; } = broadcast;
     public long? PhotoId { get; } = photoId;
     public IMessageAction MessageAction { get; } = messageAction;
+    public long? LinkedChannelId { get; } = linkedChannelId;
     public long RandomId { get; } = randomId;
 }

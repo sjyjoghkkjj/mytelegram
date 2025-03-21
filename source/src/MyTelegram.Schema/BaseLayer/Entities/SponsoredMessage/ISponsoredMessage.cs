@@ -57,6 +57,12 @@ public interface ISponsoredMessage : IObject
     MyTelegram.Schema.IPhoto? Photo { get; set; }
 
     ///<summary>
+    /// If set, contains some media.
+    /// See <a href="https://corefork.telegram.org/type/MessageMedia" />
+    ///</summary>
+    MyTelegram.Schema.IMessageMedia? Media { get; set; }
+
+    ///<summary>
     /// If set, the sponsored message should use the <a href="https://corefork.telegram.org/api/colors">message accent color »</a> specified in <code>color</code>.
     /// See <a href="https://corefork.telegram.org/type/PeerColor" />
     ///</summary>

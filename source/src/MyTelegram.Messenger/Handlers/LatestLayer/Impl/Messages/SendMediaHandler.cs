@@ -15,7 +15,7 @@
 /// 406 CHANNEL_PRIVATE You haven't joined this channel/supergroup.
 /// 403 CHAT_ADMIN_REQUIRED You must be an admin in this chat to do this.
 /// 400 CHAT_FORWARDS_RESTRICTED You can't forward messages from a protected chat.
-/// 403 CHAT_GUEST_SEND_FORBIDDEN You join the discussion group before commenting, see <a href="https://corefork.telegram.org/api/discussion#requiring-users-to-join-the-group">here&nbsp;»</a> for more info.
+/// 403 CHAT_GUEST_SEND_FORBIDDEN You join the discussion group before commenting, see <a href="https://corefork.telegram.org/api/discussion#requiring-users-to-join-the-group">here»</a> for more info.
 /// 400 CHAT_RESTRICTED You can't send messages in this chat, you were restricted.
 /// 403 CHAT_SEND_AUDIOS_FORBIDDEN You can't send audio messages in this chat.
 /// 403 CHAT_SEND_DOCS_FORBIDDEN You can't send documents in this chat.
@@ -32,7 +32,7 @@
 /// 400 CURRENCY_TOTAL_AMOUNT_INVALID The total amount of all prices is invalid.
 /// 400 DOCUMENT_INVALID The specified document is invalid.
 /// 400 EMOTICON_INVALID The specified emoji is invalid.
-/// 400 ENTITY_BOUNDS_INVALID A specified <a href="https://corefork.telegram.org/api/entities#entity-length">entity offset or length</a> is invalid, see <a href="https://corefork.telegram.org/api/entities#entity-length">here&nbsp;»</a> for info on how to properly compute the entity offset/length.
+/// 400 ENTITY_BOUNDS_INVALID A specified <a href="https://corefork.telegram.org/api/entities#entity-length">entity offset or length</a> is invalid, see <a href="https://corefork.telegram.org/api/entities#entity-length">here»</a> for info on how to properly compute the entity offset/length.
 /// 400 EXTERNAL_URL_INVALID External URL invalid.
 /// 400 FILE_PARTS_INVALID The number of file parts is invalid.
 /// 400 FILE_PART_LENGTH_INVALID The length of a file part is invalid.
@@ -142,7 +142,7 @@ internal sealed class SendMediaHandler(
                     //ThrowHelper.ThrowUserFriendlyException(RpcErrorMessages.ChatSendVoicesForbidden);
                     RpcErrors.RpcErrors403.ChatSendVoicesForbidden.ThrowRpcError();
                 },
-                new List<PrivacyType> { PrivacyType.VoiceMessages }
+                [PrivacyType.VoiceMessages]
             );
         }
 

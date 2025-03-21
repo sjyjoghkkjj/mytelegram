@@ -1,12 +1,10 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Internal use
 /// <para>Possible errors</para>
 /// Code Type Description
-/// 400 ENTITY_BOUNDS_INVALID A specified <a href="https://corefork.telegram.org/api/entities#entity-length">entity offset or length</a> is invalid, see <a href="https://corefork.telegram.org/api/entities#entity-length">here »</a> for info on how to properly compute the entity offset/length.
+/// 400 ENTITY_BOUNDS_INVALID A specified <a href="https://corefork.telegram.org/api/entities#entity-length">entity offset or length</a> is invalid, see <a href="https://corefork.telegram.org/api/entities#entity-length">here»</a> for info on how to properly compute the entity offset/length.
 /// 403 USER_INVALID Invalid user provided.
 /// See <a href="https://corefork.telegram.org/method/help.editUserInfo" />
 ///</summary>

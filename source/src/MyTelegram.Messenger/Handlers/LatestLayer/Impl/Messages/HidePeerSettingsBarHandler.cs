@@ -10,8 +10,8 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 /// See <a href="https://corefork.telegram.org/method/messages.hidePeerSettingsBar" />
 ///</summary>
 internal sealed class HidePeerSettingsBarHandler(IPeerHelper peerHelper, ICommandBus commandBus)
-    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestHidePeerSettingsBar, IBool>,
-        Messages.IHidePeerSettingsBarHandler
+    : RpcResultObjectHandler<RequestHidePeerSettingsBar, IBool>,
+        IHidePeerSettingsBarHandler
 {
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestHidePeerSettingsBar obj)
@@ -19,7 +19,7 @@ internal sealed class HidePeerSettingsBarHandler(IPeerHelper peerHelper, IComman
         var peer = peerHelper.GetPeer(obj.Peer);
         var command = new HidePeerSettingsBarCommand(PeerSettingsId.Create(input.UserId, peer.PeerId),
             input.ToRequestInfo(), peer.PeerId);
-        await commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command);
 
         return new TBoolTrue();
     }

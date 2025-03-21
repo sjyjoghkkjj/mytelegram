@@ -5,7 +5,8 @@ public class UserProfilePhotoChangedEvent(
     long userId,
     long photoId,
     bool fallback,
-    bool isBot
+    bool isBot,
+    int date
     )
     : RequestAggregateEvent2<UserAggregate, UserId>(requestInfo)
 {
@@ -14,4 +15,5 @@ public class UserProfilePhotoChangedEvent(
 
     public bool Fallback { get; } = fallback;
     public bool IsBot { get; } = isBot;
+    public int Date { get; } = date;
 }

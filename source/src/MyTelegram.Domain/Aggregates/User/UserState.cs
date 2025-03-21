@@ -48,6 +48,8 @@ public class UserState : AggregateState<UserAggregate, UserId, UserState>,
     public bool Premium { get; private set; }
     public long? PersonalChannelId { get; private set; }
     public Birthday? Birthday { get; private set; }
+    public int? ProfilePhotoUpdateDate { get; private set; }
+    public int? UserNameUpdateDate { get; private set; }
 
     public void Apply(CheckUserStatusCompletedEvent aggregateEvent)
     {
@@ -64,11 +66,16 @@ public class UserState : AggregateState<UserAggregate, UserId, UserState>,
         AccessHash = aggregateEvent.AccessHash;
         IsBot = aggregateEvent.Bot;
         UserName = aggregateEvent.UserName;
+        if (!string.IsNullOrEmpty(aggregateEvent.UserName))
+        {
+            UserNameUpdateDate = aggregateEvent.CreationTime.ToTimestamp();
+        }
     }
 
     public void Apply(UserNameUpdatedEvent aggregateEvent)
     {
         UserName = aggregateEvent.UserItem.UserName;
+        UserNameUpdateDate = aggregateEvent.Date;
     }
    
     public void Apply(UserProfilePhotoChangedEvent aggregateEvent)
@@ -130,6 +137,8 @@ public class UserState : AggregateState<UserAggregate, UserId, UserState>,
         Premium = snapshot.Premium;
         PersonalChannelId = snapshot.PersonalChannelId;
         Birthday = snapshot.Birthday;
+        ProfilePhotoUpdateDate = snapshot.ProfilePhotoUpdateDate;
+        UserNameUpdateDate = snapshot.UserNameUpdateDate;
     }
 
     public void Apply(UserProfilePhotoUploadedEvent aggregateEvent)

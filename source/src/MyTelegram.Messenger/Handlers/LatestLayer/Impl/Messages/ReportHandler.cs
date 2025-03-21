@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Report a message in a chat for violation of telegram's Terms of Service
@@ -17,6 +15,6 @@ internal sealed class ReportHandler : RpcResultObjectHandler<MyTelegram.Schema.M
     protected override Task<MyTelegram.Schema.IReportResult> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestReport obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.IReportResult>(new TReportResultReported());
     }
 }

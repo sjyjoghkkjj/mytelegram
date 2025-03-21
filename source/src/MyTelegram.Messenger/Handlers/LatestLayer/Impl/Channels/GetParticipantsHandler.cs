@@ -16,12 +16,13 @@ internal sealed class GetParticipantsHandler(
     IAccessHashHelper accessHashHelper,
     IUserConverterService userConverterService,
     IPhotoAppService photoAppService,
+    IChannelAdminRightsChecker channelAdminRightsChecker,
     IChannelAppService channelAppService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestGetParticipants,
-            MyTelegram.Schema.Channels.IChannelParticipants>,
+    : RpcResultObjectHandler<RequestGetParticipants,
+            IChannelParticipants>,
         IGetParticipantsHandler
 {
-    protected override async Task<MyTelegram.Schema.Channels.IChannelParticipants> HandleCoreAsync(IRequestInput input,
+    protected override async Task<IChannelParticipants> HandleCoreAsync(IRequestInput input,
         RequestGetParticipants obj)
     {
         if (obj.Channel is TInputChannel inputChannel)
@@ -29,25 +30,39 @@ internal sealed class GetParticipantsHandler(
             await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
             var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
             channelReadModel.ThrowExceptionIfChannelDeleted();
+            if (channelReadModel.ParticipantsHidden)
+            {
+                if (!await channelAdminRightsChecker.HasChatAdminRightAsync(inputChannel.ChannelId, input.UserId,
+                        p => p.IsCreator || p.AdminRights.ChangeInfo))
+                {
+                    return new TChannelParticipants
+                    {
+                        Chats = [],
+                        Count = 0,
+                        Participants = [],
+                        Users = []
+                    };
+                }
+            }
 
             var joinedChannelIdList = await queryProcessor.ProcessAsync(new GetJoinedChannelIdListQuery(input.UserId,
-                    new List<long> { inputChannel.ChannelId }));
+                    [inputChannel.ChannelId]));
 
-            if (joinedChannelIdList.Count == 0 && channelReadModel!.Broadcast)
+            if (joinedChannelIdList.Count == 0 && channelReadModel.Broadcast)
             {
                 return new TChannelParticipants
                 {
-                    Chats = new TVector<IChat>(),
+                    Chats = [],
                     Count = 0,
-                    Participants = new(),
-                    Users = new TVector<IUser>()
+                    Participants = [],
+                    Users = []
                 };
             }
 
             void CheckAdminPermission(IChannelReadModel channel,
                 long userId)
             {
-                if (channelReadModel!.Broadcast)
+                if (channelReadModel.Broadcast)
                 {
                     if (channel.CreatorId != userId &&
                         channel.AdminList?.FirstOrDefault(p => p.UserId == userId) == null)
@@ -62,8 +77,7 @@ internal sealed class GetParticipantsHandler(
             IQuery<IReadOnlyCollection<IChannelMemberReadModel>>? query = null;
             switch (obj.Filter)
             {
-                case TChannelParticipantsAdmins channelParticipantsAdmins:
-                    //CheckAdminPermission(channelReadModel, input.UserId);
+                case TChannelParticipantsAdmins:
                     chatAdminReadModels = await queryProcessor.ProcessAsync(
                         new GetChatAdminListByChannelIdQuery(inputChannel.ChannelId, obj.Offset, obj.Limit));
 
@@ -82,19 +96,18 @@ internal sealed class GetParticipantsHandler(
                     break;
                 default:
                     query = new GetChannelMembersByChannelIdQuery(inputChannel.ChannelId,
-                        new List<long>(),
-                        false,
+                        [],
                         obj.Offset,
                         obj.Limit);
                     break;
             }
 
-            if (joinedChannelIdList.Contains(channelReadModel!.ChannelId))
+            if (joinedChannelIdList.Contains(channelReadModel.ChannelId))
             {
                 forceNotLeft = true;
             }
 
-            var channelMemberReadModels = query == null ? Array.Empty<IChannelMemberReadModel>() : await queryProcessor
+            var channelMemberReadModels = query == null ? [] : await queryProcessor
                 .ProcessAsync(query);
 
             var userIdList = channelMemberReadModels.Select(p => p.UserId).ToList();

@@ -46,17 +46,20 @@ public class MessageAppService(
 
                 case PeerType.Channel:
                     var sendToChannelReadModel = await channelAppService.GetAsync(toPeer.PeerId);
-                    var sendAsChannelReadModel = await channelAppService.GetAsync(sendAs.PeerId);
-                    // Only channel/super group admin can use SendAs
-                    if (sendToChannelReadModel.CreatorId != requestUserId &&
-                        sendToChannelReadModel.AdminList.FirstOrDefault(p => p.UserId == requestUserId) == null)
+                    // 1. Super group with linked channel
+                    // 2. Channel: signature: true 
+                    if (sendToChannelReadModel is not ({ MegaGroup: true, LinkedChatId: not null } or
+                        { Broadcast: true, Signatures: true }))
                     {
                         RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
                     }
+
+                    var sendAsChannelReadModel = await channelAppService.GetAsync(sendAs.PeerId);
+
                     // We can only use the public channels created by the current user as SendAs
                     if (sendAsChannelReadModel == null! ||
-                        sendAsChannelReadModel.CreatorId != requestUserId /*||
-                        string.IsNullOrEmpty(sendAsChannelReadModel.UserName)*/)
+                        sendAsChannelReadModel.CreatorId != requestUserId ||
+                        string.IsNullOrEmpty(sendAsChannelReadModel.UserName))
                     {
                         RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
                     }

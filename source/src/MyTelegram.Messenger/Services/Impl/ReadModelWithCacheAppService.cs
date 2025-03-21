@@ -16,6 +16,13 @@ public abstract class ReadModelWithCacheAppService<TReadModel>(IReadModelCacheHe
         return cacheHelper.GetOrCreateAsync(id.Value, () => GetReadModelAsync(id.Value), GetReadModelId);
     }
 
+    public async Task<TReadModel> GetAsync(long id)
+    {
+        var readModel = await cacheHelper.GetOrCreateAsync(id, () => GetReadModelAsync(id), GetReadModelId);
+
+        return readModel ?? throw new ArgumentException($"ReadModel({typeof(TReadModel).Name}) with id {id} not exists");
+    }
+
     public async Task<IReadOnlyCollection<TReadModel>> GetListAsync(List<long> ids)
     {
         //var readModels = new List<TReadModel>();
@@ -25,8 +32,14 @@ public abstract class ReadModelWithCacheAppService<TReadModel>(IReadModelCacheHe
         {
             if (cacheHelper.TryGetReadModel(id, out var readModel))
             {
-                //readModels.Add(readModel);
-                readModels.TryAdd(id, readModel);
+                if (readModel != null)
+                {
+                    readModels.TryAdd(id, readModel);
+                }
+                else
+                {
+                    idsNotExistInCache.Add(id);
+                }
             }
             else
             {
@@ -36,7 +49,7 @@ public abstract class ReadModelWithCacheAppService<TReadModel>(IReadModelCacheHe
 
         if (idsNotExistInCache.Count > 0)
         {
-            var dbReadModels = await GetReadModelListAsync(idsNotExistInCache.ToList());
+            var dbReadModels = await GetReadModelListAsync([.. idsNotExistInCache]);
             //readModels.AddRange(dbReadModels);
             foreach (var readModel in dbReadModels)
             {

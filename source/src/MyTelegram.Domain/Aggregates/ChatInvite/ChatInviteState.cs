@@ -4,7 +4,8 @@ public class ChatInviteState : AggregateState<ChatInviteAggregate, ChatInviteId,
     IApply<ChatInviteCreatedEvent>,
     IApply<ChatInviteEditedEvent>,
     IApply<ChatInviteImportedEvent>,
-    IApply<ChatInviteDeletedEvent>
+    IApply<ChatInviteDeletedEvent>,
+    IApply<ChatInviteExportedEvent>
 {
     public long ChannelId { get; private set; }
     public long InviteId { get; private set; }
@@ -77,5 +78,21 @@ public class ChatInviteState : AggregateState<ChatInviteAggregate, ChatInviteId,
     public void Apply(ChatInviteDeletedEvent aggregateEvent)
     {
         //throw new NotImplementedException();
+    }
+
+    public void Apply(ChatInviteExportedEvent aggregateEvent)
+    {
+        ChannelId = aggregateEvent.ChannelId;
+        InviteId = aggregateEvent.InviteId;
+        Hash = aggregateEvent.Hash;
+        AdminId = aggregateEvent.AdminId;
+        Title = aggregateEvent.Title;
+        RequestNeeded = aggregateEvent.RequestNeeded;
+        StartDate = aggregateEvent.StartDate;
+        ExpireDate = aggregateEvent.ExpireDate;
+        UsageLimit = aggregateEvent.UsageLimit;
+        Permanent = aggregateEvent.Permanent;
+        IsBroadcast = aggregateEvent.IsBroadcast;
+        Date = aggregateEvent.Date;
     }
 }

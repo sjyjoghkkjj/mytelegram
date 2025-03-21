@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Deletes communication history.
@@ -17,32 +15,21 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.deleteHistory" />
 ///</summary>
-internal sealed class DeleteHistoryHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestDeleteHistory, MyTelegram.Schema.Messages.IAffectedHistory>,
-    Messages.IDeleteHistoryHandler
+internal sealed class DeleteHistoryHandler(
+    ICommandBus commandBus,
+    //IRandomHelper randomHelper,
+    IPeerHelper peerHelper,
+    IQueryProcessor queryProcessor,
+    IPtsHelper ptsHelper,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestDeleteHistory,
+            MyTelegram.Schema.Messages.IAffectedHistory>,
+        Messages.IDeleteHistoryHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IPtsHelper _ptsHelper;
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public DeleteHistoryHandler(ICommandBus commandBus,
-        //IRandomHelper randomHelper,
-        IPeerHelper peerHelper,
-        IQueryProcessor queryProcessor,
-        IPtsHelper ptsHelper,
-        IAccessHashHelper accessHashHelper)
-    {
-        _commandBus = commandBus;
-        _peerHelper = peerHelper;
-        _queryProcessor = queryProcessor;
-        _ptsHelper = ptsHelper;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IAffectedHistory> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestDeleteHistory obj)
     {
-        var peer = _peerHelper.GetPeer(obj.Peer, input.UserId);
+        var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
         var pageSize = MyTelegramServerDomainConsts.ClearHistoryDefaultPageSize;
         var maxId = obj.MaxId;
         if (maxId > 0)
@@ -51,12 +38,12 @@ internal sealed class DeleteHistoryHandler : RpcResultObjectHandler<MyTelegram.S
         }
 
         var messageItemsToBeDeleted =
-            await _queryProcessor.ProcessAsync(
+            await queryProcessor.ProcessAsync(
                 new GetMessageItemListToBeDeletedQuery2(input.UserId, peer.PeerId, maxId, pageSize, obj.Revoke));
 
         if (messageItemsToBeDeleted.Count == 0)
         {
-            var cachedPts = _ptsHelper.GetCachedPts(input.UserId);
+            var cachedPts = ptsHelper.GetCachedPts(input.UserId);
             return new TAffectedHistory { Offset = 0, Pts = cachedPts, PtsCount = 0 };
         }
 
@@ -70,7 +57,7 @@ internal sealed class DeleteHistoryHandler : RpcResultObjectHandler<MyTelegram.S
                 {
                     if (obj.Peer is TInputPeerUser inputUser)
                     {
-                        await _accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
+                        await accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
                     }
                 }
                 break;
@@ -78,7 +65,7 @@ internal sealed class DeleteHistoryHandler : RpcResultObjectHandler<MyTelegram.S
 
         var command = new StartDeleteHistoryCommand(TempId.New, input.ToRequestInfo(), messageItemsToBeDeleted,
             obj.Revoke, obj.Revoke);
-        await _commandBus.PublishAsync(command);
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

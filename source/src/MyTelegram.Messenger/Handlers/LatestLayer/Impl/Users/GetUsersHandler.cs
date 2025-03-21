@@ -29,22 +29,22 @@ internal sealed class GetUsersHandler(
                 case TInputUser inputUser1:
                     userIds.Add(inputUser1.UserId);
                     break;
-                case TInputUserEmpty inputUserEmpty:
+                case TInputUserEmpty:
                     userIds.Add(input.UserId);
                     break;
                 case TInputUserFromMessage inputUserFromMessage:
                     userIds.Add(inputUserFromMessage.UserId);
                     break;
-                case TInputUserSelf inputUserSelf:
+                case TInputUserSelf:
                     userIds.Add(input.UserId);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(inputUser));
+                    throw new NotImplementedException();
             }
         }
 
         var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
 
-        return new TVector<IUser>(users);
+        return [.. users];
     }
 }

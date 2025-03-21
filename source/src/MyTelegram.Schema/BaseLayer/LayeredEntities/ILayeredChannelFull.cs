@@ -71,9 +71,15 @@ public interface ILayeredChannelFull : IChatFull
     int? RequestsPending { get; set; }
     TVector<long>? RecentRequesters { get; set; }
     bool ViewForumAsMessages { get; set; }
-    /////<summary>
-    /////See <a href="https://core.telegram.org/type/Peer" />
-    /////</summary>
-    //MyTelegram.Schema.IPeer? DefaultSendAs { get; set; }
+    ///<summary>
+    ///See <a href="https://core.telegram.org/type/Peer" />
+    ///</summary>
+    MyTelegram.Schema.IPeer? DefaultSendAs { get; set; }
     //TVector<string>? AvailableReactions { get; set; }
+
+    ///<summary>
+    /// Whether the participant list is hidden.
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    bool ParticipantsHidden { get; set; }
 }

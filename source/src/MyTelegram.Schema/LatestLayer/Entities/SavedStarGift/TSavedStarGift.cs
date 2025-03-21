@@ -15,6 +15,7 @@ public sealed class TSavedStarGift : ISavedStarGift
     public bool Unsaved { get; set; }
     public bool Refunded { get; set; }
     public bool CanUpgrade { get; set; }
+    public bool PinnedToTop { get; set; }
     public MyTelegram.Schema.IPeer? FromId { get; set; }
     public int Date { get; set; }
     public MyTelegram.Schema.IStarGift Gift { get; set; }
@@ -32,6 +33,7 @@ public sealed class TSavedStarGift : ISavedStarGift
         if (Unsaved) { Flags[5] = true; }
         if (Refunded) { Flags[9] = true; }
         if (CanUpgrade) { Flags[10] = true; }
+        if (PinnedToTop) { Flags[12] = true; }
         if (FromId != null) { Flags[1] = true; }
         if (Message != null) { Flags[2] = true; }
         if (/*MsgId != 0 && */MsgId.HasValue) { Flags[3] = true; }
@@ -66,6 +68,7 @@ public sealed class TSavedStarGift : ISavedStarGift
         if (Flags[5]) { Unsaved = true; }
         if (Flags[9]) { Refunded = true; }
         if (Flags[10]) { CanUpgrade = true; }
+        if (Flags[12]) { PinnedToTop = true; }
         if (Flags[1]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
         Date = reader.ReadInt32();
         Gift = reader.Read<MyTelegram.Schema.IStarGift>();

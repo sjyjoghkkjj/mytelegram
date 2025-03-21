@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// View and search recently sent media.<br>
@@ -16,6 +14,11 @@ internal sealed class SearchSentMediaHandler : RpcResultObjectHandler<MyTelegram
     protected override Task<MyTelegram.Schema.Messages.IMessages> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSearchSentMedia obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IMessages>(new TMessages
+        {
+            Chats = [],
+            Messages = [],
+            Users = [],
+        });
     }
 }

@@ -7,10 +7,10 @@ namespace MyTelegram.Schema.Messages;
 /// Sends one or more <a href="https://corefork.telegram.org/api/reactions#paid-reactions">paid Telegram Star reactions »</a>, transferring <a href="https://corefork.telegram.org/api/stars">Telegram Stars »</a> to a channel's balance.
 /// See <a href="https://corefork.telegram.org/method/messages.sendPaidReaction" />
 ///</summary>
-[TlObject(0x9dd6a67b)]
+[TlObject(0x58bbcb50)]
 public sealed class RequestSendPaidReaction : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0x9dd6a67b;
+    public uint ConstructorId => 0x58bbcb50;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -39,13 +39,13 @@ public sealed class RequestSendPaidReaction : IRequest<MyTelegram.Schema.IUpdate
 
     ///<summary>
     /// Each post with star reactions has a leaderboard with the top senders, but users can opt out of appearing there if they prefer more privacy.  <br>If the user explicitly chose to make their paid reaction(s) private, pass <a href="https://corefork.telegram.org/constructor/boolTrue">boolTrue</a> to <a href="https://corefork.telegram.org/method/messages.sendPaidReaction">messages.sendPaidReaction</a>.<code>private</code>.  <br>If the user explicitly chose to make their paid reaction(s) private, pass <a href="https://corefork.telegram.org/constructor/boolTrue">boolFalse</a> to <a href="https://corefork.telegram.org/method/messages.sendPaidReaction">messages.sendPaidReaction</a>.<code>private</code>.  <br>If the user did not make any explicit choice about the privacy of their paid reaction(s) (i.e. when reacting by clicking on an existing star reaction on a message), do not populate the <a href="https://corefork.telegram.org/method/messages.sendPaidReaction">messages.sendPaidReaction</a>.<code>private</code> flag.
-    /// See <a href="https://corefork.telegram.org/type/Bool" />
+    /// See <a href="https://corefork.telegram.org/type/PaidReactionPrivacy" />
     ///</summary>
-    public bool? Private { get; set; }
+    public MyTelegram.Schema.IPaidReactionPrivacy? Private { get; set; }
 
     public void ComputeFlag()
     {
-        if (Private !=null) { Flags[0] = true; }
+        if (Private != null) { Flags[0] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -57,7 +57,7 @@ public sealed class RequestSendPaidReaction : IRequest<MyTelegram.Schema.IUpdate
         writer.Write(MsgId);
         writer.Write(Count);
         writer.Write(RandomId);
-        if (Flags[0]) { writer.Write(Private.Value); }
+        if (Flags[0]) { writer.Write(Private); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -67,6 +67,6 @@ public sealed class RequestSendPaidReaction : IRequest<MyTelegram.Schema.IUpdate
         MsgId = reader.ReadInt32();
         Count = reader.ReadInt32();
         RandomId = reader.ReadInt64();
-        if (Flags[0]) { Private = reader.Read(); }
+        if (Flags[0]) { Private = reader.Read<MyTelegram.Schema.IPaidReactionPrivacy>(); }
     }
 }

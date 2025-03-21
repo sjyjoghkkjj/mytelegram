@@ -18,8 +18,31 @@ public class TempAggregate(TempId id) : AggregateRoot<TempAggregate, TempId>(id)
     IApply<UpdateMessagePinnedStartedEvent>,
     IApply<EditPeerFoldersStartedEvent>,
     IApply<SendMessageStartedEvent>,
-    IApply<DraftDeletedEvent>
+    IApply<DraftDeletedEvent>,
+    IApply<JoinChannelStartedEvent>,
+    IApply<InviteToChannelStartedEvent>
 {
+
+    public void StartInviteToChannel(RequestInfo requestInfo,
+        long channelId,
+        bool isBroadcast,
+        bool hasLink,
+        long inviterId,
+        int channelHistoryMinId,
+        int maxMessageId,
+        List<long> memberUserIds,
+        List<long> botUserIds,
+        ChatJoinType chatJoinType
+    )
+    {
+        Emit(new InviteToChannelStartedEvent(requestInfo, channelId, isBroadcast, hasLink, inviterId, channelHistoryMinId, maxMessageId, memberUserIds, botUserIds, chatJoinType));
+    }
+
+    public void StartJoinChannel(RequestInfo requestInfo, long channelId, bool broadcast, int topMessageId, int channelHistoryMinId)
+    {
+        Emit(new JoinChannelStartedEvent(requestInfo, channelId, broadcast, topMessageId, channelHistoryMinId));
+    }
+
     public void DeleteDraft(long ownerPeerId, Peer toPeer)
     {
         Emit(new DraftDeletedEvent(ownerPeerId, toPeer));
@@ -158,6 +181,16 @@ public class TempAggregate(TempId id) : AggregateRoot<TempAggregate, TempId>(id)
     }
 
     public void Apply(DraftDeletedEvent aggregateEvent)
+    {
+
+    }
+
+    public void Apply(JoinChannelStartedEvent aggregateEvent)
+    {
+
+    }
+
+    public void Apply(InviteToChannelStartedEvent aggregateEvent)
     {
 
     }

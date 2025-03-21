@@ -32,17 +32,11 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
         if (_state.ForwardFromLinkedChannel)
         {
             Emit(new MessageReplyCreatedSagaEvent(domainEvent.AggregateEvent.OriginalMessageItem.ToPeer.PeerId, domainEvent.AggregateEvent.OriginalMessageItem.MessageId, _state.ToPeer.PeerId, outMessageId));
-            //PinForwardedChannelMessage(_state.ToPeer.PeerId, outMessageId);
         }
 
         await HandleForwardCompletedAsync();
     }
 
-    private void PinForwardedChannelMessage(long channelId, int messageId)
-    {
-        var command = new PinChannelMessageCommand(MessageId.Create(channelId, messageId), _state.RequestInfo);
-        Publish(command);
-    }
 
     public Task HandleAsync(IDomainEvent<TempAggregate, TempId, ForwardMessagesStartedEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
     {
@@ -99,7 +93,7 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
 
         //Peer? fromId = null;
         //Peer? peerId = null;
-        Peer savedPeerId;
+        Peer? savedPeerId;
         var senderPeer = new Peer(PeerType.User, _state.RequestInfo.UserId);
         bool savedOut = false;
         var fwdFromId = _state.FromPeer;
@@ -218,7 +212,8 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             TtlPeriod: _state.TtlPeriod,
             Pinned: _state.ForwardFromLinkedChannel,
             Silent: aggregateEvent.OriginalMessageItem.Silent,
-            SavedPeerId: savedPeerId
+            SavedPeerId: savedPeerId,
+            PostAuthor: aggregateEvent.OriginalMessageItem.PostAuthor
         );
 
         var reqMsgId = _state.ForwardFromLinkedChannel ? 0 : _state.RequestInfo.ReqMsgId;

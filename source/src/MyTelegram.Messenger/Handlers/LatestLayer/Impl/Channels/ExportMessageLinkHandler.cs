@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Get link and embed info of a message in a <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a>
@@ -12,20 +10,15 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 /// 400 MSG_ID_INVALID Invalid message ID provided.
 /// See <a href="https://corefork.telegram.org/method/channels.exportMessageLink" />
 ///</summary>
-internal sealed class ExportMessageLinkHandler : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestExportMessageLink, MyTelegram.Schema.IExportedMessageLink>,
-    Channels.IExportMessageLinkHandler
+internal sealed class ExportMessageLinkHandler(IPeerHelper peerHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestExportMessageLink,
+            MyTelegram.Schema.IExportedMessageLink>,
+        Channels.IExportMessageLinkHandler
 {
-    private readonly IPeerHelper _peerHelper;
-
-    public ExportMessageLinkHandler(IPeerHelper peerHelper)
-    {
-        _peerHelper = peerHelper;
-    }
-
     protected override Task<IExportedMessageLink> HandleCoreAsync(IRequestInput input,
         RequestExportMessageLink obj)
     {
-        var peer = _peerHelper.GetChannel(obj.Channel);
+        var peer = peerHelper.GetChannel(obj.Channel);
         return Task.FromResult<IExportedMessageLink>(new TExportedMessageLink
         {
             Link = $"Not support export link.Id={obj.Id},channelId={peer.PeerId}",

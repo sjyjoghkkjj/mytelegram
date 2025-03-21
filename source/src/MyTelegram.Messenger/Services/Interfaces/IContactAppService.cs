@@ -8,5 +8,5 @@ public interface IContactAppService
     Task<ContactType> GetContactTypeAsync(long selfUserId, long targetUserId);
 
     Task<SearchContactOutput> SearchAsync(long selfUserId,
-            string keyword);
+            string keyword, int limit);
 }

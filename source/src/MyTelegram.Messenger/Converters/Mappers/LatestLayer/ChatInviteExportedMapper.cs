@@ -49,7 +49,7 @@ ILayeredMapper,
     [return: NotNullIfNotNull("source")]
     public TChatInviteExported? Map(ChatInviteEditedEvent source, TChatInviteExported destination)
     {
-        destination.Revoked = false;
+        destination.Revoked = source.Revoked;
         destination.Permanent = source.Permanent;
         destination.RequestNeeded = source.RequestNeeded;
         //destination.Link = source.Link;

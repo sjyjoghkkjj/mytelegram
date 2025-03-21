@@ -13,6 +13,7 @@ public class GetDialogOutput(
     IReadOnlyCollection<IChannelMemberReadModel> channelMemberList,
     IReadOnlyCollection<IPollReadModel>? pollList,
     IReadOnlyCollection<IPollAnswerVoterReadModel>? chosenPollOptions,
+    IReadOnlyCollection<IUserReactionReadModel>? userReactionList,
     int limit)
 {
     //,
@@ -26,6 +27,7 @@ public class GetDialogOutput(
     public IReadOnlyCollection<IChannelMemberReadModel> ChannelMemberList { get; set; } = channelMemberList;
     public IReadOnlyCollection<IPollReadModel>? PollList { get; } = pollList;
     public IReadOnlyCollection<IPollAnswerVoterReadModel>? ChosenPollOptions { get; } = chosenPollOptions;
+    public IReadOnlyCollection<IUserReactionReadModel>? UserReactionList { get; } = userReactionList;
     public int Limit { get; } = limit;
     public IReadOnlyCollection<IChatReadModel> ChatList { get; set; } = chatList;
 

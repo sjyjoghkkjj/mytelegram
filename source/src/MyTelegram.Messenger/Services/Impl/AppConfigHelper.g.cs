@@ -6,7 +6,7 @@ namespace MyTelegram.Messenger.Services.Impl;
 public partial class AppConfigHelper
 {
     private static int _hash = 2130643969;
-    private static IJSONValue? _jsonValue;
+    private static TJsonObject? _jsonValue;
     public IJSONValue GetAppConfig()
     {
         if (_jsonValue != null)
@@ -816,6 +816,7 @@ public partial class AppConfigHelper
 
             ]
         };
+        AddCustomConfig();
 
         return _jsonValue;
     }

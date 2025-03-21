@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get changed <a href="https://corefork.telegram.org/api/custom-emoji#emoji-keywords">emoji keywords »</a>.
@@ -17,7 +15,7 @@ internal sealed class GetEmojiKeywordsDifferenceHandler : RpcResultObjectHandler
             LangCode = "en",
             FromVersion = 0,
             Version = 0,
-            Keywords = new TVector<IEmojiKeyword>()
+            Keywords = []
         };
 
         return Task.FromResult<IEmojiKeywordsDifference>(r);

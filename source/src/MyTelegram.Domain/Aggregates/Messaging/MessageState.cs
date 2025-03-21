@@ -50,7 +50,6 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     public bool IsDeleted { get; private set; }
     public void Apply(ChannelMessageDeletedEvent aggregateEvent)
     {
-        //throw new NotImplementedException();
     }
 
     public void Apply(ChannelMessagePinnedEvent aggregateEvent)
@@ -86,7 +85,6 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
 
     public void Apply(InboxMessageHasReadEvent aggregateEvent)
     {
-        //throw new NotImplementedException();
     }
 
     public void Apply(InboxMessageIdAddedToOutboxMessageEvent aggregateEvent)
@@ -97,7 +95,6 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     public void Apply(InboxMessagePinnedUpdatedEvent aggregateEvent)
     {
         Pinned = aggregateEvent.Pinned;
-        //PmOneSide = false;
     }
 
     public void Apply(MessageDeleted4Event aggregateEvent)
@@ -108,12 +105,10 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     public void Apply(MessageDeletedEvent aggregateEvent)
     {
         IsDeleted = true;
-        //throw new NotImplementedException();
     }
 
     public void Apply(MessageForwardedEvent aggregateEvent)
     {
-        //throw new NotImplementedException();
     }
 
     public void Apply(MessagePinnedUpdatedEvent aggregateEvent)
@@ -123,7 +118,6 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
 
     public void Apply(MessageReplyUpdatedEvent aggregateEvent)
     {
-        //throw new NotImplementedException();
         if (MessageItem.Reply != null)
         {
             MessageItem.Reply.ChannelId = aggregateEvent.ChannelId;
@@ -143,32 +137,17 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     public void Apply(OtherPartyMessageDeletedEvent aggregateEvent)
     {
         IsDeleted = true;
-        //throw new NotImplementedException();
     }
 
-    //private readonly CircularBuffer<Peer> _recentRepliers = new(5);
-    //public void LoadSnapshot(MessageSnapshot snapshot)
-    //{
-    //    MessageItem = snapshot.MessageItem;
-    //    InboxItems = snapshot.InboxItems;
-    //    SenderMessageId = snapshot.SenderMessageId;
-    //    Pinned = snapshot.Pinned;
-    //    Pts = snapshot.Pts;
-    //    PmOneSide = snapshot.PmOneSide;
-    //}
-
-    //public MessageItem InMessageItem { get; private set; }
     public void Apply(OutboxMessageCreatedEvent aggregateEvent)
     {
         MessageItem = aggregateEvent.OutboxMessageItem;
         SenderMessageId = aggregateEvent.OutboxMessageItem.MessageId;
-        //Reply = MessageItem.Reply;
     }
 
     public void Apply(OutboxMessageDeletedEvent aggregateEvent)
     {
         IsDeleted = true;
-        //throw new NotImplementedException();
     }
 
     public void Apply(OutboxMessageEditedEvent aggregateEvent)
@@ -180,44 +159,26 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     public void Apply(OutboxMessagePinnedUpdatedEvent aggregateEvent)
     {
         Pinned = aggregateEvent.Pinned;
-        //PmOneSide = false;
     }
 
     public void Apply(ReplyChannelMessageCompletedEvent aggregateEvent)
     {
-        //Reply = aggregateEvent.Reply;
         MessageItem = MessageItem with { Reply = aggregateEvent.Reply };
     }
 
     public void Apply(ReplyToMessageEvent aggregateEvent)
     {
-        //throw new NotImplementedException();
     }
 
     public void Apply(SelfMessageDeletedEvent aggregateEvent)
     {
         IsDeleted = true;
-        //throw new NotImplementedException();
     }
 
     public void Apply(UpdatePinnedMessageStartedEvent aggregateEvent)
     {
         Pinned = aggregateEvent.Pinned;
         PmOneSide = aggregateEvent.PmOneSide;
-    }
-
-    //public List<Peer> RecentRepliers { get; private set; } = new(MyTelegramServerDomainConsts.MaxRecentRepliersCount);
-
-    //public MessageReply? Reply { get; private set; }
-
-    public List<ReactionCount>? GetReactions()
-    {
-        if (ReactionCounts.Count > 0)
-        {
-            return ReactionCounts.Values.ToList();
-        }
-
-        return null;
     }
 
     public void LoadSnapshot(MessageSnapshot snapshot)

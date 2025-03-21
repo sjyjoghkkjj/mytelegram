@@ -41,7 +41,7 @@ internal sealed class ResolvePhoneHandler(
 
         var r = new TResolvedPeer
         {
-            Chats = new(),
+            Chats = [],
             Peer = new TPeerUser { UserId = userReadModel.UserId },
             Users = new TVector<IUser>(user)
         };

@@ -8,9 +8,10 @@ public class GetChannelMembersByChannelIdQueryHandler(IQueryOnlyReadModelStore<C
         GetChannelMembersByChannelIdQuery query,
         CancellationToken cancellationToken)
     {
-        Expression<Func<ChannelMemberReadModel, bool>> filter = p => !p.Left && p.ChannelId == query.ChannelId;
-        filter = filter.WhereIf(query.MemberUserIdList.Count > 0, p => query.MemberUserIdList.Contains(p.UserId));
+        Expression<Func<ChannelMemberReadModel, bool>> filter = p => !p.Left && !p.Kicked && p.ChannelId == query.ChannelId;
+        filter = filter.WhereIf(query.MemberUserIdList.Count > 0, p => query.MemberUserIdList.Contains(p.UserId))
+            ;
 
-        return await store.FindAsync(filter, cancellationToken: cancellationToken);
+        return await store.FindAsync(filter, skip: query.Offset, limit: query.Limit, cancellationToken: cancellationToken);
     }
 }

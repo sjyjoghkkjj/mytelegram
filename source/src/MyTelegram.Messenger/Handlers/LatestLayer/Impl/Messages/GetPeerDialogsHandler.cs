@@ -103,7 +103,7 @@ internal sealed class GetPeerDialogsHandler(
             var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
 
             var channels = output.ChannelList.ToDictionary(k => k.ChannelId, v => v);
-            peerDialogs.Dialogs = new TVector<IDialog>(peerList.Select(p =>
+            peerDialogs.Dialogs = [.. peerList.Select(p =>
             {
                 var d = new TDialog
                 {
@@ -120,7 +120,7 @@ internal sealed class GetPeerDialogsHandler(
                 }
 
                 return d;
-            }));
+            })];
 
             if (peerDialogs.Users == null)
             {

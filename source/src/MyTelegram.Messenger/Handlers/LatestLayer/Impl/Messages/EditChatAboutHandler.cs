@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Edit the description of a <a href="https://corefork.telegram.org/api/channel">group/supergroup/channel</a>.
@@ -17,37 +15,29 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.editChatAbout" />
 ///</summary>
-internal sealed class EditChatAboutHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestEditChatAbout, IBool>,
-    Messages.IEditChatAboutHandler
+internal sealed class EditChatAboutHandler(
+    ICommandBus commandBus,
+    IPeerHelper peerHelper,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestEditChatAbout, IBool>,
+        Messages.IEditChatAboutHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public EditChatAboutHandler(ICommandBus commandBus,
-        IPeerHelper peerHelper,
-        IAccessHashHelper accessHashHelper)
-    {
-        _commandBus = commandBus;
-        _peerHelper = peerHelper;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestEditChatAbout obj)
     {
-        var peer = _peerHelper.GetPeer(obj.Peer, input.UserId);
+        var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
         switch (peer.PeerType)
         {
             case PeerType.Channel:
                 {
                     if (obj.Peer is TInputPeerChannel inputChannel)
                     {
-                        await _accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+                        await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
                     }
 
                     var command =
                         new EditChannelAboutCommand(ChannelId.Create(peer.PeerId), input.ToRequestInfo(), input.UserId, obj.About);
-                    await _commandBus.PublishAsync(command, CancellationToken.None);
+                    await commandBus.PublishAsync(command, CancellationToken.None);
                     //return new TBoolTrue();
                     return null!;
                 }

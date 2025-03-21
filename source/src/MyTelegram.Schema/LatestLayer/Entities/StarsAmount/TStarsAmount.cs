@@ -11,12 +11,12 @@ public sealed class TStarsAmount : IStarsAmount
 {
     public uint ConstructorId => 0xbbb6b4a3;
     ///<summary>
-    /// &nbsp;
+    /// 
     ///</summary>
     public long Amount { get; set; }
 
     ///<summary>
-    /// &nbsp;
+    /// 
     ///</summary>
     public int Nanos { get; set; }
 

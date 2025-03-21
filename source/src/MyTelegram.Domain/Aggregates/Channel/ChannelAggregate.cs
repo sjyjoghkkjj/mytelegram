@@ -10,6 +10,19 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         Register(_state);
     }
 
+    public void ToggleJoinRequest(RequestInfo requestInfo, bool enabled)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        CheckAdminRights(requestInfo, r => r.ChangeInfo);
+        Emit(new ChannelJoinRequestUpdatedEvent(requestInfo, _state.ChannelId, enabled));
+    }
+    public void ToggleParticipantsHidden(RequestInfo requestInfo, bool enabled)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        CheckAdminRights(requestInfo, r => r.ChangeInfo);
+        Emit(new ChannelParticipantsHiddenUpdatedEvent(requestInfo, _state.ChannelId, enabled));
+    }
+
     public void UpdateParticipantCount(int updatedCount)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
@@ -64,7 +77,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
 
         if (_state.SlowModeSeconds > 0)
         {
-            if (senderPeerId == _state.LatestNoneBotSenderPeerId && senderPeerId != _state.CreatorId)
+            if (senderPeerId == _state.LatestNonBotSenderPeerId && senderPeerId != _state.CreatorId)
             {
                 var nextSendDate = _state.SlowModeSeconds + _state.LastSendDate;
                 var now = DateTime.UtcNow.ToTimestamp();
@@ -143,18 +156,11 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         string? about)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        //var admin = _state.GetAdmin(selfUserId);
         CheckAdminRights(requestInfo, r => r.ChangeInfo);
         CheckBannedRights(requestInfo, _state.GetDefaultBannedRights().ChangeInfo);
 
-        //CheckBannedRights(selfUserId,
-        //    _state.GetDefaultBannedRights().ChangeInfo,
-        //    admin?.AdminRights.ChangeInfo,
-        //    RpcErrorMessages.ChatAdminRequired);
-
         if (about?.Length > MyTelegramServerDomainConsts.ChatAboutMaxLength)
         {
-            //ThrowHelper.ThrowUserFriendlyException(RpcErrorMessages.ChatAboutTooLong);
             RpcErrors.RpcErrors400.ChatAboutTooLong.ThrowRpcError();
         }
 
@@ -175,7 +181,6 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         if (_state.ChatAdmins.Count > MyTelegramServerDomainConsts.ChannelAdminMaxCount)
         {
-            //ThrowHelper.ThrowUserFriendlyException(RpcErrorMessages.AdminsTooMuch);
             RpcErrors.RpcErrors400.AdminsTooMuch.ThrowRpcError();
         }
 
@@ -212,8 +217,6 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
     }
 
     public void EditPhoto(RequestInfo requestInfo,
-        //long fileId,
-        //byte[] photo,
         long? photoId,
         IMessageAction messageAction,
         long randomId)
@@ -224,9 +227,9 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         Emit(new ChannelPhotoEditedEvent(requestInfo,
             _state.ChannelId,
             _state.Broadcast,
-            //photo,
             photoId,
             messageAction,
+            _state.LinkedChannelId,
             randomId
             ));
     }
@@ -237,41 +240,16 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         long randomId)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        //var admin = _state.GetAdmin(requestInfo.UserId);
-        //CheckBannedRights(requestInfo.UserId,
-        //    _state.GetDefaultBannedRights().ChangeInfo,
-        //    admin?.AdminRights.ChangeInfo,
-        //    RpcErrorMessages.ChatAdminRequired);
         CheckAdminRights(requestInfo, r => r.ChangeInfo);
 
         Emit(new ChannelTitleEditedEvent(requestInfo,
             _state.ChannelId,
             _state.Broadcast,
             title,
+            _state.LinkedChannelId,
             messageAction,
             randomId
             ));
-    }
-
-    public void HideChatJoinRequest(RequestInfo requestInfo, long userId, bool approved)
-    {
-        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        CheckAdminRights(requestInfo, rights => rights.InviteUsers);
-
-        var recentRequesters = _state.RecentRequesters ?? new List<long>();
-        var requestsPending = _state.RequestsPending ?? 0;
-
-        if (recentRequesters.Contains(userId))
-        {
-            recentRequesters.Remove(userId);
-            requestsPending--;
-        }
-
-        //Emit(new JoinRequestHiddenEvent(requestInfo, _state.ChannelId, inviteId, hash, approved, userId, recentRequesters,
-        //    requestsPending, date));
-
-        Emit(new ChatJoinRequestHiddenEvent(requestInfo, _state.ChannelId, _state.Broadcast, userId, approved, requestsPending,
-            recentRequesters));
     }
 
     public void IncrementParticipantCount()
@@ -281,15 +259,15 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         Emit(new IncrementParticipantCountEvent(_state.ChannelId, participantCount));
     }
 
-    public void ReadChannelLatestNoneBotOutboxMessage(
+    public void ReadChannelLatestNonBotOutboxMessage(
         RequestInfo requestInfo,
         string sourceCommandId)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new ReadChannelLatestNoneBotOutboxMessageEvent(
             requestInfo,
-            _state.LatestNoneBotSenderPeerId,
-            _state.LatestNoneBotSenderMessageId,
+            _state.LatestNonBotSenderPeerId,
+            _state.LatestNonBotSenderMessageId,
             sourceCommandId));
     }
 
@@ -297,11 +275,9 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         long broadcastChannelId,
         long? groupChannelId)
     {
-        // TODO:Use saga to set discussion group id,check whether the groupChannelId is valid
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         if (requestInfo.UserId != _state.CreatorId)
         {
-            //ThrowHelper.ThrowUserFriendlyException(RpcErrorMessages.BroadcastIdInvalid);
             RpcErrors.RpcErrors400.BroadcastIdInvalid.ThrowRpcError();
         }
 
@@ -331,116 +307,10 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
     }
 
     public void ToggleNoForwards(RequestInfo requestInfo, bool enabled)
-    //{
-    //    Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-    //    //var admin = _state.GetAdmin(requestInfo.UserId);
-    //    //CheckBannedRights(requestInfo.UserId, true, admin?.AdminRights.DeleteMessages, RpcErrorMessages.ChatAdminRequired);
-    //    CheckAdminRights(requestInfo, r => r.DeleteMessages);
-
-    //    Emit(new DeleteParticipantHistoryStartedEvent(requestInfo, _state.ChannelId, messageIds));
-    //}
-
-    public void StartInviteToChannel(RequestInfo requestInfo,
-        long inviterId,
-        int maxMessageId,
-        IReadOnlyList<long> memberUserIdList,
-        IReadOnlyList<long>? privacyRestrictedUserId,
-        IReadOnlyList<long> botUserIdList,
-        int date,
-        long randomId,
-        string messageActionData)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         CheckAdminRights(requestInfo, rights => rights.ChangeInfo);
         Emit(new ChannelNoForwardsChangedEvent(requestInfo, _state.ChannelId, enabled));
-        if (memberUserIdList.Count == 1 && memberUserIdList.ElementAt(0) == inviterId)
-        {
-        }
-        else
-        {
-            CheckAdminRights(requestInfo, r => r.InviteUsers);
-            CheckBannedRights(requestInfo, _state.GetDefaultBannedRights().InviteUsers);
-            //var admin = _state.GetAdmin(inviterId);
-            //CheckBannedRights(inviterId,
-            //    _state.GetDefaultBannedRights().InviteUsers,
-            //    admin?.AdminRights.InviteUsers,
-            //    RpcErrorMessages.ChatAdminRequired);
-        }
-
-        Emit(new StartInviteToChannelEvent(requestInfo,
-            _state.ChannelId,
-            inviterId,
-            memberUserIdList,
-            privacyRestrictedUserId,
-            botUserIdList,
-            date,
-            //_state.MaxMessageId,
-            maxMessageId,
-            _state.PreHistoryHidden ? maxMessageId : 0,
-            randomId,
-            messageActionData,
-            _state.Broadcast,
-            _state.HasLink
-        ));
-    }
-
-    public void StartSendChannelMessage( //long reqMsgId,
-        RequestInfo requestInfo,
-        long senderPeerId,
-        bool senderIsBot,
-        int messageId,
-        MessageSubType subType)
-    {
-        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        if (_state.Broadcast && _state.CreatorId != senderPeerId)
-        {
-            var admin = _state.GetAdmin(senderPeerId);
-            if (admin == null || !admin.AdminRights.PostMessages)
-            {
-                if (subType != MessageSubType.InviteToChannel)
-                {
-                    //ThrowHelper.ThrowUserFriendlyException(RpcErrorMessages.ChatWriteForbidden);
-                    RpcErrors.RpcErrors403.ChatWriteForbidden.ThrowRpcError();
-                }
-            }
-        }
-
-        if (subType != MessageSubType.InviteToChannel)
-        {
-            //CheckBannedRights(senderPeerId,
-            //    _state.GetDefaultBannedRights().SendMessages,
-            //    false,
-            //    RpcErrorMessages.ChatWriteForbidden);
-            CheckBannedRights(senderPeerId, _state.GetDefaultBannedRights().SendMessages,
-                RpcErrors.RpcErrors403.ChatWriteForbidden);
-        }
-
-        if (_state.SlowModeSeconds > 0)
-        {
-            if (senderPeerId == _state.LatestNoneBotSenderPeerId && senderPeerId != _state.CreatorId)
-            {
-                var nextSendDate = _state.SlowModeSeconds + _state.LastSendDate;
-                var now = DateTime.UtcNow.ToTimestamp();
-                var waitForX = nextSendDate - now;
-                if (waitForX > 0)
-                {
-                    //ThrowHelper.ThrowUserFriendlyException(string.Format(RpcErrorMessages.SlowModeWait, waitForX));
-                    RpcErrors.RpcErrors420.SlowModeWaitX.ThrowRpcError(waitForX);
-                }
-            }
-        }
-
-        Emit(new StartSendChannelMessageEvent( //reqMsgId,
-            requestInfo,
-            senderPeerId,
-            senderIsBot,
-            _state.Broadcast,
-            _state.Broadcast ? 1 : 0,
-            messageId,
-            _state.BotUserIdList,
-            _state.LinkedChannelId,
-            DateTime.UtcNow.ToTimestamp()
-        ));
     }
 
     public void TogglePreHistoryHidden(RequestInfo requestInfo,
@@ -448,8 +318,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         long selfUserId)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        // only channel creator can change this setting
-        //CheckBannedRights(selfUserId, true, false, RpcErrorMessages.ChatAdminRequired);
+        // Only channel creator can change this setting
         CheckAdminRights(selfUserId, r => false, RpcErrors.RpcErrors400.ChatAdminRequired);
         Emit(new PreHistoryHiddenChangedEvent(requestInfo, _state.ChannelId, hidden));
     }
@@ -460,47 +329,16 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         CheckAdminRights(requestInfo, rights => rights.ChangeInfo);
         Emit(new ChannelSignatureChangedEvent(requestInfo, _state.ChannelId, signatureEnabled, profilesEnabled));
     }
+
     public void ToggleSlowMode(RequestInfo requestInfo,
         int seconds,
         long selfUserId)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        //CheckBannedRights(selfUserId,
-        //    _state.GetDefaultBannedRights().ChangeInfo,
-        //    false,
-        //    RpcErrorMessages.ChatAdminRequired);
         CheckBannedRights(selfUserId, _state.GetDefaultBannedRights().ChangeInfo,
             RpcErrors.RpcErrors400.ChatAdminRequired);
 
         Emit(new SlowModeChangedEvent(requestInfo, _state.ChannelId, seconds));
-    }
-
-    //        if (bannedRights)
-    //        {
-    //            ThrowHelper.ThrowUserFriendlyException(error);
-    //        }
-    //    }
-    //}
-    public void UpdateChatInviteRequestPending(long requestUserId)
-    {
-        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        var recentRequesters = _state.RecentRequesters ?? new List<long>();
-        var requestsPending = _state.RequestsPending;
-        if (!recentRequesters.Contains(requestUserId))
-        {
-            recentRequesters.Add(requestUserId);
-
-            if (recentRequesters.Count > MyTelegramServerDomainConsts.ChatInviteRecentRequesterMaxCount)
-            {
-                recentRequesters.RemoveAt(0);
-            }
-
-            requestsPending ??= 0;
-            requestsPending++;
-
-            Emit(new ChatInviteRequestPendingUpdatedEvent(_state.ChannelId,
-                _state.ChatAdmins.Select(p => p.Key).ToList(), recentRequesters, requestsPending));
-        }
     }
 
     public void UpdateColor(RequestInfo requestInfo, PeerColor color, long? backgroundEmojiId, bool forProfile)
@@ -519,13 +357,6 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
             _state.UserName));
     }
 
-    //{
-    //    if (_state.CreatorId != selfUserId)
-    //    {
-    //        if (adminRights.HasValue && adminRights.Value)
-    //        {
-    //            return;
-    //        }
     protected override Task<ChannelSnapshot> CreateSnapshotAsync(CancellationToken cancellationToken)
     {
         return Task.FromResult(new ChannelSnapshot(_state.Broadcast,
@@ -537,12 +368,11 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
             _state.PreHistoryHidden,
             _state.MaxMessageId,
             _state.BotUserIdList,
-            _state.LatestNoneBotSenderPeerId,
-            _state.LatestNoneBotSenderMessageId,
+            _state.LatestNonBotSenderPeerId,
+            _state.LatestNonBotSenderMessageId,
             _state.DefaultBannedRights,
             _state.SlowModeSeconds,
             _state.LastSendDate,
-            //_state.LastSenderPeerId,
             _state.ChatAdmins.Select(p => p.Value).ToList(),
             _state.PinnedMsgId,
             _state.Photo,
@@ -569,7 +399,9 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
             _state.TopMessageId,
             _state.StickerSetId,
             _state.EmojiStickerSetId,
-            _state.EmojiStatus
+            _state.EmojiStatus,
+            _state.ParticipantsHidden,
+            _state.JoinRequest
         ));
     }
     protected override Task LoadSnapshotAsync(ChannelSnapshot snapshot,
@@ -599,7 +431,6 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
 
             if (admin == null)
             {
-                //ThrowHelper.ThrowUserFriendlyException(errorMessage);
                 (rpcError ?? RpcErrors.RpcErrors400.ChatAdminRequired).ThrowRpcError();
             }
 
@@ -608,7 +439,6 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
                 var rights = rightsToCheck(admin.AdminRights);
                 if (!rights)
                 {
-                    //ThrowHelper.ThrowUserFriendlyException(errorMessage);
                     (rpcError ?? RpcErrors.RpcErrors400.ChatAdminRequired).ThrowRpcError();
                 }
             }
@@ -632,7 +462,6 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         {
             if (bannedRights)
             {
-                //ThrowHelper.ThrowUserFriendlyException(errorMessage);
                 (rpcError ?? RpcErrors.RpcErrors400.ChatAdminRequired).ThrowRpcError();
             }
         }

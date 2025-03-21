@@ -7,7 +7,6 @@ using MyTelegram.Domain.Commands.Updates;
 namespace MyTelegram.Messenger.DomainEventHandlers;
 
 public abstract class DomainEventHandlerBase(
-    //IQueryProcessor queryProcessor,
     IObjectMessageSender objectMessageSender,
     ICommandBus commandBus,
     IIdGenerator idGenerator,
@@ -53,7 +52,7 @@ public abstract class DomainEventHandlerBase(
                 excludeUserId,
                 onlySendToUserId,
                 onlySendToThisAuthKeyId,
-                new List<long> { senderPeer.PeerId },
+                [senderPeer.PeerId],
                 updatesType: updatesType
             );
         }
@@ -128,7 +127,7 @@ public abstract class DomainEventHandlerBase(
         List<long>? chats = null;
         if (toPeer.PeerType == PeerType.User)
         {
-            users = new List<long> { toPeer.PeerId };
+            users = [toPeer.PeerId];
             if (senderUserId.HasValue)
             {
                 users.Add(senderUserId.Value);
@@ -136,7 +135,7 @@ public abstract class DomainEventHandlerBase(
         }
         else if (toPeer.PeerType == PeerType.Channel || toPeer.PeerType == PeerType.Chat)
         {
-            chats = new List<long> { toPeer.PeerId };
+            chats = [toPeer.PeerId];
         }
 
         if (!skipSaveUpdates)
@@ -182,7 +181,6 @@ public abstract class DomainEventHandlerBase(
 
     protected async Task<long> SavePushUpdatesAsync(
         long ownerPeerId,
-        //long? channelId,
         IUpdates updates,
         int pts,
         long? excludeAuthKeyId = null,
@@ -195,10 +193,8 @@ public abstract class DomainEventHandlerBase(
         int? messageId = null
     )
     {
-        //UpdatesType updatesType = UpdatesType.Updates;
         var userIds = users;
         var chatIds = chats;
-        //int? messageId = null;
         var date = DateTime.UtcNow.ToTimestamp();
         IUpdate[]? allUpdates = null;
         switch (updates)
@@ -208,13 +204,13 @@ public abstract class DomainEventHandlerBase(
                 date = updates1.Date;
                 if (updates1.Users.Count > 0)
                 {
-                    userIds ??= new();
+                    userIds ??= [];
                     userIds.AddRange(updates1.Users.Select(p => p.Id));
                 }
 
                 if (updates1.Chats.Count > 0)
                 {
-                    chatIds ??= new();
+                    chatIds ??= [];
                     chatIds.AddRange(updates1.Chats.Select(p => p.Id));
                 }
 
@@ -288,12 +284,10 @@ public abstract class DomainEventHandlerBase(
         {
             globalSeqNo = await SavePushUpdatesAsync(
                 toPeer.PeerId,
-                //channelId,
                 updates,
                 pts,
                 excludeAuthKeyId,
                 excludeUserId,
-                //onlySendToUserId,
                 onlySendToThisAuthKeyId: onlySendToThisAuthKeyId,
                 updatesType: updatesType
             );
@@ -401,7 +395,6 @@ public abstract class DomainEventHandlerBase(
     }
 
     protected async Task SendRpcMessageToClientAsync<TData>(
-        //long reqMsgId,
         RequestInfo requestInfo,
         TData data,
         long selfUserId = 0,

@@ -7268,7 +7268,7 @@ public class RpcErrors
        { 0x6aa3f6bd, "Getsearchresultscalendarhandler" }, // messages.getsearchresultscalendarhandler
        { 0x9c7f2f10, "Getsearchresultspositionshandler" }, // messages.getsearchresultspositionshandler
        { 0x73665bc2, "Getsecurevaluehandler" }, // account.getsecurevaluehandler
-       { 0xdc770ee, "Getsendashandler" }, // channels.getsendashandler
+       { 0xe785a43f, "Getsendashandler" }, // channels.getsendashandler
        { 0x778d902f, "Getsmsjobhandler" }, // smsjobs.getsmsjobhandler
        { 0x1cff7e08, "Getsplitrangeshandler" }, // messages.getsplitrangeshandler
        { 0x9bd2f439, "Getsponsoredmessageshandler" }, // messages.getsponsoredmessageshandler
@@ -7441,8 +7441,8 @@ public class RpcErrors
        { 0x44fa7a15, "Sendencryptedhandler" }, // messages.sendencryptedhandler
        { 0x5559481d, "Sendencryptedfilehandler" }, // messages.sendencryptedfilehandler
        { 0x32d439a4, "Sendencryptedservicehandler" }, // messages.sendencryptedservicehandler
-       { 0x3ebee86a, "Sendinlinebotresulthandler" }, // messages.sendinlinebotresulthandler
-       { 0x9dd6a67b, "Sendpaidreactionhandler" }, // messages.sendpaidreactionhandler
+       { 0xc0cf7646, "Sendinlinebotresulthandler" }, // messages.sendinlinebotresulthandler
+       { 0x58bbcb50, "Sendpaidreactionhandler" }, // messages.sendpaidreactionhandler
        { 0x2d03522f, "Sendpaymentformhandler" }, // payments.sendpaymentformhandler
        { 0x6c750de1, "Sendquickreplymessageshandler" }, // messages.sendquickreplymessageshandler
        { 0xd30d78d4, "Sendreactionhandler" }, // messages.sendreactionhandler
@@ -7494,7 +7494,7 @@ public class RpcErrors
        { 0x4c2985b6, "Togglejoinrequesthandler" }, // channels.togglejoinrequesthandler
        { 0xe4cb9580, "Togglejointosendhandler" }, // channels.togglejointosendhandler
        { 0xb11eafa2, "Togglenoforwardshandler" }, // messages.togglenoforwardshandler
-       { 0x849ad397, "Togglepaidreactionprivacyhandler" }, // messages.togglepaidreactionprivacyhandler
+       { 0x435885b5, "Togglepaidreactionprivacyhandler" }, // messages.togglepaidreactionprivacyhandler
        { 0x6a6e7854, "Toggleparticipantshiddenhandler" }, // channels.toggleparticipantshiddenhandler
        { 0xbd0415c4, "Togglepeerstorieshiddenhandler" }, // stories.togglepeerstorieshiddenhandler
        { 0xe47cb579, "Togglepeertranslationshandler" }, // messages.togglepeertranslationshandler

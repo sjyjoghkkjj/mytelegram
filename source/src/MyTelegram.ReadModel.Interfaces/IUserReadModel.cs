@@ -47,4 +47,6 @@ public interface IUserReadModel : IReadModel
 
     List<string>? Usernames { get; }
     DateTime? CreationTime { get; }
+    int? ProfilePhotoUpdateDate { get; }
+    int? UserNameUpdateDate { get; }
 }

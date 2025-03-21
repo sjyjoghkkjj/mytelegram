@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Domain.Commands.Channel;
+﻿namespace MyTelegram.Domain.Commands.Temp;
 
 public class StartInviteToChannelCommand(TempId aggregateId,
     RequestInfo requestInfo,
@@ -22,9 +22,4 @@ public class StartInviteToChannelCommand(TempId aggregateId,
     public List<long> MemberUserIds { get; } = memberUserIds;
     public List<long> BotUserIds { get; } = botUserIds;
     public ChatJoinType ChatJoinType { get; } = chatJoinType;
-    protected override IEnumerable<byte[]> GetSourceIdComponents()
-    {
-        yield return BitConverter.GetBytes(ChannelId);
-        yield return BitConverter.GetBytes(RequestInfo.ReqMsgId);
-    }
 }

@@ -1,29 +1,150 @@
 ﻿namespace MyTelegram.Domain.Sagas;
 
-public class ApproveJoinChannelSaga(ApproveJoinChannelSagaId id, IEventStore eventStore)
-    : MyInMemoryAggregateSaga<ApproveJoinChannelSaga, ApproveJoinChannelSagaId, ApproveJoinChannelSagaLocator>(id,
-            eventStore),
-        ISagaIsStartedBy<ChannelAggregate, ChannelId, ChatJoinRequestHiddenEvent>
+public class ApproveJoinChannelSaga : MyInMemoryAggregateSaga<ApproveJoinChannelSaga, ApproveJoinChannelSagaId, ApproveJoinChannelSagaLocator>,
+        //ISagaIsStartedBy<ChannelAggregate, ChannelId, ChatJoinRequestHiddenEvent>,
+        ISagaIsStartedBy<JoinChannelAggregate, JoinChannelId, JoinChannelRequestUpdatedEvent>,
+        ISagaHandles<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent>
 {
-    public Task HandleAsync(IDomainEvent<ChannelAggregate, ChannelId, ChatJoinRequestHiddenEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
+    private readonly ApproveJoinChannelSagaState _state = new();
+    public ApproveJoinChannelSaga(ApproveJoinChannelSagaId id, IEventStore eventStore) : base(id,
+        eventStore)
+    {
+        Register(_state);
+    }
+
+    public Task HandleAsync(IDomainEvent<JoinChannelAggregate, JoinChannelId, JoinChannelRequestUpdatedEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
     {
         if (domainEvent.AggregateEvent.Approved)
         {
-            var command = new StartInviteToChannelCommand(TempId.New,
+            Emit(new ApproveJoinChannelStartedSagaEvent(
                 domainEvent.AggregateEvent.RequestInfo,
                 domainEvent.AggregateEvent.ChannelId,
-                domainEvent.AggregateEvent.IsBroadcast,
+                domainEvent.AggregateEvent.TopMessageId,
+                domainEvent.AggregateEvent.ChannelHistoryMinId,
+                domainEvent.AggregateEvent.Broadcast));
+
+            var command = new CreateChannelMemberCommand(
+                ChannelMemberId.Create(domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.UserId),
+                domainEvent.AggregateEvent.RequestInfo,
+                domainEvent.AggregateEvent.ChannelId,
+                domainEvent.AggregateEvent.UserId,
+                0,
+                DateTime.UtcNow.ToTimestamp(),
                 false,
-                domainEvent.AggregateEvent.RequestInfo.UserId,
-                0,
-                0,
-                [domainEvent.AggregateEvent.UserId],
-                [],
-                ChatJoinType.ApprovedByAdmin
+                domainEvent.AggregateEvent.InviteId,
+                false,
+                ChatJoinType.ByRequest
+            );
+            Publish(command);
+        }
+        else
+        {
+            Emit(new ApproveJoinChannelCompletedSagaEvent(domainEvent.AggregateEvent.RequestInfo, domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.UserId, domainEvent.AggregateEvent.Approved));
+            return CompleteAsync(cancellationToken);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task HandleAsync(IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
+    {
+        var command = new IncrementParticipantCountCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId));
+        Publish(command);
+
+        if (!domainEvent.AggregateEvent.IsRejoin)
+        {
+            var toPeer = new Peer(PeerType.Channel, domainEvent.AggregateEvent.ChannelId);
+            var createDialogCommand = new CreateDialogCommand(
+                DialogId.Create(domainEvent.AggregateEvent.UserId, toPeer),
+                domainEvent.AggregateEvent.RequestInfo,
+                domainEvent.AggregateEvent.UserId,
+                toPeer,
+                _state.ChannelHistoryMinId,
+                _state.TopMessageId
+            );
+            Publish(createDialogCommand);
+        }
+
+        return HandleJoinChannelCompletedAsync();
+    }
+
+    private Task HandleJoinChannelCompletedAsync()
+    {
+        if (!_state.Broadcast)
+        {
+            var requestInfo = _state.RequestInfo;
+            var ownerPeerId = _state.ChannelId;
+            var outMessageId = 0;
+            var ownerPeer = ownerPeerId.ToChannelPeer();
+            var senderUserId = requestInfo.UserId;
+            var senderPeer = senderUserId.ToUserPeer();
+
+            var messageItem = new MessageItem(
+                ownerPeer,
+                ownerPeer,
+                senderPeer,
+                senderUserId,
+                outMessageId,
+                string.Empty,
+                DateTime.UtcNow.ToTimestamp(),
+                Random.Shared.NextInt64(),
+                true,
+                SendMessageType.MessageService,
+                MessageType.Text,
+                MessageSubType.ChatJoinByRequest,
+                MessageAction: new TMessageActionChatJoinedByRequest(),
+                MessageActionType: MessageActionType.ChatJoinByRequest
+            );
+            var command = new StartSendMessageCommand(TempId.New,
+                requestInfo with { IsSubRequest = true },
+                [new SendMessageItem(messageItem)]
             );
             Publish(command);
         }
 
-        return CompleteAsync(cancellationToken);
+        return CompleteAsync();
+    }
+}
+
+public class ApproveJoinChannelStartedSagaEvent(RequestInfo requestInfo, long channelId, int topMessageId, int channelHistoryMinId, bool broadcast) : AggregateEvent<ApproveJoinChannelSaga, ApproveJoinChannelSagaId>
+{
+    public RequestInfo RequestInfo { get; } = requestInfo;
+    public long ChannelId { get; } = channelId;
+    public int TopMessageId { get; } = topMessageId;
+    public int ChannelHistoryMinId { get; } = channelHistoryMinId;
+    public bool Broadcast { get; } = broadcast;
+}
+
+public class ApproveJoinChannelCompletedSagaEvent(RequestInfo requestInfo, long channelId, long userId, bool approved) : RequestAggregateEvent2<ApproveJoinChannelSaga, ApproveJoinChannelSagaId>(requestInfo)
+{
+    public long ChannelId { get; } = channelId;
+    public long UserId { get; } = userId;
+    public bool Approved { get; } = approved;
+}
+
+
+public class ApproveJoinChannelSagaState : AggregateState<ApproveJoinChannelSaga, ApproveJoinChannelSagaId,
+    ApproveJoinChannelSagaState>,
+    IApply<ApproveJoinChannelStartedSagaEvent>,
+    IApply<ApproveJoinChannelCompletedSagaEvent>
+{
+    public RequestInfo RequestInfo { get; private set; } = null!;
+    public long ChannelId { get; private set; }
+    public int TopMessageId { get; private set; }
+    public int ChannelHistoryMinId { get; private set; }
+    public bool Broadcast { get; private set; }
+
+    public void Apply(ApproveJoinChannelStartedSagaEvent aggregateEvent)
+    {
+        RequestInfo = aggregateEvent.RequestInfo;
+        ChannelId = aggregateEvent.ChannelId;
+        TopMessageId = aggregateEvent.TopMessageId;
+        ChannelHistoryMinId = aggregateEvent.ChannelHistoryMinId;
+        Broadcast = aggregateEvent.Broadcast;
+    }
+
+    public void Apply(ApproveJoinChannelCompletedSagaEvent aggregateEvent)
+    {
+        
     }
 }

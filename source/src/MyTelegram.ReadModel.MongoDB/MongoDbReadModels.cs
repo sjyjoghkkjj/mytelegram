@@ -212,3 +212,7 @@ public class LanguageTextReadModel : Impl.LanguageTextReadModel, IMongoDbReadMod
 {
 
 }
+public class JoinChannelRequestReadModel : Impl.JoinChannelRequestReadModel, IMongoDbReadModel
+{
+
+}

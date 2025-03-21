@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Deletes messages by their identifiers.
@@ -10,23 +8,14 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 /// 400 MESSAGE_ID_INVALID The provided message id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.deleteMessages" />
 ///</summary>
-internal sealed class DeleteMessagesHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestDeleteMessages, MyTelegram.Schema.Messages.IAffectedMessages>,
-    Messages.IDeleteMessagesHandler
+internal sealed class DeleteMessagesHandler(
+    ICommandBus commandBus,
+    IPtsHelper ptsHelper,
+    IQueryProcessor queryProcessor)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestDeleteMessages,
+            MyTelegram.Schema.Messages.IAffectedMessages>,
+        Messages.IDeleteMessagesHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IPtsHelper _ptsHelper;
-    private readonly IQueryProcessor _queryProcessor;
-
-    public DeleteMessagesHandler(
-        ICommandBus commandBus,
-        IPtsHelper ptsHelper,
-        IQueryProcessor queryProcessor)
-    {
-        _commandBus = commandBus;
-        _ptsHelper = ptsHelper;
-        _queryProcessor = queryProcessor;
-    }
-
     protected override async Task<IAffectedMessages> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestDeleteMessages obj)
     {
@@ -34,7 +23,7 @@ internal sealed class DeleteMessagesHandler : RpcResultObjectHandler<MyTelegram.
         {
             var messageIds = obj.Id.ToList();
             var messageItemsToBeDeletedList =
-                await _queryProcessor.ProcessAsync(new GetMessageItemListToBeDeletedQuery(input.UserId, messageIds, obj.Revoke));
+                await queryProcessor.ProcessAsync(new GetMessageItemListToBeDeletedQuery(input.UserId, messageIds, obj.Revoke));
             int? newTopMessageId = null;
             int? newTopMessageIdForOtherParticipant = null;
 
@@ -42,7 +31,7 @@ internal sealed class DeleteMessagesHandler : RpcResultObjectHandler<MyTelegram.
             if (messageItemsToBeDeletedList.Any(p => p.ToPeerType == PeerType.User))
             {
                 newTopMessageId =
-                  await _queryProcessor.ProcessAsync(new GetTopMessageIdQuery(input.UserId, messageIds));
+                  await queryProcessor.ProcessAsync(new GetTopMessageIdQuery(input.UserId, messageIds));
                 if (obj.Revoke)
                 {
                     var toPeerMessageItem = messageItemsToBeDeletedList.FirstOrDefault(p => p.OwnerUserId != input.UserId);
@@ -53,7 +42,7 @@ internal sealed class DeleteMessagesHandler : RpcResultObjectHandler<MyTelegram.
                             .Select(p => p.MessageId).ToList();
 
                         newTopMessageIdForOtherParticipant =
-                          await _queryProcessor.ProcessAsync(new GetTopMessageIdQuery(toPeerMessageItem.OwnerUserId, toPeerMessageIds));
+                          await queryProcessor.ProcessAsync(new GetTopMessageIdQuery(toPeerMessageItem.OwnerUserId, toPeerMessageIds));
                     }
                 }
             }
@@ -63,12 +52,12 @@ internal sealed class DeleteMessagesHandler : RpcResultObjectHandler<MyTelegram.
                 newTopMessageId,
                 newTopMessageIdForOtherParticipant
                 );
-            await _commandBus.PublishAsync(command);
+            await commandBus.PublishAsync(command);
 
             return null!;
         }
 
-        var pts = _ptsHelper.GetCachedPts(input.UserId);
+        var pts = ptsHelper.GetCachedPts(input.UserId);
 
         return new TAffectedMessages { Pts = pts, PtsCount = 0 };
     }

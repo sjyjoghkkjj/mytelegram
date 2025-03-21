@@ -21,7 +21,7 @@ internal sealed class GetParticipantHandler(
     IUserConverterService userConverterService,
     IAccessHashHelper accessHashHelper,
     IPhotoAppService photoAppService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestGetParticipant,
+    : RpcResultObjectHandler<RequestGetParticipant,
             MyTelegram.Schema.Channels.IChannelParticipant>,
         IGetParticipantHandler
 {

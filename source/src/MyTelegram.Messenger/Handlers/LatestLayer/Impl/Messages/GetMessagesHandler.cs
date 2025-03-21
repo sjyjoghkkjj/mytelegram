@@ -1,5 +1,6 @@
 ﻿// ReSharper disable All
 
+using MyTelegram.Messenger.Converters.ConverterServices.Messages;
 using RequestGetMessages = MyTelegram.Schema.Messages.RequestGetMessages;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
@@ -12,7 +13,7 @@ internal sealed class GetMessagesHandler(
     IMessageAppService messageAppService,
     IGetHistoryConverterService getHistoryConverterService)
     : RpcResultObjectHandler<RequestGetMessages, Schema.Messages.IMessages>,
-        MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages.IGetMessagesHandler
+        Messages.IGetMessagesHandler
 {
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         RequestGetMessages obj)

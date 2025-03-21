@@ -6,4 +6,5 @@ public interface IUserNameReadModel : IReadModel
     long PeerId { get; }
     PeerType PeerType { get; }
     string UserName { get; }
+    int Date { get; }
 }

@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-using MyTelegram.Schema.Updates;
+﻿using MyTelegram.Schema.Updates;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Updates;
 

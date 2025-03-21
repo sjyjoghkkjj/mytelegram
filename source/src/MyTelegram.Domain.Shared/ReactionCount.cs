@@ -1,48 +1,77 @@
-﻿using System.Text;
+﻿using MyTelegram.Schema.Extensions;
 
 namespace MyTelegram;
 
-public class ReactionCount(
-    string? emoticon,
-    long? customEmojiDocumentId,
-    int count)
+public class MessageReactor
 {
+    public bool Top { get; set; }
+    public bool My { get; set; }
+    public bool Anonymous { get; set; }
+    public Peer? PeerId { get; set; }
+    public int Count { get; set; }
+}
+
+public class MessagePeerReaction
+{
+    public bool Big { get; set; }
+    public required Peer PeerId { get; set; }
+    public long SenderUserId { get; set; }
+    public int Date { get; set; }
+    public required IReaction Reaction { get; set; }
+}
+
+public class ReactionCount(
+    IReaction reaction,
+    int count,
+    string? emoticon,
+    long? customEmojiDocumentId
+    )
+{
+    public IReaction Reaction { get; init; } = reaction;
+
+    public int Count { get; set; } = count;
     public string? Emoticon { get; internal set; } = emoticon;
     public long? CustomEmojiDocumentId { get; internal set; } = customEmojiDocumentId;
-    public int Count { get; internal set; } = count;
+    //public int Count { get; set; } = count;
 
-    public int? ChosenOrder { get; set; }
+    //public int? ChosenOrder { get; set; }
 
-    public void IncrementCount()
+    //public void IncrementCount()
+    //{
+    //    Count++;
+    //}
+
+    //public void DecrementCount()
+    //{
+    //    Count--;
+    //}
+
+    public IReaction GetReaction()
     {
-        Count++;
-    }
+        if (Reaction != null!)
+        {
+            return Reaction;
+        }
 
-    public void DecrementCount()
-    {
-        Count--;
+        // For compatibility with old data
+        if (CustomEmojiDocumentId.HasValue)
+        {
+            return new TReactionCustomEmoji { DocumentId = CustomEmojiDocumentId.Value };
+        }
+
+        if (!string.IsNullOrEmpty(Emoticon))
+        {
+            return new TReactionEmoji
+            {
+                Emoticon = Emoticon
+            };
+        }
+
+        return new TReactionEmpty();
     }
 
     public long GetReactionId()
     {
-        if (CustomEmojiDocumentId.HasValue)
-        {
-            return CustomEmojiDocumentId.Value;
-        }
-
-        if (string.IsNullOrEmpty(Emoticon))
-        {
-            throw new InvalidOperationException("Emotion and CustomEmojiDocumentId is null");
-        }
-        var bytes = Encoding.UTF8.GetBytes(Emoticon);
-        if (bytes.Length >= 8)
-        {
-            return BitConverter.ToInt64(bytes);
-        }
-
-        var newBytes = new byte[8];
-        Buffer.BlockCopy(bytes, 0, newBytes, 0, bytes.Length);
-
-        return BitConverter.ToInt64(newBytes);
+        return GetReaction().GetReactionId();
     }
 }

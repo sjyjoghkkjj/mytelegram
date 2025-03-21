@@ -54,26 +54,13 @@ public class UserConverterService(
         bool skipSetContactProperties = true,
         bool skipCheckPrivacy = true, int layer = 0)
     {
-        var users = new List<ILayeredUser>();
-
         var userReadModels = await userAppService.GetListAsync(userIds);
-        var photoReadModels = (await photoAppService.GetPhotosAsync(userReadModels))
-            .DistinctBy(p => p.PhotoId)
-            .ToDictionary(k => k.PhotoId);
+        var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels);
         IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels = null;
-        Dictionary<long, IContactReadModel> targetUserContacts = [];
-        Dictionary<long, IContactReadModel> myContacts = [];
+        IReadOnlyCollection<IContactReadModel>? contactReadModels = null;
         if (!skipSetContactProperties)
         {
-            var contactReadModels = await queryProcessor.ProcessAsync(new GetContactListQuery(selfUserId, userIds));
-            targetUserContacts = contactReadModels?
-                .DistinctBy(p => p.SelfUserId)
-                .ToDictionary(k => k.SelfUserId) ?? [];
-
-            myContacts = contactReadModels?
-                .Where(p => p.SelfUserId == selfUserId)
-                .DistinctBy(p => p.TargetUserId)
-                .ToDictionary(k => k.TargetUserId) ?? [];
+            contactReadModels = await queryProcessor.ProcessAsync(new GetContactListQuery(selfUserId, userIds));
         }
 
         if (!skipCheckPrivacy)
@@ -81,16 +68,7 @@ public class UserConverterService(
             privacyReadModels = await privacyAppService.GetPrivacyListAsync(userIds);
         }
 
-        foreach (var userReadModel in userReadModels)
-        {
-            myContacts.TryGetValue(userReadModel.UserId, out var myContactReadModel);
-            targetUserContacts.TryGetValue(selfUserId, out var targetUserContactReadModel);
-            var user = ToUserCore(selfUserId, userReadModel, photoReadModels, myContactReadModel,
-                targetUserContactReadModel, privacyReadModels, layer);
-            users.Add(user);
-        }
-
-        return users;
+        return ToUserList(selfUserId, userReadModels, photoReadModels, contactReadModels, privacyReadModels, layer);
     }
 
     public IUserFull ToUserFull(long selfUserId,
@@ -187,12 +165,15 @@ public class UserConverterService(
              .DistinctBy(p => p.TargetUserId)
              .ToDictionary(k => k.TargetUserId) ?? [];
 
+        var groupedPrivacyReadModels = privacyReadModels?.GroupBy(p => p.UserId).ToDictionary(k => k.Key, v => v.ToList()) ?? [];
+
         foreach (var userReadModel in userReadModels)
         {
             myContacts.TryGetValue(userReadModel.UserId, out var myContactReadModel);
             targetUserContacts.TryGetValue(selfUserId, out var targetUserContactReadModel);
+            groupedPrivacyReadModels.TryGetValue(userReadModel.UserId, out var currentUserPrivacyReadModels);
             var user = ToUserCore(selfUserId, userReadModel, photos, myContactReadModel,
-                targetUserContactReadModel, privacyReadModels, layer);
+                targetUserContactReadModel, currentUserPrivacyReadModels, layer);
             users.Add(user);
         }
 
@@ -251,6 +232,11 @@ public class UserConverterService(
         IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels,
         ContactType contactType)
     {
+        if (selfUserId == userFull.Id)
+        {
+            return;
+        }
+
         foreach (var privacy in privacyReadModels ?? [])
         {
             switch (privacy.PrivacyType)
@@ -290,38 +276,13 @@ public class UserConverterService(
         }
     }
 
-    //private void ApplyProfilePhotoPrivacyToUserFull(
-    //    //long selfUserId,
-    //    //IPrivacyReadModel privacy,
-    //    //IUserReadModel userReadModel,
-    //    Schema.IUserFull userFull  
-    //    //ILayeredUser user,
-    //    //IReadOnlyCollection<IPhotoReadModel>? photos
-    //)
-    //{
-    //    user.Photo = null;
-    //    userFull.ProfilePhoto = null;
-
-    //    switch (userFull.FallbackPhoto)
-    //    {
-    //        case Schema.TPhoto photo:
-    //            user.Photo = new TUserProfilePhoto
-    //            {
-    //                DcId = photo.DcId,
-    //                HasVideo = photo.VideoSizes?.Count > 0,
-    //                Personal = false,
-    //                PhotoId = photo.Id
-    //            };
-    //            break;
-    //    }
-    //}
 
     private void ApplyPrivacyToUser(long selfUserId, IUserReadModel userReadModel, ILayeredUser user,
         Dictionary<long, IPhotoReadModel> photos, ContactType contactType,
         IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels, int layer)
     {
         //var privacyReadModels = await privacyAppService.GetPrivacyListAsync(userReadModel.UserId);
-        if (privacyReadModels?.Count > 0)
+        if (selfUserId != userReadModel.UserId && privacyReadModels?.Count > 0)
         {
             photos.TryGetValue(userReadModel.FallbackPhotoId ?? 0, out var fallbackPhotoReadModel);
             //var contactType = contactHelper.GetContactType(selfUserId, userReadModel.UserId, contactReadModels);

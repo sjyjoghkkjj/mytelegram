@@ -26,17 +26,22 @@ internal sealed class GetAdminsWithInvitesHandler(
             var adminWithInvitesList =
                 await queryProcessor.ProcessAsync(new GetAdminInvitesQuery(inputPeerChannel.ChannelId));
             var userIds = adminWithInvitesList.Select(p => p.AdminId).ToList();
+            //var userReadModels = await userAppService.GetListAsync(userIds);
+            //var contactReadModels = await queryProcessor.ProcessAsync(new GetContactListQuery(input.UserId, userIds));
+            //var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels, contactReadModels);
+            //var privacyList = await privacyAppService.GetPrivacyListAsync(userIds);
+
             var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
 
             return new TChatAdminsWithInvites
             {
-                Admins = new TVector<IChatAdminWithInvites>(adminWithInvitesList.Select(p => new TChatAdminWithInvites
+                Admins = [.. adminWithInvitesList.Select(p => new TChatAdminWithInvites
                 {
                     AdminId = p.AdminId,
                     InvitesCount = p.InvitesCount,
                     RevokedInvitesCount = p.RevokedInvitesCount,
-                })),
-                Users = new TVector<IUser>(users)
+                })],
+                Users = [.. users]
             };
         }
 

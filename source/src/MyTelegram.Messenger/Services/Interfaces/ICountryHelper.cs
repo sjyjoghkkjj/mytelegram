@@ -5,6 +5,8 @@ public interface ICountryHelper
     bool TryGetCountryCodeItem(string countryCode, [NotNullWhen(true)] out CountryCodeItem? countryCodeItem);
     IReadOnlyCollection<CountryItem> GetAllCountryList();
     void InitAllCountries();
+    string GetCountryCodeByPhoneNumber(string phoneNumber);
+    string? GetCountryIso2ByPhoneNumber(string phoneNumber);
 }
 
 

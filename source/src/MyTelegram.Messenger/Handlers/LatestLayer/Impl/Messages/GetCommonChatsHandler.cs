@@ -15,7 +15,7 @@ internal sealed class GetCommonChatsHandler(
     IChannelAppService channelAppService,
     IAccessHashHelper accessHashHelper,
     IPeerHelper peerHelper) : RpcResultObjectHandler<Schema.Messages.RequestGetCommonChats, Schema.Messages.IChats>,
-    IGetCommonChatsHandler
+    Messages.IGetCommonChatsHandler
 {
     protected override async Task<Schema.Messages.IChats> HandleCoreAsync(IRequestInput input,
         Schema.Messages.RequestGetCommonChats obj)
@@ -40,7 +40,7 @@ internal sealed class GetCommonChatsHandler(
 
             return new TChats
             {
-                Chats = new TVector<IChat>(chats)
+                Chats = [.. chats]
             };
         }
 

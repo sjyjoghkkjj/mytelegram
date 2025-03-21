@@ -35,7 +35,7 @@ internal sealed class UpdateNotifySettingsHandler : RpcResultObjectHandler<MyTel
             var targetPeer = _peerHelper.GetPeer(inputNotifyPeer.Peer, userId);
             var aggregateId = PeerNotifySettingsId.Create(userId, targetPeer.PeerType, targetPeer.PeerId);
             var updatePeerNotifySettingsCommand = new UpdatePeerNotifySettingsCommand(aggregateId,
-                input.ToRequestInfo(), 
+                input.ToRequestInfo(),
                 input.UserId,
                 targetPeer.PeerType,
                 targetPeer.PeerId,
@@ -43,12 +43,10 @@ internal sealed class UpdateNotifySettingsHandler : RpcResultObjectHandler<MyTel
                 obj.Settings.Silent,
                 obj.Settings.MuteUntil,
                 string.Empty
-                //obj.Settings.Sound
             );
-            await _commandBus.PublishAsync(updatePeerNotifySettingsCommand, CancellationToken.None)
-         ;
+            await _commandBus.PublishAsync(updatePeerNotifySettingsCommand);
+
             return null!;
-            //return new TBoolTrue();
         }
 
         throw new NotImplementedException();

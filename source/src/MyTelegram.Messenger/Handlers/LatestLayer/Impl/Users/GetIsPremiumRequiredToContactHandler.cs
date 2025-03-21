@@ -1,21 +1,15 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Users;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Users;
 
 ///<summary>
+/// Check whether we can write to the specified user (this method can only be called by non-<a href="https://corefork.telegram.org/api/premium">Premium</a> users), see <a href="https://corefork.telegram.org/api/privacy#require-premium-for-new-non-contact-users">here »</a> for more info on the full flow.
 /// See <a href="https://corefork.telegram.org/method/users.getIsPremiumRequiredToContact" />
 ///</summary>
-internal sealed class GetIsPremiumRequiredToContactHandler : RpcResultObjectHandler<MyTelegram.Schema.Users.RequestGetIsPremiumRequiredToContact, TVector<bool>>,
-    Users.IGetIsPremiumRequiredToContactHandler
+internal sealed class GetIsPremiumRequiredToContactHandler(
+    IQueryProcessor queryProcessor,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Users.RequestGetIsPremiumRequiredToContact, TVector<bool>>,
+        Users.IGetIsPremiumRequiredToContactHandler
 {
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public GetIsPremiumRequiredToContactHandler(IQueryProcessor queryProcessor, IAccessHashHelper accessHashHelper)
-    {
-        _queryProcessor = queryProcessor;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<TVector<bool>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Users.RequestGetIsPremiumRequiredToContact obj)
     {
@@ -24,12 +18,12 @@ internal sealed class GetIsPremiumRequiredToContactHandler : RpcResultObjectHand
         {
             if (item is TInputUser inputUser)
             {
-                await _accessHashHelper.CheckAccessHashAsync(inputUser);
+                await accessHashHelper.CheckAccessHashAsync(inputUser);
                 userIds.Add(inputUser.UserId);
             }
         }
 
-        var r = await _queryProcessor.ProcessAsync(new GetGlobalPrivacySettingsListQuery(userIds));
+        var r = await queryProcessor.ProcessAsync(new GetGlobalPrivacySettingsListQuery(userIds));
 
         var result = new TVector<bool>();
         foreach (var item in obj.Id)

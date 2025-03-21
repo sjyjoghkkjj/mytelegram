@@ -2,18 +2,15 @@
 
 public class InviteToChannelSaga :
     MyInMemoryAggregateSaga<InviteToChannelSaga, InviteToChannelSagaId, InviteToChannelSagaLocator>,
-    //ISagaIsStartedBy<ChannelAggregate, ChannelId, StartInviteToChannelEvent>,
     ISagaIsStartedBy<TempAggregate, TempId, InviteToChannelStartedEvent>,
     ISagaHandles<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent>,
     IApply<InviteToChannelCompletedSagaEvent>
 {
-    private readonly IIdGenerator _idGenerator;
     private readonly InviteToChannelSagaState _state = new();
 
-    public InviteToChannelSaga(InviteToChannelSagaId id, IEventStore eventStore, IIdGenerator idGenerator) : base(id,
+    public InviteToChannelSaga(InviteToChannelSagaId id, IEventStore eventStore) : base(id,
         eventStore)
     {
-        _idGenerator = idGenerator;
         Register(_state);
     }
 
@@ -51,6 +48,14 @@ public class InviteToChannelSaga :
     public Task HandleAsync(IDomainEvent<TempAggregate, TempId, InviteToChannelStartedEvent> domainEvent,
         ISagaContext sagaContext, CancellationToken cancellationToken)
     {
+        //if (domainEvent.AggregateEvent.Requested)
+        //{
+        //    var updateChatInviteRequestPendingCommand = new UpdateChatInviteRequestPendingCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId),
+        //        domainEvent.AggregateEvent.RequestInfo.UserId);
+        //    Publish(updateChatInviteRequestPendingCommand);
+        //    return CompleteAsync(cancellationToken);
+        //}
+
         Emit(new InviteToChannelSagaStartSagaEvent(
             domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.ChannelId,
@@ -77,17 +82,6 @@ public class InviteToChannelSaga :
             );
         }
 
-        //foreach (var botUserId in domainEvent.AggregateEvent.BotUserIds)
-        //{
-        //    CreateChannelMember(_state.RequestInfo, domainEvent.AggregateEvent.ChannelId,
-        //        botUserId,
-        //        domainEvent.AggregateEvent.RequestInfo.UserId,
-        //        false,
-        //        domainEvent.AggregateEvent.IsBroadcast,
-        //        date
-        //    );
-        //}
-
         return Task.CompletedTask;
     }
 
@@ -109,18 +103,14 @@ public class InviteToChannelSaga :
     }
 
 
-    private async Task HandleInviteToChannelCompletedAsync()
+    private Task HandleInviteToChannelCompletedAsync()
     {
         if (_state.Completed)
         {
-            // send service message to member after invited to super group
-            //if (_state is { Broadcast: false, HasLink: false })
             if (!_state.Broadcast)
             {
                 var ownerPeerId = _state.ChannelId;
-                //var outMessageId = await _idGenerator.NextIdAsync(IdType.MessageId, ownerPeerId);
                 var outMessageId = 0;
-                //var aggregateId = MessageId.Create(ownerPeerId, outMessageId);
                 var ownerPeer = new Peer(PeerType.Channel, ownerPeerId);
                 var senderPeer = new Peer(PeerType.User, _state.InviterId);
 
@@ -129,19 +119,24 @@ public class InviteToChannelSaga :
                 allMemberUserIds.AddRange(_state.BotUserIds);
 
                 var messageSubType = MessageSubType.None;
+                Peer? sendAs = null;
                 switch (_state.ChatJoinType)
                 {
                     case ChatJoinType.InvitedByAdmin:
                         messageSubType = MessageSubType.InviteToChannel;
+                        if (_state is { HasLink: true, Broadcast: false })
+                        {
+                            sendAs = _state.ChannelId.ToChannelPeer();
+                        }
                         break;
-                    case ChatJoinType.ByRequest:
+                    case ChatJoinType.BySelf:
                         messageSubType = MessageSubType.ChatJoinByRequest;
                         break;
                     case ChatJoinType.ByLink:
-                        messageSubType = MessageSubType.ChatJoinedByLink;
+                        messageSubType = MessageSubType.ChatJoinByLink;
                         break;
-                    case ChatJoinType.ApprovedByAdmin:
-                        messageSubType = MessageSubType.ChatJoinApprovedByAdmin;
+                    case ChatJoinType.ByRequest:
+                        messageSubType = MessageSubType.ChatJoinByRequest;
                         break;
                 }
 
@@ -163,7 +158,8 @@ public class InviteToChannelSaga :
                     {
                         Users = new TVector<long>(allMemberUserIds)
                     },
-                    MessageActionType.ChatAddUser
+                    MessageActionType.ChatAddUser,
+                    SendAs: sendAs
                 );
                 var command = new StartSendMessageCommand(TempId.New,
                     _state.RequestInfo with { IsSubRequest = true },
@@ -182,5 +178,7 @@ public class InviteToChannelSaga :
                 _state.ChatJoinType
             ));
         }
+
+        return Task.CompletedTask;
     }
 }

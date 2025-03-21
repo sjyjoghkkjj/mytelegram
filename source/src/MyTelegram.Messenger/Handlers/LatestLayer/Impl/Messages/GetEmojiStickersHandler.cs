@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Gets the list of currently installed <a href="https://corefork.telegram.org/api/custom-emoji">custom emoji stickersets</a>.
@@ -14,7 +12,7 @@ internal sealed class GetEmojiStickersHandler : RpcResultObjectHandler<MyTelegra
     {
         return Task.FromResult<MyTelegram.Schema.Messages.IAllStickers>(new TAllStickers
         {
-            Sets = new(),
+            Sets = [],
         });
     }
 }

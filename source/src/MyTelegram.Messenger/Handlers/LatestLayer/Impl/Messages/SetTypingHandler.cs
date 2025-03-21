@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Sends a current user typing event (see <a href="https://corefork.telegram.org/type/SendMessageAction">SendMessageAction</a> for all event types) to a conversation partner or group.
@@ -20,30 +18,20 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 /// 400 USER_IS_BOT Bots can't send messages to other bots.
 /// See <a href="https://corefork.telegram.org/method/messages.setTyping" />
 ///</summary>
-internal sealed class SetTypingHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSetTyping, IBool>,
-    Messages.ISetTypingHandler
+internal sealed class SetTypingHandler(
+    IPeerHelper peerHelper,
+    IObjectMessageSender messageSender,
+    IBlockCacheAppService blockCacheAppService,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSetTyping, IBool>,
+        Messages.ISetTypingHandler
 {
-    private readonly IBlockCacheAppService _blockCacheAppService;
-    private readonly IObjectMessageSender _messageSender;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public SetTypingHandler(IPeerHelper peerHelper,
-        IObjectMessageSender messageSender,
-        IBlockCacheAppService blockCacheAppService,
-        IAccessHashHelper accessHashHelper)
-    {
-        _peerHelper = peerHelper;
-        _messageSender = messageSender;
-        _blockCacheAppService = blockCacheAppService;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestSetTyping obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
         var userId = input.UserId;
-        var peer = _peerHelper.GetPeer(obj.Peer, userId);
+        var peer = peerHelper.GetPeer(obj.Peer, userId);
         IUpdate? update = null;
         switch (peer.PeerType)
         {
@@ -54,7 +42,7 @@ internal sealed class SetTypingHandler : RpcResultObjectHandler<MyTelegram.Schem
             case PeerType.User:
                 update = new TUpdateUserTyping { Action = obj.Action, UserId = userId };
 
-                if (await _blockCacheAppService.IsBlockedAsync(peer.PeerId, userId).ConfigureAwait(false))
+                if (await blockCacheAppService.IsBlockedAsync(peer.PeerId, userId))
                 {
                     return new TBoolTrue();
                 }
@@ -90,7 +78,7 @@ internal sealed class SetTypingHandler : RpcResultObjectHandler<MyTelegram.Schem
         }
 
         var updateShort = new TUpdateShort { Date = CurrentDate, Update = update };
-        await _messageSender.PushMessageToPeerAsync(peer, updateShort, excludeAuthKeyId: input.AuthKeyId);
+        await messageSender.PushMessageToPeerAsync(peer, updateShort, excludeAuthKeyId: input.AuthKeyId);
         return new TBoolTrue();
     }
 }

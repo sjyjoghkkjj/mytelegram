@@ -1,12 +1,11 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 
 ///<summary>
 /// Updates current user profile photo.The <code>file</code>, <code>video</code> and <code>video_emoji_markup</code> flags are mutually exclusive.
 /// <para>Possible errors</para>
 /// Code Type Description
 /// 400 ALBUM_PHOTOS_TOO_MANY You have uploaded too many profile photos, delete some before retrying.
+/// 400 BOT_INVALID This is not a valid bot.
 /// 400 EMOJI_MARKUP_INVALID The specified <code>video_emoji_markup</code> was invalid.
 /// 400 FILE_PARTS_INVALID The number of file parts is invalid.
 /// 400 IMAGE_PROCESS_FAILED Failure while processing image.
@@ -19,20 +18,13 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 /// 400 VIDEO_FILE_INVALID The specified video file is invalid.
 /// See <a href="https://corefork.telegram.org/method/photos.uploadProfilePhoto" />
 ///</summary>
-internal sealed class UploadProfilePhotoHandler : RpcResultObjectHandler<MyTelegram.Schema.Photos.RequestUploadProfilePhoto, MyTelegram.Schema.Photos.IPhoto>,
-    Photos.IUploadProfilePhotoHandler
+internal sealed class UploadProfilePhotoHandler(
+    IMediaHelper mediaHelper,
+    ICommandBus commandBus)
+    : RpcResultObjectHandler<MyTelegram.Schema.Photos.RequestUploadProfilePhoto, MyTelegram.Schema.Photos.IPhoto>,
+        Photos.IUploadProfilePhotoHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IMediaHelper _mediaHelper;
-
-    public UploadProfilePhotoHandler(IMediaHelper mediaHelper,
-        ICommandBus commandBus)
-    {
-        _mediaHelper = mediaHelper;
-        _commandBus = commandBus;
-    }
-
-    protected async override Task<MyTelegram.Schema.Photos.IPhoto> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.Photos.IPhoto> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Photos.RequestUploadProfilePhoto obj)
     {
         var file = obj.File ?? obj.Video;
@@ -48,7 +40,7 @@ internal sealed class UploadProfilePhotoHandler : RpcResultObjectHandler<MyTeleg
                 break;
         }
 
-        var r = await _mediaHelper.SavePhotoAsync(input.ReqMsgId,
+        var r = await mediaHelper.SavePhotoAsync(input.ReqMsgId,
             input.UserId,
             file.GetFileId(),
             obj.Video != null,
@@ -64,7 +56,7 @@ internal sealed class UploadProfilePhotoHandler : RpcResultObjectHandler<MyTeleg
             obj.Fallback,
             obj.VideoEmojiMarkup
         );
-        await _commandBus.PublishAsync(command);
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

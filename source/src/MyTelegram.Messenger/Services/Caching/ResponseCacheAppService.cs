@@ -9,7 +9,7 @@ public class ResponseCacheAppService : IResponseCacheAppService, ISingletonDepen
     {
         if (!_responseDict.TryGetValue(reqMsgId, out var responseList))
         {
-            responseList = new List<IObject>();
+            responseList = [];
             _responseDict.TryAdd(reqMsgId, responseList);
         }
 

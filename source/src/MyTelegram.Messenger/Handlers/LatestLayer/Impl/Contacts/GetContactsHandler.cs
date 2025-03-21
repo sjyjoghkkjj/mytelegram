@@ -43,9 +43,9 @@ internal sealed class GetContactsHandler(
         var contacts = new TContacts
         {
             Contacts =
-                new TVector<IContact>(contactReadModels.Where(p => validUserIds.Contains(p.TargetUserId)).Select(p =>
-                    new TContact { UserId = p.TargetUserId, Mutual = false })),
-            Users = new TVector<IUser>(userList),
+                [.. contactReadModels.Where(p => validUserIds.Contains(p.TargetUserId)).Select(p =>
+                    new TContact { UserId = p.TargetUserId, Mutual = false })],
+            Users = [.. userList],
             SavedCount = contactReadModels.Count,
         };
 

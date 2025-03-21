@@ -1,6 +1,4 @@
-﻿using MyTelegram.Schema;
-using MyTelegram.Services.Extensions;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace MyTelegram.Services.Services;
 

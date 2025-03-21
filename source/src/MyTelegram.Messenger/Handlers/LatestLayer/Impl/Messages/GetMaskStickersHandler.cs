@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get installed mask stickers
@@ -14,7 +12,7 @@ internal sealed class GetMaskStickersHandler : RpcResultObjectHandler<MyTelegram
     {
         return Task.FromResult<MyTelegram.Schema.Messages.IAllStickers>(new TAllStickers
         {
-            Sets = new()
+            Sets = []
         });
     }
 }

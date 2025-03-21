@@ -47,4 +47,7 @@ public interface IChannelReadModel : IReadModel
     int? SubscriptionUntilDate { get; }
     bool HiddenPreHistory { get; }
     List<string>? Usernames { get; }
+    bool ParticipantsHidden { get; }
+    bool JoinToSend { get; }
+    bool JoinRequest { get; }
 }

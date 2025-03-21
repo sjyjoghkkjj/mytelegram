@@ -36,4 +36,6 @@ public enum MessageActionType
     SetChatWallPaper,
     SetChatTheme,
     CreateQuickReplyMessage,
+    ChatJoinBySelf,
+    ChatJoinByRequest,
 }

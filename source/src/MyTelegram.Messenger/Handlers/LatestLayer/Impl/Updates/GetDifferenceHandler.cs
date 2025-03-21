@@ -24,15 +24,13 @@ internal sealed class GetDifferenceHandler(
     IPtsHelper ptsHelper,
     IQueryProcessor queryProcessor,
     IAckCacheService ackCacheService,
-    ILogger<GetDifferenceHandler> logger,
-    IDifferenceConverterService differenceConverterService,
-    IPhotoAppService photoAppService)
+    IDifferenceConverterService differenceConverterService)
     :
-        RpcResultObjectHandler<Schema.Updates.RequestGetDifference, Schema.Updates.IDifference>,
-        Updates.IGetDifferenceHandler
+        RpcResultObjectHandler<RequestGetDifference, IDifference>,
+        IGetDifferenceHandler
 {
-    protected override async Task<Schema.Updates.IDifference> HandleCoreAsync(IRequestInput input,
-        Schema.Updates.RequestGetDifference obj)
+    protected override async Task<IDifference> HandleCoreAsync(IRequestInput input,
+        RequestGetDifference obj)
     {
         var userId = input.UserId;
         if (userId == 0)
@@ -45,17 +43,10 @@ internal sealed class GetDifferenceHandler(
 
         var cachedPts = ptsHelper.GetCachedPts(userId);
         var ptsReadModel = await queryProcessor.ProcessAsync(new GetPtsByPeerIdQuery(userId));
-        var pts = Math.Max(cachedPts, ptsReadModel?.Pts ?? 0);
 
         var ptsForAuthKeyIdReadModel =
-                await queryProcessor.ProcessAsync(new GetPtsByPermAuthKeyIdQuery(userId, input.PermAuthKeyId), default)
+                await queryProcessor.ProcessAsync(new GetPtsByPermAuthKeyIdQuery(userId, input.PermAuthKeyId))
             ;
-        var ptsForAuthKeyId = ptsForAuthKeyIdReadModel?.Pts ?? 0;
-        var diff = pts - ptsForAuthKeyId;
-        if (diff == 0)
-        {
-            diff = pts - obj.Pts;
-        }
 
         var globalSeqNo = ptsForAuthKeyIdReadModel?.GlobalSeqNo ?? 0;
         IReadOnlyCollection<IUpdatesReadModel> userUpdates = [];
@@ -86,10 +77,10 @@ internal sealed class GetDifferenceHandler(
             channelUpdatesReadModels = tempChannelReadModels;
         }
 
-        var users = updatesReadModels.SelectMany(p => p.Users ?? new List<long>(0)).ToList();
-        var chats = updatesReadModels.SelectMany(p => p.Chats ?? new List<long>(0)).ToList();
-        users.AddRange(channelUpdatesReadModels.SelectMany(p => p.Users ?? new List<long>(0)).ToList());
-        chats.AddRange(channelUpdatesReadModels.SelectMany(p => p.Chats ?? new List<long>(0)).ToList());
+        var users = updatesReadModels.SelectMany(p => p.Users ?? []).ToList();
+        var chats = updatesReadModels.SelectMany(p => p.Chats ?? []).ToList();
+        users.AddRange(channelUpdatesReadModels.SelectMany(p => p.Users ?? []).ToList());
+        chats.AddRange(channelUpdatesReadModels.SelectMany(p => p.Chats ?? []).ToList());
         chats.AddRange(channelUpdatesReadModels.Select(p => p.OwnerPeerId));
 
         var dto = await messageAppService
@@ -98,17 +89,14 @@ internal sealed class GetDifferenceHandler(
                 limit, messageIds, users, chats));
 
         var allUpdateList = updatesReadModels.Where(p => p.UpdatesType == UpdatesType.Updates)
-            .SelectMany(p => p.Updates ?? new List<IUpdate>()).ToList();
+            .SelectMany(p => p.Updates ?? []).ToList();
         allUpdateList.AddRange(channelUpdatesReadModels.Where(p => p.UpdatesType == UpdatesType.Updates)
             .SelectMany(p => p.Updates ?? []));
         allUpdateList.AddRange(userUpdates.SelectMany(p => p.Updates ?? []));
-        var hasEncryptedMessage = obj.Qts != -1;
-
-        var maxPts = 0;
 
         if (updatesReadModels.Count > 0 || channelUpdatesReadModels.Count > 0 || userUpdates.Count > 0)
         {
-            maxPts = updatesReadModels.Count > 0 ? updatesReadModels.Max(p => p.Pts) : obj.Pts;
+            var maxPts = updatesReadModels.Count > 0 ? updatesReadModels.Max(p => p.Pts) : obj.Pts;
             var channelMaxGlobalSeqNo =
                 channelUpdatesReadModels.Count > 0
                     ? channelUpdatesReadModels.Max(p => p.GlobalSeqNo)
@@ -127,7 +115,7 @@ internal sealed class GetDifferenceHandler(
 
         dto.MessageList = dto.MessageList.OrderBy(p => p.MessageId).ToList();
         var r = differenceConverterService.ToDifference(dto, ptsReadModel, cachedPts, limit,
-            allUpdateList, new List<IChat>(), [], layer: input.Layer);
+            allUpdateList, [], [], layer: input.Layer);
 
         //logger.LogInformation("{UserId},Layer={Layer},res:{@Res}", input.UserId, input.Layer, r);
 

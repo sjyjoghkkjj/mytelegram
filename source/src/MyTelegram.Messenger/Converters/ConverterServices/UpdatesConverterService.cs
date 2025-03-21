@@ -1,7 +1,6 @@
 ﻿namespace MyTelegram.Messenger.Converters.ConverterServices;
 
 public class UpdatesConverterService(
-    //ILayeredService<IMessageConverter> messageLayeredService,
     IMessageConverterService messageConverterService,
     IChatConverterService chatConverterService,
     IMessageResponseService messageResponseService,
@@ -75,7 +74,7 @@ public class UpdatesConverterService(
 
         return new TUpdates
         {
-            Updates = new TVector<IUpdate>(updateList),
+            Updates = [.. updateList],
             Chats = [],
             Date = DateTime.UtcNow.ToTimestamp(),
             Users = []
@@ -84,8 +83,11 @@ public class UpdatesConverterService(
     public IUpdates ToChannelUpdates(long selfUserId, IChannelReadModel channelReadModel,
         IPhotoReadModel? photoReadModel, int layer)
     {
-        //var channel = GetChatConverter().ToChannel(selfUserId, channelReadModel, photoReadModel, null, false);
         var channel = chatConverterService.ToChannel(selfUserId, channelReadModel, photoReadModel, null, false, layer);
+        if (channel is ILayeredChannel layeredChannel)
+        {
+            layeredChannel.Left = false;
+        }
 
         return new TUpdates
         {
@@ -123,7 +125,7 @@ public class UpdatesConverterService(
         {
             Chats = new TVector<IChat>(channel),
             Date = item.Date,
-            Updates = new TVector<IUpdate>(updateList),
+            Updates = [.. updateList],
             Users = []
         };
         return updates;
@@ -141,7 +143,7 @@ public class UpdatesConverterService(
                 Update = new TUpdateDeleteChannelMessages
                 {
                     ChannelId = item.OwnerPeerId,
-                    Messages = new TVector<int>(item.DeletedMessageIdList),
+                    Messages = [.. item.DeletedMessageIdList],
                     Pts = item.Pts,
                     PtsCount = item.PtsCount
                 }
@@ -152,7 +154,7 @@ public class UpdatesConverterService(
         {
             Updates = new TVector<IUpdate>(new TUpdateDeleteMessages
             {
-                Messages = new TVector<int>(item.DeletedMessageIdList),
+                Messages = [.. item.DeletedMessageIdList],
                 Pts = item.Pts,
                 PtsCount = item.PtsCount
             }),
@@ -178,7 +180,7 @@ public class UpdatesConverterService(
             Chats = [],
             Date = DateTime.UtcNow.ToTimestamp(),
             Users = [],
-            Updates = new TVector<IUpdate>(draftUpdates)
+            Updates = [.. draftUpdates]
         };
     }
 
@@ -197,11 +199,6 @@ public class UpdatesConverterService(
         )
     {
         var item = aggregateEvent.MessageItem;
-        //var channel = GetChatConverter().ToChannel(
-        //    createUpdatesForSelf ? item.SenderPeer.PeerId : 0,
-        //    channelReadModel,
-        //    null,
-        //    null, false);
         var channel = chatConverterService.ToChannel(createUpdatesForSelf ? item.SenderPeer.PeerId : 0,
             channelReadModel,
             null,
@@ -230,7 +227,7 @@ public class UpdatesConverterService(
             item.Pts,
             item.SenderPeer,
             item.ToPeer,
-            new TMessageActionChatAddUser { Users = new TVector<long>(startInviteToChannelEvent.MemberUidList) },
+            new TMessageActionChatAddUser { Users = [.. startInviteToChannelEvent.MemberUidList] },
             item.Date,
             0,
             createUpdatesForSelf,
@@ -241,7 +238,7 @@ public class UpdatesConverterService(
         {
             Chats = new TVector<IChat>(channel),
             Date = item.Date,
-            Updates = new TVector<IUpdate>(updateList),
+            Updates = [.. updateList],
             Users = []
         };
     }
@@ -254,14 +251,7 @@ public class UpdatesConverterService(
     public IUpdates ToUpdatePinnedMessageServiceUpdates(long selfUserId, SendOutboxMessageCompletedSagaEvent aggregateEvent, int layer)
     {
         var item = aggregateEvent.MessageItem;
-        //var update = ToMessageServiceUpdate(item.MessageId,
-        //    item.Pts,
-        //    item.Post ? null : item.SenderPeer,
-        //    item.ToPeer,
-        //    new TMessageActionPinMessage(),
-        //    item.Date,
-        //    0,
-        //    item.InputReplyTo);
+
         var update = ToMessageServiceUpdate(selfUserId, item, layer);
         return new TUpdates
         {
@@ -289,17 +279,6 @@ public class UpdatesConverterService(
 
         var fromPeer = item.SendAs ?? item.SenderPeer;
 
-        //var messageServiceUpdate = ToMessageServiceUpdate(item.MessageId,
-        //    item.Pts,
-        //    item.Post ? null : fromPeer,
-        //    item.ToPeer,
-        //    new TMessageActionPinMessage(),
-        //    item.Date,
-        //    aggregateEvent.RequestInfo.UserId,
-        //    item.InputReplyTo);
-
-        //TODO: sendAs
-
         var update = ToMessageServiceUpdate(aggregateEvent.RequestInfo.UserId, item with { SenderPeer = item.SendAs ?? item.SenderPeer }, layer);
 
         return new TUpdates
@@ -316,14 +295,6 @@ public class UpdatesConverterService(
     {
         var item = aggregateEvent.MessageItem;
 
-        //var update = ToMessageServiceUpdate(item.MessageId,
-        //    item.Pts,
-        //    null,
-        //    item.ToPeer,
-        //    new TMessageActionPinMessage(),
-        //    item.Date,
-        //    item.OwnerPeer.PeerId,
-        //    item.InputReplyTo);
         var update = ToMessageServiceUpdate(0, item, 0);
         return new TUpdates
         {
@@ -354,7 +325,7 @@ public class UpdatesConverterService(
         return new TChatParticipants
         {
             ChatId = chatId,
-            Participants = new TVector<IChatParticipant>(participants),
+            Participants = [.. participants],
             Version = chatVersion
         };
     }
@@ -370,9 +341,6 @@ public class UpdatesConverterService(
         bool createUpdatesForSelf, int layer)
     {
         var updateMessageId = new TUpdateMessageID { Id = messageId, RandomId = randomId };
-        //only in create channel
-        //var updateChannel = new TUpdateChannel { ChannelId = peerId};
-
         var updateReadChannelInbox = new TUpdateReadChannelInbox
         {
             ChannelId = toPeer.PeerId,
@@ -403,24 +371,16 @@ public class UpdatesConverterService(
     }
 
     private IUpdates ToEditUpdates(
-        List<ReactionCount>? oldReactions,
-        List<Reaction>? recentReactions,
         MessageItem item,
         int pts,
         long selfUserId = 0,
-        List<UserReaction>? userReactions = null,
+        List<long>? userReactions = null,
         long? linkedChannelId = null,
         int layer = 0
     )
     {
-        var canSeeList = item.IsOut &&
-                         (item.ToPeer.PeerType == PeerType.Channel || item.ToPeer.PeerType == PeerType.Chat);
-        var reactions = oldReactions; // GetAllReactions(oldReactions, addedReactions, removedReactions);
-        var newRecentReactions = recentReactions; // GetRecentReactions(recentReactions, addedReactions);
-        //var messageReactions = reactionLayeredService.GetConverter(layer)
-        //    .ToMessageReactions(selfUserId, item.ToPeer, reactions, newRecentReactions, canSeeList, userReactions);
         var message = messageConverterService
-            .ToMessage(selfUserId, item, reactions, recentReactions, userReactions, layer: layer);
+            .ToMessage(selfUserId, item, userReactions, layer: layer);
 
         IUpdate update = item.ToPeer.PeerType switch
         {
@@ -466,22 +426,6 @@ public class UpdatesConverterService(
 
     private IUpdate ToMessageServiceUpdate(long selfUserId, MessageItem item, int layer)
     {
-        //var isOut = false;
-        //if (fromPeer != null)
-        //{
-        //    isOut = selfUserId == fromPeer.PeerId;
-        //}
-
-        //var m = new TMessageService
-        //{
-        //    Action = messageAction,
-        //    Date = date,
-        //    FromId = fromPeer.ToPeer(),
-        //    Out = isOut,
-        //    PeerId = toPeer.ToPeer(),
-        //    Id = messageId,
-        //    ReplyTo = inputReplyTo.ToMessageReplyHeader(),// GetMessageConverter().ToMessageReplyHeader(inputReplyTo)
-        //};
         var m = messageConverterService.ToMessage(selfUserId, item, layer: layer);
 
         if (item.ToPeer.PeerType == PeerType.Channel)

@@ -5,6 +5,7 @@ public class ChannelTitleEditedEvent(
     long channelId,
     bool broadcast,
     string title,
+    long? linkedChannelId,
     IMessageAction messageAction,
     long randomId)
     : RequestAggregateEvent2<ChannelAggregate, ChannelId>(requestInfo)
@@ -13,5 +14,6 @@ public class ChannelTitleEditedEvent(
     public bool Broadcast { get; } = broadcast;
     public long RandomId { get; } = randomId;
     public string Title { get; } = title;
+    public long? LinkedChannelId { get; } = linkedChannelId;
     public IMessageAction MessageAction { get; } = messageAction;
 }

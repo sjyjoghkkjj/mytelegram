@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Smsjobs;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Smsjobs;
 
 ///<summary>
+/// Enable SMS jobs (official clients only).
 /// See <a href="https://corefork.telegram.org/method/smsjobs.join" />
 ///</summary>
 internal sealed class JoinHandler : RpcResultObjectHandler<MyTelegram.Schema.Smsjobs.RequestJoin, IBool>,

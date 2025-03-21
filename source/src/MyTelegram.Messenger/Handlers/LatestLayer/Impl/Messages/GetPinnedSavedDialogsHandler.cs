@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
+/// Get pinned <a href="https://corefork.telegram.org/api/saved-messages">saved dialogs, see here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/method/messages.getPinnedSavedDialogs" />
 ///</summary>
 internal sealed class GetPinnedSavedDialogsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetPinnedSavedDialogs, MyTelegram.Schema.Messages.ISavedDialogs>,
@@ -13,10 +12,10 @@ internal sealed class GetPinnedSavedDialogsHandler : RpcResultObjectHandler<MyTe
     {
         return Task.FromResult<MyTelegram.Schema.Messages.ISavedDialogs>(new TSavedDialogs
         {
-            Dialogs = new(),
-            Chats = new(),
-            Messages = new(),
-            Users = new()
+            Dialogs = [],
+            Chats = [],
+            Messages = [],
+            Users = []
         });
     }
 }

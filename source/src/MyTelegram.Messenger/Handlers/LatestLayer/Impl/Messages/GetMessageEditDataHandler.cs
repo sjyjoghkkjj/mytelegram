@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Find out if a media message's caption can be edited
@@ -13,31 +11,24 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.getMessageEditData" />
 ///</summary>
-internal sealed class GetMessageEditDataHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetMessageEditData, MyTelegram.Schema.Messages.IMessageEditData>,
-    Messages.IGetMessageEditDataHandler
+internal sealed class GetMessageEditDataHandler(
+    IQueryProcessor queryProcessor,
+    IOptions<MyTelegramMessengerServerOptions> options,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetMessageEditData,
+            MyTelegram.Schema.Messages.IMessageEditData>,
+        Messages.IGetMessageEditDataHandler
 {
-    private readonly IOptions<MyTelegramMessengerServerOptions> _options;
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public GetMessageEditDataHandler(IQueryProcessor queryProcessor,
-        IOptions<MyTelegramMessengerServerOptions> options,
-        IAccessHashHelper accessHashHelper)
-    {
-        _queryProcessor = queryProcessor;
-        _options = options;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IMessageEditData> HandleCoreAsync(IRequestInput input,
         RequestGetMessageEditData obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        var message = await _queryProcessor
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        var message = await queryProcessor
             .ProcessAsync(
                 new GetMessageByIdQuery(
                     MessageId.Create(input.UserId, obj.Id).Value),
                 default);
-        var canEdit = message != null && message.Date + _options.Value.EditTimeLimit > CurrentDate;
+        var canEdit = message != null && message.Date + options.Value.EditTimeLimit > CurrentDate;
         return new TMessageEditData { Caption = canEdit };
     }
 }

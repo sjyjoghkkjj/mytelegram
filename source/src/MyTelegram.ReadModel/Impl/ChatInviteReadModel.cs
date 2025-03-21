@@ -7,7 +7,8 @@ public class ChatInviteReadModel : IChatInviteReadModel,
 IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteCreatedEvent>,
 IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteEditedEvent>,
 IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteImportedEvent>,
-IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteDeletedEvent>
+IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteDeletedEvent>,
+IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteExportedEvent>
 {
     public long InviteId { get; private set; }
     public virtual long AdminId { get; private set; }
@@ -52,9 +53,6 @@ IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteDeletedEvent>
     {
         Id = domainEvent.AggregateIdentity.Value;
 
-        // Link does not need to be modified, only a new one will be generated 
-        //Link = domainEvent.AggregateEvent.Hash;
-
         Revoked = domainEvent.AggregateEvent.Revoked;
         ExpireDate = domainEvent.AggregateEvent.ExpireDate;
         UsageLimit = domainEvent.AggregateEvent.UsageLimit;
@@ -75,6 +73,27 @@ IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteDeletedEvent>
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChatInviteAggregate, ChatInviteId, ChatInviteDeletedEvent> domainEvent, CancellationToken cancellationToken)
     {
         context.MarkForDeletion();
+
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChatInviteAggregate, ChatInviteId, ChatInviteExportedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        Id = domainEvent.AggregateIdentity.Value;
+        PeerId = domainEvent.AggregateEvent.ChannelId;
+        Link = domainEvent.AggregateEvent.Hash;
+        Revoked = false;
+        Permanent = domainEvent.AggregateEvent.Permanent;
+        AdminId = domainEvent.AggregateEvent.AdminId;
+        Date = domainEvent.AggregateEvent.Date;
+        StartDate = domainEvent.AggregateEvent.StartDate;
+        ExpireDate = domainEvent.AggregateEvent.ExpireDate;
+        UsageLimit = domainEvent.AggregateEvent.UsageLimit;
+        Usage = 0;
+        Title = domainEvent.AggregateEvent.Title;
+        RequestNeeded = domainEvent.AggregateEvent.RequestNeeded;
+        InviteId = domainEvent.AggregateEvent.InviteId;
+        IsBroadcast = domainEvent.AggregateEvent.IsBroadcast;
 
         return Task.CompletedTask;
     }

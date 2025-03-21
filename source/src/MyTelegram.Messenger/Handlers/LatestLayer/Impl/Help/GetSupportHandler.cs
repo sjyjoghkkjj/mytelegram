@@ -10,7 +10,7 @@ internal sealed class GetSupportHandler(
     IOptionsMonitor<MyTelegramMessengerServerOptions> options) : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetSupport, MyTelegram.Schema.Help.ISupport>,
     Help.IGetSupportHandler
 {
-    protected async override Task<MyTelegram.Schema.Help.ISupport> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.Help.ISupport> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Help.RequestGetSupport obj)
     {
         var supportUserId = MyTelegramServerDomainConsts.DefaultSupportUserId;

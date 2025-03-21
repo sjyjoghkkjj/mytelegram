@@ -19,7 +19,7 @@ internal sealed class ResolveUsernameHandler(
     IPhotoAppService photoAppService)
     : RpcResultObjectHandler<MyTelegram.Schema.Contacts.RequestResolveUsername,
             MyTelegram.Schema.Contacts.IResolvedPeer>,
-       MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts.IResolveUsernameHandler
+        Contacts.IResolveUsernameHandler
 {
     protected override async Task<IResolvedPeer> HandleCoreAsync(IRequestInput input,
         RequestResolveUsername obj)
@@ -49,7 +49,7 @@ internal sealed class ResolveUsernameHandler(
 
                             if (channelReadModel != null)
                             {
-                                var photoReadModel = await photoAppService.GetAsync(channelReadModel.PhotoId ?? 0);
+                                var photoReadModel = await photoAppService.GetAsync(channelReadModel.PhotoId);
                                 var channelMemberReadModel = await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(channelReadModel.ChannelId, input.UserId));
                                 return new TResolvedPeer
                                 {
@@ -60,7 +60,7 @@ internal sealed class ResolveUsernameHandler(
                                             photoReadModel,
                                             channelMemberReadModel, channelMemberReadModel?.Left ?? true, input.Layer)),
                                     Peer = new TPeerChannel { ChannelId = userNameReadModel.PeerId },
-                                    Users = new TVector<IUser>()
+                                    Users = []
                                 };
                             }
                         }

@@ -41,7 +41,9 @@ public class ChannelSnapshot(
     int topMessageId,
     long? stickerSetId,
     long? emojiStickerSetId,
-    EmojiStatus? emojiStatus
+    EmojiStatus? emojiStatus,
+    bool participantsHidden,
+    bool joinRequest
 )
     : ISnapshot
 {
@@ -98,4 +100,6 @@ public class ChannelSnapshot(
     public long? StickerSetId { get; } = stickerSetId;
     public long? EmojiStickerSetId { get; } = emojiStickerSetId;
     public EmojiStatus? EmojiStatus { get; } = emojiStatus;
+    public bool ParticipantsHidden { get; } = participantsHidden;
+    public bool JoinRequest { get; } = joinRequest;
 }

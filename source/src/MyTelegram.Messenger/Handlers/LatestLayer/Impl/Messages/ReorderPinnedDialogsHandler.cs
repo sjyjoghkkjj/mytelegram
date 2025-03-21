@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Reorder pinned dialogs
@@ -9,21 +7,13 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.reorderPinnedDialogs" />
 ///</summary>
-internal sealed class ReorderPinnedDialogsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestReorderPinnedDialogs, IBool>,
-    Messages.IReorderPinnedDialogsHandler
+internal sealed class ReorderPinnedDialogsHandler(
+    IDialogAppService dialogAppService,
+    IPeerHelper peerHelper,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestReorderPinnedDialogs, IBool>,
+        Messages.IReorderPinnedDialogsHandler
 {
-    private readonly IDialogAppService _dialogAppService;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public ReorderPinnedDialogsHandler(IDialogAppService dialogAppService,
-        IPeerHelper peerHelper,
-        IAccessHashHelper accessHashHelper)
-    {
-        _dialogAppService = dialogAppService;
-        _peerHelper = peerHelper;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestReorderPinnedDialogs obj)
     {
@@ -33,8 +23,8 @@ internal sealed class ReorderPinnedDialogsHandler : RpcResultObjectHandler<MyTel
             switch (inputDialogPeer)
             {
                 case TInputDialogPeer inputDialogPeer1:
-                    await _accessHashHelper.CheckAccessHashAsync(inputDialogPeer1.Peer);
-                    peerList.Add(_peerHelper.GetPeer(inputDialogPeer1.Peer, input.UserId));
+                    await accessHashHelper.CheckAccessHashAsync(inputDialogPeer1.Peer);
+                    peerList.Add(peerHelper.GetPeer(inputDialogPeer1.Peer, input.UserId));
                     break;
                     //case TInputDialogPeerFolder inputDialogPeerFolder:
                     //    break;
@@ -43,7 +33,7 @@ internal sealed class ReorderPinnedDialogsHandler : RpcResultObjectHandler<MyTel
             }
         }
 
-        await _dialogAppService.ReorderPinnedDialogsAsync(new ReorderPinnedDialogsInput(input.UserId, peerList))
+        await dialogAppService.ReorderPinnedDialogsAsync(new ReorderPinnedDialogsInput(input.UserId, peerList))
      ;
         return new TBoolTrue();
     }

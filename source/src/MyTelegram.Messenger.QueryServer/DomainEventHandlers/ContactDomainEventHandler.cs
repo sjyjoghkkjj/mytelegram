@@ -9,14 +9,9 @@ public class ContactDomainEventHandler(
     ICommandBus commandBus,
     IIdGenerator idGenerator,
     IAckCacheService ackCacheService,
-    IQueryProcessor queryProcessor,
-    IUserAppService userAppService,
     IUserConverterService userConverterService,
-    //ILayeredService<IUserConverter> layeredUserService,
     IPhotoAppService photoAppService,
-    //ILayeredService<IPhotoConverter> layeredPhotoService,
-    ILayeredService<IPhotoConverter> photoLayeredService,
-    IPrivacyAppService privacyAppService
+    ILayeredService<IPhotoConverter> photoLayeredService
     )
     : DomainEventHandlerBase(objectMessageSender,
             commandBus,
@@ -30,11 +25,6 @@ public class ContactDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<ContactAggregate, ContactId, ContactAddedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        //var targetUser = await userAppService.GetAsync(domainEvent.AggregateEvent.TargetUserId);
-        //var photos = await photoAppService.GetPhotosAsync(targetUser);
-        //var privacyReadModels = await privacyAppService.GetPrivacyListAsync(domainEvent.AggregateEvent.TargetUserId);
-        //var tUser = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-        //    .ToUser(domainEvent.AggregateEvent.SelfUserId, targetUser!, photos, null, privacyReadModels);
         var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.SelfUserId,
             domainEvent.AggregateEvent.TargetUserId,
             true,
@@ -63,12 +53,6 @@ public class ContactDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<ContactAggregate, ContactId, ContactDeletedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        //var targetUser = await userAppService.GetAsync(domainEvent.AggregateEvent.TargetUid);
-        //var photos = await photoAppService.GetPhotosAsync(targetUser);
-        //var privacyList = await privacyAppService.GetPrivacyListAsync(domainEvent.AggregateEvent.TargetUid);
-        //var tUser = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-        //    .ToUser(domainEvent.AggregateEvent.RequestInfo.UserId, targetUser!, photos, null, privacyList);
-
         var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
             domainEvent.AggregateEvent.TargetUid,
             true, false,
@@ -94,19 +78,6 @@ public class ContactDomainEventHandler(
         IDomainEvent<ContactAggregate, ContactId, ContactProfilePhotoChangedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        //var userReadModel = await userAppService.GetAsync(domainEvent.AggregateEvent.TargetUserId);
-        //var privacyList = await privacyAppService.GetPrivacyListAsync(domainEvent.AggregateEvent.TargetUserId);
-        //var photoReadModels = await photoAppService.GetPhotosAsync(userReadModel);
-        //var photoReadModel = await photoAppService.GetAsync(domainEvent.AggregateEvent.PhotoId);
-        //var contactReadModel =
-        //    await queryProcessor.ProcessAsync(
-        //        new GetContactQuery(domainEvent.AggregateEvent.RequestInfo.UserId,
-        //            domainEvent.AggregateEvent.TargetUserId), cancellationToken);
-
-        //var user = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-        //    .ToUser(domainEvent.AggregateEvent.SelfUserId, userReadModel!, photoReadModels, contactReadModel,
-        //        privacyList);
-
         var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.SelfUserId,
             domainEvent.AggregateEvent.TargetUserId,
             false,
@@ -133,16 +104,6 @@ public class ContactDomainEventHandler(
             .Where(p => p.UserId > 0)
             .Select(p => new TImportedContact { ClientId = p.ClientId, UserId = p.UserId }).ToList();
         var userIds = importedContacts.Select(p => p.UserId).ToList();
-        //var userReadModels = await userAppService.GetListAsync(userIds);
-        //var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels);
-        //var privacyReadModels = await privacyAppService.GetPrivacyListAsync(userIds);
-        //var contactReadModels =
-        //    await queryProcessor.ProcessAsync(new GetContactListQuery(domainEvent.AggregateEvent.RequestInfo.UserId,
-        //        userIds), cancellationToken);
-
-        //var userList = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).ToUserList(
-        //    domainEvent.AggregateEvent.RequestInfo.UserId, userReadModels, photoReadModels, contactReadModels,
-        //    privacyReadModels);
         var users = await userConverterService.GetUserListAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
             userIds, true, false, domainEvent.AggregateEvent.RequestInfo.Layer
         );
@@ -179,7 +140,7 @@ public class ContactDomainEventHandler(
         {
             Updates = new TVector<IUpdate>(updates),
             Users = new TVector<IUser>(users),
-            Chats = new TVector<IChat>(),
+            Chats = [],
             Date = DateTime.Now.ToTimestamp()
         });
     }

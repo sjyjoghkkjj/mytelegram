@@ -100,6 +100,9 @@ internal sealed class ChannelMapper
             }
         }
 
+        destination.JoinRequest = source.JoinRequest;
+        destination.JoinToSend = source.JoinToSend;
+
         return destination;
     }
 }

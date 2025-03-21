@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.ReadModel.Impl;
+﻿using MyTelegram.Domain.Extensions;
+
+namespace MyTelegram.ReadModel.Impl;
 
 public class UserReadModel : IUserReadModel,
     IAmReadModelFor<UserAggregate, UserId, UserCreatedEvent>,
@@ -23,13 +25,12 @@ public class UserReadModel : IUserReadModel,
     public virtual long AccessHash { get; private set; }
     public virtual int AccountTtl { get; private set; }
     public Birthday? Birthday { get; private set; }
-    public bool BotHasMainApp { get; private set; }
-    public int? BotActiveUsers { get; private set; }
-    public List<string>? Usernames { get; private set; }
-    public DateTime? CreationTime { get; private set; }
     public virtual bool Bot { get; private set; }
+    public int? BotActiveUsers { get; private set; }
+    public bool BotHasMainApp { get; private set; }
     public int? BotInfoVersion { get; private set; }
     public PeerColor? Color { get; private set; }
+    public DateTime? CreationTime { get; private set; }
     public string? Email { get; private set; }
     public long? EmojiStatusDocumentId { get; private set; }
     public int? EmojiStatusValidUntil { get; private set; }
@@ -38,7 +39,7 @@ public class UserReadModel : IUserReadModel,
     public GlobalPrivacySettings? GlobalPrivacySettings { get; private set; }
     public virtual bool HasPassword { get; private set; }
     public virtual string Id { get; private set; } = null!;
-    public virtual bool IsOnline { get; private set;}
+    public virtual bool IsOnline { get; private set; }
     public virtual string? LastName { get; private set; }
     public virtual DateTime LastUpdateDate { get; private set; }
     public long? PersonalChannelId { get; private set; }
@@ -50,6 +51,7 @@ public class UserReadModel : IUserReadModel,
     public PeerColor? ProfileColor { get; private set; }
     public virtual byte[]? ProfilePhoto { get; private set; }
     public long? ProfilePhotoId { get; private set; }
+    public int? ProfilePhotoUpdateDate { get; private set; }
     public List<long> RecentEmojiStatuses { get; private set; } = [];
     public virtual bool SensitiveCanChange { get; private set; }
     public virtual bool SensitiveEnabled { get; private set; }
@@ -59,6 +61,8 @@ public class UserReadModel : IUserReadModel,
     //public string UserId { get; private set; }
     public virtual string? UserName { get; private set; }
 
+    public List<string>? Usernames { get; private set; }
+    public int? UserNameUpdateDate { get; private set; }
     public virtual bool Verified { get; private set; }
 
     //public int? Color { get; private set; }
@@ -68,7 +72,7 @@ public class UserReadModel : IUserReadModel,
     public VideoSizeEmojiMarkup? VideoEmojiMarkup { get; private set; }
 
     public Task ApplyAsync(IReadModelContext context,
-        IDomainEvent<MessageAggregate, MessageId, InboxMessagePinnedUpdatedEvent> domainEvent,
+            IDomainEvent<MessageAggregate, MessageId, InboxMessagePinnedUpdatedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
         if (domainEvent.AggregateEvent.ToPeer.PeerType == PeerType.User)
@@ -96,20 +100,23 @@ public class UserReadModel : IUserReadModel,
         CancellationToken cancellationToken)
     {
         Id = domainEvent.AggregateIdentity.Value;
-        //UserId = domainEvent.AggregateIdentity;
         UserId = domainEvent.AggregateEvent.UserId;
         PhoneNumber = domainEvent.AggregateEvent.PhoneNumber;
         FirstName = domainEvent.AggregateEvent.FirstName;
         LastName = domainEvent.AggregateEvent.LastName;
         AccessHash = domainEvent.AggregateEvent.AccessHash;
-        LastUpdateDate = DateTime.UtcNow;
+        LastUpdateDate = domainEvent.AggregateEvent.CreationTime;
         Bot = domainEvent.AggregateEvent.Bot;
         BotInfoVersion = domainEvent.AggregateEvent.BotInfoVersion;
         AccountTtl = domainEvent.AggregateEvent.AccountTtl;
         SensitiveCanChange = true;
         ShowContactSignUpNotification = false;
         UserName = domainEvent.AggregateEvent.UserName;
-
+        CreationTime = domainEvent.AggregateEvent.CreationTime;
+        if (!string.IsNullOrEmpty(domainEvent.AggregateEvent.UserName))
+        {
+            UserNameUpdateDate = domainEvent.AggregateEvent.CreationTime.ToTimestamp();
+        }
 
         return Task.CompletedTask;
     }
@@ -127,8 +134,6 @@ public class UserReadModel : IUserReadModel,
         CancellationToken cancellationToken)
     {
         ProfilePhotoId = domainEvent.AggregateEvent.PhotoId;
-        //ProfilePhoto = domainEvent.AggregateEvent.UserItem.ProfilePhoto;
-        //VideoEmojiMarkup = domainEvent.AggregateEvent.VideoEmojiMarkup;
         if (domainEvent.AggregateEvent.Fallback)
         {
             FallbackPhotoId = domainEvent.AggregateEvent.PhotoId;
@@ -149,6 +154,7 @@ public class UserReadModel : IUserReadModel,
         LastName = domainEvent.AggregateEvent.LastName;
 
         About = domainEvent.AggregateEvent.About;
+
         return Task.CompletedTask;
     }
 
@@ -157,6 +163,7 @@ public class UserReadModel : IUserReadModel,
         CancellationToken cancellationToken)
     {
         Support = domainEvent.AggregateEvent.Support;
+
         return Task.CompletedTask;
     }
 
@@ -165,6 +172,7 @@ public class UserReadModel : IUserReadModel,
         CancellationToken cancellationToken)
     {
         Verified = domainEvent.AggregateEvent.Verified;
+
         return Task.CompletedTask;
     }
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<UserAggregate, UserId, UserProfilePhotoUploadedEvent> domainEvent, CancellationToken cancellationToken)
@@ -198,12 +206,14 @@ public class UserReadModel : IUserReadModel,
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<UserAggregate, UserId, UserGlobalPrivacySettingsChangedEvent> domainEvent, CancellationToken cancellationToken)
     {
         GlobalPrivacySettings = domainEvent.AggregateEvent.GlobalPrivacySettings;
+
         return Task.CompletedTask;
     }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<UserAggregate, UserId, UserPremiumStatusChangedEvent> domainEvent, CancellationToken cancellationToken)
     {
         Premium = domainEvent.AggregateEvent.Premium;
+
         return Task.CompletedTask;
     }
 

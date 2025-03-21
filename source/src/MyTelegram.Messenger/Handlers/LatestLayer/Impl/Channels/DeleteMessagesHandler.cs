@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Delete messages in a <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a>
@@ -48,8 +46,7 @@ internal sealed class DeleteMessagesHandler(
 
                 // Delete channel post message: delete all repies
                 // Delete forwarded post message: update post message channelId to 777
-                var channelReadModel =
-                    await channelAppService.GetAsync(inputChannel.ChannelId);
+                var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
                 channelReadModel.ThrowExceptionIfChannelDeleted();
 
                 IReadOnlyCollection<int>? repliesMessageIds = null;
@@ -72,7 +69,6 @@ internal sealed class DeleteMessagesHandler(
                               repliesMessageIds.ToList()));
                     }
                 }
-
 
                 var command =
                     new StartDeleteChannelMessagesCommand(TempId.New, input.ToRequestInfo(), inputChannel.ChannelId,

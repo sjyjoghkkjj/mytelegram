@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Represents a <a href="https://corefork.telegram.org/api/stars">Telegram Stars transaction »</a>.
 /// See <a href="https://corefork.telegram.org/constructor/starsTransaction" />
 ///</summary>
-[TlObject(0x64dfc926)]
+[TlObject(0xa39fd94a)]
 public sealed class TStarsTransaction : IStarsTransaction
 {
-    public uint ConstructorId => 0x64dfc926;
+    public uint ConstructorId => 0xa39fd94a;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -147,6 +147,8 @@ public sealed class TStarsTransaction : IStarsTransaction
     /// See <a href="https://corefork.telegram.org/type/StarsAmount" />
     ///</summary>
     public MyTelegram.Schema.IStarsAmount? StarrefAmount { get; set; }
+    public int? PaidMessages { get; set; }
+    public int? PremiumGiftMonths { get; set; }
 
     public void ComputeFlag()
     {
@@ -171,6 +173,8 @@ public sealed class TStarsTransaction : IStarsTransaction
         if (/*StarrefCommissionPermille != 0 && */StarrefCommissionPermille.HasValue) { Flags[16] = true; }
         if (StarrefPeer != null) { Flags[17] = true; }
         if (StarrefAmount != null) { Flags[17] = true; }
+        if (/*PaidMessages != 0 && */PaidMessages.HasValue) { Flags[19] = true; }
+        if (/*PremiumGiftMonths != 0 && */PremiumGiftMonths.HasValue) { Flags[20] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -197,6 +201,8 @@ public sealed class TStarsTransaction : IStarsTransaction
         if (Flags[16]) { writer.Write(StarrefCommissionPermille.Value); }
         if (Flags[17]) { writer.Write(StarrefPeer); }
         if (Flags[17]) { writer.Write(StarrefAmount); }
+        if (Flags[19]) { writer.Write(PaidMessages.Value); }
+        if (Flags[20]) { writer.Write(PremiumGiftMonths.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -227,5 +233,7 @@ public sealed class TStarsTransaction : IStarsTransaction
         if (Flags[16]) { StarrefCommissionPermille = reader.ReadInt32(); }
         if (Flags[17]) { StarrefPeer = reader.Read<MyTelegram.Schema.IPeer>(); }
         if (Flags[17]) { StarrefAmount = reader.Read<MyTelegram.Schema.IStarsAmount>(); }
+        if (Flags[19]) { PaidMessages = reader.ReadInt32(); }
+        if (Flags[20]) { PremiumGiftMonths = reader.ReadInt32(); }
     }
 }

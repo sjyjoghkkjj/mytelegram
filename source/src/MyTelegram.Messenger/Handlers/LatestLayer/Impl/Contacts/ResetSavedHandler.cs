@@ -1,9 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
-/// Delete saved contacts
+/// Removes all contacts without an associated Telegram account.
 /// See <a href="https://corefork.telegram.org/method/contacts.resetSaved" />
 ///</summary>
 internal sealed class ResetSavedHandler : RpcResultObjectHandler<MyTelegram.Schema.Contacts.RequestResetSaved, IBool>,

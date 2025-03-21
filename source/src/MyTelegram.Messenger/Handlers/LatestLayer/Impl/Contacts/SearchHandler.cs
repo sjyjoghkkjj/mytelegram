@@ -12,13 +12,13 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 /// </summary>
 internal sealed class SearchHandler(IContactAppService contactAppService, ISearchConverterService searchConverterService)
     : RpcResultObjectHandler<RequestSearch, Schema.Contacts.IFound>,
-        ISearchHandler
+        Contacts.ISearchHandler
 {
     protected override async Task<IFound> HandleCoreAsync(IRequestInput input,
         RequestSearch obj)
     {
         var userId = input.UserId;
-        var searchResult = await contactAppService.SearchAsync(userId, obj.Q);
+        var searchResult = await contactAppService.SearchAsync(userId, obj.Q, obj.Limit);
 
         return searchConverterService.ToFound(searchResult, input.Layer);
     }

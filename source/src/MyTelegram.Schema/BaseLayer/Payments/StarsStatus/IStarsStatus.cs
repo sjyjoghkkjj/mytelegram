@@ -15,6 +15,34 @@ public interface IStarsStatus : IObject
     BitArray Flags { get; set; }
 
     ///<summary>
+    /// Current Telegram Star balance.
+    /// See <a href="https://corefork.telegram.org/type/StarsAmount" />
+    ///</summary>
+    MyTelegram.Schema.IStarsAmount Balance { get; set; }
+
+    ///<summary>
+    /// Info about current Telegram Star subscriptions, only returned when invoking <a href="https://corefork.telegram.org/method/payments.getStarsTransactions">payments.getStarsTransactions</a> and <a href="https://corefork.telegram.org/method/payments.getStarsSubscriptions">payments.getStarsSubscriptions</a>.
+    /// See <a href="https://corefork.telegram.org/type/StarsSubscription" />
+    ///</summary>
+    TVector<MyTelegram.Schema.IStarsSubscription>? Subscriptions { get; set; }
+
+    ///<summary>
+    /// Offset for pagination of subscriptions: only usable and returned when invoking <a href="https://corefork.telegram.org/method/payments.getStarsSubscriptions">payments.getStarsSubscriptions</a>.
+    ///</summary>
+    string? SubscriptionsNextOffset { get; set; }
+
+    ///<summary>
+    /// The number of Telegram Stars the user should buy to be able to extend expired subscriptions soon (i.e. the current balance is not enough to extend all expired subscriptions).
+    ///</summary>
+    long? SubscriptionsMissingBalance { get; set; }
+
+    ///<summary>
+    /// List of Telegram Star transactions (partial if <code>next_offset</code> is set).
+    /// See <a href="https://corefork.telegram.org/type/StarsTransaction" />
+    ///</summary>
+    TVector<MyTelegram.Schema.IStarsTransaction>? History { get; set; }
+
+    ///<summary>
     /// Offset to use to fetch more transactions from the transaction history using <a href="https://corefork.telegram.org/method/payments.getStarsTransactions">payments.getStarsTransactions</a>.
     ///</summary>
     string? NextOffset { get; set; }

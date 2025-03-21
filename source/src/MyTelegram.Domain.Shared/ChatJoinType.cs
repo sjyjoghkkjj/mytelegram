@@ -12,7 +12,7 @@ public enum ChatJoinType
     /// <summary>
     ///     Joined by self request
     /// </summary>
-    ByRequest,
+    BySelf,
 
     /// <summary>
     ///     Joined By link
@@ -22,5 +22,5 @@ public enum ChatJoinType
     /// <summary>
     ///     Approved by admin
     /// </summary>
-    ApprovedByAdmin
+    ByRequest
 }

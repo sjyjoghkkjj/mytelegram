@@ -40,4 +40,10 @@ public interface IMessageReactions : IObject
     /// See <a href="https://corefork.telegram.org/type/MessagePeerReaction" />
     ///</summary>
     TVector<MyTelegram.Schema.IMessagePeerReaction>? RecentReactions { get; set; }
+
+    ///<summary>
+    /// <a href="https://corefork.telegram.org/api/reactions#paid-reactions">Paid Telegram Star reactions leaderboard »</a> for this message.
+    /// See <a href="https://corefork.telegram.org/type/MessageReactor" />
+    ///</summary>
+    TVector<MyTelegram.Schema.IMessageReactor>? TopReactors { get; set; }
 }

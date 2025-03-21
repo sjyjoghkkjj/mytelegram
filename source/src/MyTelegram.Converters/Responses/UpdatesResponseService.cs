@@ -13,14 +13,10 @@ public class UpdatesResponseService(
     IBroadcastRevenueBalancesResponseService broadcastRevenueBalancesResponseService,
     IMessageMediaResponseService messageMediaResponseService,
     IDocumentAttributeVideoResponseService documentAttributeVideoResponseService,
-
-    //ILayeredService<IMessageMediaDocumentResponseConverter> messageMediaDocumentLayeredService,
-    //ILayeredService<IDocumentAttributeVideoResponseConverter> documentAttributeVideoLayeredService,
     ILayeredService<IUpdateDeleteScheduledMessagesResponseConverter> updateDeleteScheduledMessagesLayeredService,
     ILayeredService<IUpdateStarsBalanceResponseConverter> updateStarsBalanceLayeredService,
     ILayeredService<IUpdateGroupCallResponseConverter> updateGroupCallLayeredService,
     ILayeredService<IBoostResponseConverter> boostLayeredService,
-    ILayeredService<IChatInviteExportedResponseConverter> chatInviteExportedLayeredService,
     ILayeredService<IUpdateMessageExtendedMediaResponseConverter> updateMessageExtendedMediaLayeredService
 ) : IUpdatesResponseService, ITransientDependency
 {
@@ -134,14 +130,19 @@ public class UpdatesResponseService(
                 break;
 
             case TUpdateChannelParticipant updateChannelParticipant:
-                updateChannelParticipant.NewParticipant =
-                    channelParticipantResponseService.ToLayeredData(updateChannelParticipant.NewParticipant,
-                        layer);
-                updateChannelParticipant.PrevParticipant =
-                    channelParticipantResponseService.ToLayeredData(
-                        updateChannelParticipant.PrevParticipant, layer);
+                if (updateChannelParticipant.NewParticipant != null)
+                {
+                    updateChannelParticipant.NewParticipant =
+                        channelParticipantResponseService.ToLayeredData(updateChannelParticipant.NewParticipant,
+                            layer);
+                }
 
-                //
+                if (updateChannelParticipant.PrevParticipant != null)
+                {
+                    updateChannelParticipant.PrevParticipant =
+                        channelParticipantResponseService.ToLayeredData(
+                            updateChannelParticipant.PrevParticipant, layer);
+                }
                 break;
 
             case TUpdateChannelWebPage updateChannelWebPage:
@@ -177,7 +178,6 @@ public class UpdatesResponseService(
                     messageResponseService.ToLayeredData(updateNewChannelMessage.Message, layer);
 
                 return updateNewChannelMessage;
-                break;
             case TUpdateNewMessage updateNewMessage:
                 updateNewMessage.Message =
                     messageResponseService.ToLayeredData(updateNewMessage.Message, layer);
@@ -210,7 +210,7 @@ public class UpdatesResponseService(
                     messageMediaResponseService.ToLayeredData(updateServiceNotification.Media, layer);
                 break;
 
-            case TUpdateStarsRevenueStatus updateStarsRevenueStatus:
+            case TUpdateStarsRevenueStatus:
                 break;
 
             case TUpdateStory updateStory:

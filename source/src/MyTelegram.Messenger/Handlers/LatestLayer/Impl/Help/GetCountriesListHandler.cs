@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Get name, ISO code, localized name and phone codes/patterns of all available countries
@@ -9,6 +7,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 internal sealed class GetCountriesListHandler(ICountryHelper countryHelper) : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetCountriesList, MyTelegram.Schema.Help.ICountriesList>,
     Help.IGetCountriesListHandler
 {
+
     private static ICountriesList? _countriesList;
     private static int _hash = -432121763;
 

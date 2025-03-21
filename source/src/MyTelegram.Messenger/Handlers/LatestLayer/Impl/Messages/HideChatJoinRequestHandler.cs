@@ -21,33 +21,62 @@ internal sealed class HideChatJoinRequestHandler(
     IQueryProcessor queryProcessor,
     IPeerHelper peerHelper,
     IAccessHashHelper accessHashHelper,
+    IChannelAppService channelAppService,
+    IChannelAdminRightsChecker channelAdminRightsChecker,
     ICommandBus commandBus)
-    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestHideChatJoinRequest, MyTelegram.Schema.IUpdates>,
-        Messages.IHideChatJoinRequestHandler
+    : RpcResultObjectHandler<RequestHideChatJoinRequest, IUpdates>,
+        IHideChatJoinRequestHandler
 {
-    protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Messages.RequestHideChatJoinRequest obj)
+    protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
+        RequestHideChatJoinRequest obj)
     {
         await accessHashHelper.CheckAccessHashAsync(obj.Peer);
         await accessHashHelper.CheckAccessHashAsync(obj.UserId);
 
         var channelPeer = peerHelper.GetPeer(obj.Peer);
+        var channelId = channelPeer.PeerId;
         var userPeer = peerHelper.GetPeer(obj.UserId);
-        var chatInviteImporterReadModel =
-            await queryProcessor.ProcessAsync(new GetChatInviteImporterQuery(channelPeer.PeerId, userPeer.PeerId));
-        if (chatInviteImporterReadModel == null )
+
+        await channelAdminRightsChecker.CheckAdminRightAsync(channelId, input.UserId,
+            p => p.AdminRights.InviteUsers, RpcErrors.RpcErrors403.ChatAdminRequired);
+
+        var joinRequestReadModel =
+            await queryProcessor.ProcessAsync(new GetJoinRequestQuery(channelId, userPeer.PeerId));
+        if (joinRequestReadModel == null)
         {
             RpcErrors.RpcErrors400.HideRequesterMissing.ThrowRpcError();
         }
 
-        if (chatInviteImporterReadModel!.ChatInviteRequestState != ChatInviteRequestState.WaitingForApproval)
+        if (joinRequestReadModel!.IsJoinRequestProcessed)
         {
             RpcErrors.RpcErrors400.HideRequesterMissing.ThrowRpcError();
         }
 
-        var command = new HideChatJoinRequestCommand(ChannelId.Create(channelPeer.PeerId), input.ToRequestInfo(),
-            userPeer.PeerId, obj.Approved);
-        await commandBus.PublishAsync(command, default);
+        var channelHistoryMinId = 0;
+        var topMessageId = 0;
+        var broadcast = false;
+
+        if (obj.Approved)
+        {
+            var channelReadModel = await channelAppService.GetAsync(channelId);
+            if (channelReadModel.HiddenPreHistory)
+            {
+                channelHistoryMinId = channelReadModel.TopMessageId;
+            }
+            topMessageId = channelReadModel.TopMessageId;
+            broadcast = channelReadModel.Broadcast;
+        }
+
+        var command = new HideChatJoinRequestCommand2(
+            JoinChannelId.Create(channelId, userPeer.PeerId),
+            input.ToRequestInfo(),
+            userPeer.PeerId,
+            obj.Approved,
+            topMessageId,
+            channelHistoryMinId,
+            broadcast
+        );
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

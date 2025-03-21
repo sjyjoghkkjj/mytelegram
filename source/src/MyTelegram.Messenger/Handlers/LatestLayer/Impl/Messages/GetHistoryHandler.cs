@@ -18,7 +18,7 @@ internal sealed class GetHistoryHandler(
     IPeerHelper peerHelper,
     IAccessHashHelper accessHashHelper,
     IGetHistoryConverterService getHistoryConverterService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetHistory, MyTelegram.Schema.Messages.IMessages>,
+    : RpcResultObjectHandler<RequestGetHistory, IMessages>,
         IGetHistoryHandler
 {
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
@@ -32,15 +32,15 @@ internal sealed class GetHistoryHandler(
         if (peer.PeerType == PeerType.Channel)
         {
             var channelMember = await queryProcessor
-                .ProcessAsync(new GetChannelMemberByUserIdQuery(peer.PeerId, input.UserId), default)
+                .ProcessAsync(new GetChannelMemberByUserIdQuery(peer.PeerId, input.UserId))
          ;
             if (channelMember?.Kicked == true)
             {
                 return new TChannelMessages
                 {
-                    Chats = new TVector<IChat>(),
-                    Messages = new TVector<IMessage>(),
-                    Users = new TVector<IUser>()
+                    Chats = [],
+                    Messages = [],
+                    Users = []
                 };
             }
         }

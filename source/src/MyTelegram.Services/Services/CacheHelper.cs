@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
 
 namespace MyTelegram.Services.Services;
 
@@ -11,7 +10,7 @@ public class CacheHelper<TKey, TValue> : ICacheHelper<TKey, TValue> where TKey :
         return _caches.TryAdd(key, value);
     }
 
-    public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
+    public bool TryGetValue(TKey key, out TValue? value)
     {
         return _caches.TryGetValue(key, out value);
     }

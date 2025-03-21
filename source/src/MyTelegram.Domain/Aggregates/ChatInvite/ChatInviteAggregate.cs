@@ -10,6 +10,13 @@ public class
         Register(_state);
     }
 
+    public void ExportChatInvite(RequestInfo requestInfo, long channelId, long inviteId, string hash, long adminId, string? title,
+        bool requestNeeded, int? startDate, int? expireDate, int? usageLimit, bool permanent, int date, bool isBroadcast)
+    {
+        Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
+        Emit(new ChatInviteExportedEvent(requestInfo, channelId, inviteId, hash, adminId, title, requestNeeded, startDate, expireDate, usageLimit, permanent, date, isBroadcast));
+    }
+
     public void CreateChatInvite(RequestInfo requestInfo, long channelId, long inviteId, string hash, long adminId, string? title,
         bool requestNeeded, int? startDate, int? expireDate, int? usageLimit, bool permanent, int date, bool isBroadcast)
     {

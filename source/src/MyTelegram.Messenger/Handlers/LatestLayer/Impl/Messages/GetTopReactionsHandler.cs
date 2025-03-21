@@ -1,5 +1,7 @@
 ﻿// ReSharper disable All
 
+using MyTelegram.Schema.Messages;
+
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
@@ -14,7 +16,7 @@ internal sealed class GetTopReactionsHandler : RpcResultObjectHandler<MyTelegram
     {
         return Task.FromResult<IReactions>(new TReactions
         {
-            Reactions = new()
+            Reactions = []
         });
     }
 }

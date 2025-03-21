@@ -2,17 +2,17 @@
 
 namespace MyTelegram;
 
-public class Reaction(
-    long userId,
-    string? emoticon,
-    long? customEmojiDocumentId,
-    int? date = 0)
+public record Reaction(
+    long UserId,
+    string? Emoticon,
+    long? CustomEmojiDocumentId,
+    int? Date = 0)
 {
-    public long UserId { get; set; } = userId;
-    public string? Emoticon { get; set; } = emoticon;
-    public long? CustomEmojiDocumentId { get; set; } = customEmojiDocumentId;
+    public long UserId { get; set; } = UserId;
+    public string? Emoticon { get; set; } = Emoticon;
+    public long? CustomEmojiDocumentId { get; set; } = CustomEmojiDocumentId;
 
-    public int? Date { get; set; } = date;
+    public int? Date { get; set; } = Date;
 
     public long GetReactionId()
     {

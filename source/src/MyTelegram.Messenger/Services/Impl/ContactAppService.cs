@@ -4,10 +4,9 @@ public interface IContactHelper
 {
     ContactType GetContactType(IContactReadModel? myContactReadModel,
         IContactReadModel? targetUserContactReadModel);
+
     ContactType GetContactType(long selfUserId, long targetUserId,
         IReadOnlyCollection<IContactReadModel> contactReadModels);
-
-    //Task<ContactType> GetContactTypeAsync(long selfUserId, long targetUserId);
 }
 
 public class ContactHelper : IContactHelper, ITransientDependency
@@ -17,19 +16,20 @@ public class ContactHelper : IContactHelper, ITransientDependency
     {
         var contactType = (myContactReadModel, targetUserContactReadModel)
             switch
-            {
-                { myContactReadModel: not null, targetUserContactReadModel: not null } => ContactType.Mutual,
-                { myContactReadModel: null, targetUserContactReadModel: not null } => ContactType
-                    .ContactOfTargetUser,
-                { myContactReadModel: not null, targetUserContactReadModel: null } => ContactType
-                    .TargetUserIsMyContact,
-                _ => ContactType.None
-            };
+        {
+            { myContactReadModel: not null, targetUserContactReadModel: not null } => ContactType.Mutual,
+            { myContactReadModel: null, targetUserContactReadModel: not null } => ContactType
+                .ContactOfTargetUser,
+            { myContactReadModel: not null, targetUserContactReadModel: null } => ContactType
+                .TargetUserIsMyContact,
+            _ => ContactType.None
+        };
 
         return contactType;
     }
 
-    public ContactType GetContactType(long selfUserId, long targetUserId, IReadOnlyCollection<IContactReadModel> contactReadModels)
+    public ContactType GetContactType(long selfUserId, long targetUserId,
+        IReadOnlyCollection<IContactReadModel> contactReadModels)
     {
         var myContactReadModel =
             contactReadModels.FirstOrDefault(p => p.SelfUserId == selfUserId && p.TargetUserId == targetUserId);
@@ -38,14 +38,14 @@ public class ContactHelper : IContactHelper, ITransientDependency
 
         var contactType = (myContactReadModel, targetUserContactReadModel)
             switch
-            {
-                { myContactReadModel: not null, targetUserContactReadModel: not null } => ContactType.Mutual,
-                { myContactReadModel: null, targetUserContactReadModel: not null } => ContactType
-                    .ContactOfTargetUser,
-                { myContactReadModel: not null, targetUserContactReadModel: null } => ContactType
-                    .TargetUserIsMyContact,
-                _ => ContactType.None
-            };
+        {
+            { myContactReadModel: not null, targetUserContactReadModel: not null } => ContactType.Mutual,
+            { myContactReadModel: null, targetUserContactReadModel: not null } => ContactType
+                .ContactOfTargetUser,
+            { myContactReadModel: not null, targetUserContactReadModel: null } => ContactType
+                .TargetUserIsMyContact,
+            _ => ContactType.None
+        };
 
         return contactType;
     }
@@ -91,7 +91,7 @@ public class ContactAppService(
     }
 
     public async Task<SearchContactOutput> SearchAsync(long selfUserId,
-            string keyword)
+        string keyword, int limit)
     {
         if (keyword?.Length > 0)
         {
@@ -101,6 +101,12 @@ public class ContactAppService(
                 searchKeyword = keyword[1..];
             }
 
+            var defaultLimit = limit;
+            if (defaultLimit <= 0 || defaultLimit > 1000)
+            {
+                defaultLimit = 20;
+            }
+
             var contactReadModels = await queryProcessor
                 .ProcessAsync(new SearchContactQuery(selfUserId, searchKeyword));
             var userNameReadModels = await queryProcessor
@@ -108,57 +114,35 @@ public class ContactAppService(
 
             var channelIdList = userNameReadModels.Where(p => p.PeerType == PeerType.Channel).Select(p => p.PeerId)
                 .ToList();
+            var channelIds2 =
+                await queryProcessor.ProcessAsync(new GetChannelIdsByKeywordQuery(selfUserId, keyword, defaultLimit));
+            channelIdList.AddRange(channelIds2);
+            channelIdList = channelIdList.Distinct().ToList();
 
             var userIdList = contactReadModels.Select(p => p.TargetUserId).ToList();
             userIdList.AddRange(userNameReadModels.Where(p => p.PeerType == PeerType.User).Select(p => p.PeerId));
-
-            var collectibleUsernameReadModel =
-                await queryProcessor.ProcessAsync(new GetCollectibleUsernameByUsernameQuery(searchKeyword));
-            if (collectibleUsernameReadModel != null)
-            {
-                var peerType = peerHelper.GetPeerType(collectibleUsernameReadModel.OwnerPeerId);
-                switch (peerType)
-                {
-                    case PeerType.User:
-                        userIdList.Add(collectibleUsernameReadModel.OwnerPeerId);
-                        break;
-
-                    case PeerType.Channel:
-                        channelIdList.Add(collectibleUsernameReadModel.OwnerPeerId);
-                        break;
-                }
-            }
 
             var userReadModels = await userAppService.GetListAsync(userIdList);
             var allUserReadModels = userReadModels.ToList();
 
             if (options.CurrentValue.EnableSearchNonContacts)
             {
-                var userReadModels2 = await queryProcessor.ProcessAsync(new SearchUserByKeywordQuery(keyword, 20));
+                var userReadModels2 =
+                    await queryProcessor.ProcessAsync(new SearchUserByKeywordQuery(keyword, defaultLimit));
                 allUserReadModels.AddRange(userReadModels2);
             }
 
             var channelReadModels = await channelAppService.GetListAsync(channelIdList);
-            var photos = await photoAppService.GetPhotosAsync(allUserReadModels, contactReadModels);
-
-            var privacyReadModels = await queryProcessor.ProcessAsync(new GetPrivacyListQuery(allUserReadModels.Select(p => p.UserId).ToList(), new List<PrivacyType>
-            {
-                PrivacyType.PhoneNumber,
-                PrivacyType.PhoneCall,
-                PrivacyType.VoiceMessages,
-                PrivacyType.ProfilePhoto,
-                PrivacyType.StatusTimestamp,
-                PrivacyType.Birthday,
-                PrivacyType.About
-            }));
+            var photoReadModels =
+                await photoAppService.GetPhotosAsync(allUserReadModels, contactReadModels, channelReadModels);
 
             return new SearchContactOutput(selfUserId,
                 allUserReadModels,
-                photos,
+                photoReadModels,
                 contactReadModels,
                 [],
                 channelReadModels,
-                privacyReadModels,
+                [],
                 []
             );
         }

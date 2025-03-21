@@ -4,13 +4,13 @@ using MyTelegram.Schema.Langpack;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
 
-/// <summary>
-///     Get information about all languages in a localization pack
-///     <para>Possible errors</para>
-///     Code Type Description
-///     400 LANG_PACK_INVALID The provided language pack is invalid.
-///     See <a href="https://corefork.telegram.org/method/langpack.getLanguages" />
-/// </summary>
+///<summary>
+/// Get information about all languages in a localization pack
+/// <para>Possible errors</para>
+/// Code Type Description
+/// 400 LANG_PACK_INVALID The provided language pack is invalid.
+/// See <a href="https://corefork.telegram.org/method/langpack.getLanguages" />
+///</summary>
 internal sealed class GetLanguagesHandler(ILanguageCacheService languageCacheService) : RpcResultObjectHandler<RequestGetLanguages,
         TVector<Schema.ILangPackLanguage>>,
     Langpack.IGetLanguagesHandler

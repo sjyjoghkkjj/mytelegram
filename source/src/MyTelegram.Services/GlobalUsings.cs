@@ -7,3 +7,4 @@ global using EventFlow.Provided.Jobs;
 global using EventFlow.Snapshots;
 global using MyTelegram.Services.Extensions;
 global using MyTelegram.Schema.Extensions;
+global using MyTelegram.Schema;

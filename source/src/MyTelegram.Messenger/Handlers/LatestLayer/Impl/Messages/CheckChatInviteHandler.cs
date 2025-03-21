@@ -71,6 +71,7 @@ internal sealed class CheckChatInviteHandler(
             About = channelReadModel.About,
             Broadcast = channelReadModel.Broadcast,
             Channel = true,
+            Public = !string.IsNullOrEmpty(channelReadModel.UserName),
             Megagroup = channelReadModel.MegaGroup,
             ParticipantsCount = channelReadModel.ParticipantsCount ?? 0,
             Photo = layeredPhotoService.GetConverter(input.Layer).ToPhoto(chatPhoto),

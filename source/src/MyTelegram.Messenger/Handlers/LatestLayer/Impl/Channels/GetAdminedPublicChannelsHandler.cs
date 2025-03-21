@@ -14,21 +14,27 @@
 /// </summary>
 internal sealed class GetAdminedPublicChannelsHandler(
     IQueryProcessor queryProcessor,
+    IPhotoAppService photoAppService,
     IChatConverterService chatConverterService)
-    : RpcResultObjectHandler<Schema.Channels.RequestGetAdminedPublicChannels, Schema.Messages.IChats>,
-        Channels.IGetAdminedPublicChannelsHandler
+    : RpcResultObjectHandler<RequestGetAdminedPublicChannels, IChats>,
+        IGetAdminedPublicChannelsHandler
 {
-    protected override async Task<Schema.Messages.IChats> HandleCoreAsync(IRequestInput input,
-        Schema.Channels.RequestGetAdminedPublicChannels obj)
+    protected override async Task<IChats> HandleCoreAsync(IRequestInput input,
+        RequestGetAdminedPublicChannels obj)
     {
         var channelReadModels = await queryProcessor.ProcessAsync(new GetAdminedPublicChannelsQuery(input.UserId));
-        var channelIds = channelReadModels.Select(p => p.ChannelId).ToList();
-        var channels = await chatConverterService.GetChannelListAsync(input.UserId, channelIds, false, null, channelIds,
-            layer: input.Layer);
+        var photoReadModels = await photoAppService.GetPhotosAsync(channelReadModels);
+        var channelMemberReadModels = await queryProcessor.ProcessAsync(
+            new GetChannelMemberListByChannelIdListQuery(input.UserId,
+                channelReadModels.Select(p => p.ChannelId).ToList()));
+        var channels = chatConverterService.ToChannelList(input.UserId, channelReadModels, photoReadModels,
+            channelMemberReadModels, layer: input.Layer);
+
+        var myChannels = channels.Where(p => p is ILayeredChannel);
 
         return new TChats
         {
-            Chats = new TVector<IChat>(channels)
+            Chats = [.. myChannels]
         };
     }
 }

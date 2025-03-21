@@ -5,17 +5,17 @@ namespace MyTelegram.Messenger.Converters.TLObjects.LatestLayer;
 internal sealed class ChatInviteExportedConverter(IObjectMapper objectMapper) : IChatInviteExportedConverter, ITransientDependency
 {
     public int Layer => Layers.LayerLatest;
-    public IExportedChatInvite ToExportedChatInvite(IChatInviteReadModel readModel)
+    public ILayeredExportedChatInvite ToExportedChatInvite(IChatInviteReadModel readModel)
     {
         return objectMapper.Map<IChatInviteReadModel, TChatInviteExported>(readModel);
     }
 
-    public IExportedChatInvite ToExportedChatInvite(ChatInviteCreatedEvent source)
+    public ILayeredExportedChatInvite ToExportedChatInvite(ChatInviteCreatedEvent source)
     {
         return objectMapper.Map<ChatInviteCreatedEvent, TChatInviteExported>(source);
     }
 
-    public IExportedChatInvite ToExportedChatInvite(ChatInviteEditedEvent source)
+    public ILayeredExportedChatInvite ToExportedChatInvite(ChatInviteEditedEvent source)
     {
         return objectMapper.Map<ChatInviteEditedEvent, TChatInviteExported>(source);
     }

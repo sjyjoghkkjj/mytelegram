@@ -19,13 +19,13 @@ public class MessageQueueProcessor2<TData>(
             InitQueueIfNeed();
             if (!TryGetQueue(key, out queue))
             {
-                throw new InvalidOperationException($"Get queue failed,key={key} message='{typeof(TData)}'");
+                throw new InvalidOperationException($"Get queue failed, key: {key} message: '{typeof(TData)}'");
             }
         }
 
         if (!queue!.Writer.TryWrite(message))
         {
-            logger.LogWarning("Can not write message to queue");
+            logger.LogWarning("Cannot write message to queue");
         }
     }
 
@@ -77,7 +77,7 @@ public class MessageQueueProcessor2<TData>(
                         }
                         catch (Exception ex)
                         {
-                            logger.LogError(ex, "Process message queue error:");
+                            logger.LogError(ex, "Process message queue failed:");
                         }
                     }
                 }
@@ -124,7 +124,7 @@ public class MessageQueueProcessor2<TData>(
             return true;
         }
 
-        logger.LogWarning("Can not find queue for key {Key}", key);
+        logger.LogWarning("Cannot find queue for key {Key}", key);
         return false;
     }
 }

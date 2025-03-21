@@ -12,8 +12,9 @@
 ///</summary>
 internal sealed class GetChannelsHandler(
     IChatConverterService chatConverterService,
+    IQueryProcessor queryProcessor,
     IAccessHashHelper accessHashHelper)
-    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestGetChannels, MyTelegram.Schema.Messages.IChats>,
+    : RpcResultObjectHandler<RequestGetChannels, IChats>,
         IGetChannelsHandler
 {
     protected override async Task<IChats> HandleCoreAsync(IRequestInput input,
@@ -31,11 +32,14 @@ internal sealed class GetChannelsHandler(
 
         if (channelIds.Count > 0)
         {
+            var channelMemberReadModels =
+                await queryProcessor.ProcessAsync(
+                    new GetChannelMemberListByChannelIdListQuery(input.UserId, channelIds));
             var channels =
-                await chatConverterService.GetChannelListAsync(input.UserId, channelIds, false, layer: input.Layer);
+                await chatConverterService.GetChannelListAsync(input.UserId, channelIds, channelMemberReadModels, layer: input.Layer);
             return new TChats
             {
-                Chats = new TVector<IChat>(channels)
+                Chats = [.. channels]
             };
         }
 

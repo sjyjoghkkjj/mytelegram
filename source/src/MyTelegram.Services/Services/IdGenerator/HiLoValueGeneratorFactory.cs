@@ -3,7 +3,7 @@
 public class HiLoValueGeneratorFactory(
     ILogger<DefaultHiLoValueGenerator> logger,
     IHiLoHighValueGenerator highValueGenerator)
-    : IHiLoValueGeneratorFactory
+    : IHiLoValueGeneratorFactory, ITransientDependency
 {
     public HiLoValueGenerator<long> Create(HiLoValueGeneratorState state)
     {

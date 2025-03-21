@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Add an existing telegram user as contact.Use <a href="https://corefork.telegram.org/method/contacts.importContacts">contacts.importContacts</a> to add contacts by phone number, without knowing their Telegram ID.
@@ -12,28 +10,20 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 /// 400 MSG_ID_INVALID Invalid message ID provided.
 /// See <a href="https://corefork.telegram.org/method/contacts.addContact" />
 ///</summary>
-internal sealed class AddContactHandler : RpcResultObjectHandler<MyTelegram.Schema.Contacts.RequestAddContact, MyTelegram.Schema.IUpdates>,
-    Contacts.IAddContactHandler
+internal sealed class AddContactHandler(
+    ICommandBus commandBus,
+    IPeerHelper peerHelper,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Contacts.RequestAddContact, MyTelegram.Schema.IUpdates>,
+        Contacts.IAddContactHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public AddContactHandler(ICommandBus commandBus,
-        IPeerHelper peerHelper,
-        IAccessHashHelper accessHashHelper)
-    {
-        _commandBus = commandBus;
-        _peerHelper = peerHelper;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestAddContact obj)
     {
         if (obj.Id is TInputUser inputUser)
         {
-            await _accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
-            var peer = _peerHelper.GetPeer(obj.Id, input.UserId);
+            await accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
+            var peer = peerHelper.GetPeer(obj.Id, input.UserId);
             var command = new AddContactCommand(ContactId.Create(input.UserId, peer.PeerId),
                 input.ToRequestInfo(),
                 input.UserId,
@@ -42,7 +32,7 @@ internal sealed class AddContactHandler : RpcResultObjectHandler<MyTelegram.Sche
                 obj.FirstName,
                 obj.LastName,
                 obj.AddPhonePrivacyException);
-            await _commandBus.PublishAsync(command, default);
+            await commandBus.PublishAsync(command, default);
 
             return null!;
         }

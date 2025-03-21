@@ -61,65 +61,36 @@ public static class MyTelegramMessengerQueryServerExtensions
 
             options.AddCommands(
                 typeof(CreateRpcResultCommand),
-                typeof(CreatePushUpdatesCommand),
                 typeof(CreateUpdatesCommand),
-                typeof(CreateEncryptedPushUpdatesCommand),
-                typeof(UpdatePtsCommand),
-                typeof(PtsAckedCommand),
-                typeof(QtsAckedCommand),
-                typeof(IncrementTempPtsCommand),
-                typeof(UpdateQtsCommand),
-                typeof(UpdatePtsForAuthKeyIdCommand),
-                typeof(UpdateGlobalSeqNoCommand)
-                //typeof(CreatePtsCommand)
+                typeof(DeleteRpcResultCommand)
                 );
             options.AddCommandHandlers(
                 typeof(CreateRpcResultCommandHandler),
                 typeof(CreateUpdatesCommandHandler),
-                typeof(CreateEncryptedPushUpdatesCommandHandler),
-                typeof(UpdatePtsCommandHandler),
-                typeof(PtsAckedCommandHandler),
-                typeof(QtsAckedCommandHandler),
-                typeof(IncrementTempPtsCommandHandler),
-                typeof(UpdateQtsCommandHandler),
-                typeof(UpdatePtsForAuthKeyIdCommandHandler),
-                typeof(UpdateGlobalSeqNoCommandHandler)
+                typeof(DeleteRpcResultCommandHandler)
             );
             options.AddEvents(
-                typeof(EncryptedPushUpdatesCreatedEvent),
-                typeof(PushUpdatesCreatedEvent),
                 typeof(RpcResultCreatedEvent),
                 typeof(UpdatesCreatedEvent),
-                typeof(PtsUpdatedEvent),
-                typeof(PtsAckedEvent),
-                typeof(TempPtsIncrementedEvent),
-                typeof(QtsUpdatedEvent),
-                typeof(PtsForAuthKeyIdUpdatedEvent),
-                typeof(QtsForAuthKeyIdUpdatedEvent),
-                typeof(PtsGlobalSeqNoUpdatedEvent)
+                typeof(RpcResultDeletedEvent)
                 );
-
-            options.AddSnapshots(typeof(PtsSnapshot));
-
 
             options.UseMongoDbEventStore();
             options.UseMongoDbSnapshotStore();
-
             options.UseMongoDbReadModel<UpdatesAggregate, UpdatesId, UpdatesReadModel, PushReadModelMongoDbContext>();
             options.UseMongoDbReadModel<RpcResultAggregate, RpcResultId, RpcResultReadModel, PushReadModelMongoDbContext>();
             options.UseMongoDbReadModel<PtsAggregate, PtsId, PtsReadModel, PushReadModelMongoDbContext>();
             options.UseMongoDbReadModel<PtsAggregate, PtsId, PtsForAuthKeyIdReadModel, PushReadModelMongoDbContext>();
-             
+            options.AddMyMongoDbReadModelServices();         
             configure?.Invoke(options);
         });
 
         services.AddMyTelegramCoreServices();
         services.AddMyTelegramHandlerServices();
         services.AddMyTelegramMessengerServices();
-        services.AddMyEventFlow();
         services.AddMyTelegramIdGeneratorServices();
-
-        // services.AddSingleton(typeof(IQueuedCommandExecutor<,,>), typeof(QueuedCommandExecutor<,,>));
+        services.AddMyEventFlow();
+        services.AddMyNativeAot();
 
         services.AddSystemTextJson(options =>
         {

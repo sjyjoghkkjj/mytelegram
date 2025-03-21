@@ -265,7 +265,11 @@ public class DialogReadModel : IDialogReadModel,
         IDomainEvent<PeerNotifySettingsAggregate, PeerNotifySettingsId, PeerNotifySettingsUpdatedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
+        Id = DialogId.Create(domainEvent.AggregateEvent.OwnerPeerId,
+            domainEvent.AggregateEvent.PeerType,
+            domainEvent.AggregateEvent.PeerId).Value;
         NotifySettings = domainEvent.AggregateEvent.PeerNotifySettings;
+
         return Task.CompletedTask;
     }
     //#region Draft
@@ -322,6 +326,7 @@ public class DialogReadModel : IDialogReadModel,
             domainEvent.AggregateEvent.MessageItem.ToPeer).Value;
 
         Pts = domainEvent.AggregateEvent.MessageItem.Pts;
+        TopMessage = domainEvent.AggregateEvent.MessageItem.MessageId;
 
         return Task.CompletedTask;
     }

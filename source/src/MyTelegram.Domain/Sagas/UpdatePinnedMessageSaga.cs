@@ -1,6 +1,4 @@
-﻿using EventFlow.Aggregates;
-
-namespace MyTelegram.Domain.Sagas;
+﻿namespace MyTelegram.Domain.Sagas;
 
 public class UpdatePinnedMessageSaga : MyInMemoryAggregateSaga<UpdatePinnedMessageSaga,
         UpdatePinnedMessageSagaId,

@@ -26,12 +26,12 @@ public class ReadModelCacheHelper<TReadModel> : IReadModelCacheHelper<TReadModel
         return readModel!;
     }
 
-    public bool TryGetReadModel(long readModelId, [NotNullWhen(true)] out TReadModel? readModel)
+    public bool TryGetReadModel(long readModelId, out TReadModel? readModel)
     {
         return ReadModels.TryGetValue(readModelId, out readModel);
     }
 
-    public bool TryGetReadModel(string readModelId, [NotNullWhen(true)] out TReadModel? readModel)
+    public bool TryGetReadModel(string readModelId, out TReadModel? readModel)
     {
         if (ReadModelIds.TryGetValue(readModelId, out var id))
         {

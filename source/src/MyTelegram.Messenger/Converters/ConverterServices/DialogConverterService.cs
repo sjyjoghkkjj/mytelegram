@@ -3,12 +3,9 @@
 namespace MyTelegram.Messenger.Converters.ConverterServices;
 
 public class DialogConverterService(
-    //IObjectMapper objectMapper,
     IUserConverterService userConverterService,
     IChatConverterService chatConverterService,
     IMessageConverterService messageConverterService,
-    //ILayeredService<IMessageConverter> messageLayeredService,
-    ILayeredService<IUserConverter> userLayeredService,
     ILayeredService<IDraftMessageConverter> draftMessageLayeredService,
     ILayeredService<IPeerNotifySettingsConverter> peerNotifySettingsLayeredService,
     ILayeredService<IDialogConverter> dialogLayeredService) : IDialogConverterService, ITransientDependency
@@ -47,25 +44,25 @@ public class DialogConverterService(
         }
 
         var messages = messageConverterService
-            .ToMessageList(output.SelfUserId, allMessages, output.PollList, output.ChosenPollOptions, layer);
+            .ToMessageList(output.SelfUserId, allMessages, output.PollList, output.ChosenPollOptions,output.UserReactionList, layer);
 
         if (dialogs.Count == output.Limit)
         {
             return new TDialogsSlice
             {
-                Chats = new TVector<IChat>(channelList),
-                Dialogs = new TVector<IDialog>(dialogs),
-                Messages = new TVector<IMessage>(messages),
-                Users = new TVector<IUser>(users),
+                Chats = [.. channelList],
+                Dialogs = [.. dialogs],
+                Messages = [.. messages],
+                Users = [.. users],
                 Count = dialogs.Count
             };
         }
         return new TDialogs
         {
-            Chats = new TVector<IChat>(channelList),
-            Dialogs = new TVector<IDialog>(dialogs),
-            Messages = new TVector<IMessage>(messages),
-            Users = new TVector<IUser>(users),
+            Chats = [.. channelList],
+            Dialogs = [.. dialogs],
+            Messages = [.. messages],
+            Users = [.. users],
         };
     }
 

@@ -20,8 +20,8 @@ internal sealed class GetDiscussionMessageHandler(
     IMessageConverterService messageConverterService,
     IAccessHashHelper accessHashHelper,
     IPhotoAppService photoAppService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetDiscussionMessage,
-            MyTelegram.Schema.Messages.IDiscussionMessage>,
+    : RpcResultObjectHandler<RequestGetDiscussionMessage,
+            IDiscussionMessage>,
         IGetDiscussionMessageHandler
 {
     protected override async Task<IDiscussionMessage> HandleCoreAsync(IRequestInput input,
@@ -31,7 +31,7 @@ internal sealed class GetDiscussionMessageHandler(
         // peer is the channel peer
         var peer = peerHelper.GetPeer(obj.Peer);
         var channelReadModel = await channelAppService.GetAsync(peer.PeerId);
-        if (channelReadModel == null)
+        if (channelReadModel == null!)
         {
             RpcErrors.RpcErrors400.ChatIdInvalid.ThrowRpcError();
         }
@@ -44,15 +44,17 @@ internal sealed class GetDiscussionMessageHandler(
         {
             return new TDiscussionMessage
             {
-                Chats = new TVector<IChat>(),
-                Messages = new TVector<IMessage>(),
-                Users = new TVector<IUser>(),
+                Chats = [],
+                Messages = [],
+                Users = [],
             };
         }
 
         var dialogReadModel =
             await queryProcessor.ProcessAsync(new GetDialogByIdQuery(DialogId.Create(input.UserId, PeerType.Channel, messageReadModel.ToPeerId)), default);
-        var channelReadModels = await channelAppService.GetListAsync([peer.PeerId, messageReadModel.ToPeerId]);
+
+        List<long> channelIds = [peer.PeerId, messageReadModel.ToPeerId];
+        var channelReadModels = await channelAppService.GetListAsync(channelIds);
 
         var readMaxId = 0;
         if (dialogReadModel != null)
@@ -62,20 +64,21 @@ internal sealed class GetDiscussionMessageHandler(
 
         var message = messageConverterService.ToMessage(input.UserId, messageReadModel, layer: input.Layer);
         var photoReadModels = await photoAppService.GetPhotosAsync(channelReadModels);
+        var channelMemberReadModels =
+            await queryProcessor.ProcessAsync(new GetChannelMemberListByChannelIdListQuery(input.UserId, channelIds));
 
         var chats = chatConverterService.ToChannelList(
             input.UserId,
             channelReadModels,
             photoReadModels,
-            [],
-            [],
-             true, layer: input.Layer);
+            channelMemberReadModels,
+              layer: input.Layer);
 
         return new TDiscussionMessage
         {
-            Chats = new TVector<IChat>(chats),
+            Chats = [.. chats],
             Messages = new TVector<IMessage>(message),
-            Users = new TVector<IUser>(),
+            Users = [],
             MaxId = readMaxId,
             ReadInboxMaxId = dialogReadModel?.ReadInboxMaxId,
             ReadOutboxMaxId = dialogReadModel?.ReadOutboxMaxId

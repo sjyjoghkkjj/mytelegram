@@ -48,28 +48,6 @@ internal sealed class InviteToChannelHandler(
             channelReadModel.ThrowExceptionIfChannelDeleted();
             var userReadModel = await userAppService.GetAsync(input.UserId);
 
-            if (obj.Users.Count == 1)
-            {
-                if (obj.Users[0] is TInputUser inputUser)
-                {
-                    await privacyAppService.ApplyPrivacyAsync(
-                        input.UserId,
-                        inputUser.UserId,
-                        restrictedByPrivacyValueType =>
-                        {
-                            if (restrictedByPrivacyValueType == PrivacyValueType.AllowPremium)
-                            {
-                                if (!userReadModel!.Premium)
-                                {
-                                    RpcErrors.RpcErrors403.UserPrivacyRestricted.ThrowRpcError();
-                                }
-                            }
-                        },
-                        [PrivacyType.ChatInvite]
-                    );
-                }
-            }
-
             var userIds = new List<long>();
             var botUserIds = new List<long>();
             foreach (var item in obj.Users)

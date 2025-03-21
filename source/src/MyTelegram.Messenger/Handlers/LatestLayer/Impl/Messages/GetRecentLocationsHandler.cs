@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get live location history of a certain user
@@ -14,9 +12,9 @@ internal sealed class GetRecentLocationsHandler : RpcResultObjectHandler<MyTeleg
     {
         return Task.FromResult<MyTelegram.Schema.Messages.IMessages>(new TMessages
         {
-            Chats = new(),
-            Messages = new(),
-            Users = new(),
+            Chats = [],
+            Messages = [],
+            Users = [],
         });
     }
 }

@@ -18,6 +18,6 @@ public class ChannelAdminRightsChecker(IQueryProcessor queryProcessor) : IChanne
             return false;
         }
 
-        return checkAdminRightsFunc(chatAdmin);
+        return chatAdmin.IsCreator || checkAdminRightsFunc(chatAdmin);
     }
 }

@@ -15,4 +15,5 @@ public enum PrivacyType
     About,
     Birthday,
     StarGiftsAutoSave,
+    NoPaidMessages,
 }

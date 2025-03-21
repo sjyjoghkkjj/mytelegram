@@ -19,17 +19,11 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 ///</summary>
 internal sealed class GetExportedChatInvitesHandler(
     IPeerHelper peerHelper,
-    IOptions<MyTelegramMessengerServerOptions> options,
     IAccessHashHelper accessHashHelper,
     IQueryProcessor queryProcessor,
-    IObjectMapper objectMapper,
     IChannelAppService channelAppService,
-    IPhotoAppService photoAppService,
-    IPrivacyAppService privacyAppService,
-    IUserAppService userAppService,
-    //ILayeredService<IUserConverter> layeredUserService,
     IUserConverterService userConverterService,
-    IChatInviteLinkHelper chatInviteLinkHelper)
+    IChatInviteExportedConverterService chatInviteExportedConverterService)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetExportedChatInvites,
             MyTelegram.Schema.Messages.IExportedChatInvites>,
         Messages.IGetExportedChatInvitesHandler
@@ -39,8 +33,6 @@ internal sealed class GetExportedChatInvitesHandler(
     {
         await accessHashHelper.CheckAccessHashAsync(obj.Peer);
         await accessHashHelper.CheckAccessHashAsync(obj.AdminId);
-
-        // todo:impl get chat invites
         var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
         var channelReadModel = await channelAppService.GetAsync(peer.PeerId);
         if (channelReadModel == null)
@@ -60,19 +52,20 @@ internal sealed class GetExportedChatInvitesHandler(
                     peer.PeerId,
                     admin.PeerId,
                     obj.OffsetDate,
-                    obj.OffsetLink,
+                    obj.OffsetLink ?? string.Empty,
                     obj.Limit));
         var userIds = invites.Select(p => p.AdminId).ToList();
         var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
 
-        var tInvites = invites.Select(p => objectMapper.Map<IChatInviteReadModel, TChatInviteExported>(p)).ToList();
-        tInvites.ForEach(p => p.Link = chatInviteLinkHelper.GetFullLink(options.Value.JoinChatDomain, p.Link));
+        //var tInvites = invites.Select(p => objectMapper.Map<IChatInviteReadModel, TChatInviteExported>(p)).ToList();
+        //tInvites.ForEach(p => p.Link = chatInviteLinkHelper.GetFullLink(options.Value.JoinChatDomain, p.Link));
+        var tInvites = invites.Select(p => chatInviteExportedConverterService.ToExportedChatInvite(p, input.Layer));
 
         var r = new TExportedChatInvites
         {
             Count = invites.Count,
-            Invites = new TVector<IExportedChatInvite>(tInvites),
-            Users = new TVector<IUser>(users),
+            Invites = [.. tInvites],
+            Users = [.. users],
         };
 
         return r;

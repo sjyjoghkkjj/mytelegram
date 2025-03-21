@@ -172,7 +172,7 @@ public static class Extension
                 peerType = PeerType.Empty;
                 peerId = selfUserId;
                 break;
-            case TInputPeerSelf _:
+            case TInputPeerSelf:
                 peerType = PeerType.Self;
                 peerId = selfUserId;
                 break;

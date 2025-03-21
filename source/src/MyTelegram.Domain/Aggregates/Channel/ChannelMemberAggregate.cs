@@ -120,34 +120,6 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
             bannedRights));
     }
 
-    public void Join(RequestInfo requestInfo,
-        long channelId,
-        long memberUserId,
-        bool isBroadcast
-        )
-    {
-        if (_state.KickedBy != 0)
-        {
-            RpcErrors.RpcErrors400.ChannelPrivate.ThrowRpcError();
-        }
-
-        if (!IsNew && !_state.Kicked)
-        {
-            RpcErrors.RpcErrors400.UserAlreadyParticipant.ThrowRpcError();
-        }
-
-        var isBot = memberUserId >= MyTelegramServerDomainConsts.BotUserInitId;
-
-        Emit(new ChannelMemberJoinedEvent(requestInfo,
-            channelId,
-            memberUserId,
-            DateTime.UtcNow.ToTimestamp(),
-            !IsNew,
-            isBot,
-            isBroadcast
-            ));
-    }
-
     public void LeaveChannel(RequestInfo requestInfo,
         long channelId,
         long memberUserId)

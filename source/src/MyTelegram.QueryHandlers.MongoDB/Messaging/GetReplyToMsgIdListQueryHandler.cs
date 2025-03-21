@@ -26,13 +26,14 @@ public class
                     // Reply to a message sent by ToPeerId
                     if (!messageReadModel.Out)
                     {
-                        return [new ReplyToMsgItem(messageReadModel.SenderPeerId, messageReadModel.SenderMessageId)];
+                        return new[] { new ReplyToMsgItem(messageReadModel.SenderPeerId, messageReadModel.SenderMessageId) };
                     }
 
                     // Reply to a message sent by myself
                     var item = await store.FirstOrDefaultAsync(p =>
                         p.OwnerPeerId == query.ToPeer.PeerId && p.ToPeerId == query.SelfUserId &&
-                        p.SenderMessageId == query.ReplyToMsgId, p => new ReplyToMsgItem(p.OwnerPeerId, p.MessageId), cancellationToken: cancellationToken);
+                        p.SenderMessageId == query.ReplyToMsgId,
+                        p => new ReplyToMsgItem(p.OwnerPeerId, p.MessageId), cancellationToken: cancellationToken);
 
                     if (item != null)
                     {
@@ -67,16 +68,5 @@ public class
                 }
         }
         return null;
-
-        //var cursor = await _store.FindAsync(p =>
-        //    p.OwnerPeerId == query.SelfUserId && p.ToPeerId == query.ToPeer.PeerId &&
-        //    p.MessageId == query.ReplyToMsgId);
-
-
-        //var cursor = await _store.FindAsync(p =>
-        //    p.ToPeerId == query.ToPeer.PeerId && p.SenderPeerId == query.SenderUserId &&
-        //    p.MessageId == query.ReplyToMsgId, findOptions, cancellationToken);
-
-        //return await cursor.ToListAsync(cancellationToken: cancellationToken);
     }
 }

@@ -1,6 +1,4 @@
-﻿using MyTelegram.Messenger.Converters.ConverterServices.Messages;
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Search for messages.
@@ -23,16 +21,12 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 internal sealed class SearchHandler(
     IMessageAppService messageAppService,
     IPeerHelper peerHelper,
-    //IRpcResultProcessor rpcResultProcessor,
     IAccessHashHelper accessHashHelper,
     IGetHistoryConverterService getHistoryConverterService
     )
-    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSearch, MyTelegram.Schema.Messages.IMessages>,
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSearch, IMessages>,
         ISearchHandler
 {
-    //private readonly IRpcResultProcessor _rpcResultProcessor;
-    //_rpcResultProcessor = rpcResultProcessor;
-
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSearch obj)
     {
@@ -64,7 +58,6 @@ internal sealed class SearchHandler(
 
     private static MessageType GetMessageType(IMessagesFilter? filter)
     {
-        //Expression<Func<MessageBox, bool>> predicate = null;
         if (filter != null)
         {
             var messageType = MessageType.Unknown;
@@ -145,13 +138,8 @@ internal sealed class SearchHandler(
             }
 
             return messageType;
-            //if (MessageType != MessageType.Unknown)
-            //{
-            //    predicate = x => x.MessageType == MessageType;
-            //}
         }
 
         return MessageType.Unknown;
-        //return predicate;
     }
 }

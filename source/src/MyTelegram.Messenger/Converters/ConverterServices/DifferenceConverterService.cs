@@ -29,10 +29,10 @@ public class DifferenceConverterService(
             maxPts = Math.Max(updatesMaxPts, boxMaxPts);
         }
 
-        var messageList = messageConverterService.ToMessageList(output.SelfUserId, output.MessageList, output.PollList, output.ChosenPollOptions, layer);
+        var messageList = messageConverterService.ToMessageList(output.SelfUserId, output.MessageList, output.PollList, output.ChosenPollOptions, output.UserReactionList, layer);
 
         var channelList = chatConverterService.ToChannelList(output.SelfUserId, output.ChannelList, output.PhotoList,
-            output.ChannelMemberList, output.JoinedChannelIdList, false, layer);
+            output.ChannelMemberList, output.JoinedChannelIdList, layer);
         var userList = userConverterService.ToUserList(output.SelfUserId, output.UserList, output.PhotoList,
             output.ContactList, output.PrivacyList, layer);
 
@@ -42,11 +42,11 @@ public class DifferenceConverterService(
         {
             Final = output.Pts == maxPts,
             Pts = maxPts,
-            Users = new TVector<IUser>(userList),
-            OtherUpdates = new TVector<IUpdate>(layeredUpdates),
+            Users = [.. userList],
+            OtherUpdates = [.. layeredUpdates],
             Timeout = timeout,
-            Chats = new TVector<IChat>(channelList),
-            NewMessages = new TVector<IMessage>(messageList)
+            Chats = [.. channelList],
+            NewMessages = [.. messageList]
         };
     }
 
@@ -54,11 +54,11 @@ public class DifferenceConverterService(
         IList<IChat> chatListFromUpdates, IReadOnlyCollection<IEncryptedMessageReadModel>? encryptedMessageReadModels, int layer = 0)
     {
         var messageList = messageConverterService.ToMessageList(output.SelfUserId, output.MessageList, output.PollList,
-            output.ChosenPollOptions, layer);
+            output.ChosenPollOptions, output.UserReactionList, layer);
         var userList = userConverterService.ToUserList(output.SelfUserId, output.UserList, output.PhotoList,
             output.ContactList, output.PrivacyList, layer);
         var channelList = chatConverterService.ToChannelList(output.SelfUserId, output.ChannelList, output.PhotoList,
-            output.ChannelMemberList, output.JoinedChannelIdList, false, layer);
+            output.ChannelMemberList, output.JoinedChannelIdList, layer);
 
         var qts = pts?.Qts ?? 0;
         var unreadCount = pts?.UnreadCount ?? 0;
@@ -73,11 +73,11 @@ public class DifferenceConverterService(
         {
             var differenceSlice = new TDifferenceSlice
             {
-                Chats = new TVector<IChat>(channelList),
-                NewEncryptedMessages = new TVector<IEncryptedMessage>(),
-                NewMessages = new TVector<IMessage>(messageList),
-                OtherUpdates = new TVector<IUpdate>(layeredUpdates),
-                Users = new TVector<IUser>(userList),
+                Chats = [.. channelList],
+                NewEncryptedMessages = [],
+                NewMessages = [.. messageList],
+                OtherUpdates = [.. layeredUpdates],
+                Users = [.. userList],
                 IntermediateState = pts == null
                     ? new TState
                     {
@@ -97,11 +97,11 @@ public class DifferenceConverterService(
 
         var difference = new TDifference
         {
-            Chats = new TVector<IChat>(channelList),
-            NewEncryptedMessages = new TVector<IEncryptedMessage>(newEncryptedMessages),
-            NewMessages = new TVector<IMessage>(messageList),
-            OtherUpdates = new TVector<IUpdate>(layeredUpdates),
-            Users = new TVector<IUser>(userList),
+            Chats = [.. channelList],
+            NewEncryptedMessages = [.. newEncryptedMessages],
+            NewMessages = [.. messageList],
+            OtherUpdates = [.. layeredUpdates],
+            Users = [.. userList],
             State = pts == null
                 ? new TState
                 {

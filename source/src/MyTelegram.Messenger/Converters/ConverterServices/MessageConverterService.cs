@@ -5,7 +5,6 @@ public class MessageConverterService(
     ILayeredService<IMessageConverter> messageLayeredService,
     ILayeredService<IMessageServiceConverter> messageServiceLayeredService,
     ILayeredService<IMessageFwdHeaderConverter> messageFwdHeaderLayeredService,
-    ILayeredService<IReactionConverter> reactionLayeredService,
     ILayeredService<IPollConverter> pollLayeredService
 ) : IMessageConverterService, ITransientDependency
 {
@@ -14,6 +13,7 @@ public class MessageConverterService(
         IMessageReadModel readModel,
         IPollReadModel? pollReadModel = null,
         List<string>? chosenOptions = null,
+        List<IUserReactionReadModel>? userReactionReadModels = null,
         int layer = 0
     )
     {
@@ -29,31 +29,23 @@ public class MessageConverterService(
             };
         }
 
-        return ToMessage(selfUserId, readModel, media, layer);
+        return ToMessage(selfUserId, readModel, media, userReactionReadModels, layer);
     }
 
     private IMessage ToMessage(
         long selfUserId,
         IMessageReadModel readModel,
         IMessageMedia? pollMedia = null,
+        IReadOnlyCollection<IUserReactionReadModel>? userReactionReadModels = null,
         int layer = 0
     )
     {
-        var reactions = reactionLayeredService
-            .GetConverter(layer)
-            .ToMessageReactions(
-                selfUserId,
-                new Peer(readModel.ToPeerType, readModel.ToPeerId),
-                readModel
-            );
-
         var fromId = new Peer(PeerType.User, readModel.SenderPeerId).ToPeer();
         switch (readModel.SendMessageType)
         {
             case SendMessageType.MessageService:
                 {
                     var m = messageServiceLayeredService.GetConverter(layer).ToMessage(readModel);
-                    m.Reactions = reactions;
                     if (readModel.ToPeerType == PeerType.Channel)
                     {
                         if (
@@ -99,6 +91,11 @@ public class MessageConverterService(
                             m.Out = false;
                         }
 
+                        if (readModel.Post)
+                        {
+                            m.FromId = null;
+                        }
+
                         if (readModel.SendAs != null)
                         {
                             m.FromId = readModel.SendAs.ToPeer();
@@ -120,8 +117,6 @@ public class MessageConverterService(
                         m.Media = pollMedia;
                     }
 
-                    m.Reactions = reactions;
-
                     return m;
                 }
         }
@@ -132,6 +127,7 @@ public class MessageConverterService(
         IReadOnlyCollection<IMessageReadModel> messageReadModels,
         IReadOnlyCollection<IPollReadModel>? pollReadModels,
         IReadOnlyCollection<IPollAnswerVoterReadModel>? pollAnswerVoterReadModels,
+        IReadOnlyCollection<IUserReactionReadModel>? userReactionReadModels,
         int layer = 0
     )
     {
@@ -165,7 +161,7 @@ public class MessageConverterService(
                 }
             }
 
-            messages.Add(ToMessage(selfUserId, readModel, media, layer));
+            messages.Add(ToMessage(selfUserId, readModel, media, null, layer));
         }
 
         return messages;
@@ -174,28 +170,11 @@ public class MessageConverterService(
     public IMessage ToMessage(
         long selfUserId,
         MessageItem item,
-        List<ReactionCount>? reactions = null,
-        List<Reaction>? recentReactions = null,
-        List<UserReaction>? userReactions = null,
+        List<long>? userReactionIds = null,
         bool mentioned = false,
         int layer = 0
     )
     {
-        var canSeeList =
-            item.IsOut
-            && (item.ToPeer.PeerType == PeerType.Channel || item.ToPeer.PeerType == PeerType.Chat);
-
-        var messageReactions = reactionLayeredService
-            .GetConverter(layer)
-            .ToMessageReactions(
-                selfUserId,
-                item.ToPeer,
-                reactions,
-                recentReactions,
-                canSeeList,
-                userReactions
-            );
-
         var isOut = item.IsOut;
         var fromId = item.SenderPeer.ToPeer();
 
@@ -219,12 +198,16 @@ public class MessageConverterService(
                             fromId = null;
                         }
                     }
+
                     var m = messageServiceLayeredService.GetConverter(layer).ToMessage(item);
                     m.Out = isOut;
                     m.Mentioned = mentioned;
                     m.MediaUnread = mentioned;
                     m.FromId = fromId;
-                    m.Reactions = messageReactions;
+                    if (item.SendAs != null)
+                    {
+                        m.FromId = item.SendAs.ToPeer();
+                    }
 
                     return m;
                 }
@@ -237,7 +220,6 @@ public class MessageConverterService(
                     m.Media = media;
                     m.Out = isOut;
                     m.FromId = fromId;
-                    m.Reactions = messageReactions;
 
                     if (item.FwdHeader != null)
                     {
@@ -259,6 +241,11 @@ public class MessageConverterService(
                             //m.FromId = _peerHelper.ToPeer(PeerType.Channel, item.FwdHeader.SavedFromPeer.PeerId);
                             m.FromId = item.FwdHeader.SavedFromPeer.ToPeer();
                             m.Out = false;
+                        }
+
+                        if (item.Post)
+                        {
+                            m.FromId = null;
                         }
 
                         if (item.SendAs != null)
@@ -309,12 +296,10 @@ public class MessageConverterService(
         if (post)
         {
             messageReplies.ChannelId = reply.ChannelId;
-            messageReplies.RecentRepliers = new TVector<IPeer>();
+            messageReplies.RecentRepliers = [];
             if (reply.RecentRepliers?.Count > 0)
             {
-                messageReplies.RecentRepliers = new TVector<IPeer>(
-                    reply.RecentRepliers.Select(p => p.ToPeer())
-                );
+                messageReplies.RecentRepliers = [.. reply.RecentRepliers.Select(p => p.ToPeer())];
             }
         }
 

@@ -40,7 +40,7 @@ public record MessageItem
     Guid? BatchId = null,
     long? Effect = null,
     List<ReactionCount>? Reactions = null,
-    List<Reaction>? RecentReactions = null,
+    List<MessagePeerReaction>? RecentReactions = null,
     int? EditDate = null,
     IReadOnlyCollection<InboxItem>? InboxItems = null,
     int Pts = 0,

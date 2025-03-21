@@ -37,4 +37,5 @@ public interface IChannelFullReadModel : IReadModel
     int? TtlPeriod { get; }
     int? RequestsPending { get; }
     List<long>? RecentRequesters { get; }
+    bool ParticipantsHidden { get; }
 }

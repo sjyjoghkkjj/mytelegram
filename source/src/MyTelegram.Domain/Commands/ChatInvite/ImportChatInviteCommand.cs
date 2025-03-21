@@ -1,6 +1,4 @@
-﻿using MyTelegram.Domain.Aggregates.ChatInvite;
-
-namespace MyTelegram.Domain.Commands.ChatInvite;
+﻿namespace MyTelegram.Domain.Commands.ChatInvite;
 
 public class ImportChatInviteCommand(
     ChatInviteId aggregateId,

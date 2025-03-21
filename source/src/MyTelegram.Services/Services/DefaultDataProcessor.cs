@@ -1,12 +1,10 @@
-﻿using MyTelegram.Schema;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace MyTelegram.Services.Services;
 
 public class DefaultDataProcessor<TData>(
     IHandlerHelper handlerHelper,
     IObjectMessageSender objectMessageSender,
-    IRpcResultCacheAppService rpcResultCacheAppService,
     ILogger<DefaultDataProcessor<TData>> logger,
     IExceptionProcessor exceptionProcessor,
     IRequestHelper requestHelper,
@@ -57,16 +55,12 @@ public class DefaultDataProcessor<TData>(
                         }
                     }
 
+                   
                     var handlerName = handler.GetType().Name;
 
                     if (data is IHasSubQuery)
                     {
                         handlerName = handlerHelper.GetHandlerFullName(data);
-                    }
-
-                    if (!needToCheckRequest)
-                    {
-                        Console.WriteLine($"not need to check request:{handlerName}");
                     }
 
                     var r = await handler.HandleAsync(req, data);

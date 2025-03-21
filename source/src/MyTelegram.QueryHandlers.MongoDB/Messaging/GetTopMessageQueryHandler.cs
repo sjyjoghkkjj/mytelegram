@@ -7,7 +7,7 @@ public class GetTopMessageQueryHandler(IQueryOnlyReadModelStore<MessageReadModel
     {
         return await store.FirstOrDefaultAsync(
             p => p.OwnerPeerId == query.OwnerPeerId && !query.MessageIds.Contains(p.MessageId),
-            p=>p,
+            p => p,
             sort: new SortOptions<MessageReadModel>(p => p.MessageId, SortType.Descending), cancellationToken: cancellationToken);
     }
 }

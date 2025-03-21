@@ -22,8 +22,8 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 internal sealed class UpdatePinnedMessageHandler(
     ICommandBus commandBus,
     IPeerHelper peerHelper,
-    IQueryProcessor queryProcessor,
     IChannelAppService channelAppService,
+    IQueryProcessor queryProcessor,
     IChannelAdminRightsChecker channelAdminRightsChecker,
     IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestUpdatePinnedMessage, MyTelegram.Schema.IUpdates>,
@@ -55,16 +55,7 @@ internal sealed class UpdatePinnedMessageHandler(
         var command =
             new StartUpdatePinnedMessagesCommand(TempId.New, input.ToRequestInfo(), messageItems, peer, !obj.Unpin, obj.PmOneside);
         await commandBus.PublishAsync(command);
-        //var ownerPeerId = peer.PeerType == PeerType.Channel ? peer.PeerId : input.UserId;
-        //var command = new StartUpdatePinnedMessageCommand(MessageId.Create(ownerPeerId, obj.Id),
-        //    input.ToRequestInfo(),
-        //    !obj.Unpin,
-        //    obj.Silent,
-        //    obj.PmOneside,
-        //    CurrentDate,
-        //    _randomHelper.NextLong(),
-        //    new TMessageActionPinMessage().ToBytes().ToHexString());
-        //await _commandBus.PublishAsync(command);
+       
         return null!;
     }
 }

@@ -9,10 +9,12 @@ public class ContactAggregate : SnapshotAggregateRoot<ContactAggregate, ContactI
         Register(_state);
     }
 
-    public void UpdateProfilePhoto(RequestInfo requestInfo, long selfUserId, long targetUserId, long photoId, bool suggest, IPhoto? suggestPhoto)
+    public void UpdateProfilePhoto(RequestInfo requestInfo, long selfUserId, long targetUserId, long photoId,
+        bool suggest, IPhoto? suggestPhoto)
     {
         Specs.AggregateIsCreated.ThrowFirstDomainErrorIfNotSatisfied(this);
-        Emit(new ContactProfilePhotoChangedEvent(requestInfo, selfUserId, targetUserId, photoId, suggest, suggestPhoto));
+        Emit(new ContactProfilePhotoChangedEvent(requestInfo, selfUserId, targetUserId, photoId, suggest,
+            suggestPhoto));
     }
 
     public void AddContact(RequestInfo requestInfo,
@@ -62,7 +64,7 @@ public class ContactAggregate : SnapshotAggregateRoot<ContactAggregate, ContactI
             _state.FirstName,
             _state.LastName,
             _state.PhotoId
-            ));
+        ));
     }
 
     protected override Task LoadSnapshotAsync(ContactSnapshot snapshot,

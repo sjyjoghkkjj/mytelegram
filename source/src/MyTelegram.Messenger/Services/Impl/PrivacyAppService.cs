@@ -36,12 +36,12 @@ public class PrivacyAppService(
     public Task ApplyPrivacyListAsync(long selfUserId, IReadOnlyList<long> targetUserIdList, Action<PrivacyValueType, long> executeOnPrivacyNotMatch,
         List<PrivacyType> privacyTypes)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
     public Task SetGlobalPrivacySettingsAsync(long selfUserId, GlobalPrivacySettings globalPrivacySettings)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
     public async Task<GlobalPrivacySettingsCacheItem?> GetGlobalPrivacySettingsAsync(long userId)
@@ -66,7 +66,7 @@ public class PrivacyAppService(
 
     public List<PrivacyValueData> GetPrivacyValueDataList(IList<IInputPrivacyRule> rules)
     {
-        throw new NotImplementedException();
+        return [];
     }
 
     public Task<SetPrivacyOutput> SetPrivacyAsync(RequestInfo requestInfo,
@@ -79,11 +79,11 @@ public class PrivacyAppService(
 
     public Task ApplyPrivacyAsync(long selfUserId, long targetUserId, Action<PrivacyValueType> executeOnPrivacyNotMatch, PrivacyType privacyType)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 
     public Task ApplyPrivacyAsync(long selfUserId, long targetUserId, Action<PrivacyValueType> executeOnPrivacyNotMatch, List<PrivacyType> privacyTypes)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 }

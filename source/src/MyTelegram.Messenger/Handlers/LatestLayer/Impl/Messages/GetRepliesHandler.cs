@@ -17,7 +17,7 @@ internal sealed class GetRepliesHandler(
     IAccessHashHelper accessHashHelper,
     IGetHistoryConverterService getHistoryConverterService)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetReplies, MyTelegram.Schema.Messages.IMessages>,
-        IGetRepliesHandler
+        Messages.IGetRepliesHandler
 {
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         RequestGetReplies obj)
@@ -30,7 +30,7 @@ internal sealed class GetRepliesHandler(
             OwnerPeerId = peer.PeerId,
             AddOffset = obj.AddOffset,
             Limit = obj.Limit,
-            //OffsetId = obj.OffsetId,
+            OffsetId = obj.OffsetId,
             MinDate = obj.OffsetDate,
             SelfUserId = input.UserId
         });

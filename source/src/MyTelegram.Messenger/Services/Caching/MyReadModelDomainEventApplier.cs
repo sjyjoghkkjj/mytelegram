@@ -6,8 +6,7 @@ public class MyReadModelDomainEventApplier : IReadModelDomainEventApplier
 {
     private const string ApplyMethodName = "ApplyAsync";
 
-    private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, ApplyMethod>> ApplyMethods =
-        new ConcurrentDictionary<Type, ConcurrentDictionary<Type, ApplyMethod>>();
+    private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, ApplyMethod>> ApplyMethods = new();
 
     public async Task<bool> UpdateReadModelAsync<TReadModel>(
         TReadModel readModel,

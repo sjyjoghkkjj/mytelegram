@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get all archived stickers
@@ -12,7 +10,7 @@ internal sealed class GetArchivedStickersHandler : RpcResultObjectHandler<MyTele
     protected override Task<IArchivedStickers> HandleCoreAsync(IRequestInput input,
         RequestGetArchivedStickers obj)
     {
-        var r = new TArchivedStickers { Sets = new TVector<IStickerSetCovered>() };
+        var r = new TArchivedStickers { Sets = [] };
 
         return Task.FromResult<IArchivedStickers>(r);
     }

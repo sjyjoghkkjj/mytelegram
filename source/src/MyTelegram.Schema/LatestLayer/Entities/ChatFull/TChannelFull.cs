@@ -135,6 +135,7 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
     ///</summary>
     public bool PaidReactionsAvailable { get; set; }
     public bool StargiftsAvailable { get; set; }
+    public bool PaidMessagesAvailable { get; set; }
 
     ///<summary>
     /// ID of the channel
@@ -377,6 +378,7 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
         if (CanViewStarsRevenue) { Flags2[15] = true; }
         if (PaidReactionsAvailable) { Flags2[16] = true; }
         if (StargiftsAvailable) { Flags2[19] = true; }
+        if (PaidMessagesAvailable) { Flags2[20] = true; }
         if (/*ParticipantsCount != 0 && */ParticipantsCount.HasValue) { Flags[0] = true; }
         if (/*AdminsCount != 0 && */AdminsCount.HasValue) { Flags[1] = true; }
         if (/*KickedCount != 0 && */KickedCount.HasValue) { Flags[2] = true; }
@@ -488,6 +490,7 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
         if (Flags2[15]) { CanViewStarsRevenue = true; }
         if (Flags2[16]) { PaidReactionsAvailable = true; }
         if (Flags2[19]) { StargiftsAvailable = true; }
+        if (Flags2[20]) { PaidMessagesAvailable = true; }
         Id = reader.ReadInt64();
         About = reader.ReadString();
         if (Flags[0]) { ParticipantsCount = reader.ReadInt32(); }

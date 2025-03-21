@@ -175,7 +175,7 @@ internal sealed class AccessHashHelper(
     {
         if (inputChannel is TInputChannel tInputChannel)
         {
-            return CheckAccessHashAsync(tInputChannel.ChannelId, tInputChannel.AccessHash);
+            return CheckAccessHashAsync(tInputChannel.ChannelId, tInputChannel.AccessHash, AccessHashType.Channel);
         }
 
         return Task.CompletedTask;

@@ -13,10 +13,13 @@ namespace MyTelegram.Schema.Channels;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/channels.getSendAs" />
 ///</summary>
-[TlObject(0xdc770ee)]
+[TlObject(0xe785a43f)]
 public sealed class RequestGetSendAs : IRequest<MyTelegram.Schema.Channels.ISendAsPeers>
 {
-    public uint ConstructorId => 0xdc770ee;
+    public uint ConstructorId => 0xe785a43f;
+    public BitArray Flags { get; set; } = new BitArray(32);
+    public bool ForPaidReactions { get; set; }
+
     ///<summary>
     /// The group where we intend to send messages
     /// See <a href="https://corefork.telegram.org/type/InputPeer" />
@@ -25,6 +28,7 @@ public sealed class RequestGetSendAs : IRequest<MyTelegram.Schema.Channels.ISend
 
     public void ComputeFlag()
     {
+        if (ForPaidReactions) { Flags[0] = true; }
 
     }
 
@@ -32,11 +36,14 @@ public sealed class RequestGetSendAs : IRequest<MyTelegram.Schema.Channels.ISend
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
         writer.Write(Peer);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
+        Flags = reader.ReadBitArray();
+        if (Flags[0]) { ForPaidReactions = true; }
         Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

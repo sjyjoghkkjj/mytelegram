@@ -4,6 +4,7 @@ using MyTelegram.Messenger.CommandServer.BackgroundServices;
 using MyTelegram.Messenger.CommandServer.EventHandlers;
 using MyTelegram.Messenger.NativeAot;
 using MyTelegram.Messenger.Services.Impl;
+using MyTelegram.Services.Extensions;
 using MyTelegram.Services.NativeAot;
 
 namespace MyTelegram.Messenger.CommandServer.Extensions;
@@ -25,6 +26,7 @@ public static class MyTelegramMessengerCommandServerExtensions
     public static void AddMyTelegramMessengerCommandServer(this IServiceCollection services,
         Action<IEventFlowOptions>? configure = null)
     {
+        services.AddTransient<IChatInviteLinkHelper, ChatInviteLinkHelper>();
         services.AddTransient<IDataProcessor<IDomainEvent>, DomainEventDataProcessor>();
         services.RegisterServices();
         services.AddTransient<MessengerEventHandler>();
@@ -37,8 +39,8 @@ public static class MyTelegramMessengerCommandServerExtensions
         });
         services.AddSystemTextJson(options =>
         {
-            options.AddSingleValueObjects();
-            options.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
+            //options.AddSingleValueObjects();
+            //options.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
             options.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
         });
     }

@@ -3304,12 +3304,70 @@ public class CountryHelper : ICountryHelper, ISingletonDependency
 
     private static List<CountryItem> _allCountries = [];
     private static FrozenDictionary<string, CountryCodeItem>? _countryCodeToPatterns;
-
+    private static FrozenDictionary<string, string>? _countryCodeToCountryIso2;
     public bool TryGetCountryCodeItem(string countryCode, [NotNullWhen(true)] out CountryCodeItem? countryCodeItem)
     {
         InitAllCountries();
 
         return _countryCodeToPatterns!.TryGetValue(countryCode, out countryCodeItem);
+    }
+
+    public string GetCountryCodeByPhoneNumber(string phoneNumber)
+    {
+        InitAllCountries();
+        if (phoneNumber.StartsWith("+"))
+        {
+            phoneNumber = phoneNumber[1..];
+            var items = phoneNumber.Split(" ");
+            if (_countryCodeToPatterns!.TryGetValue(items[0], out var countryCodeItem))
+            {
+                return countryCodeItem.CountryCode;
+            }
+        }
+
+        if (phoneNumber.Length < 4)
+        {
+            return string.Empty;
+        }
+
+        var code4 = phoneNumber[..4];
+        var code3 = phoneNumber[..3];
+        var code2 = phoneNumber[..2];
+        var code1 = phoneNumber[..1];
+
+        if (_countryCodeToPatterns!.TryGetValue(code4, out var item4))
+        {
+            return item4.CountryCode;
+        }
+
+        if (_countryCodeToPatterns!.TryGetValue(code3, out var item3))
+        {
+            return item3.CountryCode;
+        }
+
+        if (_countryCodeToPatterns!.TryGetValue(code2, out var item2))
+        {
+            return item2.CountryCode;
+        }
+
+        if (_countryCodeToPatterns!.TryGetValue(code1, out var item1))
+        {
+            return item1.CountryCode;
+        }
+
+        return string.Empty;
+    }
+
+    public string? GetCountryIso2ByPhoneNumber(string phoneNumber)
+    {
+        var countryCode = GetCountryCodeByPhoneNumber(phoneNumber);
+        if (_countryCodeToCountryIso2?.TryGetValue(countryCode, out var iso2) ?? false)
+        {
+            return iso2;
+        }
+
+        return null;
+        //return "Unknown";
     }
 
     public IReadOnlyCollection<CountryItem> GetAllCountryList()
@@ -3348,6 +3406,34 @@ public class CountryHelper : ICountryHelper, ISingletonDependency
                                 .ToList()))
                     .ToFrozenDictionary()
                 ;
+
+            //_countryCodeToCountryIso2 = _allCountries
+            //    .SelectMany(p => p.CountryCodes.Select(x => new { x.CountryCode, p.Iso2 }))
+            //    .DistinctBy(p=>p.CountryCode)
+            //    .ToFrozenDictionary(k => k.CountryCode, v => v.Iso2);
+
+            var countryCodeToIso2 = new Dictionary<string, string>();
+            //var countryCodeToPatterns = new Dictionary<string, CountryCodeItem>();
+            foreach (var countryItem in _allCountries)
+            {
+                foreach (var countryCodeItem in countryItem.CountryCodes)
+                {
+                    if (countryCodeItem.Prefixes?.Count > 0)
+                    {
+                        foreach (var prefix in countryCodeItem.Prefixes)
+                        {
+                            countryCodeToIso2.TryAdd($"{countryCodeItem.CountryCode}{prefix}", countryItem.Iso2);
+                        }
+                    }
+                    else
+                    {
+                        countryCodeToIso2.TryAdd(countryCodeItem.CountryCode, countryItem.Iso2);
+                    }
+                }
+            }
+
+            _countryCodeToCountryIso2 = countryCodeToIso2.ToFrozenDictionary();
+
         }
     }
 }

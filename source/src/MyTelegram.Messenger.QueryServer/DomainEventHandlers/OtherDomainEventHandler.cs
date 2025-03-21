@@ -13,7 +13,6 @@ public class OtherDomainEventHandler(
     IUpdatesConverterService updatesConverterService,
     IUserConverterService userConverterService,
     ILayeredService<IAuthorizationConverter> layeredAuthorizationService,
-    //ILayeredService<IUserConverter> layeredUserService,
     ICacheManager<GlobalPrivacySettingsCacheItem> cacheManager)
     : DomainEventHandlerBase(objectMessageSender,
             commandBus,
@@ -151,9 +150,6 @@ public class OtherDomainEventHandler(
                 domainEvent.AggregateEvent.Pts,
                 domainEvent.AggregateEvent.ToPeer.PeerType
             );
-            //var layeredData =
-            //    layeredUpdatesService.GetLayeredData(c =>
-            //        c.ToSelfUpdatePinnedMessageUpdates(domainEvent.AggregateEvent));
             await PushUpdatesToPeerAsync(
                 new Peer(PeerType.User, domainEvent.AggregateEvent.OwnerPeerId),
                 r,
@@ -166,9 +162,7 @@ public class OtherDomainEventHandler(
                 : new Peer(PeerType.User, domainEvent.AggregateEvent.OwnerPeerId),
             updatesConverterService.ToUpdatePinnedMessageUpdates(domainEvent.AggregateEvent),
             excludeUserId: domainEvent.AggregateEvent.SenderPeerId,
-            pts: domainEvent.AggregateEvent.Pts//,
-            //layeredData: layeredUpdatesService.GetLayeredData(c =>
-            //    c.ToUpdatePinnedMessageUpdates(domainEvent.AggregateEvent))
+            pts: domainEvent.AggregateEvent.Pts
         );
     }
 
@@ -216,11 +210,6 @@ public class OtherDomainEventHandler(
             new DeletedBoxItem(domainEvent.AggregateEvent.UserId, domainEvent.AggregateEvent.Pts,
                 domainEvent.AggregateEvent.PtsCount, domainEvent.AggregateEvent.MessageIds),
             DateTime.UtcNow.ToTimestamp());
-        //var layeredUpdates = layeredUpdatesService.GetLayeredData(c => c.ToDeleteMessagesUpdates(PeerType.User,
-        //    new DeletedBoxItem(domainEvent.AggregateEvent.UserId, domainEvent.AggregateEvent.Pts,
-        //        domainEvent.AggregateEvent.PtsCount, domainEvent.AggregateEvent.MessageIds),
-        //    DateTime.UtcNow.ToTimestamp()));
-
         return PushUpdatesToPeerAsync(domainEvent.AggregateEvent.UserId.ToUserPeer(), updates,
             pts: domainEvent.AggregateEvent.Pts);
     }

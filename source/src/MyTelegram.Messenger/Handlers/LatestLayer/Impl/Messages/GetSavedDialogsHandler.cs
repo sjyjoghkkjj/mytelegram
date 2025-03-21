@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
+/// Returns the current saved dialog list, see <a href="https://corefork.telegram.org/api/saved-messages">here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/method/messages.getSavedDialogs" />
 ///</summary>
 internal sealed class GetSavedDialogsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetSavedDialogs, MyTelegram.Schema.Messages.ISavedDialogs>,
@@ -13,10 +12,10 @@ internal sealed class GetSavedDialogsHandler : RpcResultObjectHandler<MyTelegram
     {
         return Task.FromResult<MyTelegram.Schema.Messages.ISavedDialogs>(new TSavedDialogs
         {
-            Chats = new(),
-            Dialogs = new(),
-            Messages = new(),
-            Users = new(),
+            Chats = [],
+            Dialogs = [],
+            Messages = [],
+            Users = [],
         });
     }
 }

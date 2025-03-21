@@ -77,6 +77,7 @@ internal sealed class ChannelFullMapper
             destination.TtlPeriod = source.TtlPeriod;
         }
 
+        destination.ParticipantsHidden = source.ParticipantsHidden;
         return destination;
     }
 }

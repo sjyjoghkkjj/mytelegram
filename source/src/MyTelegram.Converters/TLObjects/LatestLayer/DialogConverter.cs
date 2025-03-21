@@ -29,7 +29,6 @@ internal sealed class DialogConverter(IObjectMapper objectMapper) : IDialogConve
                 dialog.TopMessage = channelReadModel.TopMessageId;
                 dialog.Pts = channelReadModel.Pts;
                 dialog.UnreadCount = channelReadModel.TopMessageId - maxId;
-
                 if (dialog.UnreadCount < 0)
                 {
                     dialog.UnreadCount = 0;

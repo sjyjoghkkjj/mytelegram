@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.QueryHandlers.MongoDB.ChatAdmin;
+﻿namespace MyTelegram.QueryHandlers.InMemory.ChatAdmin;
 
 public class GetChatAdminQueryHandler(IQueryOnlyReadModelStore<ChatAdminReadModel> store) : IQueryHandler<GetChatAdminQuery, IChatAdminReadModel?>
 {

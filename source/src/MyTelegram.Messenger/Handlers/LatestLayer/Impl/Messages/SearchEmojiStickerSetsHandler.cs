@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
+/// Search for <a href="https://corefork.telegram.org/api/custom-emoji">custom emoji stickersets »</a>
 /// See <a href="https://corefork.telegram.org/method/messages.searchEmojiStickerSets" />
 ///</summary>
 internal sealed class SearchEmojiStickerSetsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSearchEmojiStickerSets, MyTelegram.Schema.Messages.IFoundStickerSets>,

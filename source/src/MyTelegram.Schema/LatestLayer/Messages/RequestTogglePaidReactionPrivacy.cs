@@ -7,10 +7,10 @@ namespace MyTelegram.Schema.Messages;
 /// Changes the privacy of already sent <a href="https://corefork.telegram.org/api/reactions#paid-reactions">paid reactions</a> on a specific message.
 /// See <a href="https://corefork.telegram.org/method/messages.togglePaidReactionPrivacy" />
 ///</summary>
-[TlObject(0x849ad397)]
+[TlObject(0x435885b5)]
 public sealed class RequestTogglePaidReactionPrivacy : IRequest<IBool>
 {
-    public uint ConstructorId => 0x849ad397;
+    public uint ConstructorId => 0x435885b5;
     ///<summary>
     /// The channel
     /// See <a href="https://corefork.telegram.org/type/InputPeer" />
@@ -24,9 +24,9 @@ public sealed class RequestTogglePaidReactionPrivacy : IRequest<IBool>
 
     ///<summary>
     /// If true, makes the current anonymous in the top sender leaderboard for this message; otherwise, does the opposite.
-    /// See <a href="https://corefork.telegram.org/type/Bool" />
+    /// See <a href="https://corefork.telegram.org/type/PaidReactionPrivacy" />
     ///</summary>
-    public bool Private { get; set; }
+    public MyTelegram.Schema.IPaidReactionPrivacy Private { get; set; }
 
     public void ComputeFlag()
     {
@@ -46,6 +46,6 @@ public sealed class RequestTogglePaidReactionPrivacy : IRequest<IBool>
     {
         Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         MsgId = reader.ReadInt32();
-        Private = reader.Read();
+        Private = reader.Read<MyTelegram.Schema.IPaidReactionPrivacy>();
     }
 }

@@ -1,11 +1,5 @@
 ﻿namespace MyTelegram.Messenger.Services;
 
-public class GetUpdatesOutput
-{
-    public List<IUpdatesReadModel> UpdatesReadModels { get; set; } = [];
-    public GetMessageOutput MessageOutput { get; set; } = new();
-}
-
 public class GetMessageOutput(
     IReadOnlyCollection<IChannelReadModel> channelList,
     IReadOnlyCollection<IChannelMemberReadModel> channelMemberList,
@@ -18,6 +12,7 @@ public class GetMessageOutput(
     IReadOnlyCollection<IPhotoReadModel> photoList,
     IReadOnlyCollection<IPollReadModel>? pollList,
     IReadOnlyCollection<IPollAnswerVoterReadModel>? chosenPollOptions,
+    IReadOnlyCollection<IUserReactionReadModel> userReactionList,
     bool hasMoreData,
     bool isSearchGlobal,
     int pts,
@@ -32,6 +27,7 @@ public class GetMessageOutput(
     //}
 
     public GetMessageOutput() : this(
+        [],
         [],
         [],
         [],
@@ -60,6 +56,7 @@ public class GetMessageOutput(
     public IReadOnlyCollection<IUserReadModel> UserList { get; init; } = userList;
     public IReadOnlyCollection<IPollReadModel>? PollList { get; init; } = pollList;
     public IReadOnlyCollection<IPollAnswerVoterReadModel>? ChosenPollOptions { get; init; } = chosenPollOptions;
+    public IReadOnlyCollection<IUserReactionReadModel> UserReactionList { get; } = userReactionList;
     public bool HasMoreData { get; init; } = hasMoreData;
     public bool IsSearchGlobal { get; init; } = isSearchGlobal;
     public int Pts { get; init; } = pts;

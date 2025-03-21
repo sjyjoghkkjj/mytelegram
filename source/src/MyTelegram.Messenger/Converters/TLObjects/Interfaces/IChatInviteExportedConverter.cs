@@ -1,9 +1,7 @@
-﻿using IExportedChatInvite = MyTelegram.Schema.IExportedChatInvite;
-
-namespace MyTelegram.Messenger.Converters.TLObjects.Interfaces;
+﻿namespace MyTelegram.Messenger.Converters.TLObjects.Interfaces;
 public interface IChatInviteExportedConverter : ILayeredConverter
 {
-    IExportedChatInvite ToExportedChatInvite(IChatInviteReadModel readModel);
-    IExportedChatInvite ToExportedChatInvite(ChatInviteCreatedEvent source);
-    IExportedChatInvite ToExportedChatInvite(ChatInviteEditedEvent source);
+    ILayeredExportedChatInvite ToExportedChatInvite(IChatInviteReadModel readModel);
+    ILayeredExportedChatInvite ToExportedChatInvite(ChatInviteCreatedEvent source);
+    ILayeredExportedChatInvite ToExportedChatInvite(ChatInviteEditedEvent source);
 }

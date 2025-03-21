@@ -1,8 +1,4 @@
-﻿// ReSharper disable All
-
-using GetChannelMemberByUserIdQuery = MyTelegram.Queries.GetChannelMemberByUserIdQuery;
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Join a channel/supergroup
@@ -28,8 +24,8 @@ internal sealed class JoinChannelHandler(
     IChannelAppService channelAppService,
     IQueryProcessor queryProcessor,
     IAccessHashHelper accessHashHelper)
-    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestJoinChannel, MyTelegram.Schema.IUpdates>,
-        Channels.IJoinChannelHandler
+    : RpcResultObjectHandler<RequestJoinChannel, IUpdates>,
+        IJoinChannelHandler
 {
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestJoinChannel obj)
@@ -42,7 +38,7 @@ internal sealed class JoinChannelHandler(
 
             var channelMemberReadModel =
                 await queryProcessor.ProcessAsync(
-                    new GetChannelMemberByUserIdQuery(channelReadModel!.ChannelId, input.UserId));
+                    new GetChannelMemberByUserIdQuery(channelReadModel.ChannelId, input.UserId));
 
             if (channelMemberReadModel != null)
             {
@@ -59,33 +55,26 @@ internal sealed class JoinChannelHandler(
                 }
             }
 
-            var userIdList = new[] { input.UserId };
-
             var channelHistoryMinId = 0;
-            if (channelReadModel!.HiddenPreHistory)
+            if (channelReadModel.HiddenPreHistory)
             {
                 channelHistoryMinId = channelReadModel.TopMessageId;
             }
 
-            var inviterUserId = 0L;
-            if (channelReadModel!.Broadcast || channelReadModel.HasLink)
+            if (channelReadModel.JoinRequest)
             {
-                inviterUserId = MyTelegramServerDomainConsts.GroupAnonymousBotUserId;
+                var command = new CreateJoinChannelRequestCommand(
+                    JoinChannelId.Create(channelReadModel.ChannelId, input.UserId), input.ToRequestInfo(),
+                    channelReadModel.ChannelId, null);
+                await commandBus.PublishAsync(command);
+            }
+            else
+            {
+                var command = new StartJoinChannelCommand(TempId.New, input.ToRequestInfo(), channelReadModel.ChannelId,
+                    channelReadModel.Broadcast, channelReadModel.TopMessageId, channelHistoryMinId);
+                await commandBus.PublishAsync(command);
             }
 
-            var command = new StartInviteToChannelCommand(TempId.New, input.ToRequestInfo(),
-                channelReadModel.ChannelId,
-                channelReadModel.Broadcast,
-                channelReadModel.HasLink,
-                inviterUserId,
-                channelHistoryMinId,
-                0,
-                [input.UserId],
-                [],
-                ChatJoinType.ByRequest
-            );
-
-            await commandBus.PublishAsync(command);
 
             return null!;
         }

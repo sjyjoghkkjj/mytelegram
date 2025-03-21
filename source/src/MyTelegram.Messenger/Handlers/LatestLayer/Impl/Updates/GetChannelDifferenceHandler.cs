@@ -63,8 +63,8 @@ internal sealed class GetChannelDifferenceHandler(
                  .Select(p => p.MessageId ?? 0)
                  .ToList()
                  ;
-            var users = updatesReadModels.SelectMany(p => p.Users ?? new List<long>(0)).ToList();
-            var chats = updatesReadModels.SelectMany(p => p.Chats ?? new List<long>(0)).ToList();
+            var users = updatesReadModels.SelectMany(p => p.Users ?? []).ToList();
+            var chats = updatesReadModels.SelectMany(p => p.Chats ?? []).ToList();
             chats.Add(inputChannel.ChannelId);
 
             var dto = await messageAppService
@@ -87,7 +87,7 @@ internal sealed class GetChannelDifferenceHandler(
             }
 
             var allUpdateList = updatesReadModels.Where(p => p.UpdatesType == UpdatesType.Updates)
-                .SelectMany(p => p.Updates ?? new List<IUpdate>(0)).ToList();
+                .SelectMany(p => p.Updates ?? []).ToList();
             var r = differenceConverterService.ToChannelDifference(dto, isChannelMember, allUpdateList, maxPts, layer: input.Layer);
 
             return r;

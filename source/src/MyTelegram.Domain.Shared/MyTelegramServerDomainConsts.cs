@@ -27,13 +27,13 @@ public class MyTelegramServerDomainConsts
     public const int QrCodeExpireSeconds = 30;
     public const int ChatAboutMaxLength = 255;
 
-    public const int ChannelAdminMaxCount = 5;
+    public const int ChannelAdminMaxCount = 20;
     public const int UsernameMinLength = 5;
     public const int UsernameMaxLength = 32;
     public const int MaxRecentRepliersCount = 3;
     public const int MaxVoteOptions = 10;
     public const int ChatMemberMaxCount = 50;
-    public const int ChannelBotMaxCount = 5;
+    public const int ChannelBotMaxCount = 20;
 
     public const int AuthKeyExpireSeconds = 30;
     //public const int MaxAllowedJoinChannel
@@ -51,6 +51,7 @@ public class MyTelegramServerDomainConsts
     public const int GzipMinLength = 512;
 
     public const int ReactionUniqueMax = 11;
+    public const int RecentReactionMaxCount = 10;
     public const int ChatInviteRecentRequesterMaxCount = 10;
     public const int ChatReadMarkExpirePeriod = 604800;
 

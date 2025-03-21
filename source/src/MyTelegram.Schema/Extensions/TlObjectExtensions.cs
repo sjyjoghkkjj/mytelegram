@@ -1,6 +1,5 @@
 ﻿using System.Buffers.Binary;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace MyTelegram.Schema.Extensions;
 
@@ -20,21 +19,21 @@ public class ArrayBufferWriterPool : ArrayBufferWriterPool<byte> { }
 
 public class ArrayBufferWriterPool<T>
 {
-    private static readonly ConcurrentQueue<ArrayPoolBufferWriterWrapper<T>> _queue = new();
+    private static readonly ConcurrentQueue<ArrayPoolBufferWriterWrapper<T>> Queue = [];
 
     public static ArrayPoolBufferWriterWrapper<T> Rent(int initialCapacity = 1024)
     {
-        if (_queue.TryDequeue(out var writer))
+        if (Queue.TryDequeue(out var writer))
         {
             return writer;
         }
-        return new ArrayPoolBufferWriterWrapper<T>(new ArrayBufferWriter<T>(1024));
+        return new ArrayPoolBufferWriterWrapper<T>(new ArrayBufferWriter<T>(initialCapacity));
     }
 
     public static void Return(ArrayPoolBufferWriterWrapper<T> writerWrapper)
     {
         writerWrapper.Writer.Clear();
-        _queue.Enqueue(writerWrapper);
+        Queue.Enqueue(writerWrapper);
     }
 }
 
@@ -73,7 +72,7 @@ public static class TlObjectExtensions
                 ownerId = peerUser.UserId;
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(peer));
         }
 
         return ownerId;
@@ -81,17 +80,15 @@ public static class TlObjectExtensions
 
     public static IInputPeer ToInputPeer(this IInputUser inputUser)
     {
-        switch (inputUser)
+        return inputUser switch
         {
-            case TInputUser inputUser1:
-                return new TInputPeerUser
-                {
-                    UserId = inputUser1.UserId,
-                    AccessHash = inputUser1.AccessHash
-                };
-            default:
-                throw new ArgumentOutOfRangeException(nameof(inputUser));
-        }
+            TInputUser inputUser1 => new TInputPeerUser
+            {
+                UserId = inputUser1.UserId,
+                AccessHash = inputUser1.AccessHash
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(inputUser))
+        };
     }
 
     public static IInputPeer ToInputPeer(this IInputChannel inputChannel)
@@ -165,15 +162,12 @@ public static class TlObjectExtensions
     [return: NotNullIfNotNull(nameof(inputReplyTo))]
     public static int? ToReplyToMsgId(this IInputReplyTo? inputReplyTo)
     {
-        switch (inputReplyTo)
+        return inputReplyTo switch
         {
-            case TInputReplyToMessage inputReplyToMessage:
-                return inputReplyToMessage.ReplyToMsgId;
-            case TInputReplyToStory inputReplyToStory:
-                return inputReplyToStory.StoryId;
-        }
-
-        return null;
+            TInputReplyToMessage inputReplyToMessage => inputReplyToMessage.ReplyToMsgId,
+            TInputReplyToStory inputReplyToStory => inputReplyToStory.StoryId,
+            _ => null
+        };
     }
 
     public static int GetLength(this IObject? obj)
@@ -198,7 +192,7 @@ public static class TlObjectExtensions
         return count;
     }
 
-    [return: NotNullIfNotNull("obj")]
+    [return: NotNullIfNotNull(nameof(obj))]
     public static byte[]? ToBytes(this IObject? obj)
     {
         if (obj == null)
@@ -218,54 +212,9 @@ public static class TlObjectExtensions
         {
             ArrayBufferWriterPool.Return(writer);
         }
-
-        //throw new NotImplementedException();
-        //if (obj == null)
-        //{
-        //    return null;
-        //}
-
-        //var stream = new MemoryStream();
-        //var bw = new BinaryWriter(stream);
-        //obj.Serialize(bw);
-
-        //return stream.ToArray();
     }
 
-    //public static ReadOnlyMemory<byte> ToReadonlyMemory(this IObject? obj)
-    //{
-    //    if (obj == null)
-    //    {
-    //        return ReadOnlyMemory<byte>.Empty;
-    //    }
-
-    //}
-
-    //public static byte[]? ToBytes(this IObject? obj)
-    //{
-    //    if (obj == null)
-    //    {
-    //        return null;
-    //    }
-
-    //    using var writer = ArrayBufferWriterPool.Rent();
-    //    obj.Serialize(writer);
-    //    return writer.Writer.WrittenSpan.ToArray();
-    //}
-
-    //public static TObject? ToTObject<TObject>(this ReadOnlyMemory<byte> memory) where TObject : IObject
-    //{
-    //    if (memory.IsEmpty)
-    //    {
-    //        return default;
-    //    }
-    //    var serializer = SerializerFactory.CreateObjectSerializer<TObject>();
-    //    var buffer = new ReadOnlySequence<byte>(memory);
-    //    return serializer.Deserialize(ref buffer);
-    //}
-
-
-    [return: NotNullIfNotNull("readOnlyMemory")]
+    [return: NotNullIfNotNull(nameof(readOnlyMemory))]
     public static TObject? ToTObject<TObject>(this ReadOnlyMemory<byte>? readOnlyMemory) where TObject : IObject
     {
         if (readOnlyMemory?.Length > 0)
@@ -289,7 +238,7 @@ public static class TlObjectExtensions
     }
 
 
-    [return: NotNullIfNotNull("bytes")]
+    [return: NotNullIfNotNull(nameof(bytes))]
     public static TObject? ToTObject<TObject>(this byte[]? bytes) where TObject : IObject
     {
         return ToTObject<TObject>(readOnlyMemory: bytes);
@@ -299,36 +248,4 @@ public static class TlObjectExtensions
     {
         return ToTObject<TObject>(readOnlyMemory: memory);
     }
-
-    //public static void Serialize<T>(this IBufferWriter<byte> writer,
-    //    T value)
-    //{
-    //    SerializerFactory.CreateSerializer<T>().Serialize(value, writer);
-    //}
-
-    //public static T Deserialize<T>(this ref ReadOnlySequence<byte> buffer)
-    //{
-    //    return SerializerFactory.CreateSerializer<T>().Deserialize(ref buffer);
-    //}
-
-    //public static void Serialize<T>(this T value, ArrayPoolBufferWriterWrapper<byte> writerWrapper) where T : IObject
-    //{
-    //    value.Serialize(writerWrapper.Writer);
-    //}
-
-    //public static void Serialize<T>(this ArrayPoolBufferWriterWrapper<byte> writerWrapper,
-    //    T value)
-    //{
-    //    writerWrapper.Writer.Serialize(value);
-    //}
-
-    //public static void Serialize<T>(this BinaryWriter writer, T value)
-    //{
-    //    SerializerFactory.CreateSerializer<T>().Serialize(value, writer);
-    //}
-
-    //public static T Deserialize<T>(this BinaryReader reader)
-    //{
-    //    return SerializerFactory.CreateSerializer<T>().Deserialize(reader);
-    //}
 }

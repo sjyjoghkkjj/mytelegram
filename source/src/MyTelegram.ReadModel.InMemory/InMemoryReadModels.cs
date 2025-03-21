@@ -1,5 +1,9 @@
 ﻿namespace MyTelegram.ReadModel.InMemory;
 
+public class AccessHashReadModel : Impl.AccessHashReadModel
+{
+}
+
 public class AppCodeReadModel : Impl.AppCodeReadModel
 {
 }
@@ -17,6 +21,16 @@ public class ChannelMemberReadModel : Impl.ChannelMemberReadModel
 
 public class ChannelReadModel : Impl.ChannelReadModel
 {
+}
+
+public class ChatAdminReadModel : Impl.ChatAdminReadModel
+{
+
+}
+
+public class ChatInviteImporterReadModel : Impl.ChatInviteImporterReadModel
+{
+
 }
 
 public class ChatInviteReadModel : Impl.ChatInviteReadModel
@@ -52,12 +66,40 @@ public class ImportedContactReadModel : Impl.ImportedContactReadModel
 {
 }
 
+public class JoinChannelRequestReadModel : Impl.JoinChannelRequestReadModel
+{
+
+}
+
+public class LanguageReadModel : Impl.LanguageReadModel
+{
+
+}
+
 public class MessageReadModel : Impl.MessageReadModel
 {
 }
 
 
 public class PeerNotifySettingsReadModel : Impl.PeerNotifySettingsReadModel
+{
+}
+
+public class PeerSettingsReadModel : Impl.PeerSettingsReadModel
+{
+
+}
+
+public class PhotoReadModel : Impl.PhotoReadModel
+{
+
+}
+
+public class PollAnswerVoterReadModel : Impl.PollAnswerVoterReadModel
+{
+}
+
+public class PollReadModel : Impl.PollReadModel
 {
 }
 
@@ -94,6 +136,11 @@ public class RpcResultReadModel : Impl.RpcResultReadModel
 {
 }
 
+public class UpdatesReadModel : Impl.UpdatesReadModel
+{
+
+}
+
 public class UserNameReadModel : Impl.UserNameReadModel
 {
 }
@@ -102,48 +149,7 @@ public class UserNameReadModel : Impl.UserNameReadModel
 public class UserReadModel : Impl.UserReadModel
 {
 }
-
-
-
-public class PollReadModel : Impl.PollReadModel
-{
-}
-
-
-public class PollAnswerVoterReadModel : Impl.PollAnswerVoterReadModel
-{
-}
-
-
-public class AccessHashReadModel : Impl.AccessHashReadModel
-{
-}
-
-
-public class PeerSettingsReadModel : Impl.PeerSettingsReadModel
-{
-
-}
-
-
-public class PhotoReadModel : Impl.PhotoReadModel
-{
-
-}
-
-public class ChatAdminReadModel : Impl.ChatAdminReadModel
-{
-
-}
-
-
-public class ChatInviteImporterReadModel : Impl.ChatInviteImporterReadModel
-{
-
-}
-
-
-public class UpdatesReadModel : Impl.UpdatesReadModel
+public class LanguageTextReadModel : Impl.LanguageTextReadModel
 {
 
 }

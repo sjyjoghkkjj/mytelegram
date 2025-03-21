@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get the number of results that would be found by a <a href="https://corefork.telegram.org/method/messages.search">messages.search</a> call with the same parameters
@@ -12,8 +10,8 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 internal sealed class GetSearchCountersHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetSearchCounters, TVector<MyTelegram.Schema.Messages.ISearchCounter>>,
     Messages.IGetSearchCountersHandler
 {
-    protected override Task<TVector<MyTelegram.Schema.Messages.ISearchCounter>> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Messages.RequestGetSearchCounters obj)
+    protected override Task<TVector<ISearchCounter>> HandleCoreAsync(IRequestInput input,
+        RequestGetSearchCounters obj)
     {
         return Task.FromResult(new TVector<ISearchCounter>(obj.Filters.Select(p => new TSearchCounter
         {

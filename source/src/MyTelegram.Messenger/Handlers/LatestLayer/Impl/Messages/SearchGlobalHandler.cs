@@ -1,9 +1,4 @@
-﻿// ReSharper disable All
-
-using EventFlow.Queries;
-using MyTelegram.Messenger.Converters.ConverterServices.Messages;
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Search for messages and peers globally
@@ -19,7 +14,7 @@ internal sealed class SearchGlobalHandler(
     IQueryProcessor queryProcessor,
     IGetHistoryConverterService getHistoryConverterService)
     :
-        RpcResultObjectHandler<Schema.Messages.RequestSearchGlobal, Schema.Messages.IMessages>,
+        RpcResultObjectHandler<RequestSearchGlobal, IMessages>,
         ISearchGlobalHandler
 {
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
@@ -38,7 +33,10 @@ internal sealed class SearchGlobalHandler(
             Q = obj.Q,
             FolderId = obj.FolderId,
             OffsetId = obj.OffsetId,
-            JoinedChannelList = allJoinedChannelIdList.ToList()
+            JoinedChannelList = allJoinedChannelIdList.ToList(),
+            BroadcastsOnly = obj.BroadcastsOnly,
+            GroupsOnly = obj.GroupsOnly,
+            UsersOnly = obj.UsersOnly
         });
 
         return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);

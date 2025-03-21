@@ -126,6 +126,7 @@ public class DialogAppService(
         photoIds.AddRange(channelList.Select(p => p.PhotoId ?? 0));
         photoIds.AddRange(userList.Select(p => p.ProfilePhotoId ?? 0));
         photoIds.AddRange(userList.Select(p => p.FallbackPhotoId ?? 0));
+        photoIds.AddRange(userList.Select(p => p.PersonalPhotoId ?? 0));
         photoIds.AddRange(contactList.Select(p => p.PhotoId ?? 0));
         photoIds.RemoveAll(p => p == 0);
 
@@ -143,6 +144,7 @@ public class DialogAppService(
             channelMemberList,
             pollReadModels,
             chosenOptions,
+            [],
             input.Limit
             );
     }

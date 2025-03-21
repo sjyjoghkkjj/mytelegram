@@ -1,7 +1,7 @@
 ﻿namespace MyTelegram.QueryHandlers.MongoDB.AccessHash;
 
-internal sealed class GetAccessHashQueryByIdQueryHandler
-    (IQueryOnlyReadModelStore<AccessHashReadModel> store) : IQueryHandler<GetAccessHashQueryByIdQuery, IAccessHashReadModel?>
+internal sealed class GetAccessHashQueryByIdQueryHandler(IQueryOnlyReadModelStore<AccessHashReadModel> store)
+    : IQueryHandler<GetAccessHashQueryByIdQuery, IAccessHashReadModel?>
 {
     public async Task<IAccessHashReadModel?> ExecuteQueryAsync(GetAccessHashQueryByIdQuery query,
         CancellationToken cancellationToken)

@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.ReadModel.Interfaces;
 
-public interface IMessageReadModel : IReadModel, IHasReactions
+public interface IMessageReadModel : IReadModel, IReactionItem
 {
     int Date { get; }
     int? EditDate { get; }
@@ -40,7 +40,7 @@ public interface IMessageReadModel : IReadModel, IHasReactions
     long? PollId { get; }
     byte[]? ReplyMarkup { get; }
     IReplyMarkup? ReplyMarkup2 { get; }
-    IInputReplyTo? ReplyTo { get; }
+    //IInputReplyTo? ReplyTo { get; }
     Peer? SendAs { get; }
     MessageReply? Reply { get; }
     long? PostChannelId { get; }
