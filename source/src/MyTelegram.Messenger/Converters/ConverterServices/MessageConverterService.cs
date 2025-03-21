@@ -200,6 +200,7 @@ public class MessageConverterService(
                     }
 
                     var m = messageServiceLayeredService.GetConverter(layer).ToMessage(item);
+                    
                     m.Out = isOut;
                     m.Mentioned = mentioned;
                     m.MediaUnread = mentioned;

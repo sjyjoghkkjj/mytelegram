@@ -74,7 +74,7 @@ internal sealed class MessageServiceMapper
         //destination.MediaUnread = source.MediaUnread;
         //destination.ReactionsArePossible = source.ReactionsArePossible;
         destination.Silent = source.Silent;
-        destination.Post = false; // source.Post;
+        destination.Post = source.Post; // source.Post;
         //destination.Legacy = source.Legacy;
         destination.Id = source.MessageId;
         //destination.FromId = source.FromId;

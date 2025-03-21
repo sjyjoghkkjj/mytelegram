@@ -225,7 +225,6 @@ internal sealed class SendMessageConverterService(
                         Date = item.Date,
                         Seq = 0
                     };
-                    ProcessScheduleMessage(aggregateEvent, updates);
 
                     return updates;
                 }
@@ -285,8 +284,6 @@ internal sealed class SendMessageConverterService(
             Date = DateTime.UtcNow.ToTimestamp(),
             Updates = [.. updateList]
         };
-        ProcessScheduleMessage(aggregateEvent, updates);
-        ProcessSetHistoryTtl(aggregateEvent, updates);
 
         return updates;
     }
@@ -330,9 +327,6 @@ internal sealed class SendMessageConverterService(
             Seq = 0
         };
 
-        ProcessScheduleMessage(aggregateEvent, updates);
-        ProcessSetHistoryTtl(aggregateEvent, updates);
-
         return updates;
     }
 
@@ -374,40 +368,7 @@ internal sealed class SendMessageConverterService(
             Users = []
         };
 
-        ProcessScheduleMessage(aggregateEvent, updates);
-        ProcessSetHistoryTtl(aggregateEvent, updates);
-
         return updates;
-    }
-
-    private void ProcessSetHistoryTtl(SendOutboxMessageCompletedSagaEvent aggregateEvent, TUpdates updates)
-    {
-        if (aggregateEvent.MessageItem.MessageAction is TMessageActionSetMessagesTTL messageActionSetMessagesTtl)
-        {
-            int? period = messageActionSetMessagesTtl.Period;
-            if (period == 0)
-            {
-                period = null;
-            }
-            updates.Updates.Insert(1, new TUpdatePeerHistoryTTL
-            {
-                Peer = aggregateEvent.MessageItem.ToPeer.ToPeer(),
-                TtlPeriod = period
-            });
-        }
-    }
-
-    private void ProcessScheduleMessage(SendOutboxMessageCompletedSagaEvent aggregateEvent, TUpdates updates)
-    {
-        var item = aggregateEvent.MessageItem;
-        if (item.ScheduleDate.HasValue)
-        {
-            updates.Updates.Add(new TUpdateDeleteScheduledMessages
-            {
-                Messages = [.. aggregateEvent.MessageItems.Select(p => p.ScheduleMessageId ?? 0)],
-                Peer = item.ToPeer.ToPeer()
-            });
-        }
     }
 
     private IUpdates CreateUpdateShortSentMessageUpdates(SendOutboxMessageCompletedSagaEvent aggregateEvent)
