@@ -16,7 +16,7 @@ internal sealed class CheckChatInviteHandler(
     IChannelAppService channelAppService,
     IChatConverterService chatConverterService,
     ILayeredService<IPhotoConverter> layeredPhotoService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestCheckChatInvite, MyTelegram.Schema.IChatInvite>,
+    : RpcResultObjectHandler<RequestCheckChatInvite, IChatInvite>,
         ICheckChatInviteHandler
 {
     protected override async Task<IChatInvite> HandleCoreAsync(IRequestInput input,
@@ -42,18 +42,28 @@ internal sealed class CheckChatInviteHandler(
         }
 
         var channelReadModel = await channelAppService.GetAsync(chatInviteReadModel.PeerId);
-        var channelMemberReadModel =
-            await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(channelReadModel.ChannelId,
-                input.UserId));
-        var chatPhoto = await photoAppService.GetAsync(channelReadModel.PhotoId);
-        if (channelMemberReadModel != null)
+        if (channelReadModel == null!)
         {
-            var channel = chatConverterService.ToChannel(input.UserId, channelReadModel, chatPhoto,
-                channelMemberReadModel, false, input.Layer);
-            return new TChatInviteAlready
+            RpcErrors.RpcErrors400.InviteHashInvalid.ThrowRpcError();
+        }
+        var chatPhoto = await photoAppService.GetAsync(channelReadModel!.PhotoId);
+
+        // Public channel/Super group
+        if (!string.IsNullOrEmpty(channelReadModel.UserName) || !channelReadModel.Broadcast)
+        {
+            var channelMemberReadModel =
+                await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(channelReadModel!.ChannelId,
+                    input.UserId));
+            if (channelMemberReadModel != null)
             {
-                Chat = channel
-            };
+                var channel = chatConverterService.ToChannel(input.UserId, channelReadModel, chatPhoto,
+                    channelMemberReadModel, null, input.Layer);
+
+                return new TChatInviteAlready
+                {
+                    Chat = channel
+                };
+            }
         }
 
         return new TChatInvite
