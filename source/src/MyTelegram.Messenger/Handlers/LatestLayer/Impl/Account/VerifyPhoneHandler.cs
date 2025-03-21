@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Verify a phone number for telegram <a href="https://corefork.telegram.org/passport">passport</a>.

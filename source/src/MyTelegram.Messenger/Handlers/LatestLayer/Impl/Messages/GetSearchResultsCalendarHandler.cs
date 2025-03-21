@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Returns information about the next messages of the specified type in the chat split by days.Returns the results in reverse chronological order.<br>

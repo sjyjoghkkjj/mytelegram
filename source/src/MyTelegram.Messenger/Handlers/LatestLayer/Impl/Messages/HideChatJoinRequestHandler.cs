@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Dismiss or approve a chat <a href="https://corefork.telegram.org/api/invites#join-requests">join request</a> related to a specific chat or channel.
@@ -19,44 +17,37 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 USER_ID_INVALID The provided user ID is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.hideChatJoinRequest" />
 ///</summary>
-internal sealed class HideChatJoinRequestHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestHideChatJoinRequest, MyTelegram.Schema.IUpdates>,
-    Messages.IHideChatJoinRequestHandler
+internal sealed class HideChatJoinRequestHandler(
+    IQueryProcessor queryProcessor,
+    IPeerHelper peerHelper,
+    IAccessHashHelper accessHashHelper,
+    ICommandBus commandBus)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestHideChatJoinRequest, MyTelegram.Schema.IUpdates>,
+        Messages.IHideChatJoinRequestHandler
 {
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    private readonly ICommandBus _commandBus;
-    public HideChatJoinRequestHandler(IQueryProcessor queryProcessor, IPeerHelper peerHelper, IAccessHashHelper accessHashHelper, ICommandBus commandBus)
-    {
-        _queryProcessor = queryProcessor;
-        _peerHelper = peerHelper;
-        _accessHashHelper = accessHashHelper;
-        _commandBus = commandBus;
-    }
-
     protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestHideChatJoinRequest obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await _accessHashHelper.CheckAccessHashAsync(obj.UserId);
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(obj.UserId);
 
-        var channelPeer = _peerHelper.GetPeer(obj.Peer);
-        var userPeer = _peerHelper.GetPeer(obj.UserId);
+        var channelPeer = peerHelper.GetPeer(obj.Peer);
+        var userPeer = peerHelper.GetPeer(obj.UserId);
         var chatInviteImporterReadModel =
-            await _queryProcessor.ProcessAsync(new GetChatInviteImporterQuery(channelPeer.PeerId, userPeer.PeerId));
+            await queryProcessor.ProcessAsync(new GetChatInviteImporterQuery(channelPeer.PeerId, userPeer.PeerId));
         if (chatInviteImporterReadModel == null )
         {
             RpcErrors.RpcErrors400.HideRequesterMissing.ThrowRpcError();
         }
 
-        if (chatInviteImporterReadModel!.ChatInviteRequestState != ChatInviteRequestState.NeedApprove)
+        if (chatInviteImporterReadModel!.ChatInviteRequestState != ChatInviteRequestState.WaitingForApproval)
         {
             RpcErrors.RpcErrors400.HideRequesterMissing.ThrowRpcError();
         }
 
         var command = new HideChatJoinRequestCommand(ChannelId.Create(channelPeer.PeerId), input.ToRequestInfo(),
             userPeer.PeerId, obj.Approved);
-        await _commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command, default);
 
         return null!;
     }

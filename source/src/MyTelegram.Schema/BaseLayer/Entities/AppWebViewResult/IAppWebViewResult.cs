@@ -6,7 +6,6 @@ namespace MyTelegram.Schema;
 /// Contains the link that must be used to open a <a href="https://corefork.telegram.org/api/bots/webapps#direct-link-mini-apps">direct link Mini App</a>.
 /// See <a href="https://corefork.telegram.org/constructor/AppWebViewResult" />
 ///</summary>
-[JsonDerivedType(typeof(TAppWebViewResultUrl), nameof(TAppWebViewResultUrl))]
 public interface IAppWebViewResult : IObject
 {
     ///<summary>

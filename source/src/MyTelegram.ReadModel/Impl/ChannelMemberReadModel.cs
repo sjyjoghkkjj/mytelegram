@@ -21,8 +21,9 @@ public class ChannelMemberReadModel : IChannelMemberReadModel,
     public int UntilDate { get; private set; }
     public long UserId { get; private set; }
     public long? ChatInviteId { get; private set; }
-    public bool IsBroadcast { get; private set; }
     public ChatJoinType ChatJoinType { get; private set; }
+    public int? SubscriptionUntilDate { get; private set; }
+    public bool? IsBroadcast { get; private set; }
     public virtual long? Version { get; set; }
 
     public Task ApplyAsync(IReadModelContext context,
@@ -86,6 +87,7 @@ public class ChannelMemberReadModel : IChannelMemberReadModel,
         UserId = domainEvent.AggregateEvent.MemberUserId;
         InviterId = domainEvent.AggregateEvent.MemberUserId;
         Date = domainEvent.AggregateEvent.Date;
+        IsBroadcast = domainEvent.AggregateEvent.IsBroadcast;
 
         return Task.CompletedTask;
     }

@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Help;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 /// <summary>
 ///     Returns info on data center nearest to the user.

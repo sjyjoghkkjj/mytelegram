@@ -1,6 +1,4 @@
-﻿using MyTelegram.Schema.Extensions;
-
-namespace MyTelegram.Domain.Sagas;
+﻿namespace MyTelegram.Domain.Sagas;
 
 public class ApproveJoinChannelSaga(ApproveJoinChannelSagaId id, IEventStore eventStore)
     : MyInMemoryAggregateSaga<ApproveJoinChannelSaga, ApproveJoinChannelSagaId, ApproveJoinChannelSagaLocator>(id,
@@ -11,25 +9,20 @@ public class ApproveJoinChannelSaga(ApproveJoinChannelSagaId id, IEventStore eve
     {
         if (domainEvent.AggregateEvent.Approved)
         {
-            var command = new StartInviteToChannelCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId),
+            var command = new StartInviteToChannelCommand(TempId.New,
                 domainEvent.AggregateEvent.RequestInfo,
                 domainEvent.AggregateEvent.ChannelId,
+                domainEvent.AggregateEvent.IsBroadcast,
+                false,
                 domainEvent.AggregateEvent.RequestInfo.UserId,
                 0,
-                new[] { domainEvent.AggregateEvent.UserId },
-                null,
-                Array.Empty<long>(),
-                DateTime.UtcNow.ToTimestamp(),
-                Random.Shared.NextInt64(),
-                BitConverter.ToString(new TMessageActionChatJoinedByRequest().ToBytes()).Replace("-", string.Empty),
+                0,
+                [domainEvent.AggregateEvent.UserId],
+                [],
                 ChatJoinType.ApprovedByAdmin
             );
             Publish(command);
         }
-        //var updateChatInviteRequestPendingCommand = new UpdateChatInviteRequestPendingCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId),
-        //    domainEvent.AggregateEvent.UserId);
-        //Publish(updateChatInviteRequestPendingCommand);
-
 
         return CompleteAsync(cancellationToken);
     }

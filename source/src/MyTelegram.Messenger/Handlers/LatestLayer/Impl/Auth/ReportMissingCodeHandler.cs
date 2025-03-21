@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Auth;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/auth.reportMissingCode" />

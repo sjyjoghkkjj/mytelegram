@@ -1,5 +1,4 @@
 ﻿using EventFlow;
-using EventFlow.Core;
 using Microsoft.Extensions.DependencyInjection;
 using MyTelegram.Services.NativeAot;
 using System.Text.Json;
@@ -10,7 +9,7 @@ public static class EventFlowOptionsSystemTextJsonExtensions
 {
     public static IEventFlowOptions AddSystemTextJson(
         this IEventFlowOptions eventFlowOptions,
-        Action<JsonSerializerOptions>? configure = default)
+        Action<JsonSerializerOptions>? configure = null)
     {
         eventFlowOptions.ServiceCollection.AddSystemTextJson(configure);
 
@@ -18,16 +17,13 @@ public static class EventFlowOptionsSystemTextJsonExtensions
     }
 
     public static IServiceCollection AddSystemTextJson(this IServiceCollection services,
-        Action<JsonSerializerOptions>? configure = default)
+        Action<JsonSerializerOptions>? configure = null)
     {
-        var serializer = new SystemTextJsonSerializer((jsonOptions) =>
+        services.AddMySystemTextJson(options =>
         {
-            //jsonOptions.TypeInfoResolver = new PolymorphicTypeResolver();
-            jsonOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
-            jsonOptions.Converters.Add(new BitArrayConverter());
-            configure?.Invoke(jsonOptions);
+            options.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
+            configure?.Invoke(options);
         });
-        services.AddSingleton<IJsonSerializer>(serializer);
 
         return services;
     }

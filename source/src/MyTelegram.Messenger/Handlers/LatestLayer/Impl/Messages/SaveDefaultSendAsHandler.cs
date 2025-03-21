@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Change the default peer that should be used when sending messages to a specific group

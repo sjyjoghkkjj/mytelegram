@@ -1,8 +1,4 @@
-﻿// ReSharper disable All
-
-using MyTelegram.Schema.Updates;
-
-namespace MyTelegram.Handlers.Updates.LayerN;
+﻿namespace  MyTelegram.Handlers.Updates.LayerN;
 
 ///<summary>
 /// Get new <a href="https://corefork.telegram.org/api/updates">updates</a>.
@@ -21,21 +17,14 @@ namespace MyTelegram.Handlers.Updates.LayerN;
 /// 400 USER_NOT_PARTICIPANT You're not a member of this supergroup/channel.
 /// See <a href="https://corefork.telegram.org/method/updates.getDifference" />
 ///</summary>
-internal sealed class GetDifferenceHandlerLayerN(
-    IHandlerHelper handlerHelper)
+internal sealed class GetDifferenceHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Updates.LayerN.RequestGetDifference,
+        MyTelegram.Schema.Updates.RequestGetDifference> dataConverter)
     : ForwardRequestToNewHandler<
             MyTelegram.Schema.Updates.LayerN.RequestGetDifference,
-            MyTelegram.Schema.Updates.RequestGetDifference>(handlerHelper),
-        Updates.IGetDifferenceHandler
+            MyTelegram.Schema.Updates.RequestGetDifference
+        >(handlerHelper, dataConverter),
+        Updates.LayerN.IGetDifferenceHandler
 {
-    protected override RequestGetDifference GetNewData(IRequestInput request, Schema.Updates.LayerN.RequestGetDifference obj)
-    {
-        return new RequestGetDifference
-        {
-            Date = obj.Date,
-            Pts = obj.Pts,
-            Qts = obj.Qts,
-            PtsTotalLimit = obj.PtsTotalLimit
-        };
-    }
 }

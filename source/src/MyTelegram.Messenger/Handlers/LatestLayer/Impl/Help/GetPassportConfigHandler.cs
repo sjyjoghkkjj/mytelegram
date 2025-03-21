@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Help;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Get <a href="https://corefork.telegram.org/passport">passport</a> configuration

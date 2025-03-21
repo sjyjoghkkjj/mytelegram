@@ -16,8 +16,9 @@ public class StartForwardMessagesCommand(
     int? scheduleDate,
     Peer? sendAs,
     bool forwardFromLinkedChannel,
-    bool post
-    )
+    bool post,
+    int? ttlPeriod,
+    Dictionary<long, string>? fromNames)
     : RequestCommand2<TempAggregate, TempId, IExecutionResult>(aggregateId, requestInfo)
 {
     public bool Silent { get; } = silent;
@@ -34,4 +35,7 @@ public class StartForwardMessagesCommand(
     public Peer? SendAs { get; } = sendAs;
     public bool ForwardFromLinkedChannel { get; } = forwardFromLinkedChannel;
     public bool Post { get; } = post;
+
+    public int? TtlPeriod { get; } = ttlPeriod;
+    public Dictionary<long, string>? FromNames { get; } = fromNames;
 }

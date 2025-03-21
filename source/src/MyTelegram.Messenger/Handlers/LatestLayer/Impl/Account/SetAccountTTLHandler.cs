@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Set account self-destruction period

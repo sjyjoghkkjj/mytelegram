@@ -70,6 +70,28 @@ services:
 
   ################### MyTelegram server
 
+### Data seeder
+  data-seeder:
+    image: ${MyTelegramRegistry}/mytelegram-data-seeder:${MyTelegramVersion}
+    restart: always
+    networks:
+      - tg-net
+    environment:
+      Serilog__MinimumLevel__Default: ${Serilog__MinimumLevel__Default}
+      ConnectionStrings__Default: ${ConnectionStrings__Default}
+      App__DatabaseName: ${App__DatabaseName}
+      # App__LoadAllStickersIntoMemory: ${App__LoadAllStickersIntoMemory}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
+      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
+      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
+      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
+      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+    volumes:
+      - ./data/mytelegram/data-seeder/logs:/app/Logs
+    depends_on:
+      - mongodb
+
   ### 1.Gateway server
   gateway-server:
     image: ${MyTelegramRegistry}/mytelegram-gateway-server:${MyTelegramVersion}

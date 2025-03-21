@@ -10,6 +10,6 @@ public class ObjectMessageSenderBackgroundService(
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Object message sender service started");
-        return processor.ProcessAsync();
+        return processor.ProcessAsync(stoppingToken);
     }
 }

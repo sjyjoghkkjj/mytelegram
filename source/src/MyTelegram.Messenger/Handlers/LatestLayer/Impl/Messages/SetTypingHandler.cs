@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Sends a current user typing event (see <a href="https://corefork.telegram.org/type/SendMessageAction">SendMessageAction</a> for all event types) to a conversation partner or group.

@@ -49,7 +49,7 @@ public class CacheManager<TCacheItem>(
         DistributedCacheEntryOptions? cacheOptions;
         if (ttlInSeconds > 0)
         {
-            cacheOptions = new DistributedCacheEntryOptions
+            cacheOptions = new()
             {
                 SlidingExpiration = TimeSpan.FromSeconds(ttlInSeconds)
             };

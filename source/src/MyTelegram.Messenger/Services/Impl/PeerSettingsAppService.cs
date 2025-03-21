@@ -10,7 +10,7 @@ public class PeerSettingsAppService(IQueryProcessor queryProcessor, IPeerHelper 
             return new PeerSettings();
         }
 
-        var peerSettingsReadModel = await queryProcessor.ProcessAsync(new GetPeerSettingsQuery(userId, peer.PeerId), default);
+        var peerSettingsReadModel = await queryProcessor.ProcessAsync(new GetPeerSettingsQuery(userId, peer.PeerId));
         if (peerSettingsReadModel != null)
         {
             if (peerSettingsReadModel.HiddenPeerSettingsBar)
@@ -31,10 +31,7 @@ public class PeerSettingsAppService(IQueryProcessor queryProcessor, IPeerHelper 
                 };
             }
 
-            return new PeerSettings
-            {
-
-            };
+            return new PeerSettings();
         }
 
         return new PeerSettings();

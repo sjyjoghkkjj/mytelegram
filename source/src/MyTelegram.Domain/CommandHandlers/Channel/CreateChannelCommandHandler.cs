@@ -13,18 +13,21 @@ public class CreateChannelCommandHandler : CommandHandler<ChannelAggregate, Chan
             command.MegaGroup,
             command.Title,
             command.About,
+            command.GeoPoint,
             command.Address,
             command.AccessHash,
             command.Date,
             command.RandomId,
-            command.MessageActionData,
+            command.MessageAction,
             command.TtlPeriod,
             command.MigratedFromChat,
             command.MigrateFromChatId,
             command.MigratedMaxId,
             command.PhotoId,
             command.AutoCreateFromChat,
-            command.TtlFromDefaultSetting
+            command.TtlFromDefaultSetting,
+            command.MemberUserIds,
+            command.BotUserIds
         );
         return Task.CompletedTask;
     }

@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get pinned dialogs
@@ -9,26 +7,20 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 FOLDER_ID_INVALID Invalid folder ID.
 /// See <a href="https://corefork.telegram.org/method/messages.getPinnedDialogs" />
 ///</summary>
-internal sealed class GetPinnedDialogsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetPinnedDialogs, MyTelegram.Schema.Messages.IPeerDialogs>,
-    Messages.IGetPinnedDialogsHandler
+internal sealed class GetPinnedDialogsHandler(
+    IDialogAppService dialogAppService,
+    IPtsHelper ptsHelper,
+    IDialogConverterService dialogConverterService
+    )
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetPinnedDialogs,
+            MyTelegram.Schema.Messages.IPeerDialogs>,
+        Messages.IGetPinnedDialogsHandler
 {
-    private readonly IDialogAppService _dialogAppService;
-    private readonly IPtsHelper _ptsHelper;
-    private readonly ILayeredService<IDialogConverter> _layeredService;
-    public GetPinnedDialogsHandler(IDialogAppService dialogAppService,
-        IPtsHelper ptsHelper,
-        ILayeredService<IDialogConverter> layeredService)
-    {
-        _dialogAppService = dialogAppService;
-        _ptsHelper = ptsHelper;
-        _layeredService = layeredService;
-    }
-
     protected override async Task<IPeerDialogs> HandleCoreAsync(IRequestInput input,
         RequestGetPinnedDialogs obj)
     {
         var userId = input.UserId;
-        var r = await _dialogAppService
+        var getDialogOutput = await dialogAppService
             .GetDialogsAsync(new GetDialogInput
             {
                 Pinned = true,
@@ -37,13 +29,9 @@ internal sealed class GetPinnedDialogsHandler : RpcResultObjectHandler<MyTelegra
                 FolderId = obj.FolderId
             });
 
-        //var pts = await _queryProcessor.ProcessAsync(new GetPtsByPeerIdQuery(input.UserId), default)
-        //    .;
-        var cachedPts = _ptsHelper.GetCachedPts(input.UserId);
+        var cachedPts = ptsHelper.GetCachedPts(input.UserId);
+        getDialogOutput.CachedPts = cachedPts;
 
-        //r.PtsReadModel = pts;
-        r.CachedPts = cachedPts;
-
-        return _layeredService.GetConverter(input.Layer).ToPeerDialogs(r);
+        return dialogConverterService.ToPeerDialogs(getDialogOutput, input.Layer);
     }
 }

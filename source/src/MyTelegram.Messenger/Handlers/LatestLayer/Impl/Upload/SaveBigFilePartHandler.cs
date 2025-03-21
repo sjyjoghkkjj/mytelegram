@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Upload;
 
 ///<summary>
 /// Saves a part of a large file (over 10 MB in size) to be later passed to one of the methods.

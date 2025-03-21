@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Help;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Returns localized text of a text message with an invitation.

@@ -5,6 +5,8 @@ public class DialogAppService(
     IQueryProcessor queryProcessor,
     IPhotoAppService photoAppService,
     IPrivacyAppService privacyAppService,
+    IChannelAppService channelAppService,
+    IUserAppService userAppService,
     IPeerHelper peerHelper,
     IOffsetHelper offsetHelper)
     : BaseAppService, IDialogAppService, ITransientDependency
@@ -59,53 +61,19 @@ public class DialogAppService(
 
         var channelList = channelIdList.Count == 0
             ? new List<IChannelReadModel>()
-            : await queryProcessor
-                .ProcessAsync(new GetChannelByChannelIdListQuery(channelIdList))
-         ;
+            : await channelAppService.GetListAsync(channelIdList);
 
-        //
         var topMessageIdList = dialogList.Where(p => p.ToPeerType != PeerType.Channel)
             .Select(p => MessageId.Create(p.OwnerId, p.TopMessage).Value).ToList();
         topMessageIdList.AddRange(channelList.Select(p => MessageId.Create(p.ChannelId, p.TopMessageId).Value));
         var minIdList = dialogList.Where(p => p.ChannelHistoryMinId > 0)
             .Select(p => MessageId.Create(input.OwnerId, p.ChannelHistoryMinId).Value).ToList();
-        topMessageIdList.RemoveAll(p => minIdList.Contains(p));
+        topMessageIdList.RemoveAll(minIdList.Contains);
         var messageReadModels =
             await queryProcessor.ProcessAsync(new GetMessagesByIdListQuery(topMessageIdList));
 
-        var extraChatUserIdList = new List<long>();
-        foreach (var messageReadModel in messageReadModels)
-        {
-            switch (messageReadModel.MessageActionType)
-            {
-                case MessageActionType.ChatAddUser:
-                    var messageActionData = messageReadModel.MessageActionData!.ToBytes()
-                        .ToTObject<IObject>();
-                    switch (messageActionData)
-                    {
-                        case TMessageActionChatAddUser messageActionChatAddUser:
-                            extraChatUserIdList.AddRange(messageActionChatAddUser.Users);
-                            break;
+        var extraChatUserIdList = GetExtraChatUserIdList(messageReadModels);
 
-                        case TMessageActionChatJoinedByLink messageActionChatJoinedByLink:
-                            extraChatUserIdList.Add(messageActionChatJoinedByLink.InviterId);
-                            break;
-
-                        case TMessageActionChatJoinedByRequest:
-
-                            break;
-                    }
-
-                    break;
-                case MessageActionType.ChatDeleteUser:
-                    var deletedUserId = messageReadModel.MessageActionData!.ToBytes().ToTObject<TMessageActionChatDeleteUser>()
-                        .UserId;
-                    extraChatUserIdList.Add(deletedUserId);
-                    break;
-            }
-
-            extraChatUserIdList.Add(messageReadModel.SenderPeerId);
-        }
 
         var chatIdList = messageReadModels.Where(p => p.ToPeerType == PeerType.Chat).Select(p => p.ToPeerId).ToList();
         var userIdList = messageReadModels.Where(p => p.ToPeerType == PeerType.User).Select(p => p.ToPeerId).ToList();
@@ -117,17 +85,9 @@ public class DialogAppService(
         userIdList.AddRange(dialogList.Where(p => p.ToPeerType == PeerType.User).Select(p => p.ToPeerId));
         userIdList.AddRange(extraChatUserIdList);
 
-        var userList =
-            await queryProcessor.ProcessAsync(new GetUsersByUserIdListQuery(userIdList))
-         ;
+        var userList = await userAppService.GetListAsync(userIdList);
         var contactList = await queryProcessor
-            .ProcessAsync(new GetContactListQuery(input.OwnerId, userIdList))
-     ;
-
-        var chatList = chatIdList.Count == 0
-            ? new List<IChatReadModel>()
-            : await queryProcessor
-                .ProcessAsync(new GetChatByChatIdListQuery(chatIdList));
+            .ProcessAsync(new GetContactListQuery(input.OwnerId, userIdList));
 
         var privacyList = await privacyAppService.GetPrivacyListAsync(userIdList);
         // reset dialog top message box id
@@ -159,12 +119,10 @@ public class DialogAppService(
             pollReadModels =
                 await queryProcessor.ProcessAsync(new GetPollsQuery(pollIdList));
             chosenOptions = await queryProcessor
-                .ProcessAsync(new GetChosenVoteAnswersQuery(pollIdList, query.OwnerId))
-         ;
+                .ProcessAsync(new GetChosenVoteAnswersQuery(pollIdList, query.OwnerId));
         }
 
         var photoIds = new List<long>();
-        photoIds.AddRange(chatList.Select(p => p.PhotoId ?? 0));
         photoIds.AddRange(channelList.Select(p => p.PhotoId ?? 0));
         photoIds.AddRange(userList.Select(p => p.ProfilePhotoId ?? 0));
         photoIds.AddRange(userList.Select(p => p.FallbackPhotoId ?? 0));
@@ -178,7 +136,7 @@ public class DialogAppService(
             messageReadModels,
             userList,
             photos,
-            chatList,
+            [],
             channelList,
             contactList,
             privacyList,
@@ -187,5 +145,35 @@ public class DialogAppService(
             chosenOptions,
             input.Limit
             );
+    }
+
+    private static List<long> GetExtraChatUserIdList(IReadOnlyCollection<IMessageReadModel> messageReadModels)
+    {
+        var extraChatUserIdList = new List<long>();
+        foreach (var messageReadModel in messageReadModels)
+        {
+            switch (messageReadModel.MessageAction)
+            {
+                case TMessageActionChatAddUser messageActionChatAddUser:
+                    extraChatUserIdList.AddRange(messageActionChatAddUser.Users);
+                    break;
+
+                case TMessageActionChatJoinedByLink messageActionChatJoinedByLink:
+                    extraChatUserIdList.Add(messageActionChatJoinedByLink.InviterId);
+                    break;
+
+                case TMessageActionChatJoinedByRequest:
+
+                    break;
+
+                case TMessageActionChatDeleteUser messageActionChatDeleteUser:
+                    extraChatUserIdList.Add(messageActionChatDeleteUser.UserId);
+                    break;
+            }
+
+            extraChatUserIdList.Add(messageReadModel.SenderPeerId);
+        }
+
+        return extraChatUserIdList;
     }
 }

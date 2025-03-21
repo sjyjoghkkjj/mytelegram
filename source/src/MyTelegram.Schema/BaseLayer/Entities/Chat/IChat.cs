@@ -14,7 +14,7 @@ namespace MyTelegram.Schema;
 public interface IChat : IObject
 {
     ///<summary>
-    /// Channel ID
+    /// ID of the channel, see <a href="https://corefork.telegram.org/api/peers#peer-id">here »</a> for more info
     ///</summary>
     long Id { get; set; }
 }

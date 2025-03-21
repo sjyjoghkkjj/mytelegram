@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Contacts;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Stop getting notifications about <a href="https://corefork.telegram.org/api/threads">thread replies</a> of a certain user in <code>@replies</code>

@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Help;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 /// <summary>
 ///     Look for updates of telegram's terms of service

@@ -3,7 +3,7 @@
 using MyTelegram.Schema.Photos;
 using IPhoto = MyTelegram.Schema.IPhoto;
 
-namespace MyTelegram.Handlers.Photos;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 
 ///<summary>
 /// Returns the list of user photos.

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace MyTelegram.Services.NativeAot;
 
-// Count:75
+// Count:76
 // MyTelegram.Core
 [JsonSerializable(typeof(MyTelegram.Core.AcksDataReceivedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.AppCodeCreatedIntegrationEvent))]
@@ -54,6 +54,7 @@ namespace MyTelegram.Services.NativeAot;
 [JsonSerializable(typeof(MyTelegram.Core.SessionRevokedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.SetSessionPasswordStateEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.StickerDataReceivedEvent))]
+[JsonSerializable(typeof(MyTelegram.Core.TakeoutCacheItem))]
 [JsonSerializable(typeof(MyTelegram.Core.TransportErrorEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.UnRegisterAuthKeyEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.UnencryptedMessage))]
@@ -68,6 +69,7 @@ namespace MyTelegram.Services.NativeAot;
 [JsonSerializable(typeof(MyTelegram.Core.UserSignUpSuccessIntegrationEvent))]
 
 // MyTelegram.Domain.Shared
+[JsonSerializable(typeof(MyTelegram.MessageReply))]
 [JsonSerializable(typeof(MyTelegram.Peer))]
 [JsonSerializable(typeof(MyTelegram.PeerColor))]
 [JsonSerializable(typeof(MyTelegram.PhotoSize))]
@@ -76,9 +78,9 @@ namespace MyTelegram.Services.NativeAot;
 [JsonSerializable(typeof(MyTelegram.WallPaperSettings))]
 
 // EventFlow
-[JsonSerializable(typeof(EventFlow.Aggregates.Metadata))]
-[JsonSerializable(typeof(EventFlow.Provided.Jobs.DispatchToAsynchronousEventSubscribersJob))]
-[JsonSerializable(typeof(EventFlow.Snapshots.SnapshotMetadata))]
+[JsonSerializable(typeof(global::EventFlow.Aggregates.Metadata))]
+[JsonSerializable(typeof(global::EventFlow.Provided.Jobs.DispatchToAsynchronousEventSubscribersJob))]
+[JsonSerializable(typeof(global::EventFlow.Snapshots.SnapshotMetadata))]
 [JsonSerializable(typeof(MyTelegram.Peer))]
 [JsonSerializable(typeof(MyTelegram.RequestInfo))]
 [JsonSerializable(typeof(MyTelegram.Core.UserCacheItem))]

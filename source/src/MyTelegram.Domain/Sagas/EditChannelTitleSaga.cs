@@ -27,14 +27,15 @@ public class EditChannelTitleSaga(EditChannelTitleSagaId id, IEventStore eventSt
             MessageType.Text,
             MessageSubType.Normal,
             null,
-            domainEvent.AggregateEvent.MessageActionData,
+            domainEvent.AggregateEvent.MessageAction,
             MessageActionType.ChatEditTitle,
             Post: domainEvent.AggregateEvent.Broadcast
         );
         //var command = new CreateOutboxMessageCommand(aggregateId,
         //    domainEvent.AggregateEvent.RequestInfo,
         //    messageItem);
-        var command = new StartSendMessageCommand(TempId.New, domainEvent.AggregateEvent.RequestInfo,
+        var command = new StartSendMessageCommand(TempId.New,
+            domainEvent.AggregateEvent.RequestInfo,
             [new SendMessageItem(messageItem)]);
 
         Publish(command);

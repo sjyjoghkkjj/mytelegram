@@ -34,9 +34,6 @@ public class DistributedDomainEventHandler(
 
         switch (aggregateEvent)
         {
-            case ChatCreatedEvent chatCreatedEvent:
-                chatEventCacheHelper.Add(chatCreatedEvent);
-                break;
             case ChannelCreatedEvent channelCreatedEvent:
                 chatEventCacheHelper.Add(channelCreatedEvent);
                 break;

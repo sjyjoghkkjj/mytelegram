@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Channels;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Set whether all users should <a href="https://corefork.telegram.org/api/invites#join-requests">request admin approval to join the group »</a>.

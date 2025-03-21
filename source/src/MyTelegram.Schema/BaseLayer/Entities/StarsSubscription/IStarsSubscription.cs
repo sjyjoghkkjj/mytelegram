@@ -30,11 +30,6 @@ public interface IStarsSubscription : IObject
     bool MissingBalance { get; set; }
 
     ///<summary>
-    /// &nbsp;
-    ///</summary>
-    bool BotCanceled { get; set; }
-
-    ///<summary>
     /// Subscription ID.
     ///</summary>
     string Id { get; set; }
@@ -60,20 +55,4 @@ public interface IStarsSubscription : IObject
     /// Invitation link, used to renew the subscription after cancellation or expiration.
     ///</summary>
     string? ChatInviteHash { get; set; }
-
-    ///<summary>
-    /// &nbsp;
-    ///</summary>
-    string? Title { get; set; }
-
-    ///<summary>
-    /// &nbsp;
-    /// See <a href="https://corefork.telegram.org/type/WebDocument" />
-    ///</summary>
-    MyTelegram.Schema.IWebDocument? Photo { get; set; }
-
-    ///<summary>
-    /// &nbsp;
-    ///</summary>
-    string? InvoiceSlug { get; set; }
 }

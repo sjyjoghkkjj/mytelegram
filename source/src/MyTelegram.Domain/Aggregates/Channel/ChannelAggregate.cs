@@ -95,18 +95,21 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         bool megaGroup,
         string title,
         string? about,
+        GeoPoint? geoPoint,
         string? address,
         long accessHash,
         int date,
         long randomId,
-        string messageActionData,
+        IMessageAction messageAction,
         int? ttlPeriod,
         bool migratedFromChat,
         long? migratedFromChatId,
         int? migratedMaxId,
         long? photoId,
         bool autoCreateFromChat,
-        bool ttlFromDefaultSetting
+        bool ttlFromDefaultSetting,
+        List<long>? memberUserIds,
+        List<long>? botUserIds
         )
     {
         Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
@@ -117,18 +120,21 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
             broadcast,
             megaGroup,
             about,
+            geoPoint,
             address,
             accessHash,
             date,
             randomId,
-            messageActionData,
+            messageAction,
             ttlPeriod,
             migratedFromChat,
             migratedFromChatId,
             migratedMaxId,
             photoId,
             autoCreateFromChat,
-            ttlFromDefaultSetting
+            ttlFromDefaultSetting,
+            memberUserIds ?? [],
+            botUserIds ?? []
         ));
     }
 
@@ -176,7 +182,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         CheckAdminRights(requestInfo, r => r.AddAdmins);
 
         // flags value==0 means no rights(should remove member from admin list)
-        var removeFromAdminList = adminRights.GetFlags().ToInt() == 0;
+        var removeFromAdminList = adminRights.GetFlags().ToInt32() == 0;
         var isNewAdmin = !_state.ChatAdmins.ContainsKey(userId);
 
         Emit(new ChannelAdminRightsEditedEvent(requestInfo,
@@ -209,7 +215,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         //long fileId,
         //byte[] photo,
         long? photoId,
-        string messageActionData,
+        IMessageAction messageAction,
         long randomId)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
@@ -220,14 +226,14 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
             _state.Broadcast,
             //photo,
             photoId,
-            messageActionData,
+            messageAction,
             randomId
             ));
     }
 
     public void EditTitle(RequestInfo requestInfo,
         string title,
-        string messageActionData,
+        IMessageAction messageAction,
         long randomId)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
@@ -242,7 +248,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
             _state.ChannelId,
             _state.Broadcast,
             title,
-            messageActionData,
+            messageAction,
             randomId
             ));
     }
@@ -264,7 +270,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         //Emit(new JoinRequestHiddenEvent(requestInfo, _state.ChannelId, inviteId, hash, approved, userId, recentRequesters,
         //    requestsPending, date));
 
-        Emit(new ChatJoinRequestHiddenEvent(requestInfo, _state.ChannelId, userId, approved, requestsPending,
+        Emit(new ChatJoinRequestHiddenEvent(requestInfo, _state.ChannelId, _state.Broadcast, userId, approved, requestsPending,
             recentRequesters));
     }
 
@@ -544,12 +550,20 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
             _state.NoForwards,
             _state.IsFirstChatInviteCreated,
             _state.RequestsPending,
-            _state.RecentRequesters?.ToList() ?? new List<long>(),
+            _state.RecentRequesters?.ToList() ?? [],
             _state.SignatureEnabled,
             _state.ParticipantCount,
             _state.Color,
             _state.HasLink,
-            _state.IsDeleted
+            _state.IsDeleted,
+            _state.WallPaperId,
+            _state.ThemeEmoticon,
+            _state.WallPaperSettings,
+            _state.IsGeoGroup,
+            _state.TopMessageId,
+            _state.StickerSetId,
+            _state.EmojiStickerSetId,
+            _state.EmojiStatus
         ));
     }
     protected override Task LoadSnapshotAsync(ChannelSnapshot snapshot,

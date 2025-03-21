@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stickers;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stickers;
 
 ///<summary>
 /// Suggests a short name for a given stickerpack name

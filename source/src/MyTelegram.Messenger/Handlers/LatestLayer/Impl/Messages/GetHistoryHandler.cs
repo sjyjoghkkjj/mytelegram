@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Returns the conversation history with one interlocutor / within a chat
@@ -11,43 +9,29 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 CHAT_ID_INVALID The provided chat id is invalid.
 /// 400 MSG_ID_INVALID Invalid message ID provided.
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
+/// 400 TAKEOUT_INVALID The specified takeout ID is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.getHistory" />
 ///</summary>
-internal sealed class GetHistoryHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetHistory, MyTelegram.Schema.Messages.IMessages>,
-    Messages.IGetHistoryHandler
+internal sealed class GetHistoryHandler(
+    IMessageAppService messageAppService,
+    IQueryProcessor queryProcessor,
+    IPeerHelper peerHelper,
+    IAccessHashHelper accessHashHelper,
+    IGetHistoryConverterService getHistoryConverterService)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetHistory, MyTelegram.Schema.Messages.IMessages>,
+        IGetHistoryHandler
 {
-    private readonly IMessageAppService _messageAppService;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IQueryProcessor _queryProcessor;
-    //private readonly IRpcResultProcessor _rpcResultProcessor;
-    private readonly IAccessHashHelper _accessHashHelper;
-    private readonly ILayeredService<IRpcResultProcessor> _layeredService;
-    public GetHistoryHandler(IMessageAppService messageAppService,
-        IQueryProcessor queryProcessor,
-        //IRpcResultProcessor rpcResultProcessor,
-        IPeerHelper peerHelper,
-        IAccessHashHelper accessHashHelper,
-        ILayeredService<IRpcResultProcessor> layeredService)
-    {
-        _messageAppService = messageAppService;
-        _queryProcessor = queryProcessor;
-        //_rpcResultProcessor = rpcResultProcessor;
-        _peerHelper = peerHelper;
-        _accessHashHelper = accessHashHelper;
-        _layeredService = layeredService;
-    }
-
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         RequestGetHistory obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
         var userId = input.UserId;
-        var peer = _peerHelper.GetPeer(obj.Peer, userId);
+        var peer = peerHelper.GetPeer(obj.Peer, userId);
         var ownerPeerId = peer.PeerType == PeerType.Channel ? peer.PeerId : userId;
 
         if (peer.PeerType == PeerType.Channel)
         {
-            var channelMember = await _queryProcessor
+            var channelMember = await queryProcessor
                 .ProcessAsync(new GetChannelMemberByUserIdQuery(peer.PeerId, input.UserId), default)
          ;
             if (channelMember?.Kicked == true)
@@ -64,13 +48,12 @@ internal sealed class GetHistoryHandler : RpcResultObjectHandler<MyTelegram.Sche
         int channelHistoryMinId;
         //if (peer.PeerType == PeerType.Channel || peer.PeerType == PeerType.Chat)
         {
-            var dialogReadModel = await _queryProcessor
-                .ProcessAsync(new GetDialogByIdQuery(DialogId.Create(input.UserId, peer)), CancellationToken.None)
-         ;
+            var dialogReadModel = await queryProcessor
+                .ProcessAsync(new GetDialogByIdQuery(DialogId.Create(input.UserId, peer)));
             channelHistoryMinId = dialogReadModel?.ChannelHistoryMinId ?? 0;
         }
 
-        var r = await _messageAppService.GetHistoryAsync(new GetHistoryInput
+        var r = await messageAppService.GetHistoryAsync(new GetHistoryInput
         {
             OwnerPeerId = ownerPeerId,
             SelfUserId = userId,
@@ -79,10 +62,10 @@ internal sealed class GetHistoryHandler : RpcResultObjectHandler<MyTelegram.Sche
             MaxId = obj.MaxId,
             MinId = obj.MinId,
             OffsetId = obj.OffsetId,
-            Peer = _peerHelper.GetPeer(obj.Peer, userId),
+            Peer = peerHelper.GetPeer(obj.Peer, userId),
             ChannelHistoryMinId = channelHistoryMinId
         });
 
-        return _layeredService.GetConverter(input.Layer).ToMessages(r, input.Layer);
+        return getHistoryConverterService.ToMessages(r, input.Layer);
     }
 }

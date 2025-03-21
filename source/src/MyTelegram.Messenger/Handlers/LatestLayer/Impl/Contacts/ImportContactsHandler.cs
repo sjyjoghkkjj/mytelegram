@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Contacts;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Imports contacts: saves a full list on the server, adds already registered contacts to the contact list, returns added contacts and their info.Use <a href="https://corefork.telegram.org/method/contacts.addContact">contacts.addContact</a> to add Telegram contacts without actually using their phone number.

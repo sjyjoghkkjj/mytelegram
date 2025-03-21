@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MyTelegram.Services.Services;
+using MyTelegram.Services.TLObjectConverters;
 using System.Reflection;
 
 namespace MyTelegram.Services.Extensions
@@ -8,8 +9,7 @@ namespace MyTelegram.Services.Extensions
     {
         public static IServiceCollection AddMyTelegramHandlerServices(this IServiceCollection services)
         {
-            services.RegisterServices();
-
+            services.RegisterServices(typeof(MyTelegramHandlerExtensions).Assembly);
             services.AddSingleton(typeof(IInMemoryRepository<,>), typeof(InMemoryRepository<,>));
             services.AddTransient(typeof(IDataProcessor<>), typeof(DefaultDataProcessor<>));
             services.AddSingleton(typeof(IMessageQueueProcessor<>), typeof(MessageQueueProcessor<>));
@@ -17,8 +17,8 @@ namespace MyTelegram.Services.Extensions
 
             services.AddSystemTextJson();
 
-            services.AddSingleton(typeof(ICacheHelper<,>),typeof(CacheHelper<,>));
-            services.AddTransient<IHashCalculator, HashCalculator>();
+            services.AddSingleton(typeof(ILayeredService<>), typeof(LayeredService<>));
+            services.AddSingleton(typeof(ICacheHelper<,>), typeof(CacheHelper<,>));
             services.AddSingleton(typeof(IQueuedCommandExecutor<,,>), typeof(QueuedCommandExecutor<,,>));
 
             return services;

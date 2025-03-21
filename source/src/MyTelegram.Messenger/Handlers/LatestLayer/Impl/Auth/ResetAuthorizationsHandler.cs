@@ -3,7 +3,7 @@
 using EventFlow.Aggregates.ExecutionResults;
 using MyTelegram.Domain.Aggregates.Device;
 
-namespace MyTelegram.Handlers.Auth;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Terminates all user's authorized sessions except for the current one.After calling this method it is necessary to reregister the current device using the method <a href="https://corefork.telegram.org/method/account.registerDevice">account.registerDevice</a>

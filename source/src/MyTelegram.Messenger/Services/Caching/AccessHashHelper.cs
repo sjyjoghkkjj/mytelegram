@@ -2,6 +2,7 @@
 
 internal sealed class AccessHashHelper(
     IQueryProcessor queryProcessor,
+    IReadModelCacheHelper<IUserReadModel> useReadModelCacheHelper,
     IPeerHelper peerHelper)
     : IAccessHashHelper, ISingletonDependency
 {
@@ -47,7 +48,8 @@ internal sealed class AccessHashHelper(
         switch (accessHashType)
         {
             case AccessHashType.User:
-                var userReadModel = await queryProcessor.ProcessAsync(new GetUserByIdQuery(id));
+                var userReadModel = await useReadModelCacheHelper.GetOrCreateAsync(id,
+                    () => queryProcessor.ProcessAsync(new GetUserByIdQuery(id)), p => p.Id);
                 if (userReadModel != null)
                 {
                     _accessHashCaches.TryAdd(id, userReadModel.AccessHash);
@@ -67,6 +69,39 @@ internal sealed class AccessHashHelper(
                 break;
 
             case AccessHashType.WallPaper:
+                var wallPaperReadModel = await queryProcessor.ProcessAsync(new GetWallPaperQuery(id));
+                if (wallPaperReadModel != null)
+                {
+                    _accessHashCaches.TryAdd(id, wallPaperReadModel.AccessHash);
+                    return accessHash == wallPaperReadModel.AccessHash;
+                }
+                break;
+            case AccessHashType.Theme:
+                var themeReadModel = await queryProcessor.ProcessAsync(new GetThemeByIdQuery(id));
+                if (themeReadModel != null)
+                {
+                    _accessHashCaches.TryAdd(id, themeReadModel.Theme.AccessHash);
+
+                    return accessHash == themeReadModel.Theme.AccessHash;
+                }
+                break;
+            case AccessHashType.GroupCall:
+                var groupCallReadModel = await queryProcessor.ProcessAsync(new GetGroupCallByIdQuery(id));
+                if (groupCallReadModel != null)
+                {
+                    _accessHashCaches.TryAdd(groupCallReadModel.GroupCallId, groupCallReadModel.AccessHash);
+
+                    return accessHash == groupCallReadModel.AccessHash;
+                }
+                break;
+            case AccessHashType.StickerSet:
+                var stickerSetReadModel = await queryProcessor.ProcessAsync(new GetStickerSetByIdQuery(id));
+                if (stickerSetReadModel != null)
+                {
+                    _accessHashCaches.TryAdd(stickerSetReadModel.StickerSetId, stickerSetReadModel.AccessHash);
+
+                    return accessHash == stickerSetReadModel.AccessHash;
+                }
                 break;
         }
 
@@ -78,7 +113,39 @@ internal sealed class AccessHashHelper(
     {
         if (!await IsAccessHashValidAsync(id, accessHash, accessHashType))
         {
-            RpcErrors.RpcErrors400.PeerIdInvalid.ThrowRpcError();
+            switch (accessHashType)
+            {
+                case AccessHashType.WallPaper:
+                    RpcErrors.RpcErrors400.WallpaperInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Theme:
+                    RpcErrors.RpcErrors400.ThemeInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.GroupCall:
+                    RpcErrors.RpcErrors400.GroupcallInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.StickerSet:
+                    RpcErrors.RpcErrors400.StickersetInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.User:
+                    RpcErrors.RpcErrors400.UserIdInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Channel:
+                    RpcErrors.RpcErrors400.ChannelIdInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Document:
+                    RpcErrors.RpcErrors400.DocumentInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Photo:
+                    RpcErrors.RpcErrors400.PhotoInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Sticker:
+                    RpcErrors.RpcErrors400.StickersetInvalid.ThrowRpcError();
+                    break;
+                default:
+                    RpcErrors.RpcErrors400.PeerIdInvalid.ThrowRpcError();
+                    break;
+            }
         }
     }
 
@@ -113,10 +180,5 @@ internal sealed class AccessHashHelper(
 
         return Task.CompletedTask;
     }
-
-    //public Task CheckAccessHashAsync(Peer peer)
-    //{
-    //    return CheckAccessHashAsync(peer.PeerId, peer.AccessHash);
-    //}
 }
 

@@ -9,10 +9,8 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TWebPageAttributeTheme), nameof(TWebPageAttributeTheme))]
 [JsonDerivedType(typeof(TWebPageAttributeStory), nameof(TWebPageAttributeStory))]
 [JsonDerivedType(typeof(TWebPageAttributeStickerSet), nameof(TWebPageAttributeStickerSet))]
+[JsonDerivedType(typeof(TWebPageAttributeUniqueStarGift), nameof(TWebPageAttributeUniqueStarGift))]
 public interface IWebPageAttribute : IObject
 {
-    ///<summary>
-    /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
-    ///</summary>
-    BitArray Flags { get; set; }
+
 }

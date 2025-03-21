@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Phone;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Phone;
 
 ///<summary>
 /// Stop screen sharing in a group call

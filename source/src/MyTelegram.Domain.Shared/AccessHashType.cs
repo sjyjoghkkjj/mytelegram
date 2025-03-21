@@ -9,5 +9,6 @@ public enum AccessHashType
     StickerSet,
     Sticker,
     WallPaper,
-    Theme
+    Theme,
+    GroupCall
 }

@@ -1,4 +1,4 @@
-﻿using EventFlow.Aggregates;
+﻿using MyTelegram.Schema;
 
 namespace MyTelegram.Domain.Tests.UnitTests.Aggregates.Channel;
 
@@ -83,11 +83,22 @@ public class ChannelAggregateTests : TestsFor<ChannelAggregate>
             "test",
             null,
             null,
+            null,
             0,
             1,
             1,
-            "test",
-            0, false, null, null, null, false, false);
+            new TMessageActionChatCreate
+            {
+                Title = "test",
+                Users = []
+            },
+            0,
+            false,
+            null,
+            null,
+            null,
+            false,
+            false, [], []);
 
         var exception = Assert.Throws<RpcException>(() =>
             Sut.CheckChannelState(A<RequestInfo>(), senderPeerId,
@@ -112,11 +123,17 @@ public class ChannelAggregateTests : TestsFor<ChannelAggregate>
             "test",
             null,
             null,
+            null,
             1,
             1,
             1,
-            "test",
-            0, false, null, null, null, false, false);
+            new TMessageActionChatCreate
+            {
+                Title = "test",
+                Users = []
+            },
+            0, false, null, null, null,
+            false, false, [], []);
         var bannedWriteMessageRights = new ChatBannedRights(false,
             true,
             true,
@@ -155,12 +172,18 @@ public class ChannelAggregateTests : TestsFor<ChannelAggregate>
             "test",
             null,
             null,
+            null,
             1,
             1,
             1,
-            "test",
+            new TMessageActionChatCreate
+            {
+                Title = "test",
+                Users = []
+            },
             0,
-            false, null, null, null, false, false);
+            false, null, null, null,
+            false, false, [], []);
         Sut.ToggleSlowMode(A<RequestInfo>(), 60, 1);
         var checkStateCompletedEvent = new CheckChannelStateCompletedEvent(
             A<RequestInfo>(),
@@ -192,12 +215,18 @@ public class ChannelAggregateTests : TestsFor<ChannelAggregate>
             true,
             null,
             null,
+            null,
             1,
             1,
             1,
-            "test",
-            0, false, null, null, null, false, false);
-        Sut.ApplyEvents(new IDomainEvent[] { ADomainEvent<ChannelAggregate, ChannelId, ChannelCreatedEvent>(aggregateEvent, 1) });
+            new TMessageActionChatCreate
+            {
+                Title = "test",
+                Users = []
+            },
+            0, false, null, null, null,
+            false, false, [], []);
+        Sut.ApplyEvents([ADomainEvent<ChannelAggregate, ChannelId, ChannelCreatedEvent>(aggregateEvent, 1)]);
 
         Sut.CheckChannelState(A<RequestInfo>(), senderPeerId, 1, DateTime.UtcNow.ToTimestamp(), MessageSubType.Normal);
 

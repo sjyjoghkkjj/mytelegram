@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Make a user admin in a <a href="https://corefork.telegram.org/api/channel#basic-groups">basic group</a>.
@@ -15,32 +15,9 @@ namespace MyTelegram.Handlers.Messages;
 internal sealed class EditChatAdminHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestEditChatAdmin, IBool>,
     Messages.IEditChatAdminHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IPeerHelper _peerHelper;
-
-    public EditChatAdminHandler(ICommandBus commandBus, IPeerHelper peerHelper)
-    {
-        _commandBus = commandBus;
-        _peerHelper = peerHelper;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestEditChatAdmin obj)
     {
-        var peer = _peerHelper.GetPeer(obj.UserId);
-        var isBot = _peerHelper.IsBotUser(peer.PeerId);
-        var command = new EditChatAdminCommand(ChatId.Create(obj.ChatId), input.ToRequestInfo(),
-            input.UserId,
-            false,
-            peer.PeerId,
-            isBot,
-            new ChatAdminRights(true, true, true, true, true, true, true, false, true, true, true, true, true, true, true),
-            string.Empty,
-            CurrentDate
-        );
-
-        await _commandBus.PublishAsync(command, default);
-
         return new TBoolTrue();
     }
 }

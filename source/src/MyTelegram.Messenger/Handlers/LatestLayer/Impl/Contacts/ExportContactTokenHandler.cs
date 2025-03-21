@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Contacts;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Generates a <a href="https://corefork.telegram.org/api/links#temporary-profile-links">temporary profile link</a> for the currently logged-in user.

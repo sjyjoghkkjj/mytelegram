@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.Services.TLObjectConverters;
 
-public interface ILayeredConverter : IHasRequestLayer
+public interface ILayeredConverter //: IHasRequestLayer
 {
     /// <summary>
     /// The layer of the converter
@@ -11,4 +11,8 @@ public interface ILayeredConverter : IHasRequestLayer
     ///// The layer of the request
     ///// </summary>
     //int RequestLayer { get; set; }
+}
+
+public interface ILayeredMapper
+{
 }

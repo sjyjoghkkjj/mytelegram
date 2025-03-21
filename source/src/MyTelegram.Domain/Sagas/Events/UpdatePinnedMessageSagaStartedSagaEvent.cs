@@ -16,13 +16,13 @@ public class
         Peer toPeer,
         long randomId,
         int date,
-        string? messageActionData)
+        IMessageAction? messageAction)
     : RequestAggregateEvent2<UpdatePinnedMessageSaga, UpdatePinnedMessageSagaId>(requestInfo)
 {
     public int Date { get; } = date;
+    public IMessageAction? MessageAction { get; } = messageAction;
     public int InboxCount { get; } = inboxCount;
 
-    public string? MessageActionData { get; } = messageActionData;
     public int MessageId { get; } = messageId;
     public bool NeedWaitForOutboxPinnedUpdated { get; } = needWaitForOutboxPinnedUpdated;
 

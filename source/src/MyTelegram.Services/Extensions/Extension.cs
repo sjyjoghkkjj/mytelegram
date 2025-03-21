@@ -5,12 +5,110 @@ namespace MyTelegram.Services.Extensions;
 
 public static class Extension
 {
+    public static IPhoneCallProtocol ToPhoneCallProtocol(this PhoneCallProtocol source)
+    {
+        return new TPhoneCallProtocol
+        {
+            LibraryVersions = new TVector<string>(source.LibraryVersions),
+            MaxLayer = source.MaxLayer,
+            MinLayer = source.MinLayer,
+            UdpP2p = source.UdpP2P,
+            UdpReflector = source.UdpReflector
+        };
+    }
+
+    public static IInputPeer ToInputPeer(this InputPeer source)
+    {
+        switch (source.Peer.PeerType)
+        {
+            case PeerType.Empty:
+            case PeerType.Self:
+            case PeerType.User:
+                return new TInputPeerUser { AccessHash = source.AccessHash, UserId = source.Peer.PeerId };
+            case PeerType.Chat:
+                return new TInputPeerChat { ChatId = source.Peer.PeerId };
+            case PeerType.Channel:
+                return new TInputPeerChannel { AccessHash = source.AccessHash, ChannelId = source.Peer.PeerId };
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    public static IChatAdminRights? ToChatAdminRights(this ChatAdminRights? source)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+
+        return new TChatAdminRights
+        {
+            ChangeInfo = source.ChangeInfo,
+            PostMessages = source.PostMessages,
+            EditMessages = source.EditMessages,
+            DeleteMessages = source.DeleteMessages,
+            BanUsers = source.BanUsers,
+            InviteUsers = source.InviteUsers,
+            PinMessages = source.PinMessages,
+            AddAdmins = source.AddAdmins,
+            Anonymous = source.Anonymous,
+            ManageCall = source.ManageCall,
+            Other = source.Other,
+            ManageTopics = source.ManageTopics,
+            PostStories = source.PostStories,
+            EditStories = source.EditStories,
+            DeleteStories = source.DeleteStories
+        };
+    }
+
+    public static IChatBannedRights? ToChatBannedRights(this ChatBannedRights? source)
+    {
+        if (source == null)
+        {
+            return null;
+        }
+
+        return new TChatBannedRights
+        {
+            ViewMessages = source.ViewMessages,
+            SendMessages = source.SendMessages,
+            SendMedia = source.SendMedia,
+            SendStickers = source.SendStickers,
+            SendGifs = source.SendGifs,
+            SendGames = source.SendGames,
+            SendInline = source.SendInline,
+            EmbedLinks = source.EmbedLinks,
+            SendPolls = source.SendPolls,
+            ChangeInfo = source.ChangeInfo,
+            InviteUsers = source.InviteUsers,
+            PinMessages = source.PinMessages,
+            ManageTopics = source.ManageTopics,
+            SendPhotos = source.SendPhotos,
+            SendVideos = source.SendVideos,
+            SendRoundvideos = source.SendRoundVideos,
+            SendAudios = source.SendAudios,
+            SendVoices = source.SendVoices,
+            SendDocs = source.SendDocs,
+            SendPlain = source.SendPlain,
+            UntilDate = source.UntilDate
+        };
+    }
+
     public static TRpcError ToRpcError(this RpcError rpcError)
     {
         return new TRpcError
         {
             ErrorCode = rpcError.ErrorCode,
             ErrorMessage = rpcError.Message
+        };
+    }
+
+    public static TRpcError ToRpcError(this RpcError rpcError, int xToReplace)
+    {
+        return new TRpcError
+        {
+            ErrorCode = rpcError.ErrorCode,
+            ErrorMessage = string.Format(rpcError.Message, xToReplace)
         };
     }
 
@@ -60,6 +158,11 @@ public static class Extension
             case TInputPeerChannel inputPeerChannel:
                 peerType = PeerType.Channel;
                 peerId = inputPeerChannel.ChannelId;
+                //accessHash = inputPeerChannel.AccessHash;
+                //case TInputPeerChannelFromMessage inputPeerChannelFromMessage:
+                //    peerType = PeerType.Channel;
+                //    peerId = inputPeerChannelFromMessage.ChannelId;
+
                 break;
             case TInputPeerChat inputPeerChat:
                 peerType = PeerType.Chat;
@@ -78,6 +181,8 @@ public static class Extension
                 peerId = inputPeerUser.UserId;
                 //accessHash = inputPeerUser.AccessHash;
                 break;
+            //case TInputPeerUserFromMessage inputPeerUserFromMessage:
+            //break;
             default:
                 throw new NotSupportedException(peer.GetType().Name);
         }

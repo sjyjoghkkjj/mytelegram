@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Deletes a user from a chat and sends a service message on it.
@@ -16,38 +16,9 @@ namespace MyTelegram.Handlers.Messages;
 internal sealed class DeleteChatUserHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestDeleteChatUser, MyTelegram.Schema.IUpdates>,
     Messages.IDeleteChatUserHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IRandomHelper _randomHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public DeleteChatUserHandler(ICommandBus commandBus,
-        IPeerHelper peerHelper,
-        IRandomHelper randomHelper,
-        IAccessHashHelper accessHashHelper)
-    {
-        _commandBus = commandBus;
-        _peerHelper = peerHelper;
-        _randomHelper = randomHelper;
-        _accessHashHelper = accessHashHelper;
-    }
-
-    protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
+    protected override Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestDeleteChatUser obj)
     {
-        if (obj.UserId is TInputUser inputUser)
-        {
-            await _accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
-        }
-
-        var peer = _peerHelper.GetPeer(obj.UserId, input.UserId);
-        var command = new DeleteChatUserCommand(ChatId.Create(obj.ChatId),
-            input.ToRequestInfo(),
-            peer.PeerId,
-            new TMessageActionChatDeleteUser { UserId = peer.PeerId }.ToBytes().ToHexString(),
-            _randomHelper.NextInt64()
-        );
-        await _commandBus.PublishAsync(command, CancellationToken.None);
-
-        return null!;
+        throw new NotImplementedException();
     }
 }

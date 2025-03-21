@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Chatlists;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Chatlists;
 
 ///<summary>
 /// List all <a href="https://corefork.telegram.org/api/links#chat-folder-links">chat folder deep links »</a> associated to a folder

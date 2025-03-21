@@ -2,7 +2,7 @@
 
 using GetSimpleMessageListQuery = MyTelegram.Queries.GetSimpleMessageListQuery;
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Pin a message

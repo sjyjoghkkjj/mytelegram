@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stats;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stats;
 
 ///<summary>
 /// Get <a href="https://corefork.telegram.org/api/stats">statistics</a> for a certain <a href="https://corefork.telegram.org/api/stories">story</a>.

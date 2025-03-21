@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Users;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Users;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/users.getIsPremiumRequiredToContact" />

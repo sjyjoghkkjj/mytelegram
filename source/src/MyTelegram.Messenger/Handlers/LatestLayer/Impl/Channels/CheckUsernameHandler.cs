@@ -1,6 +1,6 @@
 ﻿//// ReSharper disable All
 
-namespace MyTelegram.Handlers.Channels;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Check if a username is free and can be assigned to a channel/supergroup

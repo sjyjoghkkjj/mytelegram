@@ -2,7 +2,7 @@
 
 using EventFlow.Queries;
 
-namespace MyTelegram.Handlers.Channels;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Change or remove the username of a supergroup/channel

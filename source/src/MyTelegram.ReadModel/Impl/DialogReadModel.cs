@@ -63,6 +63,7 @@ public class DialogReadModel : IDialogReadModel,
     public int UnreadMentionsCount { get; private set; }
     public int UnreadReactionsCount { get; private set; }
     public int? FolderId { get; private set; }
+    public bool ViewForumAsMessages { get; private set; }
 
     public Task ApplyAsync(IReadModelContext context,
         IDomainEvent<DialogAggregate, DialogId, ChannelHistoryClearedEvent> domainEvent,

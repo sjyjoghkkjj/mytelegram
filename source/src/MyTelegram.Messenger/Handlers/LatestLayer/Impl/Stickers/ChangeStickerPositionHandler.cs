@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stickers;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stickers;
 
 ///<summary>
 /// Changes the absolute position of a sticker in the set to which it belongs; for bots only. The sticker set must have been created by the bot

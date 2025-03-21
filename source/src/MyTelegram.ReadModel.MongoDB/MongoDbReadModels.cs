@@ -37,10 +37,6 @@ public class ChatInviteReadModel : Impl.ChatInviteReadModel, IMongoDbReadModel
 {
 }
 
-public class ChatReadModel : Impl.ChatReadModel, IMongoDbReadModel
-{
-}
-
 public class ContactReadModel : Impl.ContactReadModel, IMongoDbReadModel
 {
 }

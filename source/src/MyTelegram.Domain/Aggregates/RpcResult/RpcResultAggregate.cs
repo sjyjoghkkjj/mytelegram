@@ -9,10 +9,15 @@ public class RpcResultAggregate : MyInMemorySnapshotAggregateRoot<RpcResultAggre
         Register(_state);
     }
 
+    public void Delete()
+    {
+        Emit(new RpcResultDeletedEvent());
+    }
+
     public void Create(RequestInfo requestInfo,
         byte[] rpcData)
     {
-        Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
+        //Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new RpcResultCreatedEvent(requestInfo, rpcData, DateTime.UtcNow.ToTimestamp()));
     }
 

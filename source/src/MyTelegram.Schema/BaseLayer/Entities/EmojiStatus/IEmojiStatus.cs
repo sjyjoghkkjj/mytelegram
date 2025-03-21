@@ -8,7 +8,8 @@ namespace MyTelegram.Schema;
 ///</summary>
 [JsonDerivedType(typeof(TEmojiStatusEmpty), nameof(TEmojiStatusEmpty))]
 [JsonDerivedType(typeof(TEmojiStatus), nameof(TEmojiStatus))]
-[JsonDerivedType(typeof(TEmojiStatusUntil), nameof(TEmojiStatusUntil))]
+[JsonDerivedType(typeof(TEmojiStatusCollectible), nameof(TEmojiStatusCollectible))]
+[JsonDerivedType(typeof(TInputEmojiStatusCollectible), nameof(TInputEmojiStatusCollectible))]
 public interface IEmojiStatus : IObject
 {
 

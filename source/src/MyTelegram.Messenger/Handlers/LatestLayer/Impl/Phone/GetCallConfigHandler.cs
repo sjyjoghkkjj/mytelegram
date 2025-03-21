@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Phone;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Phone;
 
 ///<summary>
 /// Get phone call configuration to be passed to libtgvoip's shared config

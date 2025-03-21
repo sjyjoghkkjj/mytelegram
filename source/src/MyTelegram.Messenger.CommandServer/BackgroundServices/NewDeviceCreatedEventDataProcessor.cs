@@ -1,11 +1,12 @@
-﻿using MyTelegram.Domain.Aggregates.Device;
+﻿using EventFlow.Aggregates.ExecutionResults;
+using MyTelegram.Domain.Aggregates.Device;
 using MyTelegram.Domain.Commands.Device;
 
 namespace MyTelegram.Messenger.CommandServer.BackgroundServices;
 
-public class NewDeviceCreatedEventDataProcessor(ICommandBus commandBus) : IDataProcessor<NewDeviceCreatedEvent>
+public class NewDeviceCreatedEventDataProcessor(IQueuedCommandExecutor<DeviceAggregate, DeviceId, IExecutionResult> queuedCommandExecutor) : IDataProcessor<NewDeviceCreatedEvent>
 {
-    public async Task ProcessAsync(NewDeviceCreatedEvent eventData)
+    public Task ProcessAsync(NewDeviceCreatedEvent eventData)
     {
         var createDeviceCommand = new CreateDeviceCommand(DeviceId.Create(eventData.PermAuthKeyId),
             eventData.RequestInfo,
@@ -27,6 +28,9 @@ public class NewDeviceCreatedEventDataProcessor(ICommandBus commandBus) : IDataP
             eventData.Ip,
             eventData.Layer
         );
-        await commandBus.PublishAsync(createDeviceCommand, default);
+        //await commandBus.PublishAsync(createDeviceCommand, default);
+        queuedCommandExecutor.Enqueue(createDeviceCommand);
+
+        return Task.CompletedTask;
     }
 }

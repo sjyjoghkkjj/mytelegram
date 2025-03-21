@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Phone;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Phone;
 
 ///<summary>
 /// Send phone call debug data to server

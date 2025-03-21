@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 
 namespace MyTelegram.Core;
 
-public class MyRsaHelper(IHashHelper hashHelper) : IMyRsaHelper
+public class MyRsaHelper(IHashHelper hashHelper) : IMyRsaHelper, ISingletonDependency
 {
     // https://stackoverflow.com/questions/15702718/public-key-encryption-with-rsacryptoserviceprovider
     private MyRsaParameter? _myRsaParameter;

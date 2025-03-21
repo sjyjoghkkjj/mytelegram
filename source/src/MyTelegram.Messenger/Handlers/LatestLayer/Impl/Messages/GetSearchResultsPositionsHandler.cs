@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Returns sparse positions of messages of the specified type in the chat to be used for shared media scroll implementation.Returns the results in reverse chronological order (i.e., in order of decreasing message_id).

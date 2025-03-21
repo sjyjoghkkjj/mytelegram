@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stickers;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stickers;
 
 ///<summary>
 /// Add a sticker to a stickerset, bots only. The sticker set must have been created by the bot.

@@ -1,23 +1,17 @@
-﻿using MyTelegram.Messenger.Services.Caching;
-using MyTelegram.Messenger.TLObjectConverters.Interfaces;
-using MyTelegram.Services.TLObjectConverters;
-
-namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
+﻿namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
 
 public class QrCodeLoginDomainEventHandler(
     IObjectMessageSender objectMessageSender,
     ICommandBus commandBus,
     IIdGenerator idGenerator,
     IAckCacheService ackCacheService,
-    IResponseCacheAppService responseCacheAppService,
     IQueryProcessor queryProcessor,
-    ILogger<QrCodeLoginDomainEventHandler> logger,
-    ILayeredService<IAuthorizationConverter> layeredAuthorizationService)
+    ILayeredService<IAuthorizationConverter> authorizationLayeredService,
+    ILogger<QrCodeLoginDomainEventHandler> logger)
     : DomainEventHandlerBase(objectMessageSender,
             commandBus,
             idGenerator,
-            ackCacheService,
-            responseCacheAppService),
+            ackCacheService),
         ISubscribeSynchronousTo<QrCodeAggregate, QrCodeId, QrCodeLoginTokenExportedEvent>,
         ISubscribeSynchronousTo<QrCodeAggregate, QrCodeId, LoginTokenAcceptedEvent>
 {
@@ -32,12 +26,18 @@ public class QrCodeLoginDomainEventHandler(
         if (deviceReadModel == null)
         {
             logger.LogWarning(
-                "Get device info failed, PermAuthKeyId: {PermAuthKeyId:x2}",
+                "Get device info failed, permAuthKeyId: {PermAuthKeyId:x2}",
                 domainEvent.AggregateEvent.QrCodeLoginRequestPermAuthKeyId);
             return;
         }
+        
 
-        var authorization = layeredAuthorizationService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).ToAuthorization(deviceReadModel);
+        var authorization = authorizationLayeredService
+            .GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
+            .ToAuthorization(deviceReadModel);
+        //var authorization = authorizationLayeredService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
+        //    .Convert(deviceReadModel);
+
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, authorization);
 
         var updateShortForLoginWithTokenRequestOwner =

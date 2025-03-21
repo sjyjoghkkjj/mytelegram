@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account.LayerN;
+﻿namespace  MyTelegram.Handlers.Account.LayerN;
 
 ///<summary>
 /// Create a theme
@@ -10,19 +8,14 @@ namespace MyTelegram.Handlers.Account.LayerN;
 /// 400 THEME_TITLE_INVALID The specified theme title is invalid.
 /// See <a href="https://corefork.telegram.org/method/account.createTheme" />
 ///</summary>
-internal sealed class CreateThemeHandler(IHandlerHelper handlerHelper) :
-    ForwardRequestToNewHandler<MyTelegram.Schema.Account.LayerN.RequestCreateTheme,
-        MyTelegram.Schema.Account.RequestCreateTheme>(handlerHelper),
-    LayerN.ICreateThemeHandler
+internal sealed class CreateThemeHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Account.LayerN.RequestCreateTheme,
+        MyTelegram.Schema.Account.RequestCreateTheme> dataConverter)
+    : ForwardRequestToNewHandler<
+            MyTelegram.Schema.Account.LayerN.RequestCreateTheme,
+            MyTelegram.Schema.Account.RequestCreateTheme
+        >(handlerHelper, dataConverter),
+        Account.LayerN.ICreateThemeHandler, IDistinctObjectHandler
 {
-    protected override RequestCreateTheme GetNewData(IRequestInput input, Schema.Account.LayerN.RequestCreateTheme obj)
-    {
-        return new RequestCreateTheme
-        {
-            Slug = obj.Slug,
-            Document = obj.Document,
-            Title = obj.Title,
-            Settings = obj.Settings == null ? null : [obj.Settings]
-        };
-    }
 }

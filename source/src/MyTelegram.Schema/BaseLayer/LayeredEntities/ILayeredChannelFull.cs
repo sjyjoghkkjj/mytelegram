@@ -5,7 +5,7 @@ public interface ILayeredChannelFull : IChatFull
 {
     bool CanViewParticipants { get; set; }
     bool CanSetUsername { get; set; }
-    //bool CanSetStickers { get; set; }
+    bool CanSetStickers { get; set; }
     //bool HiddenPrehistory { get; set; }
     //bool CanSetLocation { get; set; }
     //bool HasScheduled { get; set; }
@@ -35,7 +35,6 @@ public interface ILayeredChannelFull : IChatFull
     ///See <a href="https://core.telegram.org/type/ExportedChatInvite" />
     ///</summary>
     MyTelegram.Schema.IExportedChatInvite? ExportedInvite { get; set; }
-    //TVector<MyTelegram.Schema.IBotInfo> BotInfo { get; set; }
     //long? MigratedFromChatId { get; set; }
     //int? MigratedFromMaxId { get; set; }
     //int? PinnedMsgId { get; set; }
@@ -60,18 +59,18 @@ public interface ILayeredChannelFull : IChatFull
     /////<summary>
     /////See <a href="https://core.telegram.org/type/InputGroupCall" />
     /////</summary>
-    //MyTelegram.Schema.IInputGroupCall? Call { get; set; }
+    MyTelegram.Schema.IInputGroupCall? Call { get; set; }
     //int? TtlPeriod { get; set; }
     //TVector<string>? PendingSuggestions { get; set; }
 
     /////<summary>
     /////See <a href="https://core.telegram.org/type/Peer" />
     /////</summary>
-    //MyTelegram.Schema.IPeer? GroupcallDefaultJoinAs { get; set; }
+    MyTelegram.Schema.IPeer? GroupcallDefaultJoinAs { get; set; }
     //string? ThemeEmoticon { get; set; }
     int? RequestsPending { get; set; }
     TVector<long>? RecentRequesters { get; set; }
-
+    bool ViewForumAsMessages { get; set; }
     /////<summary>
     /////See <a href="https://core.telegram.org/type/Peer" />
     /////</summary>

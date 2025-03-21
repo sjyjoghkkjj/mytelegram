@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Auth;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Registers a validated phone number in the system.

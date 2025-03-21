@@ -10,10 +10,6 @@ public class ReplyToChannelMessageCompletedSagaEvent2(
     IReadOnlyCollection<Peer> recentRepliers)
     : AggregateEvent<SendMessageSaga, SendMessageSagaId>
 {
-    //int replyToMsgId,
-    //ReplyToMsgId = replyToMsgId;
-
-    //public int ReplyToMsgId { get; }
     public IInputReplyTo ReplyTo { get; } = replyTo;
     public long ChannelId { get; } = channelId;
     public int RepliesPts { get; } = repliesPts;

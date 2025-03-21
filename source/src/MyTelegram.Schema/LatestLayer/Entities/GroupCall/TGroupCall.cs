@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Info about a group call or livestream
 /// See <a href="https://corefork.telegram.org/constructor/groupCall" />
 ///</summary>
-[TlObject(0xd597650c)]
+[TlObject(0xcdf8d3e3)]
 public sealed class TGroupCall : IGroupCall
 {
-    public uint ConstructorId => 0xd597650c;
+    public uint ConstructorId => 0xcdf8d3e3;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -113,6 +113,7 @@ public sealed class TGroupCall : IGroupCall
     /// Version
     ///</summary>
     public int Version { get; set; }
+    public long? ConferenceFromCall { get; set; }
 
     public void ComputeFlag()
     {
@@ -129,7 +130,7 @@ public sealed class TGroupCall : IGroupCall
         if (/*RecordStartDate != 0 && */RecordStartDate.HasValue) { Flags[5] = true; }
         if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[7] = true; }
         if (/*UnmutedVideoCount != 0 && */UnmutedVideoCount.HasValue) { Flags[10] = true; }
-
+        if (/*ConferenceFromCall != 0 &&*/ ConferenceFromCall.HasValue) { Flags[14] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -147,6 +148,7 @@ public sealed class TGroupCall : IGroupCall
         if (Flags[10]) { writer.Write(UnmutedVideoCount.Value); }
         writer.Write(UnmutedVideoLimit);
         writer.Write(Version);
+        if (Flags[14]) { writer.Write(ConferenceFromCall.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -170,5 +172,6 @@ public sealed class TGroupCall : IGroupCall
         if (Flags[10]) { UnmutedVideoCount = reader.ReadInt32(); }
         UnmutedVideoLimit = reader.ReadInt32();
         Version = reader.ReadInt32();
+        if (Flags[14]) { ConferenceFromCall = reader.ReadInt64(); }
     }
 }

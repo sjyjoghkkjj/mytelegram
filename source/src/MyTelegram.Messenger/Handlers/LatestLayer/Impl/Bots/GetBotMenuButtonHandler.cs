@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Bots;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Bots;
 
 ///<summary>
 /// Gets the menu button action for a given user or for all users, previously set using <a href="https://corefork.telegram.org/method/bots.setBotMenuButton">bots.setBotMenuButton</a>; users can see this information in the <a href="https://corefork.telegram.org/constructor/botInfo">botInfo</a> constructor.

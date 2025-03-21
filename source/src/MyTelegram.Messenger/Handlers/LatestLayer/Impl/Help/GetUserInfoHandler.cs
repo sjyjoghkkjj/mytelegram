@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Help;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Can only be used by TSF members to obtain internal information.

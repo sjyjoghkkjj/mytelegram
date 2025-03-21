@@ -23,6 +23,10 @@ public class UserReadModel : IUserReadModel,
     public virtual long AccessHash { get; private set; }
     public virtual int AccountTtl { get; private set; }
     public Birthday? Birthday { get; private set; }
+    public bool BotHasMainApp { get; private set; }
+    public int? BotActiveUsers { get; private set; }
+    public List<string>? Usernames { get; private set; }
+    public DateTime? CreationTime { get; private set; }
     public virtual bool Bot { get; private set; }
     public int? BotInfoVersion { get; private set; }
     public PeerColor? Color { get; private set; }
@@ -38,13 +42,13 @@ public class UserReadModel : IUserReadModel,
     public virtual string? LastName { get; private set; }
     public virtual DateTime LastUpdateDate { get; private set; }
     public long? PersonalChannelId { get; private set; }
-    public long? PersonalPhotoId { get; }
+    public long? PersonalPhotoId { get; private set; }
     public virtual string PhoneNumber { get; private set; } = null!;
     public virtual int? PinnedMsgId { get; private set; }
     public virtual List<int> PinnedMsgIdList { get; protected set; } = [];
     public bool Premium { get; private set; }
     public PeerColor? ProfileColor { get; private set; }
-    public virtual byte[]? ProfilePhoto { get; }
+    public virtual byte[]? ProfilePhoto { get; private set; }
     public long? ProfilePhotoId { get; private set; }
     public List<long> RecentEmojiStatuses { get; private set; } = [];
     public virtual bool SensitiveCanChange { get; private set; }
@@ -60,7 +64,8 @@ public class UserReadModel : IUserReadModel,
     //public int? Color { get; private set; }
     //public long? BackgroundEmojiId { get; private set; }
     public virtual long? Version { get; set; }
-    public VideoSizeEmojiMarkup? VideoEmojiMarkup { get; }
+
+    public VideoSizeEmojiMarkup? VideoEmojiMarkup { get; private set; }
 
     public Task ApplyAsync(IReadModelContext context,
         IDomainEvent<MessageAggregate, MessageId, InboxMessagePinnedUpdatedEvent> domainEvent,

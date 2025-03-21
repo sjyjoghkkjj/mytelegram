@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Domain.Aggregates.Messaging;
+﻿//namespace MyTelegram.Domain.Aggregates.Messaging;
 
-public record UserReaction(long UserId,
-    List<long> ReactionIds);
+//public record UserReaction(long UserId,
+//    List<long> ReactionIds);

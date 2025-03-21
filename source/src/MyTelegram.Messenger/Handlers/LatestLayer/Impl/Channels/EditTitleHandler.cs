@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Edit the name of a <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a>
@@ -14,35 +12,27 @@ namespace MyTelegram.Handlers.Channels;
 /// 403 CHAT_WRITE_FORBIDDEN You can't write in this chat.
 /// See <a href="https://corefork.telegram.org/method/channels.editTitle" />
 ///</summary>
-internal sealed class EditTitleHandler : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestEditTitle, MyTelegram.Schema.IUpdates>,
-    Channels.IEditTitleHandler
+internal sealed class EditTitleHandler(
+    ICommandBus commandBus,
+    IRandomHelper randomHelper,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestEditTitle, MyTelegram.Schema.IUpdates>,
+        IEditTitleHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IRandomHelper _randomHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public EditTitleHandler(ICommandBus commandBus,
-        IRandomHelper randomHelper,
-        IAccessHashHelper accessHashHelper)
-    {
-        _commandBus = commandBus;
-        _randomHelper = randomHelper;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestEditTitle obj)
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await _accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
 
             var command = new EditChannelTitleCommand(ChannelId.Create(inputChannel.ChannelId),
                 input.ToRequestInfo(),
                 obj.Title,
-                new TMessageActionChatEditTitle { Title = obj.Title }.ToBytes().ToHexString(),
-                _randomHelper.NextInt64()
+                new TMessageActionChatEditTitle { Title = obj.Title },
+                randomHelper.NextInt64()
             );
-            await _commandBus.PublishAsync(command, CancellationToken.None);
+            await commandBus.PublishAsync(command, CancellationToken.None);
             return null!;
         }
 

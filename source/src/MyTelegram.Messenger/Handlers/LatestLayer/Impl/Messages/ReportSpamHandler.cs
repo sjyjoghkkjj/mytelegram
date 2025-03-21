@@ -2,7 +2,7 @@
 
 using IBool = MyTelegram.Schema.IBool;
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Report a new incoming chat for spam, if the <a href="https://corefork.telegram.org/constructor/peerSettings">peer settings</a> of the chat allow us to do that

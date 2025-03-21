@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Auth;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Reset the <a href="https://core.telegram.org/api/auth#email-verification">login email »</a>.

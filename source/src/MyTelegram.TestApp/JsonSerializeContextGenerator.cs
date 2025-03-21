@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EventFlow.Aggregates;
-using EventFlow.MongoDB.ValueObjects;
+﻿using EventFlow.Aggregates;
 using EventFlow.Provided.Jobs;
 using EventFlow.Snapshots;
 using MyTelegram.Core;
-using MyTelegram.Domain.ValueObjects;
 using MyTelegram.Services.Services;
+using System.Text;
 
 namespace MyTelegram.TestApp;
 
@@ -54,6 +48,12 @@ public class JsonSerializeContextGenerator
             sb.AppendLine();
         }
 
+        /*[JsonSerializable(typeof(global::EventFlow.Aggregates.Metadata))]
+           [JsonSerializable(typeof(global::EventFlow.Provided.Jobs.DispatchToAsynchronousEventSubscribersJob))]
+           [JsonSerializable(typeof(global::EventFlow.Snapshots.SnapshotMetadata))]*/
+        sb.AppendLine("[JsonSerializable(typeof(global::EventFlow.Aggregates.Metadata))]");
+        sb.AppendLine("[JsonSerializable(typeof(global::EventFlow.Provided.Jobs.DispatchToAsynchronousEventSubscribersJob))]");
+        sb.AppendLine("[JsonSerializable(typeof(global::EventFlow.Snapshots.SnapshotMetadata))]");
         sb.AppendLine($"[JsonSerializable(typeof(System.Collections.Generic.List<PhotoSize>))]");
         sb.AppendLine($"[JsonSerializable(typeof(System.Collections.Generic.List<VideoSize>))]");
         sb.AppendLine($"[JsonSerializable(typeof(System.Collections.Generic.List<FutureAuthTokenCacheItem>))]");
@@ -124,9 +124,9 @@ public class JsonSerializeContextGenerator
 
         var types3 = new List<Type>(new[]
         {
-            typeof(Metadata),
-            typeof(SnapshotMetadata),
-            typeof(DispatchToAsynchronousEventSubscribersJob),
+            //typeof(Metadata),
+            //typeof(SnapshotMetadata),
+            //typeof(DispatchToAsynchronousEventSubscribersJob),
             //typeof(MongoDbEventDataModel),
             typeof(RequestInfo),
             typeof(Peer),

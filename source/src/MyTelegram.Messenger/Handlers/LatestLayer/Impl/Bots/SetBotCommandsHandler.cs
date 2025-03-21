@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Bots;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Bots;
 
 ///<summary>
 /// Set bot command list

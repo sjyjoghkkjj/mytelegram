@@ -76,7 +76,6 @@
     <!--<ProjectReference Include="..\MyTelegram.Queries\MyTelegram.Queries.csproj" />-->
     <!--<ProjectReference Include="..\MyTelegram.ReadModel\MyTelegram.ReadModel.csproj" />-->
     <!--<ProjectReference Include="..\MyTelegram.ReadModel.MongoDB\MyTelegram.ReadModel.MongoDB.csproj" />-->
-    <ProjectReference Include="..\MyTelegram.Queries.MongoDB\MyTelegram.QueryHandlers.MongoDB.csproj" />
     <ProjectReference Include="..\MyTelegram.Services\MyTelegram.Services.csproj" />
 
   </ItemGroup>

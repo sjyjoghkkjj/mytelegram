@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Premium;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Premium;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/premium.applyBoost" />

@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Contacts;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// If the <a href="https://corefork.telegram.org/constructor/peerSettings">peer settings</a> of a new user allow us to add them as contact, add that user as contact

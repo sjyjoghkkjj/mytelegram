@@ -7,7 +7,7 @@ public class PrivacyAppService(
 {
     public Task<IReadOnlyCollection<IPrivacyReadModel>> GetPrivacyListAsync(IReadOnlyList<long> userIds)
     {
-        return Task.FromResult<IReadOnlyCollection<IPrivacyReadModel>>(Array.Empty<IPrivacyReadModel>());
+        return Task.FromResult<IReadOnlyCollection<IPrivacyReadModel>>([]);
     }
 
     public Task<IReadOnlyCollection<IPrivacyReadModel>> GetPrivacyListAsync(long userId)
@@ -33,6 +33,12 @@ public class PrivacyAppService(
 
     }
 
+    public Task ApplyPrivacyListAsync(long selfUserId, IReadOnlyList<long> targetUserIdList, Action<PrivacyValueType, long> executeOnPrivacyNotMatch,
+        List<PrivacyType> privacyTypes)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task SetGlobalPrivacySettingsAsync(long selfUserId, GlobalPrivacySettings globalPrivacySettings)
     {
         throw new NotImplementedException();
@@ -53,11 +59,31 @@ public class PrivacyAppService(
         return item;
     }
 
+    public PrivacyValueData GetPrivacyValueData(IInputPrivacyRule rule)
+    {
+        throw new NotImplementedException();
+    }
+
+    public List<PrivacyValueData> GetPrivacyValueDataList(IList<IInputPrivacyRule> rules)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<SetPrivacyOutput> SetPrivacyAsync(RequestInfo requestInfo,
         long selfUserId,
         IInputPrivacyKey key,
         IReadOnlyList<IInputPrivacyRule> ruleList)
     {
         return Task.FromResult(new SetPrivacyOutput(new List<IPrivacyRule>()));
+    }
+
+    public Task ApplyPrivacyAsync(long selfUserId, long targetUserId, Action<PrivacyValueType> executeOnPrivacyNotMatch, PrivacyType privacyType)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ApplyPrivacyAsync(long selfUserId, long targetUserId, Action<PrivacyValueType> executeOnPrivacyNotMatch, List<PrivacyType> privacyTypes)
+    {
+        throw new NotImplementedException();
     }
 }

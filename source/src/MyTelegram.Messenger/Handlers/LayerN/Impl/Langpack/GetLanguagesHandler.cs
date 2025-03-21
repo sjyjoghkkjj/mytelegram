@@ -1,8 +1,4 @@
-﻿// ReSharper disable All
-
-using MyTelegram.Schema.Langpack;
-
-namespace MyTelegram.Handlers.Langpack.LayerN;
+﻿namespace  MyTelegram.Handlers.Langpack.LayerN;
 
 ///<summary>
 /// Get information about all languages in a localization pack
@@ -11,16 +7,14 @@ namespace MyTelegram.Handlers.Langpack.LayerN;
 /// 400 LANG_PACK_INVALID The provided language pack is invalid.
 /// See <a href="https://corefork.telegram.org/method/langpack.getLanguages" />
 ///</summary>
-internal sealed class GetLanguagesHandler(IHandlerHelper handlerHelper) : ForwardRequestToNewHandler<
-        MyTelegram.Schema.Langpack.LayerN.RequestGetLanguages,
-        MyTelegram.Schema.Langpack.RequestGetLanguages>(handlerHelper),
-    Langpack.LayerN.IGetLanguagesHandler
+internal sealed class GetLanguagesHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Langpack.LayerN.RequestGetLanguages,
+        MyTelegram.Schema.Langpack.RequestGetLanguages> dataConverter)
+    : ForwardRequestToNewHandler<
+            MyTelegram.Schema.Langpack.LayerN.RequestGetLanguages,
+            MyTelegram.Schema.Langpack.RequestGetLanguages
+        >(handlerHelper, dataConverter),
+        Langpack.LayerN.IGetLanguagesHandler
 {
-    protected override RequestGetLanguages GetNewData(IRequestInput request, Schema.Langpack.LayerN.RequestGetLanguages obj)
-    {
-        return new RequestGetLanguages
-        {
-            LangPack = request.DeviceType.ToString().ToLower()
-        };
-    }
 }

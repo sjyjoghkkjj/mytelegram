@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Info about bots (available bot commands, etc)
 /// See <a href="https://corefork.telegram.org/constructor/botInfo" />
 ///</summary>
-[TlObject(0x36607333)]
+[TlObject(0x4d8a0299)]
 public sealed class TBotInfo : IBotInfo
 {
-    public uint ConstructorId => 0x36607333;
+    public uint ConstructorId => 0x4d8a0299;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -65,6 +65,7 @@ public sealed class TBotInfo : IBotInfo
     /// See <a href="https://corefork.telegram.org/type/BotAppSettings" />
     ///</summary>
     public MyTelegram.Schema.IBotAppSettings? AppSettings { get; set; }
+    public MyTelegram.Schema.IBotVerifierSettings? VerifierSettings { get; set; }
 
     public void ComputeFlag()
     {
@@ -77,6 +78,7 @@ public sealed class TBotInfo : IBotInfo
         if (MenuButton != null) { Flags[3] = true; }
         if (PrivacyPolicyUrl != null) { Flags[7] = true; }
         if (AppSettings != null) { Flags[8] = true; }
+        if (VerifierSettings != null) { Flags[9] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -92,6 +94,7 @@ public sealed class TBotInfo : IBotInfo
         if (Flags[3]) { writer.Write(MenuButton); }
         if (Flags[7]) { writer.Write(PrivacyPolicyUrl); }
         if (Flags[8]) { writer.Write(AppSettings); }
+        if (Flags[9]) { writer.Write(VerifierSettings); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -106,5 +109,6 @@ public sealed class TBotInfo : IBotInfo
         if (Flags[3]) { MenuButton = reader.Read<MyTelegram.Schema.IBotMenuButton>(); }
         if (Flags[7]) { PrivacyPolicyUrl = reader.ReadString(); }
         if (Flags[8]) { AppSettings = reader.Read<MyTelegram.Schema.IBotAppSettings>(); }
+        if (Flags[9]) { VerifierSettings = reader.Read<MyTelegram.Schema.IBotVerifierSettings>(); }
     }
 }

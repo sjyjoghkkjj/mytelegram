@@ -11,19 +11,18 @@ public class
     public bool Broadcast { get; private set; }
 
     public bool Completed => TotalCount == IncrementedCount;
-    public int Date { get; private set; }
-
     public int IncrementedCount { get; private set; }
     public long InviterId { get; private set; }
     public int MaxMessageId { get; private set; }
-    public IReadOnlyList<long> MemberUidList { get; private set; } = null!;
-    public IReadOnlyList<long>? PrivacyRestrictedUserId { get; private set; }
+    public IReadOnlyCollection<long> MemberUserIds { get; private set; } = [];
+    public IReadOnlyCollection<long> BotUserIds { get; private set; } = [];
     public string MessageActionData { get; private set; } = null!;
 
     public long RandomId { get; private set; }
     public RequestInfo RequestInfo { get; private set; } = default!;
     public int TotalCount { get; private set; }
     public bool HasLink { get; private set; }
+    public ChatJoinType ChatJoinType { get; private set; }
 
     public void Apply(InviteToChannelSagaMemberCreatedSagaEvent aggregateEvent)
     {
@@ -35,15 +34,12 @@ public class
         RequestInfo = aggregateEvent.RequestInfo;
         ChannelId = aggregateEvent.ChannelId;
         InviterId = aggregateEvent.InviterId;
-        Date = aggregateEvent.Date;
-        TotalCount = aggregateEvent.TotalCount;
-        MemberUidList = aggregateEvent.MemberUidList;
-        PrivacyRestrictedUserId = aggregateEvent.PrivacyRestrictedUserId;
+        TotalCount = aggregateEvent.MemberUserIds.Count;// + aggregateEvent.BotUserIds.Count;
+        MemberUserIds = aggregateEvent.MemberUserIds;
         MaxMessageId = aggregateEvent.MaxMessageId;
-        RandomId = aggregateEvent.RandomId;
-        MessageActionData = aggregateEvent.MessageActionData;
         ChannelHistoryMinId = aggregateEvent.ChannelHistoryMinId;
         Broadcast = aggregateEvent.Broadcast;
         HasLink = aggregateEvent.HasLink;
+        ChatJoinType = aggregateEvent.ChatJoinType;
     }
 }

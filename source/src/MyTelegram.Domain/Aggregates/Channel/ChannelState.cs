@@ -4,7 +4,9 @@ namespace MyTelegram.Domain.Aggregates.Channel;
 
 public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelState>,
     IApply<ChannelCreatedEvent>,
+
     //IApply<ChannelInviteExportedEvent>,
+
     IApply<StartSendChannelMessageEvent>,
     IApply<StartInviteToChannelEvent>,
     IApply<IncrementParticipantCountEvent>,
@@ -21,10 +23,6 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     IApply<ChannelPhotoEditedEvent>,
     IApply<ChannelUserNameChangedEvent>,
     IApply<CheckChannelStateCompletedEvent>,
-    //IApply<DeleteParticipantHistoryStartedEvent>,
-    //IApply<ChannelInviteEditedEvent>,
-    //IApply<ChannelInviteDeletedEvent>,
-    //IApply<ChatInviteImportedEvent>,
     IApply<ChatJoinRequestHiddenEvent>,
     IApply<ChannelColorUpdatedEvent>,
     IApply<ChatInviteRequestPendingUpdatedEvent>,
@@ -86,6 +84,14 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     public PeerColor? Color { get; private set; }
     public bool HasLink { get; private set; }
     public bool IsDeleted { get; private set; }
+    public long? WallPaperId { get; private set; }
+    public string? ThemeEmoticon { get; private set; }
+    public WallPaperSettings? WallPaperSettings { get; private set; }
+    public bool IsGeoGroup { get; private set; }
+    public int TopMessageId { get; private set; }
+    public long? StickerSetId { get; private set; }
+    public long? EmojiStickerSetId { get; private set; }
+    public EmojiStatus? EmojiStatus { get; private set; }
 
     public void Apply(ChannelAboutEditedEvent aggregateEvent)
     {
@@ -139,6 +145,7 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
         MigratedFromChatId = aggregateEvent.MigratedFromChatId;
         MigratedMaxId = aggregateEvent.MigratedMaxId;
         ParticipantCount = 1;
+        IsGeoGroup = aggregateEvent.GeoPoint != null;
 
         ChatAdmins.TryAdd(CreatorId,
             new ChatAdmin(CreatorId, true, CreatorId, ChatAdminRights.GetCreatorRights(), string.Empty));
@@ -153,11 +160,6 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     {
         IsDeleted = true;
     }
-
-    //public void Apply(DeleteParticipantHistoryStartedEvent aggregateEvent)
-    //{
-    //    //throw new NotImplementedException();
-    //}
 
     public void Apply(ChannelParticipantCountChangedEvent aggregateEvent)
     {
@@ -348,5 +350,14 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
         Color = snapshot.Color;
         HasLink = snapshot.HasLink;
         IsDeleted = snapshot.IsDeleted;
+
+        WallPaperId = snapshot.WallPaperId;
+        ThemeEmoticon = snapshot.ThemeEmoticon;
+        WallPaperSettings = snapshot.WallPaperSettings;
+        IsGeoGroup = snapshot.IsGeoGroup;
+        TopMessageId = snapshot.TopMessageId;
+        StickerSetId = snapshot.StickerSetId;
+        EmojiStickerSetId = snapshot.EmojiStickerSetId;
+        EmojiStatus = snapshot.EmojiStatus;
     }
 }

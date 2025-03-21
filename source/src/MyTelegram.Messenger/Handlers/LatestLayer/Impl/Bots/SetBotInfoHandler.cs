@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Bots;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Bots;
 
 ///<summary>
 /// Set localized name, about text and description of a bot (or of the current account, if called by a bot).

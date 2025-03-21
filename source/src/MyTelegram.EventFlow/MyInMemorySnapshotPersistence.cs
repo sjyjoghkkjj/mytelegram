@@ -47,7 +47,7 @@ public class MyInMemorySnapshotPersistence(ILogger<MyInMemorySnapshotPersistence
 
         if (_totalCount % 1000 == 0)
         {
-            logger.LogInformation("Aggregate cache count:{Count}", _totalCount);
+            logger.LogInformation("Aggregate cache count: {Count}", _totalCount);
         }
 
         return Task.CompletedTask;

@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Upload;
 
 ///<summary>
 /// Download a <a href="https://corefork.telegram.org/cdn">CDN</a> file.

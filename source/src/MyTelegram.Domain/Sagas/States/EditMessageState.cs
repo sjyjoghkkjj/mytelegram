@@ -1,10 +1,10 @@
 ﻿namespace MyTelegram.Domain.Sagas.States;
 
 public class EditMessageState : AggregateState<EditMessageSaga, EditMessageSagaId, EditMessageState>,
-    IApply<EditOutboxMessageStartedSagaEvent>,
-    IApply<OutboxMessageEditCompletedSagaEvent>,
-    IApply<InboxMessageEditCompletedSagaEvent>,
-    IApply<EditInboxMessageStartedSagaEvent>
+        IApply<EditOutboxMessageStartedSagaEvent>,
+        IApply<OutboxMessageEditCompletedSagaEvent>,
+        IApply<InboxMessageEditCompletedSagaEvent>,
+        IApply<EditInboxMessageStartedSagaEvent>
 {
     public Dictionary<long, int> UidToMessageId = new();
 
@@ -27,14 +27,14 @@ public class EditMessageState : AggregateState<EditMessageSaga, EditMessageSagaI
         //UidToMessageId.TryAdd(aggregateEvent.UserId, aggregateEvent.MessageId);
         CurrentInboxCount++;
 
-        OldInboxMessageItem = aggregateEvent.OldMessageItem;
+        OldInboxMessageItem= aggregateEvent.OldMessageItem;
         NewInboxMessageItem = aggregateEvent.NewMessageItem;
     }
 
     public void Apply(EditOutboxMessageStartedSagaEvent aggregateEvent)
     {
         RequestInfo = aggregateEvent.RequestInfo;
-        OldMessageItem = aggregateEvent.OldMessageItem;
+        OldMessageItem= aggregateEvent.OldMessageItem;
         NewMessageItem = aggregateEvent.NewMessageItem;
 
         InboxCount = aggregateEvent.NewMessageItem.InboxItems?.Count ?? 0;

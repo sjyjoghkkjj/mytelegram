@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Payments;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Payments;
 
 ///<summary>
 /// Checks whether Telegram Premium purchase is possible. Must be called before in-store Premium purchase, official apps only.

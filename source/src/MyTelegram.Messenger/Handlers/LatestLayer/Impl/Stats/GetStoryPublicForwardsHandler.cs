@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stats;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stats;
 
 ///<summary>
 /// Obtain forwards of a <a href="https://corefork.telegram.org/api/stories">story</a> as a message to public chats and reposts by public channels.

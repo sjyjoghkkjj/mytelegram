@@ -8,7 +8,7 @@ public interface IScheduleAppService
     TimerTaskHandle Execute(Action action, TimeSpan delayTimeSpan);
 }
 
-public class ScheduleAppService : IScheduleAppService, ITransientDependency
+public class ScheduleAppService : IScheduleAppService, ISingletonDependency
 {
     private readonly HashedWheelTimer _timer = new();
 

@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get preview of webpage
@@ -10,12 +10,16 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 MESSAGE_EMPTY The provided message is empty.
 /// See <a href="https://corefork.telegram.org/method/messages.getWebPagePreview" />
 ///</summary>
-internal sealed class GetWebPagePreviewHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetWebPagePreview, MyTelegram.Schema.IMessageMedia>,
-    Messages.IGetWebPagePreviewHandler
+internal sealed class GetWebPagePreviewHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetWebPagePreview, MyTelegram.Schema.Messages.IWebPagePreview>,
+    IGetWebPagePreviewHandler
 {
-    protected override Task<MyTelegram.Schema.IMessageMedia> HandleCoreAsync(IRequestInput input,
+    protected override Task<MyTelegram.Schema.Messages.IWebPagePreview> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestGetWebPagePreview obj)
     {
-        return Task.FromResult<IMessageMedia>(new TMessageMediaEmpty());
+        return Task.FromResult<MyTelegram.Schema.Messages.IWebPagePreview>(new TWebPagePreview
+        {
+            Media = new TMessageMediaEmpty(),
+            Users = []
+        });
     }
 }

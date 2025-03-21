@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Edit the description of a <a href="https://corefork.telegram.org/api/channel">group/supergroup/channel</a>.
@@ -49,13 +49,6 @@ internal sealed class EditChatAboutHandler : RpcResultObjectHandler<MyTelegram.S
                         new EditChannelAboutCommand(ChannelId.Create(peer.PeerId), input.ToRequestInfo(), input.UserId, obj.About);
                     await _commandBus.PublishAsync(command, CancellationToken.None);
                     //return new TBoolTrue();
-                    return null!;
-                }
-            case PeerType.Chat:
-                {
-                    var command =
-                        new EditChatAboutCommand(ChatId.Create(peer.PeerId), input.ToRequestInfo(), input.UserId, obj.About);
-                    await _commandBus.PublishAsync(command, CancellationToken.None);
                     return null!;
                 }
         }

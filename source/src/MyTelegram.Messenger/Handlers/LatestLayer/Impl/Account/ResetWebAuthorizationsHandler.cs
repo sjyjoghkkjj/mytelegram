@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 /// <summary>
 ///     Reset all active web <a href="https://corefork.telegram.org/widgets/login">telegram login</a> sessions

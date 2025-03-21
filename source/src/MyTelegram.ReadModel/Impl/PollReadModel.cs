@@ -7,6 +7,7 @@ public class PollReadModel : IPollReadModel,
 {
     public IReadOnlyCollection<PollAnswer> Answers { get; private set; } = default!;
     public IReadOnlyCollection<PollAnswerVoter>? AnswerVoters { get; private set; }
+    public IList<IMessageEntity>? SolutionEntities2 { get; private set; }
     public bool Closed { get; private set; }
     public int? CloseDate { get; private set; }
     public int? ClosePeriod { get; private set; }
@@ -17,6 +18,7 @@ public class PollReadModel : IPollReadModel,
     public bool PublicVoters { get; private set; }
     public string Question { get; private set; } = default!;
     public byte[]? QuestionEntities { get; private set; }
+    public IList<IMessageEntity>? QuestionEntities2 { get; private set; }
     public bool Quiz { get; private set; }
     public string? Solution { get; private set; }
     public byte[]? SolutionEntities { get; private set; }
@@ -38,7 +40,9 @@ public class PollReadModel : IPollReadModel,
         CorrectAnswers = domainEvent.AggregateEvent.CorrectAnswers;
         Solution = domainEvent.AggregateEvent.Solution;
         SolutionEntities = domainEvent.AggregateEvent.SolutionEntities;
-        QuestionEntities= domainEvent.AggregateEvent.QuestionEntities;
+        QuestionEntities = domainEvent.AggregateEvent.QuestionEntities;
+        SolutionEntities2 = domainEvent.AggregateEvent.SolutionEntities2;
+        QuestionEntities2 = domainEvent.AggregateEvent.QuestionEntities2;
 
         return Task.CompletedTask;
     }

@@ -2,7 +2,7 @@
 
 using RequestReadHistory = MyTelegram.Schema.Messages.RequestReadHistory;
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 /// <summary>
 ///     Marks message history as read.

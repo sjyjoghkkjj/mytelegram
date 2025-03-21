@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Returns attachment menu entry for a <a href="https://corefork.telegram.org/api/bots/attach">bot web app that can be launched from the attachment menu »</a>

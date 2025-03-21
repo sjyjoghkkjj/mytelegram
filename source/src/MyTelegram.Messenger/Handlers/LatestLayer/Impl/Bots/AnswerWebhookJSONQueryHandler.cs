@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Bots;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Bots;
 
 ///<summary>
 /// Answers a custom query; for bots only

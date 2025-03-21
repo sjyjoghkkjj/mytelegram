@@ -10,6 +10,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TPhoneCallDiscardReasonDisconnect), nameof(TPhoneCallDiscardReasonDisconnect))]
 [JsonDerivedType(typeof(TPhoneCallDiscardReasonHangup), nameof(TPhoneCallDiscardReasonHangup))]
 [JsonDerivedType(typeof(TPhoneCallDiscardReasonBusy), nameof(TPhoneCallDiscardReasonBusy))]
+[JsonDerivedType(typeof(TPhoneCallDiscardReasonAllowGroupCall), nameof(TPhoneCallDiscardReasonAllowGroupCall))]
 public interface IPhoneCallDiscardReason : IObject
 {
 

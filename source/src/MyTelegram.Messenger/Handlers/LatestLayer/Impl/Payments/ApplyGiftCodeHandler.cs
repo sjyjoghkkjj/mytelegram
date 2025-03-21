@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Payments;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Payments;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/payments.applyGiftCode" />

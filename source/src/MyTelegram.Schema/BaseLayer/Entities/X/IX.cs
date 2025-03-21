@@ -39,12 +39,12 @@ public interface IX : IObject
     string SystemLangCode { get; set; }
 
     ///<summary>
-    /// Platform identifier (i.e. <code>android</code>, <code>tdesktop</code>, etc).
+    /// Language pack to use
     ///</summary>
     string LangPack { get; set; }
 
     ///<summary>
-    /// Either an ISO 639-1 language code or a language pack name obtained from a <a href="https://corefork.telegram.org/api/links#language-pack-links">language pack link</a>.
+    /// Code for the language used on the client, ISO 639-1 standard
     ///</summary>
     string LangCode { get; set; }
 

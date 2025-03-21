@@ -115,19 +115,15 @@ public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, User
     }
 
     public void UpdateProfilePhoto(RequestInfo requestInfo,
-            //long userId,
             long photoId,
-            bool fallback)//,
-                          //byte[]? photo, 
-                          //VideoSizeEmojiMarkup? videoEmojiMarkup /*, bool hasVideo, double videoStartTs*/)
+            bool fallback)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new UserProfilePhotoChangedEvent(requestInfo,
             _state.UserId,
             photoId,
-            fallback
-            //videoEmojiMarkup
-            /*, hasVideo, videoStartTs*/));
+            fallback,
+            _state.IsBot));
     }
 
     public void UpdateUserName(RequestInfo requestInfo,

@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Forwarded document
 /// See <a href="https://corefork.telegram.org/constructor/inputMediaDocument" />
 ///</summary>
-[TlObject(0x33473058)]
+[TlObject(0xa8763ab5)]
 public sealed class TInputMediaDocument : IInputMedia
 {
-    public uint ConstructorId => 0x33473058;
+    public uint ConstructorId => 0xa8763ab5;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -27,6 +27,8 @@ public sealed class TInputMediaDocument : IInputMedia
     /// See <a href="https://corefork.telegram.org/type/InputDocument" />
     ///</summary>
     public MyTelegram.Schema.IInputDocument Id { get; set; }
+    public MyTelegram.Schema.IInputPhoto? VideoCover { get; set; }
+    public int? VideoTimestamp { get; set; }
 
     ///<summary>
     /// Time to live of self-destructing document
@@ -41,6 +43,8 @@ public sealed class TInputMediaDocument : IInputMedia
     public void ComputeFlag()
     {
         if (Spoiler) { Flags[2] = true; }
+        if (VideoCover != null) { Flags[3] = true; }
+        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[4] = true; }
         if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[0] = true; }
         if (Query != null) { Flags[1] = true; }
     }
@@ -51,6 +55,8 @@ public sealed class TInputMediaDocument : IInputMedia
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Id);
+        if (Flags[3]) { writer.Write(VideoCover); }
+        if (Flags[4]) { writer.Write(VideoTimestamp.Value); }
         if (Flags[0]) { writer.Write(TtlSeconds.Value); }
         if (Flags[1]) { writer.Write(Query); }
     }
@@ -60,6 +66,8 @@ public sealed class TInputMediaDocument : IInputMedia
         Flags = reader.ReadBitArray();
         if (Flags[2]) { Spoiler = true; }
         Id = reader.Read<MyTelegram.Schema.IInputDocument>();
+        if (Flags[3]) { VideoCover = reader.Read<MyTelegram.Schema.IInputPhoto>(); }
+        if (Flags[4]) { VideoTimestamp = reader.ReadInt32(); }
         if (Flags[0]) { TtlSeconds = reader.ReadInt32(); }
         if (Flags[1]) { Query = reader.ReadString(); }
     }

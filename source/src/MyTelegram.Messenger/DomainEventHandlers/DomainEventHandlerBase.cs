@@ -1,21 +1,31 @@
-﻿using MyTelegram.Domain.Aggregates.Updates;
+﻿using MyTelegram.Domain.Aggregates.RpcResult;
+using MyTelegram.Domain.Aggregates.Updates;
 using MyTelegram.Domain.Commands.Pts;
+using MyTelegram.Domain.Commands.RpcResult;
 using MyTelegram.Domain.Commands.Updates;
 
 namespace MyTelegram.Messenger.DomainEventHandlers;
 
 public abstract class DomainEventHandlerBase(
+    //IQueryProcessor queryProcessor,
     IObjectMessageSender objectMessageSender,
     ICommandBus commandBus,
     IIdGenerator idGenerator,
-    IAckCacheService ackCacheService,
-    IResponseCacheAppService responseCacheAppService)
+    IAckCacheService ackCacheService
+)
 {
-    protected Task AddRpcGlobalSeqNoForAuthKeyIdAsync(long reqMsgId,
+    protected Task AddRpcGlobalSeqNoForAuthKeyIdAsync(
+        long reqMsgId,
         long selfUserId,
-        long globalSeqNo)
+        long globalSeqNo
+    )
     {
-        return ackCacheService.AddRpcPtsToCacheAsync(reqMsgId, 0, globalSeqNo, new Peer(PeerType.User, selfUserId));
+        return ackCacheService.AddRpcPtsToCacheAsync(
+            reqMsgId,
+            0,
+            globalSeqNo,
+            new Peer(PeerType.User, selfUserId)
+        );
     }
 
     protected async Task PushUpdatesToChannelMemberAsync(
@@ -29,33 +39,36 @@ public abstract class DomainEventHandlerBase(
         UpdatesType updatesType = UpdatesType.Updates,
         int pts = 0,
         bool skipSaveUpdates = false,
-        LayeredData<IUpdates>? layeredData = null)
+        LayeredData<IUpdates>? layeredData = null
+    )
     {
         var globalSeqNo = 0L;
         if (!skipSaveUpdates)
         {
             globalSeqNo = await SavePushUpdatesAsync(
-               channelPeer.PeerId,
-               updates,
-               pts,
-               excludeAuthKeyId,
-               excludeUserId,
-               onlySendToUserId,
-               onlySendToThisAuthKeyId,
-               new List<long> { senderPeer.PeerId },
-               updatesType: updatesType
-                );
+                channelPeer.PeerId,
+                updates,
+                pts,
+                excludeAuthKeyId,
+                excludeUserId,
+                onlySendToUserId,
+                onlySendToThisAuthKeyId,
+                new List<long> { senderPeer.PeerId },
+                updatesType: updatesType
+            );
         }
 
-        await objectMessageSender.PushMessageToPeerAsync(channelPeer,
+        await objectMessageSender.PushMessageToPeerAsync(
+            channelPeer,
             updates,
             excludeAuthKeyId,
             excludeUserId,
             onlySendToUserId,
             onlySendToThisAuthKeyId,
             pts,
-           globalSeqNo: globalSeqNo,
-           layeredData: layeredData);
+            globalSeqNo: globalSeqNo,
+            layeredData: layeredData
+        );
     }
 
     protected async Task PushUpdatesToChannelSingleMemberAsync(
@@ -68,7 +81,9 @@ public abstract class DomainEventHandlerBase(
         long? onlySendToThisAuthKeyId = null,
         int pts = 0,
         UpdatesType updatesType = UpdatesType.Updates,
-        LayeredData<IUpdates>? layeredData = null)
+        LayeredData<IUpdates>? layeredData = null,
+        long? senderUserId = null
+    )
     {
         var globalSeqNo = await SavePushUpdatesAsync(
             channelId,
@@ -79,8 +94,9 @@ public abstract class DomainEventHandlerBase(
             onlySendToUserId,
             onlySendToThisAuthKeyId,
             updatesType: updatesType
-            );
-        await objectMessageSender.PushMessageToPeerAsync(channelMemberPeer,
+        );
+        await objectMessageSender.PushMessageToPeerAsync(
+            channelMemberPeer,
             updates,
             excludeAuthKeyId,
             excludeUserId,
@@ -88,10 +104,12 @@ public abstract class DomainEventHandlerBase(
             onlySendToThisAuthKeyId,
             pts,
             globalSeqNo: globalSeqNo,
-            layeredData: layeredData);
+            layeredData: layeredData
+        );
     }
 
-    protected async Task PushUpdatesToPeerAsync(Peer toPeer,
+    protected async Task PushUpdatesToPeerAsync(
+        Peer toPeer,
         IUpdates updates,
         long? excludeAuthKeyId = null,
         long? excludeUserId = null,
@@ -103,7 +121,7 @@ public abstract class DomainEventHandlerBase(
         long? senderUserId = null,
         bool skipSaveUpdates = false,
         PushData? pushData = null
-        )
+    )
     {
         long globalSeqNo = 0;
         List<long>? users = null;
@@ -134,10 +152,11 @@ public abstract class DomainEventHandlerBase(
                 users,
                 chats,
                 updatesType
-                );
+            );
         }
 
-        await objectMessageSender.PushMessageToPeerAsync(toPeer,
+        await objectMessageSender.PushMessageToPeerAsync(
+            toPeer,
             updates,
             excludeAuthKeyId,
             excludeUserId,
@@ -150,36 +169,15 @@ public abstract class DomainEventHandlerBase(
         );
     }
 
-    protected async Task ReplyRpcResultToSenderAsync(
+    protected Task ReplyRpcResultToSenderAsync(
         RequestInfo requestInfo,
         Peer toPeer,
         IUpdates updates,
-        //int groupItemCount,
         long selfUserId,
-        int pts)
+        int pts
+    )
     {
-        await SendRpcMessageToClientAsync(requestInfo,
-            updates,
-            selfUserId,
-            pts,
-            toPeer.PeerType);
-        //if (groupItemCount > 1)
-        //{
-        //    await SendMultiMediaResultAsync(requestInfo,
-        //        toPeer,
-        //        updates,
-        //        groupItemCount,
-        //        selfUserId,
-        //        pts);
-        //}
-        //else
-        //{
-        //    await SendRpcMessageToClientAsync(requestInfo,
-        //        updates,
-        //        selfUserId,
-        //        pts,
-        //        toPeer.PeerType);
-        //}
+        return SendRpcMessageToClientAsync(requestInfo, updates, selfUserId, pts, toPeer.PeerType);
     }
 
     protected async Task<long> SavePushUpdatesAsync(
@@ -223,7 +221,7 @@ public abstract class DomainEventHandlerBase(
                 break;
             case TUpdateShort updateShort:
                 date = updateShort.Date;
-                allUpdates = new[] { updateShort.Update };
+                allUpdates = [updateShort.Update];
                 break;
             case TUpdateShortChatMessage updateShortChatMessage:
                 date = updateShortChatMessage.Date;
@@ -243,32 +241,30 @@ public abstract class DomainEventHandlerBase(
                 break;
             case TUpdatesTooLong:
                 return 0;
-                //return Task.FromResult<long>(0);
         }
-
 
         var globalSeqNo = await idGenerator.NextLongIdAsync(IdType.GlobalSeqNo);
 
         _ = Task.Run(() =>
-          {
-              var command = new CreateUpdatesCommand(UpdatesId.New,
-                  ownerPeerId,
-                  excludeAuthKeyId,
-                  excludeUserId,
-                  onlySendToUserId,
-                  onlySendToThisAuthKeyId,
-                  updatesType,
-                  pts,
-                  messageId,
-                  date,
-                  globalSeqNo,
-                  allUpdates,
-                  userIds,
-                  chatIds
-              );
-              commandBus.PublishAsync(command, default);
-          });
-
+        {
+            var command = new CreateUpdatesCommand(
+                UpdatesId.New,
+                ownerPeerId,
+                excludeAuthKeyId,
+                excludeUserId,
+                onlySendToUserId,
+                onlySendToThisAuthKeyId,
+                updatesType,
+                pts,
+                messageId,
+                date,
+                globalSeqNo,
+                allUpdates,
+                userIds,
+                chatIds
+            );
+            commandBus.PublishAsync(command);
+        });
         return globalSeqNo;
     }
 
@@ -284,24 +280,26 @@ public abstract class DomainEventHandlerBase(
         LayeredData<TData>? layeredData = null,
         long channelId = 0,
         PushData? pushData = null
-        ) where TData : IObject
+    )
+        where TData : IObject
     {
         var globalSeqNo = 0L;
         if (data is IUpdates updates)
         {
             globalSeqNo = await SavePushUpdatesAsync(
-               toPeer.PeerId,
-               //channelId,
-               updates,
-               pts,
-               excludeAuthKeyId,
-               excludeUserId,
-               //onlySendToUserId,
-               onlySendToThisAuthKeyId: onlySendToThisAuthKeyId,
-               updatesType: updatesType
-               );
+                toPeer.PeerId,
+                //channelId,
+                updates,
+                pts,
+                excludeAuthKeyId,
+                excludeUserId,
+                //onlySendToUserId,
+                onlySendToThisAuthKeyId: onlySendToThisAuthKeyId,
+                updatesType: updatesType
+            );
         }
-        await objectMessageSender.PushMessageToPeerAsync(toPeer,
+        await objectMessageSender.PushMessageToPeerAsync(
+            toPeer,
             data,
             excludeAuthKeyId,
             excludeUserId,
@@ -311,10 +309,11 @@ public abstract class DomainEventHandlerBase(
             globalSeqNo: globalSeqNo,
             layeredData: layeredData,
             pushData: pushData
-            );
+        );
     }
 
-    protected async Task PushMessageToPeerAsync<TData, TExtraData>(Peer toPeer,
+    protected async Task PushMessageToPeerAsync<TData, TExtraData>(
+        Peer toPeer,
         TData data,
         long? excludeAuthKeyId = null,
         long? excludeUserId = null,
@@ -325,7 +324,8 @@ public abstract class DomainEventHandlerBase(
         LayeredData<TData>? layeredData = null,
         TExtraData? extraData = default,
         PushData? pushData = null
-        ) where TData : IObject
+    )
+        where TData : IObject
     {
         var globalSeqNo = 0L;
 
@@ -344,7 +344,8 @@ public abstract class DomainEventHandlerBase(
             );
         }
 
-        await objectMessageSender.PushMessageToPeerAsync(toPeer,
+        await objectMessageSender.PushMessageToPeerAsync(
+            toPeer,
             data,
             excludeAuthKeyId,
             excludeUserId,
@@ -355,54 +356,48 @@ public abstract class DomainEventHandlerBase(
             layeredData: layeredData,
             extraData: extraData,
             pushData: pushData
-            );
+        );
     }
 
-    protected Task PushMessageToAuthKeyIdAsync<TData>(Peer toPeer, TData data, long authKeyId, int? qts = null, UpdatesType updatesType = UpdatesType.Updates)
+    protected Task PushMessageToAuthKeyIdAsync<TData>(
+        Peer toPeer,
+        TData data,
+        long authKeyId,
+        int? qts = null,
+        UpdatesType updatesType = UpdatesType.Updates
+    )
         where TData : IObject
     {
-        return objectMessageSender.PushMessageToPeerAsync(toPeer, data, onlySendToThisAuthKeyId: authKeyId, qts: qts);
+        return objectMessageSender.PushMessageToPeerAsync(
+            toPeer,
+            data,
+            onlySendToThisAuthKeyId: authKeyId,
+            qts: qts
+        );
     }
 
-    protected async Task SendMultiMediaResultAsync(
+    protected async Task ReplyRpcMessageAndNotifySelfOtherDevicesAsync(
         RequestInfo requestInfo,
-        //long reqMsgId,
-        Peer toPeer,
         IUpdates updates,
-        int groupItemCount,
-        long selfUserId,
-        int pts)
+        int pts = 0,
+        UpdatesType updatesType = UpdatesType.Updates,
+        PeerType toPeerType = PeerType.User
+    )
     {
-        var cachedCount = responseCacheAppService.AddToCache(requestInfo.ReqMsgId, updates);
-        if (cachedCount == groupItemCount)
-        {
-            if (responseCacheAppService.TryRemoveResponseList(requestInfo.ReqMsgId, out var responseList))
-            {
-                var updatesAllInOne = new TUpdates
-                {
-                    Updates = new TVector<IUpdate>(),
-                    Users = new TVector<IUser>(),
-                    Chats = new TVector<IChat>(),
-                    Date = DateTime.UtcNow.ToTimestamp()
-                };
-                foreach (var allUpdate in responseList)
-                {
-                    if (allUpdate is TUpdates updatesItem)
-                    {
-                        foreach (var update in updatesItem.Updates)
-                        {
-                            updatesAllInOne.Updates.Add(update);
-                        }
-                    }
-                }
-
-                await SendRpcMessageToClientAsync(requestInfo,
-                    updatesAllInOne,
-                    selfUserId,
-                    pts,
-                    toPeer.PeerType);
-            }
-        }
+        await SendRpcMessageToClientAsync(
+            requestInfo,
+            updates,
+            requestInfo.UserId,
+            pts,
+            toPeerType
+        );
+        await PushUpdatesToPeerAsync(
+            requestInfo.UserId.ToUserPeer(),
+            updates,
+            requestInfo.PermAuthKeyId,
+            pts: pts,
+            updatesType: updatesType
+        );
     }
 
     protected async Task SendRpcMessageToClientAsync<TData>(
@@ -412,7 +407,8 @@ public abstract class DomainEventHandlerBase(
         long selfUserId = 0,
         int pts = 0,
         PeerType toPeerType = PeerType.User
-    ) where TData : IObject
+    )
+        where TData : IObject
     {
         if (requestInfo.ReqMsgId == 0)
         {
@@ -421,23 +417,50 @@ public abstract class DomainEventHandlerBase(
 
         if (pts > 0 && selfUserId != 0 && toPeerType != PeerType.Channel)
         {
-            await ackCacheService.AddRpcPtsToCacheAsync(requestInfo.ReqMsgId, pts, 0, new Peer(PeerType.User, selfUserId))
-         ;
+            await ackCacheService.AddRpcPtsToCacheAsync(
+                requestInfo.ReqMsgId,
+                pts,
+                0,
+                new Peer(PeerType.User, selfUserId)
+            );
         }
 
         await objectMessageSender.SendRpcMessageToClientAsync(requestInfo, data);
+        await SaveRpcResultAsync(requestInfo, data);
     }
 
-
-    protected Task UpdateSelfGlobalSeqNoAfterSendChannelMessageAsync(long userId,
-        long globalSeqNo)
+    protected Task UpdateSelfGlobalSeqNoAfterSendChannelMessageAsync(long userId, long globalSeqNo)
     {
         Task.Run(() =>
         {
-            var updateGlobalSeqNoCommand = new UpdateGlobalSeqNoCommand(PtsId.Create(userId), userId, 0, globalSeqNo);
+            var updateGlobalSeqNoCommand = new UpdateGlobalSeqNoCommand(
+                PtsId.Create(userId),
+                userId,
+                0,
+                globalSeqNo
+            );
             commandBus.PublishAsync(updateGlobalSeqNoCommand, default);
         });
 
         return Task.CompletedTask;
+    }
+
+    private Task SaveRpcResultAsync<TData>(
+        RequestInfo requestInfo,
+        TData data
+    )
+        where TData : IObject
+    {
+        if (requestInfo.IsSubRequest)
+        {
+            return Task.CompletedTask;
+        }
+
+        var command = new CreateRpcResultCommand(
+            RpcResultId.Create(requestInfo.UserId, requestInfo.ReqMsgId),
+            requestInfo,
+            data.ToBytes());
+
+        return commandBus.PublishAsync(command);
     }
 }

@@ -16,6 +16,8 @@ public sealed class TChannelParticipant : IChannelParticipant
     ///</summary>
     public MyTelegram.Schema.IChannelParticipant Participant { get; set; }
 
+    public TVector<IChat> Chats { get; set; }
+
     ///<summary>
     /// Users
     ///</summary>

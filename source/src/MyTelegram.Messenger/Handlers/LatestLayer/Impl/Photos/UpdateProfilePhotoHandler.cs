@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Photos;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 
 ///<summary>
 /// Installs a previously uploaded photo as a profile photo.

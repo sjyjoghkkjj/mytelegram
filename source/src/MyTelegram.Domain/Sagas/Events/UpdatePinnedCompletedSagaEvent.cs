@@ -2,4 +2,5 @@
 
 public class UpdatePinnedCompletedSagaEvent : AggregateEvent<UpdatePinnedMessageSaga, UpdatePinnedMessageSagaId>
 {
+
 }

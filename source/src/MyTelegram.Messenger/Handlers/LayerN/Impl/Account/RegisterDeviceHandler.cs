@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account.LayerN;
+﻿namespace  MyTelegram.Handlers.Account.LayerN;
 
 ///<summary>
 /// Register device to receive <a href="https://corefork.telegram.org/api/push-updates">PUSH notifications</a>
@@ -14,18 +12,14 @@ namespace MyTelegram.Handlers.Account.LayerN;
 /// 400 WEBPUSH_TOKEN_INVALID The specified web push token is invalid.
 /// See <a href="https://corefork.telegram.org/method/account.registerDevice" />
 ///</summary>
-internal sealed class RegisterDeviceHandler(IHandlerHelper handlerHelper) :
-    ForwardRequestToNewHandler<MyTelegram.Schema.Account.LayerN.RequestRegisterDevice,
-        MyTelegram.Schema.Account.RequestRegisterDevice>(handlerHelper),
-    LayerN.IRegisterDeviceHandler
+internal sealed class RegisterDeviceHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Account.LayerN.RequestRegisterDevice,
+        MyTelegram.Schema.Account.RequestRegisterDevice> dataConverter)
+    : ForwardRequestToNewHandler<
+            MyTelegram.Schema.Account.LayerN.RequestRegisterDevice,
+            MyTelegram.Schema.Account.RequestRegisterDevice
+        >(handlerHelper, dataConverter),
+        Account.LayerN.IRegisterDeviceHandler, IDistinctObjectHandler
 {
-    protected override RequestRegisterDevice GetNewData(IRequestInput input, Schema.Account.LayerN.RequestRegisterDevice obj)
-    {
-        return new RequestRegisterDevice
-        {
-            Token = obj.Token,
-            TokenType = obj.TokenType,
-            OtherUids = []
-        };
-    }
 }

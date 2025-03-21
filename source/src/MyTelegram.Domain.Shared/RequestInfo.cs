@@ -23,4 +23,9 @@ public record RequestInfo(
     int Layer,
     long Date,
     DeviceType DeviceType = DeviceType.Desktop,
-    bool AddRequestIdToCache = true);
+    bool AddRequestIdToCache = true,
+    bool IsSubRequest = false
+    )
+{
+    public static RequestInfo Empty { get; } = new(0, 0, 0, 0, Guid.Empty, 0, 0);
+}

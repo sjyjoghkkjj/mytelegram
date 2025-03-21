@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Contacts;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Resolve a @username to get peer info
@@ -13,19 +11,20 @@ namespace MyTelegram.Handlers.Contacts;
 ///</summary>
 internal sealed class ResolveUsernameHandler(
     IQueryProcessor queryProcessor,
-    IUserAppService userAppService,
+    //ILayeredService<IChatConverter> layeredChatService,
+    //ILayeredService<IUserConverter> layeredUserService,
+    IChatConverterService chatConverterService,
+    IUserConverterService userConverterService,
     IChannelAppService channelAppService,
-    ILayeredService<IChatConverter> layeredChatService,
-    ILayeredService<IUserConverter> layeredUserService,
-    IPhotoAppService photoAppService,
-    IPrivacyAppService privacyAppService)
+    IPhotoAppService photoAppService)
     : RpcResultObjectHandler<MyTelegram.Schema.Contacts.RequestResolveUsername,
             MyTelegram.Schema.Contacts.IResolvedPeer>,
-        Contacts.IResolveUsernameHandler
+       MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts.IResolveUsernameHandler
 {
     protected override async Task<IResolvedPeer> HandleCoreAsync(IRequestInput input,
         RequestResolveUsername obj)
     {
+        //Console.WriteLine($"RequestResolveUsername:{obj.Username}");
         if (!string.IsNullOrEmpty(obj.Username))
         {
             var userNameReadModel = await queryProcessor
@@ -36,63 +35,30 @@ internal sealed class ResolveUsernameHandler(
                 switch (userNameReadModel.PeerType)
                 {
                     case PeerType.User:
-                        var userReadModel = await userAppService.GetAsync(userNameReadModel.PeerId);
-
-                        if (userReadModel != null)
+                        var user = await userConverterService.GetUserAsync(input.UserId, userNameReadModel.PeerId, false, false, input.Layer);
+                        return new TResolvedPeer
                         {
-                            var contactReadModel =
-                                await queryProcessor.ProcessAsync(
-                                    new GetContactQuery(input.UserId, userReadModel.UserId), default);
-                            var photos = await photoAppService.GetPhotosAsync(userReadModel, contactReadModel);
-                            var privacies = await privacyAppService.GetPrivacyListAsync(userReadModel!.UserId);
+                            Chats = [],
+                            Peer = new TPeerUser { UserId = userNameReadModel.PeerId },
+                            Users = new TVector<IUser>(user)
+                        };
 
-                            return new TResolvedPeer
-                            {
-                                Chats = new TVector<IChat>(),
-                                Peer = new TPeerUser { UserId = userNameReadModel.PeerId },
-                                Users = new TVector<IUser>(layeredUserService.GetConverter(input.Layer).ToUser(
-                                    input.UserId,
-                                    userReadModel,
-                                    photos,
-                                    contactReadModel,
-                                    privacies))
-                            };
-                        }
-
-                        break;
-                    case PeerType.Chat:
-                        {
-                            var chatReadModel = await queryProcessor
-                                .ProcessAsync(new GetChatByChatIdQuery(userNameReadModel.PeerId), default)
-                         ;
-                            if (chatReadModel != null)
-                            {
-                                var photoReadModel = await photoAppService.GetAsync(chatReadModel.PhotoId);
-                                return new TResolvedPeer
-                                {
-                                    Chats = new TVector<IChat>(layeredChatService.GetConverter(input.Layer).ToChat(input.UserId, chatReadModel, photoReadModel)),
-                                    Peer = new TPeerChat { ChatId = userNameReadModel.PeerId },
-                                    Users = new TVector<IUser>()
-                                };
-                            }
-                        }
-                        break;
                     case PeerType.Channel:
                         {
                             var channelReadModel = await channelAppService.GetAsync(userNameReadModel.PeerId);
+
                             if (channelReadModel != null)
                             {
-                                var photoReadModel = await photoAppService.GetAsync(channelReadModel.PhotoId);
+                                var photoReadModel = await photoAppService.GetAsync(channelReadModel.PhotoId ?? 0);
                                 var channelMemberReadModel = await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(channelReadModel.ChannelId, input.UserId));
-
                                 return new TResolvedPeer
                                 {
                                     Chats =
-                                        new TVector<IChat>(layeredChatService.GetConverter(input.Layer).ToChannel(
+                                        new TVector<IChat>(chatConverterService.ToChannel(
                                             input.UserId,
                                             channelReadModel,
                                             photoReadModel,
-                                            channelMemberReadModel, channelMemberReadModel?.Left ?? true)),
+                                            channelMemberReadModel, channelMemberReadModel?.Left ?? true, input.Layer)),
                                     Peer = new TPeerChannel { ChannelId = userNameReadModel.PeerId },
                                     Users = new TVector<IUser>()
                                 };

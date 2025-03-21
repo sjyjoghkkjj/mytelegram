@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Import a chat invite and join a private chat/supergroup/channel
@@ -21,17 +19,10 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 USER_CHANNELS_TOO_MUCH One of the users you tried to add is already in too many channels/supergroups.
 /// See <a href="https://corefork.telegram.org/method/messages.importChatInvite" />
 ///</summary>
-internal sealed class ImportChatInviteHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestImportChatInvite, MyTelegram.Schema.IUpdates>,
-    Messages.IImportChatInviteHandler
+internal sealed class ImportChatInviteHandler(ICommandBus commandBus, IQueryProcessor queryProcessor)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestImportChatInvite, MyTelegram.Schema.IUpdates>,
+        Messages.IImportChatInviteHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IQueryProcessor _queryProcessor;
-    public ImportChatInviteHandler(ICommandBus commandBus, IQueryProcessor queryProcessor)
-    {
-        _commandBus = commandBus;
-        _queryProcessor = queryProcessor;
-    }
-
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestImportChatInvite obj)
     {
@@ -40,7 +31,7 @@ internal sealed class ImportChatInviteHandler : RpcResultObjectHandler<MyTelegra
             RpcErrors.RpcErrors400.InviteHashEmpty.ThrowRpcError();
         }
 
-        var chatInviteReadModel = await _queryProcessor.ProcessAsync(new GetChatInviteByLinkQuery(obj.Hash));
+        var chatInviteReadModel = await queryProcessor.ProcessAsync(new GetChatInviteByLinkQuery(obj.Hash));
         if (chatInviteReadModel == null)
         {
             RpcErrors.RpcErrors400.InviteHashInvalid.ThrowRpcError();
@@ -68,7 +59,7 @@ internal sealed class ImportChatInviteHandler : RpcResultObjectHandler<MyTelegra
         }
 
         var channelMember =
-            await _queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(chatInviteReadModel.PeerId,
+            await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(chatInviteReadModel.PeerId,
                 input.UserId));
         if (channelMember != null && !channelMember.Left && !channelMember.Kicked)
         {
@@ -76,10 +67,10 @@ internal sealed class ImportChatInviteHandler : RpcResultObjectHandler<MyTelegra
         }
 
         var chatInviteImporterReadModel =
-            await _queryProcessor.ProcessAsync(new GetChatInviteImporterQuery(chatInviteReadModel.PeerId,
+            await queryProcessor.ProcessAsync(new GetChatInviteImporterQuery(chatInviteReadModel.PeerId,
                 input.UserId));
         if (chatInviteImporterReadModel != null &&
-            (chatInviteImporterReadModel.ChatInviteRequestState == ChatInviteRequestState.NeedApprove ||
+            (chatInviteImporterReadModel.ChatInviteRequestState == ChatInviteRequestState.WaitingForApproval ||
              chatInviteImporterReadModel.ChatInviteRequestState == ChatInviteRequestState.Approved
              ))
         {
@@ -88,11 +79,11 @@ internal sealed class ImportChatInviteHandler : RpcResultObjectHandler<MyTelegra
 
         var command = new ImportChatInviteCommand(ChatInviteId.Create(chatInviteReadModel.PeerId, chatInviteReadModel.InviteId),
             input.ToRequestInfo(),
-            chatInviteReadModel.RequestNeeded ? ChatInviteRequestState.NeedApprove : ChatInviteRequestState.NotNeedApprove,
+            chatInviteReadModel.RequestNeeded ? ChatInviteRequestState.WaitingForApproval : ChatInviteRequestState.NoApprovalRequired,
             CurrentDate
         );
 
-        await _commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

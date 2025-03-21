@@ -38,7 +38,8 @@ public class MyTelegramMessengerServerOptions
     // https://github.com/dotnet/runtime/issues/36510
     [RegularExpression("^([\\d]{1,19})|(\\s*)$")]
     public string SupportUserId { get; set; }
-
+    public int MaxInMemoryContactCount { get; set; }
     public bool CheckPhoneNumberFormat { get; set; }
     public bool EnableSearchNonContacts { get; set; }
+    public int RpcResultExpirationMinutes { get; set; }
 }

@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Auth.LayerN;
+﻿namespace  MyTelegram.Handlers.Auth.LayerN;
 
 ///<summary>
 /// Send the verification code for login
@@ -16,25 +14,17 @@ namespace MyTelegram.Handlers.Auth.LayerN;
 /// 406 PHONE_PASSWORD_FLOOD You have tried logging in too many times.
 /// 400 PHONE_PASSWORD_PROTECTED This phone is password protected.
 /// 400 SMS_CODE_CREATE_FAILED An error occurred while creating the SMS code.
-/// 400 Sorry, too many invalid attempts to enter your password. Please try again later. &nbsp;
+/// 406 UPDATE_APP_TO_LOGIN Please update your client to login.
 /// See <a href="https://corefork.telegram.org/method/auth.sendCode" />
 ///</summary>
-internal sealed class SendCodeHandler(IHandlerHelper handlerHelper) : ForwardRequestToNewHandler<
-        MyTelegram.Schema.Auth.LayerN.RequestSendCode,
-        MyTelegram.Schema.Auth.RequestSendCode>(handlerHelper),
-    Auth.LayerN.ISendCodeHandler
+internal sealed class SendCodeHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Auth.LayerN.RequestSendCode,
+        MyTelegram.Schema.Auth.RequestSendCode> dataConverter)
+    : ForwardRequestToNewHandler<
+            MyTelegram.Schema.Auth.LayerN.RequestSendCode,
+            MyTelegram.Schema.Auth.RequestSendCode
+        >(handlerHelper, dataConverter),
+        Auth.LayerN.ISendCodeHandler, IDistinctObjectHandler
 {
-    protected override RequestSendCode GetNewData(IRequestInput input, Schema.Auth.LayerN.RequestSendCode obj)
-    {
-        return new RequestSendCode
-        {
-            ApiHash = obj.ApiHash,
-            ApiId = obj.ApiId,
-            PhoneNumber = obj.PhoneNumber,
-            Settings = new TCodeSettings
-            {
-                AllowFlashcall = obj.AllowFlashcall,
-            }
-        };
-    }
 }

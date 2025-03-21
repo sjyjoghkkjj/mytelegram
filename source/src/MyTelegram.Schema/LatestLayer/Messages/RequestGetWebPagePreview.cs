@@ -11,10 +11,10 @@ namespace MyTelegram.Schema.Messages;
 /// 400 MESSAGE_EMPTY The provided message is empty.
 /// See <a href="https://corefork.telegram.org/method/messages.getWebPagePreview" />
 ///</summary>
-[TlObject(0x8b68b0cc)]
-public sealed class RequestGetWebPagePreview : IRequest<MyTelegram.Schema.IMessageMedia>
+[TlObject(0x570d6f6f)]
+public sealed class RequestGetWebPagePreview : IRequest<MyTelegram.Schema.Messages.IWebPagePreview>
 {
-    public uint ConstructorId => 0x8b68b0cc;
+    public uint ConstructorId => 0x570d6f6f;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>

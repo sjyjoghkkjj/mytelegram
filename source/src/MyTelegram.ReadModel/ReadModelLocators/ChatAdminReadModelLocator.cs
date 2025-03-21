@@ -13,9 +13,6 @@ public class ChatAdminReadModelLocator : IChatAdminReadModelLocator
             case ChannelCreatedEvent channelCreatedEvent:
                 yield return AdminId.Create(channelCreatedEvent.ChannelId, channelCreatedEvent.CreatorId).Value;
                 break;
-            case ChatAdminRightsEditedEvent chatAdminRightsEditedEvent:
-                yield return AdminId.Create(chatAdminRightsEditedEvent.ChatId, chatAdminRightsEditedEvent.UserId).Value;
-                break;
         }
     }
 }

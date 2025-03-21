@@ -1,5 +1,4 @@
 ﻿using MyTelegram.Messenger.DomainEventHandlers;
-using MyTelegram.Messenger.Services.Caching;
 
 namespace MyTelegram.Messenger.CommandServer.DomainEventHandlers;
 
@@ -8,11 +7,10 @@ public class UserDomainEventHandler(
     ICommandBus commandBus,
     IIdGenerator idGenerator,
     IAckCacheService ackCacheService,
-    IResponseCacheAppService responseCacheAppService,
     IMessageAppService messageAppService,
     IOptionsMonitor<MyTelegramMessengerServerOptions> options,
     IRandomHelper randomHelper)
-    : DomainEventHandlerBase(objectMessageSender, commandBus, idGenerator, ackCacheService, responseCacheAppService),
+    : DomainEventHandlerBase(objectMessageSender, commandBus, idGenerator, ackCacheService),
         ISubscribeSynchronousTo<UserAggregate, UserId, UserCreatedEvent>
 {
     private readonly ICommandBus _commandBus = commandBus;

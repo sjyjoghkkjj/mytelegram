@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Channels;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Activate or deactivate a purchased <a href="https://fragment.com/">fragment.com</a> username associated to a <a href="https://corefork.telegram.org/api/channel">supergroup or channel</a> we own.

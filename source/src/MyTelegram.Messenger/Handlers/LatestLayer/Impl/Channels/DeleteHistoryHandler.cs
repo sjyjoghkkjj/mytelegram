@@ -2,7 +2,7 @@
 
 using RequestDeleteHistory = MyTelegram.Schema.Channels.RequestDeleteHistory;
 
-namespace MyTelegram.Handlers.Channels;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 /// <summary>
 ///     Delete the history of a <a href="https://corefork.telegram.org/api/channel">supergroup</a>

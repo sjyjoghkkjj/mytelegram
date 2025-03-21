@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stats;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stats;
 
 ///<summary>
 /// Obtains a list of messages, indicating to which other public channels was a channel message forwarded.<br>

@@ -9,10 +9,10 @@ public class ContactAggregate : SnapshotAggregateRoot<ContactAggregate, ContactI
         Register(_state);
     }
 
-    public void UpdateProfilePhoto(RequestInfo requestInfo, long selfUserId, long targetUserId, long photoId, bool suggest, string? messageActionData)
+    public void UpdateProfilePhoto(RequestInfo requestInfo, long selfUserId, long targetUserId, long photoId, bool suggest, IPhoto? suggestPhoto)
     {
         Specs.AggregateIsCreated.ThrowFirstDomainErrorIfNotSatisfied(this);
-        Emit(new ContactProfilePhotoChangedEvent(requestInfo, selfUserId, targetUserId, photoId, suggest, messageActionData));
+        Emit(new ContactProfilePhotoChangedEvent(requestInfo, selfUserId, targetUserId, photoId, suggest, suggestPhoto));
     }
 
     public void AddContact(RequestInfo requestInfo,

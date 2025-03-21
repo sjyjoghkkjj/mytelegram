@@ -63,9 +63,4 @@ public interface IBoost : IObject
     /// If set, this boost counts as <code>multiplier</code> boosts, otherwise it counts as a single boost.
     ///</summary>
     int? Multiplier { get; set; }
-
-    ///<summary>
-    /// Number of Telegram Stars distributed among the winners of the giveaway.
-    ///</summary>
-    long? Stars { get; set; }
 }

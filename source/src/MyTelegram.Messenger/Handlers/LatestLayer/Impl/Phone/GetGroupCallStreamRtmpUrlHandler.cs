@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Phone;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Phone;
 
 ///<summary>
 /// Get RTMP URL and stream key for RTMP livestreams. Can be used even before creating the actual RTMP livestream with <a href="https://corefork.telegram.org/method/phone.createGroupCall">phone.createGroupCall</a> (the <code>rtmp_stream</code> flag must be set).

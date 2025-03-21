@@ -28,6 +28,7 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
     {
         var outMessageId = await SendMessageToTargetPeerAsync(domainEvent.AggregateEvent);
         Emit(new ForwardSingleMessageSuccessSagaEvent());
+
         if (_state.ForwardFromLinkedChannel)
         {
             Emit(new MessageReplyCreatedSagaEvent(domainEvent.AggregateEvent.OriginalMessageItem.ToPeer.PeerId, domainEvent.AggregateEvent.OriginalMessageItem.MessageId, _state.ToPeer.PeerId, outMessageId));
@@ -52,7 +53,8 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             domainEvent.AggregateEvent.RandomIds,
             domainEvent.AggregateEvent.ForwardFromLinkedChannel,
             domainEvent.AggregateEvent.Post,
-            null
+            domainEvent.AggregateEvent.TtlPeriod,
+            domainEvent.AggregateEvent.FromNames
         ));
         ForwardMessage(domainEvent.AggregateEvent);
         return Task.CompletedTask;
@@ -87,7 +89,9 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
 
     private async Task<int> SendMessageToTargetPeerAsync(MessageForwardedEvent aggregateEvent)
     {
-        var originalMessageItem = aggregateEvent.OriginalMessageItem;
+        var item = aggregateEvent.OriginalMessageItem;
+        var isForwardToSavedMessages = _state.ToPeer.PeerId == _state.RequestInfo.UserId;
+
         var selfUserId = _state.RequestInfo.UserId;
         var ownerPeerId = _state.ToPeer.PeerType == PeerType.Channel
             ? _state.ToPeer.PeerId
@@ -95,37 +99,36 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
 
         //Peer? fromId = null;
         //Peer? peerId = null;
-        Peer? savedPeerId = null;
-        Peer? fwdFromId = null;
+        Peer savedPeerId;
+        var senderPeer = new Peer(PeerType.User, _state.RequestInfo.UserId);
+        bool savedOut = false;
+        var fwdFromId = _state.FromPeer;
+        string? fromName = null;
+        var fwdDate = item.Date;
+        var channelPost = _state.FromPeer.PeerType == PeerType.Channel ? aggregateEvent.OriginalMessageItem.MessageId : 0;
+        var postAuthor = item.PostAuthor;
         Peer? fwdSavedFromPeer = null;
         int? fwdSavedFromMsgId = null;
-        var channelPost = _state.FromPeer.PeerType == PeerType.Channel ? aggregateEvent.OriginalMessageItem.MessageId : 0;
-        var senderPeer = new Peer(PeerType.User, _state.RequestInfo.UserId);
-        switch (aggregateEvent.OriginalMessageItem.ToPeer.PeerType)
-        {
-            case PeerType.Channel:
-                //fromId = null;
-                //peerId= originalMessageItem.ToPeer;
-                savedPeerId = originalMessageItem.ToPeer;
-                fwdFromId = originalMessageItem.SenderPeer;
-                fwdSavedFromPeer = originalMessageItem.ToPeer;
-                fwdSavedFromMsgId = originalMessageItem.MessageId;
-                break;
-            case PeerType.User:
-                //fromId = originalMessageItem.SenderPeer;
-                //peerId = originalMessageItem.ToPeer;
-                savedPeerId = originalMessageItem.ToPeer;
-                fwdFromId = originalMessageItem.SenderPeer;
-                fwdSavedFromPeer = originalMessageItem.ToPeer;
-                fwdSavedFromMsgId = originalMessageItem.MessageId;
-                break;
-        }
+        Peer? fwdSavedFromId = null;
+        string? fwdSavedFromName = null;
+        int? fwdSavedDate = null;
 
         var isOut = true;
         MessageReply? reply = null;
         long? postChannelId = null;
         int? postMessageId = null;
         Peer? sendAs = null;
+
+        _state.FromNames?.TryGetValue(item.SenderUserId, out fromName);
+
+        // Forward from user peer
+        if (_state.FromPeer.PeerType == PeerType.User &&
+            item.SenderPeer.PeerId == aggregateEvent.RequestInfo.UserId)
+        {
+            fwdFromId = item.SenderPeer;
+            fromName = null;
+        }
+
         if (_state.ForwardFromLinkedChannel)
         {
             fwdSavedFromPeer = _state.FromPeer;
@@ -137,19 +140,45 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             postMessageId = aggregateEvent.OriginalMessageItem.MessageId;
             sendAs = aggregateEvent.OriginalMessageItem.SendAs;
         }
+
+        if (isForwardToSavedMessages)
+        {
+            savedOut = item.IsOut;
+            savedPeerId = _state.FromPeer;
+            fwdSavedFromPeer = _state.FromPeer;
+            fwdSavedFromMsgId = item.MessageId;
+
+            if (item.FwdHeader != null)
+            {
+                fwdFromId = item.FwdHeader.FromId;
+                fwdSavedFromId = item.FwdHeader.SavedFromId;
+                fwdSavedDate = item.FwdHeader.Date;
+            }
+        }
+        else
+        {
+            savedPeerId = null;
+        }
+
+        if (!string.IsNullOrEmpty(fromName))
+        {
+            fwdFromId = null;
+            savedPeerId = MyTelegramServerDomainConsts.AnonymousUserId.ToUserPeer();
+        }
+
         var fwdHeader = new MessageFwdHeader(
             false,
-            false,
+            savedOut,
             fwdFromId,
-            null,
+            fromName,
             channelPost,
-            aggregateEvent.OriginalMessageItem.PostAuthor,
-            DateTime.UtcNow.ToTimestamp(),
+            postAuthor,
+            fwdDate,
             fwdSavedFromPeer,
             fwdSavedFromMsgId,
-            null,
-            null,
-            null,
+            fwdSavedFromId,
+            fwdSavedFromName,
+            fwdSavedDate,
             null,
             _state.ForwardFromLinkedChannel);
 
@@ -159,7 +188,6 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             ? _state.ToPeer
             : senderPeer;
         var toPeer = _state.ToPeer;
-        var item = aggregateEvent.OriginalMessageItem;
 
         var messageItem = new MessageItem(
             ownerPeer,
@@ -174,7 +202,7 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             SendMessageType.Text,
             MessageType.Text,
             MessageSubType.ForwardMessage,
-            InputReplyTo: item.InputReplyTo,
+            //InputReplyTo: item.InputReplyTo,
             Entities: item.Entities,
             Media: item.Media,
             FwdHeader: fwdHeader,
@@ -194,6 +222,7 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
         );
 
         var reqMsgId = _state.ForwardFromLinkedChannel ? 0 : _state.RequestInfo.ReqMsgId;
+
         // Only the first message uses reqMsgId to reply to the client's RPC request
         // Other messages are sent to the client via online push
         // If reqMsgId==0, a push message will be sent to the target peer

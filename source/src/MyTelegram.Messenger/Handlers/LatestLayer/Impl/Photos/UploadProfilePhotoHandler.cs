@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Photos;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 
 ///<summary>
 /// Updates current user profile photo.The <code>file</code>, <code>video</code> and <code>video_emoji_markup</code> flags are mutually exclusive.

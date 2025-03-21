@@ -32,17 +32,17 @@ public class GetMessageOutput(
     //}
 
     public GetMessageOutput() : this(
-        Array.Empty<IChannelReadModel>(),
-        Array.Empty<IChannelMemberReadModel>(),
-        Array.Empty<IChatReadModel>(),
-        Array.Empty<IContactReadModel>(),
-        Array.Empty<long>(),
-        Array.Empty<IMessageReadModel>(),
-        Array.Empty<IPrivacyReadModel>(),
-        Array.Empty<IUserReadModel>(),
-        Array.Empty<IPhotoReadModel>(),
-        Array.Empty<IPollReadModel>(),
-        Array.Empty<IPollAnswerVoterReadModel>(),
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
         false, false, 0, 0, 0,
         null
         )

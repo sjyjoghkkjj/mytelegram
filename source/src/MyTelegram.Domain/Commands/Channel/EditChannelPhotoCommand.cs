@@ -4,17 +4,11 @@ public class EditChannelPhotoCommand(
     ChannelId aggregateId,
     RequestInfo requestInfo,
     long? fileId,
-    string messageActionData,
+    IMessageAction messageAction,
     long randomId)
-    : RequestCommand2<ChannelAggregate, ChannelId, IExecutionResult>(aggregateId, requestInfo) //, IHasCorrelationId
+    : RequestCommand2<ChannelAggregate, ChannelId, IExecutionResult>(aggregateId, requestInfo)
 {
-    //byte[] photo,
-    //Photo = photo;
-
     public long? FileId { get; } = fileId;
-
-    public string MessageActionData { get; } = messageActionData;
-
-    //public byte[] Photo { get; }
+    public IMessageAction MessageAction { get; } = messageAction;
     public long RandomId { get; } = randomId;
 }

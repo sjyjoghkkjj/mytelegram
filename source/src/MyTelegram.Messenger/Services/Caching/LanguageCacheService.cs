@@ -37,7 +37,7 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
     {
         var languages = await queryProcessor.ProcessAsync(new GetAllLanguagesQuery());
         var groupedLanguages = languages.GroupBy(p => p.Platform)
-            .ToDictionary(k => k.Key.ToString().ToLower(),
+            .ToDictionary(k => GetLanguagePack(k.Key),
                 v => v.ToFrozenDictionary(x => GetLanguageTextKey(x.LanguageCode, x.Platform)));
         _languageReadModels = groupedLanguages.ToFrozenDictionary();
         logger.LogInformation("Loading all languages completed, count: {Count}", languages.Count);
@@ -52,12 +52,12 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
             .ToFrozenDictionary(k => GetLanguageTextKey(k.Key.LanguageCode, k.Key.Platform),
                 v => v.ToDictionary(k1 => k1.Key, v1 => v1));
         sw.Stop();
-        logger.LogInformation("Loading all language texts completed, count: {Count}, timespan: {TimeSpan}", languageTexts.Count, sw.Elapsed);
+        logger.LogInformation("Loading all language texts completed, count: {Count}, time: {TimeSpan}", languageTexts.Count, sw.Elapsed);
     }
 
     private string GetLanguageTextKey(string languageCode, string languagePack) => $"{languageCode}_{languagePack}";
 
-    private string GetLanguageTextKey(string languageCode, DeviceType deviceType)
+    private string GetLanguagePack(DeviceType deviceType)
     {
         var langPack = deviceType.ToString().ToLower();
         switch (deviceType)
@@ -69,6 +69,12 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
                 langPack = "android_x";
                 break;
         }
+
+        return langPack;
+    }
+    private string GetLanguageTextKey(string languageCode, DeviceType deviceType)
+    {
+        var langPack = GetLanguagePack(deviceType);
 
         return GetLanguageTextKey(languageCode, langPack);
     }

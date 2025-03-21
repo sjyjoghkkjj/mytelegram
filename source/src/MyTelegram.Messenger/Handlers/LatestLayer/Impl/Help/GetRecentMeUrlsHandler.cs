@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Help;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Get recently used <code>t.me</code> links.When installing official applications from "Download Telegram" buttons present in <a href="https://t.me/">t.me</a> pages, a referral parameter is passed to applications after installation.<br>

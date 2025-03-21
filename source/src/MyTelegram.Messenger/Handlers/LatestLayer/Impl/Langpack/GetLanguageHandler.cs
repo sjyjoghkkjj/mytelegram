@@ -2,7 +2,7 @@
 
 using MyTelegram.Schema.Langpack;
 
-namespace MyTelegram.Handlers.Langpack;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
 
 /// <summary>
 ///     Get information about a language in a localization pack

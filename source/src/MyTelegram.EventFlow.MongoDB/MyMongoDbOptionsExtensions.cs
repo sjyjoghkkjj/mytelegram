@@ -18,11 +18,7 @@ public static class MyMongoDbOptionsExtensions
         options.ServiceCollection.AddSingleton<IMongoDbContext, DefaultReadModelMongoDbContext>();
         options.ServiceCollection.AddSingleton(typeof(IMongoDbContextFactory<>),
             typeof(DefaultMongoDbContextFactory<>));
-        options.ServiceCollection.AddTransient<IReadModelCacheStrategy, DefaultReadModelCacheStrategy>();
-        options.ServiceCollection.AddTransient<IReadModelUpdateStrategy, ReadModelUpdateStrategy>();
-        options.ServiceCollection.AddTransient<IReadModelUpdateManager, ReadModelUpdateManager>();
         options.ServiceCollection.AddTransient<IQueryOnlyReadModelDescriptionProvider, QueryOnlyReadModelDescriptionProvider>();
-        //options.ServiceCollection.AddSingleton(typeof(IMyInMemoryReadStore<>), typeof(MyInMemoryReadStore<>));
 
         return options;
     }
@@ -40,7 +36,6 @@ public static class MyMongoDbOptionsExtensions
             ;
         eventFlowOptions.ServiceCollection.AddTransient<IReadModelStore<TReadModel>>(f =>
             f.GetRequiredService<IMongoDbReadModelStore<TReadModel>>());
-        //eventFlowOptions.UseReadStoreFor<IMongoDbReadModelStore<TReadModel>, TReadModel>();
 #pragma warning disable CS0618
         eventFlowOptions.UseReadStoreFor<TAggregate, TIdentity, IMongoDbReadModelStore<TReadModel>, TReadModel>();
 #pragma warning restore CS0618

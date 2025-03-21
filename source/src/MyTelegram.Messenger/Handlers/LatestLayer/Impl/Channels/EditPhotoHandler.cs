@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Change the photo of a <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a>
@@ -13,30 +11,21 @@ namespace MyTelegram.Handlers.Channels;
 /// 403 CHAT_WRITE_FORBIDDEN You can't write in this chat.
 /// 400 FILE_PARTS_INVALID The number of file parts is invalid.
 /// 400 FILE_REFERENCE_INVALID The specified <a href="https://corefork.telegram.org/api/file_reference">file reference</a> is invalid.
+/// 400 IMAGE_PROCESS_FAILED Failure while processing image.
 /// 400 PHOTO_CROP_SIZE_SMALL Photo is too small.
 /// 400 PHOTO_EXT_INVALID The extension of the photo is invalid.
 /// 400 PHOTO_INVALID Photo invalid.
 /// 400 STICKER_MIME_INVALID The specified sticker MIME type is invalid.
 /// See <a href="https://corefork.telegram.org/method/channels.editPhoto" />
 ///</summary>
-internal sealed class EditPhotoHandler : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestEditPhoto, MyTelegram.Schema.IUpdates>,
-    Channels.IEditPhotoHandler
+internal sealed class EditPhotoHandler(
+    IMediaHelper mediaHelper,
+    ICommandBus commandBus,
+    IRandomHelper randomHelper,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestEditPhoto, MyTelegram.Schema.IUpdates>,
+        IEditPhotoHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IMediaHelper _mediaHelper;
-    private readonly IRandomHelper _randomHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public EditPhotoHandler(IMediaHelper mediaHelper,
-        ICommandBus commandBus,
-        IRandomHelper randomHelper,
-        IAccessHashHelper accessHashHelper)
-    {
-        _mediaHelper = mediaHelper;
-        _commandBus = commandBus;
-        _randomHelper = randomHelper;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestEditPhoto obj)
     {
@@ -44,19 +33,12 @@ internal sealed class EditPhotoHandler : RpcResultObjectHandler<MyTelegram.Schem
         if (obj.Channel is TInputChannel inputChannel)
         {
             channelId = inputChannel.ChannelId;
-            await _accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
         }
         else
         {
             throw new NotImplementedException();
         }
-
-        ////var photo=await _mediaHelper.SavePhotoAsync(input.ReqMsgId,obj)
-        //var channelId = obj.Channel switch
-        //{
-        //    TInputChannel inputChannel => inputChannel.ChannelId,
-        //    _ => throw new ArgumentOutOfRangeException(nameof(obj.Channel))
-        //};
 
         long fileId = 0;
         var parts = 0;
@@ -72,9 +54,6 @@ internal sealed class EditPhotoHandler : RpcResultObjectHandler<MyTelegram.Schem
                     var file = inputChatUploadedPhoto1.File ?? inputChatUploadedPhoto1.Video;
                     if (file != null && file is TInputFile tInputFile)
                     {
-                        //ThrowHelper.ThrowUserFriendlyException("PHOTO_INVALID");
-                        //RpcErrors.RpcErrors400.PhotoInvalid.ThrowRpcError();
-
                         fileId = tInputFile!.Id;
                         parts = tInputFile.Parts;
                         name = tInputFile.Name;
@@ -118,7 +97,7 @@ internal sealed class EditPhotoHandler : RpcResultObjectHandler<MyTelegram.Schem
         IPhoto photo = new TPhotoEmpty();
 
         long? photoId = null;
-        var r = await _mediaHelper.SavePhotoAsync(input.ReqMsgId,
+        var r = await mediaHelper.SavePhotoAsync(input.ReqMsgId,
             input.UserId,
             fileId,
             hasVideo,
@@ -134,10 +113,9 @@ internal sealed class EditPhotoHandler : RpcResultObjectHandler<MyTelegram.Schem
         var command = new EditChannelPhotoCommand(ChannelId.Create(channelId),
             input.ToRequestInfo(),
             photoId,
-            //photo.ToBytes(),
-            new TMessageActionChatEditPhoto { Photo = photo }.ToBytes().ToHexString(),
-            _randomHelper.NextInt64());
-        await _commandBus.PublishAsync(command, CancellationToken.None);
+            new TMessageActionChatEditPhoto { Photo = photo },
+            randomHelper.NextInt64());
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

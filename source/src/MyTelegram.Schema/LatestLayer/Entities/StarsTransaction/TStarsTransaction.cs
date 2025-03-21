@@ -45,6 +45,7 @@ public sealed class TStarsTransaction : IStarsTransaction
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool Reaction { get; set; }
+    public bool StargiftUpgrade { get; set; }
 
     ///<summary>
     /// Transaction ID.
@@ -154,6 +155,7 @@ public sealed class TStarsTransaction : IStarsTransaction
         if (Failed) { Flags[6] = true; }
         if (Gift) { Flags[10] = true; }
         if (Reaction) { Flags[11] = true; }
+        if (StargiftUpgrade) { Flags[18] = true; }
         if (Title != null) { Flags[0] = true; }
         if (Description != null) { Flags[1] = true; }
         if (Photo != null) { Flags[2] = true; }
@@ -205,6 +207,7 @@ public sealed class TStarsTransaction : IStarsTransaction
         if (Flags[6]) { Failed = true; }
         if (Flags[10]) { Gift = true; }
         if (Flags[11]) { Reaction = true; }
+        if (Flags[18]) { StargiftUpgrade = true; }
         Id = reader.ReadString();
         Stars = reader.Read<MyTelegram.Schema.IStarsAmount>();
         Date = reader.ReadInt32();

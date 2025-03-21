@@ -4,18 +4,20 @@ namespace MyTelegram;
 
 public class MyTelegramServerDomainConsts
 {
-    public const int Layer = 192;
+    public const int Layer = Layers.LayerLatest;
 
     public const string RepositoryUrl = "https://github.com/loyldg/mytelegram";
     public const long UserIdInitId = 2000000;
     public const long BotUserInitId = 600000000000;
     public const long ChatIdInitId = 700000000000;
     public const long ChannelInitId = 800000000000;
+    public const long BotFatherUserId = BotUserInitId;
 
     public const int PtsInitId = 1;
 
     public const long OfficialUserId = 777000;
     public const long GroupAnonymousBotUserId = 568888;
+    public const long AnonymousUserId = 2666000;
     public const long DefaultSupportUserId = 569999;
 
     public const long DeletedChannelIdForChannelPost = 777;
@@ -56,4 +58,18 @@ public class MyTelegramServerDomainConsts
     public const string UserNameCuckooFilterKey = "MyTelegarm.CuckooFilter.UserName";
     public const string ChannelMessageViewsBloomFilterKey = "MyTelegarm.BloomFilter.ChannelMessageViews";
     public static int EditTimeLimit { get; set; } = 172800;
+
+    public const int QuickRepliesLimit = 100;
+    public const int QuickReplyMessagesLimit = 20;
+    public const int ScheduleMessagesLimit = 30;
+    public const int ActiveStoriesLimit = 10;
+    public const int StoriesWeeklyLimit = 10;
+    public const int StoriesMonthlyLimit = 30;
+    public const int StoryCaptionLengthLimit = 200;
+
+    public class GeoKeys
+    {
+        public const string User = "User";
+        public const string GeoGroup = "GeoGroup";
+    }
 }

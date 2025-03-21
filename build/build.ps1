@@ -13,6 +13,7 @@ $messengerProCommandOutputFolder=Join-Path $outputRootFolder "command-server"
 $messengerProQueryOutputFolder=Join-Path $outputRootFolder "query-server"
 $messengerGrpcOutputFolder=Join-Path $outputRootFolder "messenger-grpc"
 $smsOutputFolder=Join-Path $outputRootFolder "sms"
+$dataSeederOutputFolder=Join-Path $outputRootFolder "data-seeder"
 
 Write-Output "Current dir:$currentDir"
 Write-Output "OutputFolder is:$outputRootFolder"
@@ -37,6 +38,7 @@ Build-Server "./MyTelegram.Messenger.CommandServer" $messengerProCommandOutputFo
 Build-Server "./MyTelegram.Messenger.QueryServer" $messengerProQueryOutputFolder
 #Build-Server "./MyTelegram.MessengerServer.GrpcService" $messengerGrpcOutputFolder
 Build-Server "./MyTelegram.SmsSender" $smsOutputFolder
+Build-Server "./MyTelegram.DataSeeder" $dataSeederOutputFolder
 
 Set-Location $currentDir
 

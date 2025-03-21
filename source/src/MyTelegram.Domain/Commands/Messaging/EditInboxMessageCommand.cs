@@ -10,7 +10,7 @@ public class EditInboxMessageCommand(
     IMessageMedia? media,
     IReplyMarkup? replyMarkup,
     bool invertMedia
-)
+    )
     : RequestCommand2<MessageAggregate, MessageId, IExecutionResult>(aggregateId, requestInfo)
 {
     public int MessageId { get; } = messageId;

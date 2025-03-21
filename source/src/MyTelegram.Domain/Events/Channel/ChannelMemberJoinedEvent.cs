@@ -6,7 +6,8 @@ public class ChannelMemberJoinedEvent(
     long memberUserId,
     int date,
     bool isRejoin,
-    bool isBot
+    bool isBot,
+    bool isBroadcast
     )
     : RequestAggregateEvent2<ChannelMemberAggregate, ChannelMemberId>(requestInfo)
 {
@@ -14,5 +15,6 @@ public class ChannelMemberJoinedEvent(
     public int Date { get; } = date;
     public bool IsRejoin { get; } = isRejoin;
     public bool IsBot { get; } = isBot;
+    public bool IsBroadcast { get; } = isBroadcast;
     public long MemberUserId { get; } = memberUserId;
 }

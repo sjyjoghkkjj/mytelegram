@@ -43,6 +43,4 @@ public class UpdateMessageReplySaga :
     {
         Register(_state);
     }
-
-    
 }

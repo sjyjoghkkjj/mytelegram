@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Payments;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Payments;
 
 ///<summary>
 /// Informs server about a purchase made through the Play Store: for official applications only.

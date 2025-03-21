@@ -68,15 +68,10 @@ public class MyInMemoryEventPersistence(ILogger<MyInMemoryEventPersistence> logg
         }
     }
 
-    public Task<IReadOnlyCollection<ICommittedDomainEvent>> LoadCommittedEventsAsync(IIdentity id,
-        int fromEventSequenceNumber, int toEventSequenceNumber,
+    public Task<IReadOnlyCollection<ICommittedDomainEvent>> LoadCommittedEventsAsync(IIdentity id, int fromEventSequenceNumber, int toEventSequenceNumber,
         CancellationToken cancellationToken)
     {
-        return LoadCommittedEventsAsync(
-            id,
-            fromEventSequenceNumber,
-            e => e.AggregateSequenceNumber >= fromEventSequenceNumber &&
-                 e.AggregateSequenceNumber <= toEventSequenceNumber);
+        throw new NotImplementedException();
     }
 
     public Task DeleteEventsAsync(IIdentity id,
@@ -132,25 +127,6 @@ public class MyInMemoryEventPersistence(ILogger<MyInMemoryEventPersistence> logg
             result = fromEventSequenceNumber <= 1
                 ? committedDomainEvent
                 : committedDomainEvent.Where(e => e.AggregateSequenceNumber >= fromEventSequenceNumber).ToList();
-        }
-        else
-        {
-            result = new List<InMemoryCommittedDomainEvent>();
-        }
-
-        return Task.FromResult(result);
-    }
-
-    private Task<IReadOnlyCollection<ICommittedDomainEvent>> LoadCommittedEventsAsync(IIdentity id,
-        int fromEventSequenceNumber, Func<InMemoryCommittedDomainEvent, bool> filter)
-    {
-        IReadOnlyCollection<ICommittedDomainEvent> result;
-
-        if (_eventStore.TryGetValue(id.Value, out var committedDomainEvent))
-        {
-            result = fromEventSequenceNumber <= 1
-                ? committedDomainEvent
-                : committedDomainEvent.Where(filter).ToList();
         }
         else
         {

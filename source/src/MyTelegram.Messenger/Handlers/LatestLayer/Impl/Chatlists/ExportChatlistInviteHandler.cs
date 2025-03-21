@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Chatlists;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Chatlists;
 
 ///<summary>
 /// Export a <a href="https://corefork.telegram.org/api/folders">folder »</a>, creating a <a href="https://corefork.telegram.org/api/links#chat-folder-links">chat folder deep link »</a>.

@@ -46,10 +46,9 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException($"Unsuporrted load type:{loadType}");
+                throw new ArgumentOutOfRangeException($"Unsuporrted load type: {loadType}");
         }
 
-        //Logger.LogDebug($"input:AddOffset={input.AddOffset} OffsetId={input.OffsetId} Limit={input.Limit} MaxId={input.MaxId} {loadType} fromId:{fromId}  maxId:{maxId} limit:{input.Limit}");
         return new OffsetInfo { MaxId = newMaxId, FromId = fromId, LoadType = loadType };
     }
 
@@ -107,7 +106,4 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
 
         return LoadType.Forward;
     }
-
-    //private static LoadType GetOffsetLoadType(GetPagedListInput input) =>
-    //    GetOffsetLoadType(input.Limit, input.AddOffset, input.MaxId);
 }

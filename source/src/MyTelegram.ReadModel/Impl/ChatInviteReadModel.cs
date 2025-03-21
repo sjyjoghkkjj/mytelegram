@@ -24,8 +24,7 @@ IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteDeletedEvent>
     public virtual int? Usage { get; private set; }
     public virtual int? UsageLimit { get; private set; }
     public virtual int? Requested { get; private set; }
-
-
+    public bool IsBroadcast { get; private set; }
     public virtual long? Version { get; set; }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChatInviteAggregate, ChatInviteId, ChatInviteCreatedEvent> domainEvent, CancellationToken cancellationToken)
@@ -44,6 +43,7 @@ IAmReadModelFor<ChatInviteAggregate, ChatInviteId, ChatInviteDeletedEvent>
         Title = domainEvent.AggregateEvent.Title;
         RequestNeeded = domainEvent.AggregateEvent.RequestNeeded;
         InviteId = domainEvent.AggregateEvent.InviteId;
+        IsBroadcast = domainEvent.AggregateEvent.IsBroadcast;
 
         return Task.CompletedTask;
     }

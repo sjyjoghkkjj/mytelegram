@@ -6,7 +6,7 @@ public class JoinChannelCommandHandler : CommandHandler<ChannelMemberAggregate, 
         JoinChannelCommand command,
         CancellationToken cancellationToken)
     {
-        aggregate.Join(command.RequestInfo, command.ChannelId, command.SelfUserId);
+        aggregate.Join(command.RequestInfo, command.ChannelId, command.SelfUserId, command.IsBroadcast);
         return Task.CompletedTask;
     }
 }

@@ -2,8 +2,16 @@
 
 public interface IPrivacyHelper
 {
-    void ApplyPrivacy(IPrivacyReadModel? privacyReadModel,
-        Action executeOnPrivacyNotMatch,
+    void ApplyPrivacy(
+        IPrivacyReadModel? privacyReadModel,
+        Action<PrivacyValueType> executeOnPrivacyNotMatch,
         long selfUserId,
-        bool isContact);
+        ContactType contactType);
+
+    //void ApplyPrivacy(IPrivacyReadModel? privacyReadModel,
+    //    Action executeOnPrivacyNotMatch,
+    //    SimpleUserItem userItem,
+    //    ContactType contactType);
+    bool IsAllowedByPrivacy(long selfUserId, IPrivacyReadModel? privacyReadModel,
+        ContactType contactType);
 }

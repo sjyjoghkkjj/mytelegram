@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Activate or deactivate a purchased <a href="https://fragment.com/">fragment.com</a> username associated to the currently logged-in user.

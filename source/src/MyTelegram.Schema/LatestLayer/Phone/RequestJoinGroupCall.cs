@@ -14,10 +14,10 @@ namespace MyTelegram.Schema.Phone;
 /// 400 JOIN_AS_PEER_INVALID The specified peer cannot be used to join a group call.
 /// See <a href="https://corefork.telegram.org/method/phone.joinGroupCall" />
 ///</summary>
-[TlObject(0xb132ff7b)]
+[TlObject(0xd61e1df3)]
 public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0xb132ff7b;
+    public uint ConstructorId => 0xd61e1df3;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -51,6 +51,7 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
     /// The invitation hash from the <a href="https://corefork.telegram.org/api/links#video-chat-livestream-links">invite link »</a>, if provided allows speaking in a livestream or muted group chat.
     ///</summary>
     public string? InviteHash { get; set; }
+    public long? KeyFingerprint { get; set; }
 
     ///<summary>
     /// WebRTC parameters
@@ -63,6 +64,7 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
         if (Muted) { Flags[0] = true; }
         if (VideoStopped) { Flags[2] = true; }
         if (InviteHash != null) { Flags[1] = true; }
+        if (/*KeyFingerprint != 0 &&*/ KeyFingerprint.HasValue) { Flags[3] = true; }
 
     }
 
@@ -74,6 +76,7 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Call);
         writer.Write(JoinAs);
         if (Flags[1]) { writer.Write(InviteHash); }
+        if (Flags[3]) { writer.Write(KeyFingerprint.Value); }
         writer.Write(Params);
     }
 
@@ -85,6 +88,7 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
         Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
         JoinAs = reader.Read<MyTelegram.Schema.IInputPeer>();
         if (Flags[1]) { InviteHash = reader.ReadString(); }
+        if (Flags[3]) { KeyFingerprint = reader.ReadInt64(); }
         Params = reader.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

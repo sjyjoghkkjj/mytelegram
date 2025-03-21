@@ -16,6 +16,8 @@ public sealed class TDraftMessageEmpty : IDraftMessage,IEmpty
     ///</summary>
     public BitArray Flags { get; set; } = new BitArray(32);
 
+    public IInputMedia? Media { get; set; }
+
     ///<summary>
     /// When was the draft last updated
     ///</summary>

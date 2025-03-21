@@ -54,7 +54,7 @@ public class TempAggregate(TempId id) : AggregateRoot<TempAggregate, TempId>(id)
         List<int> messageIds, List<long> randomIds, int? scheduleDate, Peer? sendAs, bool forwardFromLinkedChannel, bool post)
     {
         Emit(new ForwardMessagesStartedEvent(requestInfo, silent, background, withMyScore, dropAuthor, dropMediaCaptions,
-            noForwards, fromPeer, toPeer, messageIds, randomIds, scheduleDate, sendAs, forwardFromLinkedChannel, post));
+            noForwards, fromPeer, toPeer, messageIds, randomIds, scheduleDate, sendAs, forwardFromLinkedChannel, post, null, null));
     }
 
     public void StartDeleteReplyMessages(RequestInfo requestInfo, long channelId, List<int> messageIds, int newTopMessageId)

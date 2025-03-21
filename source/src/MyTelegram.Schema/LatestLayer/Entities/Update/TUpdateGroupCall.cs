@@ -7,14 +7,16 @@ namespace MyTelegram.Schema;
 /// A new groupcall was started
 /// See <a href="https://corefork.telegram.org/constructor/updateGroupCall" />
 ///</summary>
-[TlObject(0x14b24500)]
+[TlObject(0x97d64341)]
 public sealed class TUpdateGroupCall : IUpdate
 {
-    public uint ConstructorId => 0x14b24500;
+    public uint ConstructorId => 0x97d64341;
+    public BitArray Flags { get; set; } = new BitArray(32);
+
     ///<summary>
     /// The <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a> where this group call or livestream takes place
     ///</summary>
-    public long ChatId { get; set; }
+    public long? ChatId { get; set; }
 
     ///<summary>
     /// Info about the group call or livestream
@@ -24,6 +26,7 @@ public sealed class TUpdateGroupCall : IUpdate
 
     public void ComputeFlag()
     {
+        if (/*ChatId != 0 &&*/ ChatId.HasValue) { Flags[0] = true; }
 
     }
 
@@ -31,13 +34,15 @@ public sealed class TUpdateGroupCall : IUpdate
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(ChatId);
+        writer.Write(Flags);
+        if (Flags[0]) { writer.Write(ChatId.Value); }
         writer.Write(Call);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        ChatId = reader.ReadInt64();
+        Flags = reader.ReadBitArray();
+        if (Flags[0]) { ChatId = reader.ReadInt64(); }
         Call = reader.Read<MyTelegram.Schema.IGroupCall>();
     }
 }

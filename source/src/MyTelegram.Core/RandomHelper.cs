@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.Core;
 
-public class RandomHelper : IRandomHelper
+public class RandomHelper : IRandomHelper, ISingletonDependency
 {
     private const string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private const string NumberCharacters = "0123456789";

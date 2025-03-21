@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Smsjobs;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Smsjobs;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/smsjobs.getSmsJob" />

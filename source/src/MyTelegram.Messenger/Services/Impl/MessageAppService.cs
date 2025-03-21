@@ -10,10 +10,54 @@ public class MessageAppService(
     IChannelAppService channelAppService,
     IUserAppService userAppService,
     IPrivacyAppService privacyAppService,
+    IContactAppService contactAppService,
     IOffsetHelper offsetHelper,
-    IIdGenerator idGenerator)
+    IIdGenerator idGenerator,
+    IReadModelCacheHelper<IUserReadModel> useReadModelCacheHelper)
     : BaseAppService, IMessageAppService, ITransientDependency
 {
+    public void CheckBotPermission(long requestUserId, Peer toPeer)
+    {
+        if (peerHelper.IsBotUser(requestUserId) && peerHelper.IsBotUser(toPeer.PeerId))
+        {
+            RpcErrors.RpcErrors400.UserIsBot.ThrowRpcError();
+        }
+    }
+
+    public async Task CheckSendAsAsync(long requestUserId, Peer toPeer, Peer? sendAs)
+    {
+        if (sendAs != null)
+        {
+            if (toPeer.PeerType != PeerType.Channel)
+            {
+                RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
+            }
+
+            switch (sendAs.PeerType)
+            {
+                case PeerType.User:
+                case PeerType.Self:
+                    if (sendAs.PeerId != requestUserId)
+                    {
+                        RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
+                    }
+
+                    break;
+
+                case PeerType.Channel:
+
+                    var sendAsPeerId =
+                        await queryProcessor.ProcessAsync(new GetSendAsPeerIdQuery(requestUserId, sendAs.PeerId));
+                    if (sendAsPeerId == null)
+                    {
+                        RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
+                    }
+
+                    break;
+            }
+        }
+    }
+
     public async Task<GetMessageOutput> GetChannelDifferenceAsync(GetDifferenceInput input)
     {
         return await GetMessagesInternalAsync(new GetMessagesQuery(input.OwnerPeerId,
@@ -66,59 +110,31 @@ public class MessageAppService(
     {
         return GetMessagesCoreAsync(input);
     }
-
-    private async Task CheckBlockedAsync(SendMessageInput input)
+    public async Task SendMessageAsync(List<SendMessageInput> inputs)
     {
-        if (input.ToPeer.PeerType == PeerType.User)
+        if (inputs.Count == 0)
         {
-            if (await blockCacheAppService.IsBlockedAsync(input.ToPeer.PeerId, input.SenderUserId))
-            {
-                RpcErrors.RpcErrors400.UserIsBlocked.ThrowRpcError();
-            }
-
-            if (await blockCacheAppService.IsBlockedAsync(input.SenderUserId, input.ToPeer.PeerId))
-            {
-                RpcErrors.RpcErrors400.YouBlockedUser.ThrowRpcError();
-            }
+            throw new ArgumentException();
         }
-    }
 
-    public async Task CheckSendAsAsync(long requestUserId, Peer toPeer, Peer? sendAs)
-    {
-        if (sendAs != null)
+        List<SendMessageItem> sendMessageItems = [];
+        var firstInput = inputs.First();
+        var requestInfo = firstInput.RequestInfo;
+
+        foreach (var input in inputs)
         {
-            if (toPeer.PeerType != PeerType.Channel)
-            {
-                RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
-            }
-
-            switch (sendAs.PeerType)
-            {
-                case PeerType.User:
-                case PeerType.Self:
-                    if (sendAs.PeerId != requestUserId)
-                    {
-                        RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
-                    }
-                    break;
-
-                case PeerType.Channel:
-
-                    var sendAsPeerId =
-                        await queryProcessor.ProcessAsync(new GetSendAsPeerIdQuery(requestUserId, sendAs.PeerId));
-                    if (sendAsPeerId == null)
-                    {
-                        RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
-                    }
-
-                    break;
-            }
+            CheckBotPermission(input.RequestInfo.UserId, input.ToPeer);
+            var item = await CreateSendMessageItemAsync(input);
+            sendMessageItems.Add(item);
         }
-    }
 
-    private Task CheckSendAsAsync(SendMessageInput input)
-    {
-        return CheckSendAsAsync(input.RequestInfo.UserId, input.ToPeer, input.SendAs);
+        var command = new StartSendMessageCommand(TempId.New, requestInfo,
+            sendMessageItems,
+            firstInput.ClearDraft,
+            firstInput.IsSendGroupedMessage,
+            firstInput.IsSendQuickReplyMessage);
+
+        await commandBus.PublishAsync(command);
     }
 
     private async Task<IChannelReadModel?> CheckChannelBannedRightsAsync(SendMessageInput input)
@@ -164,6 +180,7 @@ public class MessageAppService(
                     RpcErrors.RpcErrors400.UserBannedInChannel.ThrowRpcError();
                 }
             }
+
             if (input.Media != null)
             {
                 if (memberBannedRights.SendMedia)
@@ -176,7 +193,164 @@ public class MessageAppService(
         return channelReadModel;
     }
 
-    private async Task<(List<long> mentionedUserIds, TVector<IMessageEntity>? entities)> GetMessageEntitiesAsync(SendMessageInput input)
+    private Task CheckSendAsAsync(SendMessageInput input)
+    {
+        return CheckSendAsAsync(input.RequestInfo.UserId, input.ToPeer, input.SendAs);
+    }
+
+    private async Task<SendMessageItem> CreateSendMessageItemAsync(SendMessageInput input)
+    {
+        //await CheckAccessHashAsync(input);
+        await CheckSendAsAsync(input);
+        await CheckGlobalPrivacySettingsAsync(input);
+        var channelReadModel = await CheckChannelBannedRightsAsync(input);
+
+        var item = await GetMessageEntitiesAsync(input);
+        var ownerPeerId = input.ToPeer.PeerType == PeerType.Channel ? input.ToPeer.PeerId : input.SenderUserId;
+        var replyToMsgId = input.InputReplyTo.ToReplyToMsgId();
+
+        // Reply to group: ToPeerId=input.ToPeerId,SenderUserId=input.UserId
+        // Reply to user:  ToPeerId=Input.UserId,OwnerPeerId=input.ToPeerId,MessageId=replyToMsgId
+
+        var replyToMsgItems =
+            await queryProcessor.ProcessAsync(new GetReplyToMsgIdListQuery(input.ToPeer, input.SenderUserId,
+                replyToMsgId));
+        var idType = IdType.MessageId;
+        var subType = MessageSubType.Normal;
+        var messageActionType = MessageActionType.None;
+        var post = channelReadModel?.Broadcast ?? false;
+        var linkedChannelId = channelReadModel?.Broadcast ?? false ? channelReadModel.LinkedChatId : null;
+        string? postAuthor = null;
+
+        if (post && channelReadModel!.Signatures)
+        {
+            if (input.SendAs?.PeerType != PeerType.Channel)
+            {
+                var sendAsUserId = input.SendAs?.PeerId ?? input.RequestInfo.UserId;
+                var userReadModel = await useReadModelCacheHelper.GetOrCreateAsync(sendAsUserId,
+                    () => queryProcessor.ProcessAsync(new GetUserByIdQuery(sendAsUserId)), p => p.Id);
+                postAuthor = $"{userReadModel!.FirstName} {userReadModel.LastName}";
+            }
+        }
+
+        var scheduleDate = input.ScheduleDate;
+        if (scheduleDate.HasValue)
+        {
+            // If the schedule_date is less than 20 seconds in the future, the message will be sent immediately,
+            // generating a normal updateNewMessage/updateNewChannelMessage.
+            if (scheduleDate.Value - CurrentDate < 20)
+            {
+                scheduleDate = null;
+            }
+            else
+            {
+                idType = IdType.ScheduleMessageId;
+            }
+        }
+
+        var pts = 0;
+        MessageReply? reply = null;
+        if (post && linkedChannelId.HasValue)
+        {
+            reply = new MessageReply(linkedChannelId, 0, 0, 0, []);
+        }
+
+        var messageId = await idGenerator.NextIdAsync(idType, ownerPeerId);
+        //var messageId = 0;
+        int? scheduleMessageId = null;
+        if (idType == IdType.ScheduleMessageId)
+        {
+            scheduleMessageId = await idGenerator.NextIdAsync(IdType.ScheduleMessageId, ownerPeerId);
+        }
+
+        var date = CurrentDate;
+        var messageItem = new MessageItem(
+            input.ToPeer with { PeerId = ownerPeerId /*, AccessHash = 0 */ },
+            input.ToPeer,
+            new Peer(PeerType.User, input.SenderUserId),
+            input.SenderUserId,
+            messageId,
+            input.Message,
+            date,
+            input.RandomId,
+            true,
+            input.SendMessageType,
+            (MessageType)input.SendMessageType,
+            subType,
+            input.InputReplyTo,
+            //input.MessageActionData,
+            input.MessageAction,
+            messageActionType,
+            item.entities,
+            input.Media,
+            input.GroupId,
+            PollId: input.PollId,
+            Post: post,
+            ReplyMarkup: input.ReplyMarkup,
+            TopMsgId: input.TopMsgId,
+            PostAuthor: postAuthor,
+            SendAs: input.SendAs,
+            Effect: input.Effect,
+            ReplyToMsgItems: replyToMsgItems?.ToList(),
+            LinkedChannelId: linkedChannelId,
+            Pts: pts,
+            Silent: input.Silent,
+            ScheduleDate: scheduleDate,
+            ScheduleMessageId: scheduleMessageId,
+            Reply: reply,
+            InvertMedia: input.InvertMedia
+        );
+
+        var sendMessageItem = new SendMessageItem(messageItem, input.ClearDraft, item.mentionedUserIds, []);
+
+        return sendMessageItem;
+    }
+
+    private async Task CheckGlobalPrivacySettingsAsync(SendMessageInput input)
+    {
+        if (input.ToPeer.PeerType == PeerType.User && input.RequestInfo.UserId != input.ToPeer.PeerId)
+        {
+            var globalPrivacySettings = await privacyAppService.GetGlobalPrivacySettingsAsync(input.ToPeer.PeerId);
+            if (globalPrivacySettings?.NewNoncontactPeersRequirePremium ?? false)
+            {
+                var userReadModel = await userAppService.GetAsync(input.RequestInfo.UserId);
+                if (!userReadModel!.Premium)
+                {
+                    var contactType =
+                        await contactAppService.GetContactTypeAsync(input.RequestInfo.UserId, input.ToPeer.PeerId);
+                    if (contactType != ContactType.Mutual && contactType != ContactType.ContactOfTargetUser)
+                    {
+                        RpcErrors.RpcErrors406.PrivacyPremiumRequired.ThrowRpcError();
+                    }
+                }
+            }
+        }
+    }
+
+    private (List<TMessageEntityMention> mentions, List<string> userNameList) GetMentions(string message)
+    {
+        var pattern = "@(\\w{4,40})";
+        var mentions = new List<TMessageEntityMention>();
+        var matches = Regex.Matches(message, pattern);
+        var userNameList = new List<string>();
+        foreach (Match match in matches)
+        {
+            if (match.Success)
+            {
+                mentions.Add(new TMessageEntityMention
+                {
+                    Offset = match.Index,
+                    Length = match.Length
+                });
+                userNameList.Add(match.Value[1..]);
+            }
+        }
+
+        return (mentions, userNameList);
+    }
+
+    private async Task<(List<long> mentionedUserIds, TVector<IMessageEntity>? entities)> GetMessageEntitiesAsync(
+        SendMessageInput input)
     {
         var mentionsAndUserNames = GetMentions(input.Message);
         var mentions = mentionsAndUserNames.mentions;
@@ -237,153 +411,6 @@ public class MessageAppService(
         return (mentionedUserIds, entities);
     }
 
-    private async Task<List<long>?> GetChatMembersAsync(SendMessageInput input)
-    {
-        if (input.ToPeer.PeerType != PeerType.Chat)
-        {
-            return null;
-        }
-
-        var chatReadModel = await queryProcessor.ProcessAsync(new GetChatByChatIdQuery(input.ToPeer.PeerId));
-        if (chatReadModel == null)
-        {
-            RpcErrors.RpcErrors400.ChatIdInvalid.ThrowRpcError();
-        }
-
-        return chatReadModel!.ChatMembers.Select(p => p.UserId).ToList();
-    }
-
-    public async Task SendMessageAsync(List<SendMessageInput> inputs)
-    {
-        if (inputs.Count == 0)
-        {
-            throw new ArgumentException();
-        }
-
-        List<SendMessageItem> sendMessageItems = [];
-        var firstInput = inputs.First();
-        var requestInfo = firstInput.RequestInfo;
-        foreach (var input in inputs)
-        {
-            var item = await CreateSendMessageItemAsync(input);
-            sendMessageItems.Add(item);
-        }
-
-        var command = new StartSendMessageCommand(TempId.New, requestInfo,
-            sendMessageItems,
-            firstInput.ClearDraft,
-            firstInput.IsSendGroupedMessage,
-            firstInput.IsSendQuickReplyMessage);
-
-        await commandBus.PublishAsync(command);
-    }
-
-    private async Task<SendMessageItem> CreateSendMessageItemAsync(SendMessageInput input)
-    {
-        //await CheckAccessHashAsync(input);
-        await CheckSendAsAsync(input);
-        await CheckBlockedAsync(input);
-        var channelReadModel = await CheckChannelBannedRightsAsync(input);
-        var chatMembers = await GetChatMembersAsync(input);
-
-        var item = await GetMessageEntitiesAsync(input);
-        var ownerPeerId = input.ToPeer.PeerType == PeerType.Channel ? input.ToPeer.PeerId : input.SenderUserId;
-        var replyToMsgId = input.InputReplyTo.ToReplyToMsgId();
-
-        // Reply to group: ToPeerId=input.ToPeerId,SenderUserId=input.UserId
-        // Reply to user:  ToPeerId=Input.UserId,OwnerPeerId=input.ToPeerId,MessageId=replyToMsgId
-
-        var replyToMsgItems =
-            await queryProcessor.ProcessAsync(new GetReplyToMsgIdListQuery(input.ToPeer, input.SenderUserId,
-                replyToMsgId));
-        var idType = IdType.MessageId;
-        var subType = MessageSubType.Normal;
-        var messageAction = MessageActionType.None;
-        var post = channelReadModel?.Broadcast ?? false;
-        var linkedChannelId = channelReadModel?.Broadcast ?? false ? channelReadModel.LinkedChatId : null;
-        string? postAuthor = null;
-
-        if (post && channelReadModel!.Signatures)
-        {
-            if (input.SendAs?.PeerType != PeerType.Channel)
-            {
-                var user = await userAppService.GetAsync(input.SendAs?.PeerId ?? input.RequestInfo.UserId);
-                postAuthor = $"{user!.FirstName} {user.LastName}";
-            }
-        }
-
-        var pts = await idGenerator.NextIdAsync(IdType.Pts, ownerPeerId); ;
-
-        MessageReply? reply = null;
-        if (post && linkedChannelId.HasValue)
-        {
-            reply = new MessageReply(linkedChannelId, 0, 0, 0, []);
-        }
-
-        var messageId = await idGenerator.NextIdAsync(idType, ownerPeerId);
-
-        var date = CurrentDate;
-        var messageItem = new MessageItem(
-            input.ToPeer with { PeerId = ownerPeerId /*, AccessHash = 0 */ },
-            input.ToPeer,
-            new Peer(PeerType.User, input.SenderUserId),
-            input.SenderUserId,
-            messageId,
-            input.Message,
-            date,
-            input.RandomId,
-            true,
-            input.SendMessageType,
-            (MessageType)input.SendMessageType,
-            subType,
-            input.InputReplyTo,
-            input.MessageActionData,
-            messageAction,
-            item.entities,
-            input.Media,
-            input.GroupId,
-            PollId: input.PollId,
-            Post: post,
-            ReplyMarkup: input.ReplyMarkup,
-            TopMsgId: input.TopMsgId,
-            PostAuthor: postAuthor,
-            SendAs: input.SendAs,
-            Effect: input.Effect,
-            ReplyToMsgItems: replyToMsgItems?.ToList(),
-            LinkedChannelId: linkedChannelId,
-            Pts: pts,
-            Silent: input.Silent,
-            Reply: reply,
-            InvertMedia: input.InvertMedia
-        );
-
-        var sendMessageItem = new SendMessageItem(messageItem, input.ClearDraft, item.mentionedUserIds, chatMembers);
-
-        return sendMessageItem;
-    }
-
-    private (List<TMessageEntityMention> mentions, List<string> userNameList) GetMentions(string message)
-    {
-        var pattern = "@(\\w{4,40})";
-        var mentions = new List<TMessageEntityMention>();
-        var matches = Regex.Matches(message, pattern);
-        var userNameList = new List<string>();
-        foreach (Match match in matches)
-        {
-            if (match.Success)
-            {
-                mentions.Add(new TMessageEntityMention
-                {
-                    Offset = match.Index,
-                    Length = match.Length
-                });
-                userNameList.Add(match.Value[1..]);
-            }
-        }
-
-        return (mentions, userNameList);
-    }
-
     private Task<GetMessageOutput> GetMessagesCoreAsync<TRequest>(TRequest input)
         where TRequest : GetPagedListInput
     {
@@ -394,16 +421,16 @@ public class MessageAppService(
         return GetMessagesInternalAsync(query);
     }
 
-    private async Task<GetMessageOutput> GetMessagesInternalAsync(GetMessagesQuery query, IReadOnlyCollection<long>? users = null,
+    private async Task<GetMessageOutput> GetMessagesInternalAsync(GetMessagesQuery query,
+        IReadOnlyCollection<long>? users = null,
         IReadOnlyCollection<long>? chats = null)
     {
         var messageList = await queryProcessor.ProcessAsync(query);
-        var chatOrChannelPeers = chats?.Count > 0 ? chats.Select(peerHelper.GetPeer).ToList() : new List<Peer>(0);
+        var channelIdList = messageList.Where(p => p.ToPeerType == PeerType.Channel).Select(p => p.ToPeerId).ToList();
         var userIdList = messageList.Where(p => p.ToPeerType == PeerType.User).Select(p => p.ToPeerId).ToList();
         var chatIdList = messageList.Where(p => p.ToPeerType == PeerType.Chat).Select(p => p.ToPeerId).ToList();
-        var channelIdList = messageList.Where(p => p.ToPeerType == PeerType.Channel).Select(p => p.ToPeerId).ToList();
-        var extraChatUserIdList = new List<long>();
 
+        var extraChatUserIdList = new List<long>();
         if (users?.Count > 0)
         {
             extraChatUserIdList.AddRange(users);
@@ -411,32 +438,21 @@ public class MessageAppService(
 
         foreach (var messageReadModel in messageList)
         {
-            switch (messageReadModel.MessageActionType)
+            switch (messageReadModel.MessageAction)
             {
-                case MessageActionType.ChatAddUser:
-                    var messageActionData = messageReadModel.MessageActionData!.ToBytes()
-                        .ToTObject<IObject>();
-                    switch (messageActionData)
-                    {
-                        case TMessageActionChatAddUser messageActionChatAddUser:
-                            extraChatUserIdList.AddRange(messageActionChatAddUser.Users);
-                            break;
+                case TMessageActionChatAddUser messageActionChatAddUser:
+                    extraChatUserIdList.AddRange(messageActionChatAddUser.Users);
+                    break;
 
-                        case TMessageActionChatJoinedByLink messageActionChatJoinedByLink:
-                            extraChatUserIdList.Add(messageActionChatJoinedByLink.InviterId);
-                            break;
+                case TMessageActionChatJoinedByLink messageActionChatJoinedByLink:
+                    extraChatUserIdList.Add(messageActionChatJoinedByLink.InviterId);
+                    break;
 
-                        case TMessageActionChatJoinedByRequest:
-
-                            break;
-                    }
+                case TMessageActionChatJoinedByRequest:
 
                     break;
-                case MessageActionType.ChatDeleteUser:
-                    var deletedUserId = messageReadModel.MessageActionData!.ToBytes()
-                        .ToTObject<TMessageActionChatDeleteUser>()
-                        .UserId;
-                    extraChatUserIdList.Add(deletedUserId);
+                case TMessageActionChatDeleteUser messageActionChatDeleteUser:
+                    extraChatUserIdList.Add(messageActionChatDeleteUser.UserId);
                     break;
             }
 
@@ -448,6 +464,9 @@ public class MessageAppService(
             extraChatUserIdList.Add(messageReadModel.SenderPeerId);
         }
 
+        var chatOrChannelPeers = chats?.Count > 0 ? chats.Select(peerHelper.GetPeer).ToList() : new List<Peer>(0);
+
+
         userIdList.Add(query.SelfUserId);
         userIdList.AddRange(extraChatUserIdList);
 
@@ -457,22 +476,15 @@ public class MessageAppService(
             channelIdList.AddRange(chatOrChannelPeers.Where(p => p.PeerType == PeerType.Channel).Select(p => p.PeerId));
         }
 
-        var userList = await queryProcessor.ProcessAsync(new GetUsersByUserIdListQuery(userIdList));
-        var chatList = chatIdList.Count == 0
-            ? new List<IChatReadModel>()
-            : await queryProcessor
-                .ProcessAsync(new GetChatByChatIdListQuery(chatIdList));
-
+        var userList = await userAppService.GetListAsync(userIdList);
         var channelList = channelIdList.Count == 0
-                ? new List<IChannelReadModel>()
-                : await queryProcessor
-                    .ProcessAsync(new GetChannelByChannelIdListQuery(channelIdList));
+            ? new List<IChannelReadModel>()
+            : await channelAppService.GetListAsync(channelIdList);
 
         var contactList = await queryProcessor
-                .ProcessAsync(new GetContactListQuery(query.SelfUserId, userIdList));
+            .ProcessAsync(new GetContactListQuery(query.SelfUserId, userIdList));
 
         var photoIds = new List<long>();
-        photoIds.AddRange(chatList.Select(p => p.PhotoId ?? 0));
         photoIds.AddRange(channelList.Select(p => p.PhotoId ?? 0));
         photoIds.AddRange(userList.Select(p => p.ProfilePhotoId ?? 0));
         photoIds.AddRange(userList.Select(p => p.FallbackPhotoId ?? 0));
@@ -514,11 +526,9 @@ public class MessageAppService(
                 .ProcessAsync(new GetChosenVoteAnswersQuery(pollIdList, query.SelfUserId));
         }
 
-        //var channelPostIdList=messageList.Where(p=>p.Post)
-
         return new GetMessageOutput(channelList,
             channelMemberList,
-            chatList,
+            [],
             contactList,
             joinedChannelIdList,
             messageList,

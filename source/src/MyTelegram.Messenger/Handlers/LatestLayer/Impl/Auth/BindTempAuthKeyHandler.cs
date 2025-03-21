@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Auth;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Binds a temporary authorization key <code>temp_auth_key_id</code> to the permanent authorization key <code>perm_auth_key_id</code>. Each permanent key may only be bound to one temporary key at a time, binding a new temporary key overwrites the previous one.For more information, see <a href="https://corefork.telegram.org/api/pfs">Perfect Forward Secrecy</a>.

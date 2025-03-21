@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Payments;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Payments;
 
 ///<summary>
 /// Generate an <a href="https://corefork.telegram.org/api/links#invoice-links">invoice deep link</a>

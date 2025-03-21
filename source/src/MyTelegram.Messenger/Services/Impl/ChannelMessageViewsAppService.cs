@@ -10,8 +10,6 @@ public class ChannelMessageViewsAppService(
     ICuckooFilter cuckooFilter)
     : IChannelMessageViewsAppService, ITransientDependency
 {
-    //private readonly IBloomFilter _bloomFilter;
-
     public async Task IncrementViewsIfNotIncrementedAsync(long selfUserId,
         long authKeyId,
         long channelId,

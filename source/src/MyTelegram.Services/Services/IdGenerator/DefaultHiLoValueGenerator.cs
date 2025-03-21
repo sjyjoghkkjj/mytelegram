@@ -20,7 +20,7 @@ public class DefaultHiLoValueGenerator(
     {
         var highValue = await highValueGenerator.GetNewHighValueAsync(idType, key, cancellationToken)
      ;
-        logger.LogInformation("Get new low value from db, idType={IdType} key={Key} newHighValue={HighValue}",
+        logger.LogInformation("Get new low value from db, idType: {IdType} key: {Key} newHighValue: {HighValue}",
             idType,
             key,
             highValue);

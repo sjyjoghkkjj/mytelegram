@@ -1,6 +1,8 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Channels;
+using GetChannelMemberByUserIdQuery = MyTelegram.Queries.GetChannelMemberByUserIdQuery;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Join a channel/supergroup
@@ -14,7 +16,6 @@ namespace MyTelegram.Handlers.Channels;
 /// 406 INVITE_HASH_EXPIRED The invite link has expired.
 /// 400 INVITE_HASH_INVALID The invite hash is invalid.
 /// 400 INVITE_REQUEST_SENT You have successfully requested to join this chat or channel.
-/// 500 MEMBER_CHAT_ADD_FAILED
 /// 400 MSG_ID_INVALID Invalid message ID provided.
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// 400 USERS_TOO_MUCH The maximum number of users has been exceeded (to create a chat, for example).
@@ -24,8 +25,8 @@ namespace MyTelegram.Handlers.Channels;
 ///</summary>
 internal sealed class JoinChannelHandler(
     ICommandBus commandBus,
-    IRandomHelper randomHelper,
     IChannelAppService channelAppService,
+    IQueryProcessor queryProcessor,
     IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestJoinChannel, MyTelegram.Schema.IUpdates>,
         Channels.IJoinChannelHandler
@@ -39,23 +40,53 @@ internal sealed class JoinChannelHandler(
             var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
             channelReadModel.ThrowExceptionIfChannelDeleted();
 
-            var userIdList = new[] { input.UserId };
-            var command = new StartInviteToChannelCommand(
-                ChannelId.Create(inputChannel.ChannelId),
-                input.ToRequestInfo(),
-                inputChannel.ChannelId,
-                input.UserId,
-                channelReadModel!.TopMessageId,
-                userIdList,
-                null,
-                new List<long>(),
-                CurrentDate,
-                randomHelper.NextInt64(),
-                new TMessageActionChatAddUser { Users = new TVector<long>(userIdList) }.ToBytes().ToHexString(),
-                ChatJoinType.ByRequest
-                );
+            var channelMemberReadModel =
+                await queryProcessor.ProcessAsync(
+                    new GetChannelMemberByUserIdQuery(channelReadModel!.ChannelId, input.UserId));
 
-            await commandBus.PublishAsync(command, default);
+            if (channelMemberReadModel != null)
+            {
+                if (channelMemberReadModel.Kicked)
+                {
+                    RpcErrors.RpcErrors400.ChannelPrivate.ThrowRpcError();
+                }
+                else
+                {
+                    if (!channelMemberReadModel.Left)
+                    {
+                        RpcErrors.RpcErrors400.UserAlreadyParticipant.ThrowRpcError();
+                    }
+                }
+            }
+
+            var userIdList = new[] { input.UserId };
+
+            var channelHistoryMinId = 0;
+            if (channelReadModel!.HiddenPreHistory)
+            {
+                channelHistoryMinId = channelReadModel.TopMessageId;
+            }
+
+            var inviterUserId = 0L;
+            if (channelReadModel!.Broadcast || channelReadModel.HasLink)
+            {
+                inviterUserId = MyTelegramServerDomainConsts.GroupAnonymousBotUserId;
+            }
+
+            var command = new StartInviteToChannelCommand(TempId.New, input.ToRequestInfo(),
+                channelReadModel.ChannelId,
+                channelReadModel.Broadcast,
+                channelReadModel.HasLink,
+                inviterUserId,
+                channelHistoryMinId,
+                0,
+                [input.UserId],
+                [],
+                ChatJoinType.ByRequest
+            );
+
+            await commandBus.PublishAsync(command);
+
             return null!;
         }
 

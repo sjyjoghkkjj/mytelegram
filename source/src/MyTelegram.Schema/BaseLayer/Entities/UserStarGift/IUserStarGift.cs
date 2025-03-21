@@ -6,7 +6,6 @@ namespace MyTelegram.Schema;
 /// Represents a <a href="https://corefork.telegram.org/api/gifts">gift</a>, displayed on a user's profile page.
 /// See <a href="https://corefork.telegram.org/constructor/UserStarGift" />
 ///</summary>
-[JsonDerivedType(typeof(TUserStarGift), nameof(TUserStarGift))]
 public interface IUserStarGift : IObject
 {
     ///<summary>

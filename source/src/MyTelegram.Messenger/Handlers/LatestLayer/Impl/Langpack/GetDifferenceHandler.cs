@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Langpack;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
 
 ///<summary>
 /// Get new strings in language pack

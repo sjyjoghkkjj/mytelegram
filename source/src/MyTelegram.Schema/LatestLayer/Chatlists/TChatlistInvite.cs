@@ -7,19 +7,21 @@ namespace MyTelegram.Schema.Chatlists;
 /// Info about a <a href="https://corefork.telegram.org/api/links#chat-folder-links">chat folder deep link »</a>.
 /// See <a href="https://corefork.telegram.org/constructor/chatlists.chatlistInvite" />
 ///</summary>
-[TlObject(0x1dcd839d)]
+[TlObject(0xf10ece2f)]
 public sealed class TChatlistInvite : IChatlistInvite
 {
-    public uint ConstructorId => 0x1dcd839d;
+    public uint ConstructorId => 0xf10ece2f;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
     public BitArray Flags { get; set; } = new BitArray(32);
+    public bool TitleNoanimate { get; set; }
 
     ///<summary>
     /// Name of the link
+    /// See <a href="https://corefork.telegram.org/type/TextWithEntities" />
     ///</summary>
-    public string Title { get; set; }
+    public MyTelegram.Schema.ITextWithEntities Title { get; set; }
 
     ///<summary>
     /// Emoji to use as icon for the folder.
@@ -43,6 +45,7 @@ public sealed class TChatlistInvite : IChatlistInvite
 
     public void ComputeFlag()
     {
+        if (TitleNoanimate) { Flags[1] = true; }
         if (Emoticon != null) { Flags[0] = true; }
 
     }
@@ -62,7 +65,8 @@ public sealed class TChatlistInvite : IChatlistInvite
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Flags = reader.ReadBitArray();
-        Title = reader.ReadString();
+        if (Flags[1]) { TitleNoanimate = true; }
+        Title = reader.Read<MyTelegram.Schema.ITextWithEntities>();
         if (Flags[0]) { Emoticon = reader.ReadString(); }
         Peers = reader.Read<TVector<MyTelegram.Schema.IPeer>>();
         Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();

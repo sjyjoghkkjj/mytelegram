@@ -1,4 +1,5 @@
 ﻿using MyTelegram.Schema;
+using MyTelegram.Services.Extensions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MyTelegram.Services.Services;
@@ -26,6 +27,11 @@ public class PeerHelper : IPeerHelper, ITransientDependency
     public bool IsChannelPeer(long peerId)
     {
         return peerId >= MyTelegramServerDomainConsts.ChannelInitId;
+    }
+
+    public bool IsUserPeer(long peerId)
+    {
+        return peerId is >= MyTelegramServerDomainConsts.UserIdInitId and < MyTelegramServerDomainConsts.BotUserInitId;
     }
 
     public IPeer ToPeer(Peer peer)

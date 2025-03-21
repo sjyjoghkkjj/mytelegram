@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Save or remove saved notification sound.If the notification sound is already in MP3 format, <a href="https://corefork.telegram.org/constructor/account.savedRingtone">account.savedRingtone</a> will be returned.<br>

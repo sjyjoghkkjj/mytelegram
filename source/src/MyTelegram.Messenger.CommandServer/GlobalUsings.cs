@@ -31,3 +31,4 @@ global using MyTelegram.Services.Extensions;
 global using MyTelegram.Services.Services;
 global using Rebus.Config;
 global using System.Reflection;
+global using MyTelegram.EventFlow.Extensions;

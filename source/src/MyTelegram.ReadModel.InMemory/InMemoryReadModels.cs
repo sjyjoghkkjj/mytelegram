@@ -23,12 +23,6 @@ public class ChatInviteReadModel : Impl.ChatInviteReadModel
 {
 }
 
-
-public class ChatReadModel : Impl.ChatReadModel
-{
-}
-
-
 public class ContactReadModel : Impl.ContactReadModel
 {
 }

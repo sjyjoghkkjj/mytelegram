@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.GatewayServer.BackgroundServices;
 
-public class MessageDataProcessor(IEventBus eventBus, IOptions<MyTelegramGatewayServerOption> options)
+public class MessageDataProcessor(IEventBus eventBus)
     : IDataProcessor<UnencryptedMessage>,
         IDataProcessor<EncryptedMessage>
 {

@@ -11,9 +11,7 @@ public abstract class CachedReadModelManager<TReadModelInterface, TReadModel>(
     where TReadModelInterface : IReadModel
 {
     private static readonly Type StaticReadModelType = typeof(TReadModel);
-    // ReSharper disable once StaticMemberInGenericType
     private static readonly HashSet<Type> AggregateEventTypes;
-
 
     static CachedReadModelManager()
     {

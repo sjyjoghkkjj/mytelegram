@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Document (video, audio, voice, sticker, any media type except photo)
 /// See <a href="https://corefork.telegram.org/constructor/messageMediaDocument" />
 ///</summary>
-[TlObject(0xdd570bd5)]
+[TlObject(0x52d8ccd9)]
 public sealed class TMessageMediaDocument : IMessageMedia
 {
-    public uint ConstructorId => 0xdd570bd5;
+    public uint ConstructorId => 0x52d8ccd9;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -56,6 +56,8 @@ public sealed class TMessageMediaDocument : IMessageMedia
     /// Videos only, contains alternative qualities of the video.
     ///</summary>
     public TVector<MyTelegram.Schema.IDocument>? AltDocuments { get; set; }
+    public MyTelegram.Schema.IPhoto? VideoCover { get; set; }
+    public int? VideoTimestamp { get; set; }
 
     ///<summary>
     /// Time to live of self-destructing document
@@ -71,6 +73,8 @@ public sealed class TMessageMediaDocument : IMessageMedia
         if (Voice) { Flags[8] = true; }
         if (Document != null) { Flags[0] = true; }
         if (AltDocuments?.Count > 0) { Flags[5] = true; }
+        if (VideoCover != null) { Flags[9] = true; }
+        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[10] = true; }
         if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[2] = true; }
     }
 
@@ -81,6 +85,8 @@ public sealed class TMessageMediaDocument : IMessageMedia
         writer.Write(Flags);
         if (Flags[0]) { writer.Write(Document); }
         if (Flags[5]) { writer.Write(AltDocuments); }
+        if (Flags[9]) { writer.Write(VideoCover); }
+        if (Flags[10]) { writer.Write(VideoTimestamp.Value); }
         if (Flags[2]) { writer.Write(TtlSeconds.Value); }
     }
 
@@ -94,6 +100,8 @@ public sealed class TMessageMediaDocument : IMessageMedia
         if (Flags[8]) { Voice = true; }
         if (Flags[0]) { Document = reader.Read<MyTelegram.Schema.IDocument>(); }
         if (Flags[5]) { AltDocuments = reader.Read<TVector<MyTelegram.Schema.IDocument>>(); }
+        if (Flags[9]) { VideoCover = reader.Read<MyTelegram.Schema.IPhoto>(); }
+        if (Flags[10]) { VideoTimestamp = reader.ReadInt32(); }
         if (Flags[2]) { TtlSeconds = reader.ReadInt32(); }
     }
 }

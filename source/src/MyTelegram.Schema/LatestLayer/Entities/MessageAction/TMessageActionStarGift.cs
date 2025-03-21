@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// You received a <a href="https://corefork.telegram.org/api/gifts">gift, see here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/constructor/messageActionStarGift" />
 ///</summary>
-[TlObject(0x8557637)]
+[TlObject(0x4717e8a4)]
 public sealed class TMessageActionStarGift : IMessageAction
 {
-    public uint ConstructorId => 0x8557637;
+    public uint ConstructorId => 0x4717e8a4;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -33,6 +33,9 @@ public sealed class TMessageActionStarGift : IMessageAction
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool Converted { get; set; }
+    public bool Upgraded { get; set; }
+    public bool Refunded { get; set; }
+    public bool CanUpgrade { get; set; }
 
     ///<summary>
     /// Info about the gift
@@ -50,14 +53,27 @@ public sealed class TMessageActionStarGift : IMessageAction
     /// The receiver of this gift may convert it to this many Telegram Stars, instead of displaying it on their profile page.<br><code>convert_stars</code> will be equal to <code>stars</code> only if the gift was bought using recently bought Telegram Stars, otherwise it will be less than <code>stars</code>.
     ///</summary>
     public long? ConvertStars { get; set; }
+    public int? UpgradeMsgId { get; set; }
+    public long? UpgradeStars { get; set; }
+    public MyTelegram.Schema.IPeer? FromId { get; set; }
+    public MyTelegram.Schema.IPeer? Peer { get; set; }
+    public long? SavedId { get; set; }
 
     public void ComputeFlag()
     {
         if (NameHidden) { Flags[0] = true; }
         if (Saved) { Flags[2] = true; }
         if (Converted) { Flags[3] = true; }
+        if (Upgraded) { Flags[5] = true; }
+        if (Refunded) { Flags[9] = true; }
+        if (CanUpgrade) { Flags[10] = true; }
         if (Message != null) { Flags[1] = true; }
         if (/*ConvertStars != 0 &&*/ ConvertStars.HasValue) { Flags[4] = true; }
+        if (/*UpgradeMsgId != 0 && */UpgradeMsgId.HasValue) { Flags[5] = true; }
+        if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags[8] = true; }
+        if (FromId != null) { Flags[11] = true; }
+        if (Peer != null) { Flags[12] = true; }
+        if (/*SavedId != 0 &&*/ SavedId.HasValue) { Flags[12] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -68,6 +84,11 @@ public sealed class TMessageActionStarGift : IMessageAction
         writer.Write(Gift);
         if (Flags[1]) { writer.Write(Message); }
         if (Flags[4]) { writer.Write(ConvertStars.Value); }
+        if (Flags[5]) { writer.Write(UpgradeMsgId.Value); }
+        if (Flags[8]) { writer.Write(UpgradeStars.Value); }
+        if (Flags[11]) { writer.Write(FromId); }
+        if (Flags[12]) { writer.Write(Peer); }
+        if (Flags[12]) { writer.Write(SavedId.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -76,8 +97,16 @@ public sealed class TMessageActionStarGift : IMessageAction
         if (Flags[0]) { NameHidden = true; }
         if (Flags[2]) { Saved = true; }
         if (Flags[3]) { Converted = true; }
+        if (Flags[5]) { Upgraded = true; }
+        if (Flags[9]) { Refunded = true; }
+        if (Flags[10]) { CanUpgrade = true; }
         Gift = reader.Read<MyTelegram.Schema.IStarGift>();
         if (Flags[1]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
         if (Flags[4]) { ConvertStars = reader.ReadInt64(); }
+        if (Flags[5]) { UpgradeMsgId = reader.ReadInt32(); }
+        if (Flags[8]) { UpgradeStars = reader.ReadInt64(); }
+        if (Flags[11]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags[12]) { Peer = reader.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags[12]) { SavedId = reader.ReadInt64(); }
     }
 }

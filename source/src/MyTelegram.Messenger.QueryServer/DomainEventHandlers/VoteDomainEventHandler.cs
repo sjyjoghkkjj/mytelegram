@@ -1,34 +1,26 @@
-﻿using MyTelegram.Messenger.Services.Caching;
-using MyTelegram.Messenger.TLObjectConverters.Interfaces;
-using MyTelegram.Services.TLObjectConverters;
-
-namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
+﻿namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
 
 public class VoteDomainEventHandler(
     IObjectMessageSender objectMessageSender,
     ICommandBus commandBus,
     IIdGenerator idGenerator,
     IAckCacheService ackCacheService,
-    IResponseCacheAppService responseCacheAppService,
     IQueryProcessor queryProcessor,
-    ILayeredService<IPollConverter> layeredService)
+    ISendVoteConverterService sendVoteConverterService
+    )
     :
-        DomainEventHandlerBase(objectMessageSender, commandBus, idGenerator, ackCacheService,
-            responseCacheAppService),
+        DomainEventHandlerBase(objectMessageSender, commandBus, idGenerator, ackCacheService),
         ISubscribeSynchronousTo<VoteSaga, VoteSagaId, VoteSagaCompletedSagaEvent>
 {
-    //private readonly ITlPollConverter _pollConverter;
-
     public async Task HandleAsync(IDomainEvent<VoteSaga, VoteSagaId, VoteSagaCompletedSagaEvent> domainEvent,
         CancellationToken cancellationToken)
     {
         var pollReadModel = await queryProcessor
-            .ProcessAsync(new GetPollQuery(domainEvent.AggregateEvent.ToPeer.PeerId, domainEvent.AggregateEvent.PollId),
-                default);
+            .ProcessAsync(new GetPollQuery(domainEvent.AggregateEvent.ToPeer.PeerId, domainEvent.AggregateEvent.PollId), cancellationToken);
         if (pollReadModel != null)
         {
-            var selfUpdates = layeredService.Converter.ToSelfPollUpdates(pollReadModel,
-                domainEvent.AggregateEvent.ChosenOptions.ToList());
+            var selfUpdates = sendVoteConverterService.ToSelfUpdates(pollReadModel,
+                domainEvent.AggregateEvent.ChosenOptions.ToList(), domainEvent.AggregateEvent.RequestInfo.Layer);
             await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, selfUpdates)
          ;
 
@@ -36,8 +28,7 @@ public class VoteDomainEventHandler(
                 selfUpdates,
                 domainEvent.AggregateEvent.RequestInfo.AuthKeyId);
 
-            // 
-            var updatesForMember = layeredService.Converter.ToPollUpdates(pollReadModel, Array.Empty<string>());
+            var updatesForMember = sendVoteConverterService.ToUpdates(pollReadModel, []);
             await PushMessageToPeerAsync(domainEvent.AggregateEvent.ToPeer,
                 updatesForMember,
                 excludeAuthKeyId: domainEvent.AggregateEvent.RequestInfo.AuthKeyId);

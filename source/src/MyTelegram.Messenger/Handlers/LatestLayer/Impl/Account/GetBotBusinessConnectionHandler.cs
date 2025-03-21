@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Bots may invoke this method to re-fetch the <a href="https://corefork.telegram.org/constructor/updateBotBusinessConnect">updateBotBusinessConnect</a> constructor associated with a specific <a href="https://corefork.telegram.org/api/business#connected-bots">business <code>connection_id</code>, see here »</a> for more info on connected business bots.<br>

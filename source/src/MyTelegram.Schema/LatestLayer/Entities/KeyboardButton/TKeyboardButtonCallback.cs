@@ -30,7 +30,8 @@ public sealed class TKeyboardButtonCallback : IKeyboardButton
     ///<summary>
     /// Callback data
     ///</summary>
-    public byte[] Data { get; set; }
+    //public byte[] Data { get; set; }
+    public string Data { get; set; }
 
     public void ComputeFlag()
     {
@@ -52,6 +53,7 @@ public sealed class TKeyboardButtonCallback : IKeyboardButton
         Flags = reader.ReadBitArray();
         if (Flags[0]) { RequiresPassword = true; }
         Text = reader.ReadString();
-        Data = reader.ReadBytes();
+        //Data = reader.ReadBytes();
+        Data = reader.ReadString();
     }
 }

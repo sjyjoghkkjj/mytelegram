@@ -10,8 +10,9 @@ public class ChannelMemberCreatedEvent(
     ChatBannedRights? bannedRights,
     bool isBot,
     long? chatInviteId,
-    bool isBroadcast,
-    ChatJoinType chatJoinType)
+    ChatJoinType chatJoinType,
+    bool isBroadcast
+    )
     : RequestAggregateEvent2<ChannelMemberAggregate, ChannelMemberId>(requestInfo)
 {
     //long reqMsgId,
@@ -22,8 +23,8 @@ public class ChannelMemberCreatedEvent(
     public long InviterId { get; } = inviterId;
     public bool IsBot { get; } = isBot;
     public long? ChatInviteId { get; } = chatInviteId;
-    public bool IsBroadcast { get; } = isBroadcast;
     public ChatJoinType ChatJoinType { get; } = chatJoinType;
+    public bool IsBroadcast { get; } = isBroadcast;
     public bool IsRejoin { get; } = isRejoin;
     public long UserId { get; } = userId;
 }

@@ -15,7 +15,7 @@ public class EditInboxMessageCommandHandler : CommandHandler<MessageAggregate, M
             command.Media,
             command.ReplyMarkup,
             command.InvertMedia
-        );
+            );
         return Task.CompletedTask;
     }
 }

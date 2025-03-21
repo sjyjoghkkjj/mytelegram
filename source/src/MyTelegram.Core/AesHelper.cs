@@ -1,9 +1,10 @@
 ﻿using System.Buffers;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace MyTelegram.Core;
 
-public class AesHelper : IAesHelper
+public class AesHelper : IAesHelper, ISingletonDependency
 {
     public byte[] EncryptIge(ReadOnlySpan<byte> plainSpan,
         ReadOnlySpan<byte> key,

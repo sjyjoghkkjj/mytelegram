@@ -1,7 +1,8 @@
 ﻿namespace MyTelegram.Messenger.Services.Impl;
 
 public class UserAppService(IQueryProcessor queryProcessor,
-    IReadModelCacheHelper<IUserReadModel> userReadModelCacheHelper) : ReadModelWithCacheAppService<IUserReadModel>(userReadModelCacheHelper), IUserAppService, ITransientDependency
+    IReadModelCacheHelper<IUserReadModel> userReadModelCacheHelper,
+    IReadModelCacheHelper<IUserFullReadModel> userFullReadModelCacheHelper) : ReadModelWithCacheAppService<IUserReadModel>(userReadModelCacheHelper), IUserAppService, ITransientDependency
 {
     public async Task CheckAccountPremiumStatusAsync(long userId)
     {
@@ -15,6 +16,13 @@ public class UserAppService(IQueryProcessor queryProcessor,
         {
             RpcErrors.RpcErrors400.PremiumAccountRequired.ThrowRpcError();
         }
+    }
+
+
+    public Task<IUserFullReadModel?> GetUserFullAsync(long userId)
+    {
+        return userFullReadModelCacheHelper.GetOrCreateAsync(userId,
+            () => queryProcessor.ProcessAsync(new GetUserFullQuery(userId)), p => p.Id);
     }
 
     protected override Task<IUserReadModel?> GetReadModelAsync(long id)

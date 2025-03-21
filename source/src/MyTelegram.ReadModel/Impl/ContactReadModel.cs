@@ -3,9 +3,8 @@
 public class ContactReadModel : IContactReadModel,
     IAmReadModelFor<ContactAggregate, ContactId, ContactAddedEvent>,
     IAmReadModelFor<ContactAggregate, ContactId, ContactDeletedEvent>,
-    IAmReadModelFor<ContactAggregate,ContactId,ContactProfilePhotoChangedEvent>,
-    IAmReadModelFor<ContactAggregate,ContactId,ContactCreatedEvent>
-
+    IAmReadModelFor<ContactAggregate, ContactId, ContactProfilePhotoChangedEvent>,
+    IAmReadModelFor<ContactAggregate, ContactId, ContactCreatedEvent>
 {
     public virtual string FirstName { get; private set; } = default!;
     public virtual string Id { get; private set; } = null!;
@@ -26,6 +25,7 @@ public class ContactReadModel : IContactReadModel,
         Phone = domainEvent.AggregateEvent.Phone;
         FirstName = domainEvent.AggregateEvent.FirstName;
         LastName = domainEvent.AggregateEvent.LastName;
+
         return Task.CompletedTask;
     }
 
@@ -34,12 +34,13 @@ public class ContactReadModel : IContactReadModel,
         CancellationToken cancellationToken)
     {
         context.MarkForDeletion();
+
         return Task.CompletedTask;
     }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<ContactAggregate, ContactId, ContactProfilePhotoChangedEvent> domainEvent, CancellationToken cancellationToken)
     {
-        PhotoId= domainEvent.AggregateEvent.PhotoId;
+        PhotoId = domainEvent.AggregateEvent.PhotoId;
 
         return Task.CompletedTask;
     }

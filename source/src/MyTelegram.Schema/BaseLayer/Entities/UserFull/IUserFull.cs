@@ -90,16 +90,6 @@ public interface IUserFull : IObject
     bool SponsoredEnabled { get; set; }
 
     ///<summary>
-    /// If set, this user can view <a href="https://corefork.telegram.org/api/revenue#revenue-statistics">ad revenue statistics »</a> for this bot.
-    ///</summary>
-    bool CanViewRevenue { get; set; }
-
-    ///<summary>
-    /// &nbsp;
-    ///</summary>
-    bool BotCanManageEmojiStatus { get; set; }
-
-    ///<summary>
     /// User ID
     ///</summary>
     long Id { get; set; }
@@ -250,15 +240,4 @@ public interface IUserFull : IObject
     /// ID of the latest message of the associated personal <a href="https://corefork.telegram.org/api/channel">channel »</a>, that should be previewed in the <a href="https://corefork.telegram.org/api/profile#personal-channel">profile page</a>.
     ///</summary>
     int? PersonalChannelMessage { get; set; }
-
-    ///<summary>
-    /// Number of <a href="https://corefork.telegram.org/api/gifts">gifts</a> the user has chosen to display on their profile
-    ///</summary>
-    int? StargiftsCount { get; set; }
-
-    ///<summary>
-    /// &nbsp;
-    /// See <a href="https://corefork.telegram.org/type/StarRefProgram" />
-    ///</summary>
-    MyTelegram.Schema.IStarRefProgram? StarrefProgram { get; set; }
 }

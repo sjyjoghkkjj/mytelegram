@@ -3,30 +3,24 @@
 public class InviteToChannelSagaStartSagaEvent(
     RequestInfo requestInfo,
     long channelId,
-    long inviterId,
-    int date,
-    int totalCount,
-    IReadOnlyList<long> memberUidList,
-    IReadOnlyList<long>? privacyRestrictedUserId,
-    int maxMessageId,
-    int channelHistoryMinId,
-    long randomId,
-    string messageActionData,
     bool broadcast,
-    bool hasLink
+    bool hasLink,
+    long inviterId,
+    IReadOnlyCollection<long> memberUserIds,
+    IReadOnlyCollection<long> botUserIds,
+    int channelHistoryMinId,
+    int maxMessageId,
+    ChatJoinType chatJoinType
     )
     : RequestAggregateEvent2<InviteToChannelSaga, InviteToChannelSagaId>(requestInfo)
 {
+    public IReadOnlyCollection<long> BotUserIds { get; } = botUserIds;
+    public bool Broadcast { get; } = broadcast;
     public int ChannelHistoryMinId { get; } = channelHistoryMinId;
     public long ChannelId { get; } = channelId;
-    public int Date { get; } = date;
     public long InviterId { get; } = inviterId;
     public int MaxMessageId { get; } = maxMessageId;
-    public IReadOnlyList<long> MemberUidList { get; } = memberUidList;
-    public IReadOnlyList<long>? PrivacyRestrictedUserId { get; } = privacyRestrictedUserId;
-    public string MessageActionData { get; } = messageActionData;
-    public bool Broadcast { get; } = broadcast;
+    public ChatJoinType ChatJoinType { get; } = chatJoinType;
     public bool HasLink { get; } = hasLink;
-    public long RandomId { get; } = randomId;
-    public int TotalCount { get; } = totalCount;
+    public IReadOnlyCollection<long> MemberUserIds { get; } = memberUserIds;
 }

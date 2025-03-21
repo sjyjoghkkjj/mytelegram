@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// A message
 /// See <a href="https://corefork.telegram.org/constructor/message" />
 ///</summary>
-[TlObject(0x94345242)]
-public sealed class TMessage : IMessage
+[TlObject(0x96fdbbe9)]
+public sealed class TMessage : ILayeredMessage
 {
-    public uint ConstructorId => 0x94345242;
+    public uint ConstructorId => 0x96fdbbe9;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -238,6 +238,7 @@ public sealed class TMessage : IMessage
     /// See <a href="https://corefork.telegram.org/type/FactCheck" />
     ///</summary>
     public MyTelegram.Schema.IFactCheck? Factcheck { get; set; }
+    public int? ReportDeliveryUntilDate { get; set; }
 
     public void ComputeFlag()
     {
@@ -276,6 +277,7 @@ public sealed class TMessage : IMessage
         if (/*QuickReplyShortcutId != 0 && */QuickReplyShortcutId.HasValue) { Flags[30] = true; }
         if (/*Effect != 0 &&*/ Effect.HasValue) { Flags2[2] = true; }
         if (Factcheck != null) { Flags2[3] = true; }
+        if (/*ReportDeliveryUntilDate != 0 && */ReportDeliveryUntilDate.HasValue) { Flags2[5] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -310,6 +312,7 @@ public sealed class TMessage : IMessage
         if (Flags[30]) { writer.Write(QuickReplyShortcutId.Value); }
         if (Flags2[2]) { writer.Write(Effect.Value); }
         if (Flags2[3]) { writer.Write(Factcheck); }
+        if (Flags2[5]) { writer.Write(ReportDeliveryUntilDate.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -355,5 +358,6 @@ public sealed class TMessage : IMessage
         if (Flags[30]) { QuickReplyShortcutId = reader.ReadInt32(); }
         if (Flags2[2]) { Effect = reader.ReadInt64(); }
         if (Flags2[3]) { Factcheck = reader.Read<MyTelegram.Schema.IFactCheck>(); }
+        if (Flags2[5]) { ReportDeliveryUntilDate = reader.ReadInt32(); }
     }
 }

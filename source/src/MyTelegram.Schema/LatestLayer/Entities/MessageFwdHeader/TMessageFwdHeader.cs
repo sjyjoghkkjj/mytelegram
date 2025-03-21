@@ -94,8 +94,8 @@ public sealed class TMessageFwdHeader : IMessageFwdHeader
         if (FromName != null) { Flags[5] = true; }
         if (/*ChannelPost != 0 && */ChannelPost.HasValue) { Flags[2] = true; }
         if (PostAuthor != null) { Flags[3] = true; }
-        if (SavedFromPeer != null) { Flags[4] = true; }
-        if (/*SavedFromMsgId != 0 && */SavedFromMsgId.HasValue) { Flags[4] = true; }
+        if (SavedFromPeer != null && SavedFromMsgId.HasValue) { Flags[4] = true; }
+        //if (/*SavedFromMsgId != 0 && */SavedFromMsgId.HasValue) { Flags[4] = true; }
         if (SavedFromId != null) { Flags[8] = true; }
         if (SavedFromName != null) { Flags[9] = true; }
         if (/*SavedDate != 0 && */SavedDate.HasValue) { Flags[10] = true; }

@@ -11,7 +11,7 @@ public class CreateChannelMemberCommand(
     long? chatInviteId,
     bool isBroadcast,
     ChatJoinType chatJoinType = ChatJoinType.InvitedByAdmin
-)
+    )
     : /*Request*/RequestCommand2<ChannelMemberAggregate, ChannelMemberId, IExecutionResult>(aggregateId, requestInfo)
 {
     //long reqMsgId,

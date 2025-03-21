@@ -2,7 +2,7 @@
 
 using IExportedChatInvite = MyTelegram.Schema.Messages.IExportedChatInvite;
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 /// <summary>
 ///     Edit an exported chat invite

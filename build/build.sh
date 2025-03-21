@@ -14,6 +14,7 @@ messengerProCommandOutputFolder="$outputRootFolder/command-server"
 messengerProQueryOutputFolder="$outputRootFolder/query-server"
 messengerGrpcOutputFolder="$outputRootFolder/messenger-grpc"
 smsOutputFolder="$outputRootFolder/sms"
+dataSeederOutputFolder="$outputRootFolder/data-seeder"
 
 echo "Current dir: $currentDir"
 echo "OutputFolder is: $outputRootFolder"
@@ -39,5 +40,6 @@ Build-Server "./MyTelegram.Messenger.CommandServer" "$messengerProCommandOutputF
 Build-Server "./MyTelegram.Messenger.QueryServer" "$messengerProQueryOutputFolder"
 #Build-Server "./MyTelegram.MessengerServer.GrpcService" "$messengerGrpcOutputFolder"
 Build-Server "./MyTelegram.SmsSender" "$smsOutputFolder"
+Build-Server "./MyTelegram.DataSeeder" "$dataSeederOutputFolder"
 
 cd "$currentDir"

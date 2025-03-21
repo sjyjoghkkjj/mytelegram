@@ -2,8 +2,9 @@
 
 public enum ChatInviteRequestState
 {
-    NotNeedApprove,
-    NeedApprove,
+    NoApprovalRequired,
+    //NeedApprove,
+    WaitingForApproval,
     Approved,
     Rejected
 }

@@ -5,16 +5,18 @@ public class InviteToChannelCompletedSagaEvent(
     long channelId,
     long inviterId,
     bool broadcast,
-    IReadOnlyList<long> memberUidList,
-    IReadOnlyList<long>? privacyRestrictedUserId,
-    bool hasLink
+    IReadOnlyCollection<long> memberUserIds,
+    IReadOnlyCollection<long> botUserIds,
+    bool hasLink,
+    ChatJoinType chatJoinType
     )
     : RequestAggregateEvent2<InviteToChannelSaga, InviteToChannelSagaId>(requestInfo)
 {
     public long ChannelId { get; } = channelId;
     public long InviterId { get; } = inviterId;
     public bool Broadcast { get; } = broadcast;
-    public IReadOnlyList<long> MemberUidList { get; } = memberUidList;
-    public IReadOnlyList<long>? PrivacyRestrictedUserId { get; } = privacyRestrictedUserId;
+    public IReadOnlyCollection<long> MemberUserIds { get; } = memberUserIds;
+    public IReadOnlyCollection<long> BotUserIds { get; } = botUserIds;
     public bool HasLink { get; } = hasLink;
+    public ChatJoinType ChatJoinType { get; } = chatJoinType;
 }

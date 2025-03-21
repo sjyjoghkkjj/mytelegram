@@ -69,6 +69,11 @@ public class ChannelReadModel : IChannelReadModel,
     public int? Level { get; private set; }
     public bool HasLink { get; private set; }
     public bool IsDeleted { get; private set; }
+    public EmojiStatus? EmojiStatus { get; private set; }
+    public bool SignatureProfiles { get; private set; }
+    public int? SubscriptionUntilDate { get; private set; }
+    public bool HiddenPreHistory { get; private set; }
+    public List<string>? Usernames { get; private set; }
 
     //public ReactionType ReactionType { get; private set; }
     //public bool AllowCustomReaction { get; private set; }

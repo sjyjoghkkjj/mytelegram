@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Terminate webview interaction started with <a href="https://corefork.telegram.org/method/messages.requestWebView">messages.requestWebView</a>, sending the specified message to the chat on behalf of the user.

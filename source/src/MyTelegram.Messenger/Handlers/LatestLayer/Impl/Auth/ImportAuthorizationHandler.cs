@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Auth;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Logs in a user using a key transmitted from his native data-center.
@@ -12,11 +10,11 @@ namespace MyTelegram.Handlers.Auth;
 ///</summary>
 internal sealed class ImportAuthorizationHandler(
     IHashHelper hashHelper,
-    IUserAppService userAppService,
     ICacheManager<string> cacheManager,
     IEventBus eventBus,
+    IUserAppService userAppService,
     ILayeredService<IAuthorizationConverter> layeredService,
-    ILayeredService<IUserConverter> layeredUserService,
+    IUserConverterService userConverterService,
     IPhotoAppService photoAppService)
     : RpcResultObjectHandler<MyTelegram.Schema.Auth.RequestImportAuthorization, MyTelegram.Schema.Auth.IAuthorization>,
         Auth.IImportAuthorizationHandler
@@ -47,10 +45,11 @@ internal sealed class ImportAuthorizationHandler(
             await cacheManager.RemoveAsync(key);
 
             var photos = await photoAppService.GetPhotosAsync(userReadModel);
-            ILayeredUser? user = userReadModel == null ? null : layeredUserService.GetConverter(input.Layer).ToUser(input.UserId, userReadModel, photos);
+            ILayeredUser? user = userReadModel == null ? null : userConverterService.ToUser(input.UserId, userReadModel, photos, layer: input.Layer);
 
             return layeredService.GetConverter(input.Layer).CreateAuthorization(user);
         }
+
         RpcErrors.RpcErrors400.UserIdInvalid.ThrowRpcError();
         return null!;
     }

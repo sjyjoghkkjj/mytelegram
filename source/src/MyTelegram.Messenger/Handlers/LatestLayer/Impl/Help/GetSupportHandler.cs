@@ -1,16 +1,12 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Help;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Returns the support user for the "ask a question" feature.
 /// See <a href="https://corefork.telegram.org/method/help.getSupport" />
 ///</summary>
-internal sealed class GetSupportHandler(IQueryProcessor queryProcessor,
-    ILayeredService<IUserConverter> userLayeredService,
+internal sealed class GetSupportHandler(
     IUserAppService userAppService,
-    IPhotoAppService photoAppService,
-    IPrivacyAppService privacyAppService,
+    IUserConverterService userConverterService,
     IOptionsMonitor<MyTelegramMessengerServerOptions> options) : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetSupport, MyTelegram.Schema.Help.ISupport>,
     Help.IGetSupportHandler
 {
@@ -25,21 +21,19 @@ internal sealed class GetSupportHandler(IQueryProcessor queryProcessor,
                 supportUserId = MyTelegramServerDomainConsts.DefaultSupportUserId;
             }
         }
-
         var userReadModel = await userAppService.GetAsync(supportUserId);
+
         if (userReadModel == null)
         {
             supportUserId = MyTelegramServerDomainConsts.DefaultSupportUserId;
-            userReadModel = await queryProcessor.ProcessAsync(new GetUserByIdQuery(supportUserId));
+            userReadModel = await userAppService.GetAsync(supportUserId);
         }
 
-        var photos = await photoAppService.GetPhotosAsync(userReadModel);
-        var user = userLayeredService.GetConverter(input.Layer).ToUser(input.UserId, userReadModel!, photos);
-        var privacies = await privacyAppService.GetPrivacyListAsync(userReadModel!.UserId);
+        var user = await userConverterService.GetUserAsync(input.UserId, supportUserId, layer: input.Layer);
 
         return new TSupport
         {
-            PhoneNumber = userReadModel.PhoneNumber,
+            PhoneNumber = user.Phone,
             User = user
         };
     }

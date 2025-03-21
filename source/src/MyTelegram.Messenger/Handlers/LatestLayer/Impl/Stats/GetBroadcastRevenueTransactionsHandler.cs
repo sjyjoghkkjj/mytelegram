@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stats;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stats;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/stats.getBroadcastRevenueTransactions" />

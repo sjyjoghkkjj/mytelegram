@@ -2,8 +2,7 @@
 
 namespace MyTelegram.Messenger.Services.Impl;
 
-
-public class MongoDbHighValueGenerator(IMongoDbIdGenerator idGenerator) : IHiLoHighValueGenerator
+public class MongoDbHighValueGenerator(IMongoDbIdGenerator idGenerator) : IHiLoHighValueGenerator, ITransientDependency
 {
     public Task<long> GetNewHighValueAsync(IdType idType, long key, CancellationToken cancellationToken = default)
     {

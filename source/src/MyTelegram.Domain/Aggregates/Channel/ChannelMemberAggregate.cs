@@ -17,8 +17,8 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
         int date,
         bool isBot,
         long? chatInviteId,
-        bool isBroadcast,
-        ChatJoinType chatJoinType
+        ChatJoinType chatJoinType,
+        bool isBroadcast
         )
     {
         // Kicked user can not join channel by invite link
@@ -44,8 +44,8 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
             _state.BannedRights,
             isBot,
             chatInviteId,
-            isBroadcast,
-            chatJoinType
+            chatJoinType,
+            isBroadcast
             ));
     }
 
@@ -53,7 +53,8 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
         long channelId,
         long userId,
         int date,
-        bool isBroadcast)
+        bool isBroadcast
+        )
     {
         Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new ChannelCreatorCreatedEvent(requestInfo,
@@ -61,8 +62,7 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
             userId,
             userId,
             date,
-            isBroadcast
-            ));
+            isBroadcast));
     }
 
     public void EditBanned(RequestInfo requestInfo,
@@ -122,7 +122,9 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
 
     public void Join(RequestInfo requestInfo,
         long channelId,
-        long memberUserId)
+        long memberUserId,
+        bool isBroadcast
+        )
     {
         if (_state.KickedBy != 0)
         {
@@ -141,7 +143,8 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
             memberUserId,
             DateTime.UtcNow.ToTimestamp(),
             !IsNew,
-            isBot
+            isBot,
+            isBroadcast
             ));
     }
 

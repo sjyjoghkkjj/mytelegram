@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Fragment;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Fragment;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/fragment.getCollectibleInfo" />

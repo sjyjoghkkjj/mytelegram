@@ -10,5 +10,9 @@ public enum PrivacyValueType
     DisallowAll,
     DisallowUsers,
     AllowChatParticipants,
-    DisallowChatParticipants
+    DisallowChatParticipants,
+    AllowBots,
+    DisallowBots,
+    AllowCloseFriends,
+    AllowPremium
 }

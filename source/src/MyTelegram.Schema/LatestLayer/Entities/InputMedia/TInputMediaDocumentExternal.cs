@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Document that will be downloaded by the telegram servers
 /// See <a href="https://corefork.telegram.org/constructor/inputMediaDocumentExternal" />
 ///</summary>
-[TlObject(0xfb52dc99)]
+[TlObject(0x779600f9)]
 public sealed class TInputMediaDocumentExternal : IInputMedia
 {
-    public uint ConstructorId => 0xfb52dc99;
+    public uint ConstructorId => 0x779600f9;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -31,11 +31,15 @@ public sealed class TInputMediaDocumentExternal : IInputMedia
     /// Self-destruct time to live of document
     ///</summary>
     public int? TtlSeconds { get; set; }
+    public MyTelegram.Schema.IInputPhoto? VideoCover { get; set; }
+    public int? VideoTimestamp { get; set; }
 
     public void ComputeFlag()
     {
         if (Spoiler) { Flags[1] = true; }
         if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[0] = true; }
+        if (VideoCover != null) { Flags[2] = true; }
+        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[3] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -45,6 +49,8 @@ public sealed class TInputMediaDocumentExternal : IInputMedia
         writer.Write(Flags);
         writer.Write(Url);
         if (Flags[0]) { writer.Write(TtlSeconds.Value); }
+        if (Flags[2]) { writer.Write(VideoCover); }
+        if (Flags[3]) { writer.Write(VideoTimestamp.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -53,5 +59,7 @@ public sealed class TInputMediaDocumentExternal : IInputMedia
         if (Flags[1]) { Spoiler = true; }
         Url = reader.ReadString();
         if (Flags[0]) { TtlSeconds = reader.ReadInt32(); }
+        if (Flags[2]) { VideoCover = reader.Read<MyTelegram.Schema.IInputPhoto>(); }
+        if (Flags[3]) { VideoTimestamp = reader.ReadInt32(); }
     }
 }

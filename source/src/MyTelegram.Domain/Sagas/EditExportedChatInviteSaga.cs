@@ -26,7 +26,8 @@ public class EditExportedChatInviteSaga(
                 domainEvent.AggregateEvent.ExpireDate,
                 domainEvent.AggregateEvent.UsageLimit,
                 domainEvent.AggregateEvent.Permanent,
-                DateTime.UtcNow.ToTimestamp()
+                DateTime.UtcNow.ToTimestamp(),
+                domainEvent.AggregateEvent.IsBroadcast
             );
             Publish(command);
         }

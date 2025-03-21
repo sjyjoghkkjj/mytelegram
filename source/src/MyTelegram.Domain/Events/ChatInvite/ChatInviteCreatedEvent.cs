@@ -12,7 +12,9 @@ public class ChatInviteCreatedEvent(
     int? expireDate,
     int? usageLimit,
     bool permanent,
-    int date)
+    int date,
+    bool isBroadcast
+    )
     : RequestAggregateEvent2<ChatInviteAggregate, ChatInviteId>(requestInfo)
 {
     public long ChannelId { get; } = channelId;
@@ -26,4 +28,5 @@ public class ChatInviteCreatedEvent(
     public int? UsageLimit { get; } = usageLimit;
     public bool Permanent { get; } = permanent;
     public int Date { get; } = date;
+    public bool IsBroadcast { get; } = isBroadcast;
 }

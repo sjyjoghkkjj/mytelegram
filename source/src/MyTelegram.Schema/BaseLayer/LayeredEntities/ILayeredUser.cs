@@ -3,6 +3,7 @@ namespace MyTelegram.Schema;
 
 public interface ILayeredUser : IUser
 {
+    //long Id { get; set; }
     MyTelegram.Schema.IUserStatus? Status { get; set; }
     bool Self { get; set; }
     bool Contact { get; set; }
@@ -18,4 +19,5 @@ public interface ILayeredUser : IUser
     MyTelegram.Schema.IUserProfilePhoto? Photo { get; set; }
 
     string? BotInlinePlaceholder { get; set; }
+    MyTelegram.Schema.IEmojiStatus? EmojiStatus { get; set; }
 }

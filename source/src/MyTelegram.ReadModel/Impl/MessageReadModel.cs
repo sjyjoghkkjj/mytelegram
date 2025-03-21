@@ -73,6 +73,7 @@ public class MessageReadModel : IMessageReadModel,
     public int? PostMessageId { get; private set; }
     public bool IsQuickReplyMessage { get; private set; }
     public int? ShortcutId { get; private set; }
+    public QuickReplyItem? QuickReplyItem { get; private set; }
     public Guid BatchId { get; private set; }
 
     public long? Effect { get; private set; }
@@ -106,7 +107,7 @@ public class MessageReadModel : IMessageReadModel,
         Entities2 = messageItem.Entities;
         Date = messageItem.Date;
         SenderMessageId = messageItem.MessageId;
-        MessageActionData = messageItem.MessageActionData;
+        //MessageActionData = messageItem.MessageActionData;
         MessageActionType = messageItem.MessageActionType;
         //ReplyToMsgId = messageItem.ReplyToMsgId;
         TopMsgId = messageItem.TopMsgId;
@@ -178,7 +179,7 @@ public class MessageReadModel : IMessageReadModel,
         Entities2 = messageItem.Entities;
         Date = messageItem.Date;
         SenderMessageId = domainEvent.AggregateEvent.SenderMessageId;
-        MessageActionData = messageItem.MessageActionData;
+        //MessageActionData = messageItem.MessageActionData;
         MessageActionType = messageItem.MessageActionType;
         //ReplyToMsgId = messageItem.ReplyToMsgId;
         FwdHeader = messageItem.FwdHeader;
@@ -209,7 +210,7 @@ public class MessageReadModel : IMessageReadModel,
             ExpirationTime = messageItem.Date + messageItem.TtlPeriod.Value;
         }
 
-        InvertMedia = InvertMedia;
+        InvertMedia = messageItem.InvertMedia;
 
         return Task.CompletedTask;
     }

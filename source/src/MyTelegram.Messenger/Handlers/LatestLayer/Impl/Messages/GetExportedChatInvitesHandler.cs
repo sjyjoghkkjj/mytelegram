@@ -1,8 +1,9 @@
 ﻿// ReSharper disable All
 
+using MyTelegram.Messenger.Converters.ConverterServices;
 using IExportedChatInvite = MyTelegram.Schema.IExportedChatInvite;
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get info about the chat invites of a specific chat
@@ -21,11 +22,13 @@ internal sealed class GetExportedChatInvitesHandler(
     IOptions<MyTelegramMessengerServerOptions> options,
     IAccessHashHelper accessHashHelper,
     IQueryProcessor queryProcessor,
-    IChannelAppService channelAppService,
     IObjectMapper objectMapper,
+    IChannelAppService channelAppService,
     IPhotoAppService photoAppService,
     IPrivacyAppService privacyAppService,
-    ILayeredService<IUserConverter> layeredUserService,
+    IUserAppService userAppService,
+    //ILayeredService<IUserConverter> layeredUserService,
+    IUserConverterService userConverterService,
     IChatInviteLinkHelper chatInviteLinkHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetExportedChatInvites,
             MyTelegram.Schema.Messages.IExportedChatInvites>,
@@ -57,15 +60,10 @@ internal sealed class GetExportedChatInvitesHandler(
                     peer.PeerId,
                     admin.PeerId,
                     obj.OffsetDate,
-                    obj.OffsetLink ?? string.Empty,
+                    obj.OffsetLink,
                     obj.Limit));
         var userIds = invites.Select(p => p.AdminId).ToList();
-        var userReadModels = await queryProcessor.ProcessAsync(new GetUsersByUserIdListQuery(userIds));
-        var contactReadModels = await queryProcessor.ProcessAsync(new GetContactListQuery(input.UserId, userIds));
-        var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels, contactReadModels);
-        var privacyReadModels = await privacyAppService.GetPrivacyListAsync(userIds);
-        var users = layeredUserService.GetConverter(input.Layer).ToUserList(input.UserId, userReadModels,
-            photoReadModels, contactReadModels, privacyReadModels);
+        var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
 
         var tInvites = invites.Select(p => objectMapper.Map<IChatInviteReadModel, TChatInviteExported>(p)).ToList();
         tInvites.ForEach(p => p.Link = chatInviteLinkHelper.GetFullLink(options.Value.JoinChatDomain, p.Link));
