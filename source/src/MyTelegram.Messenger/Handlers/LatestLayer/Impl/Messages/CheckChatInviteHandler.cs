@@ -54,7 +54,6 @@ internal sealed class CheckChatInviteHandler(
 
         // Public channel/Super group
         if (!string.IsNullOrEmpty(channelReadModel.UserName) ||
-            !channelReadModel.Broadcast ||
             channelMemberReadModel is { Left: false, Kicked: false })
         {
             if (channelMemberReadModel != null)
