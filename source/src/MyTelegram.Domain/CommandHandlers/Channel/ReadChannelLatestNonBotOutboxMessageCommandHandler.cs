@@ -1,10 +1,10 @@
 ﻿namespace MyTelegram.Domain.CommandHandlers.Channel;
 
 public class ReadChannelLatestNonBotOutboxMessageCommandHandler : CommandHandler<ChannelAggregate, ChannelId,
-    ReadChannelLatestNoneBotOutboxMessageCommand>
+    ReadChannelLatestNonBotOutboxMessageCommand>
 {
     public override Task ExecuteAsync(ChannelAggregate aggregate,
-        ReadChannelLatestNoneBotOutboxMessageCommand command,
+        ReadChannelLatestNonBotOutboxMessageCommand command,
         CancellationToken cancellationToken)
     {
         aggregate.ReadChannelLatestNonBotOutboxMessage(command.RequestInfo, command.SourceCommandId);

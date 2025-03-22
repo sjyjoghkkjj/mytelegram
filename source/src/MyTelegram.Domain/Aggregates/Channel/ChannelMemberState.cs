@@ -17,6 +17,7 @@ public class ChannelMemberState : AggregateState<ChannelMemberAggregate, Channel
     public long KickedBy { get; private set; }
     public bool Left { get; private set; }
     public bool IsBot { get; private set; }
+    public bool Broadcast { get; private set; }
     public void Apply(ChannelCreatorCreatedEvent aggregateEvent)
     {
     }
@@ -37,6 +38,7 @@ public class ChannelMemberState : AggregateState<ChannelMemberAggregate, Channel
         Left = false;
         Banned = false;
         IsBot= aggregateEvent.IsBot;
+        Broadcast = aggregateEvent.IsBroadcast;
 
         BannedRights = null;
     }
@@ -58,5 +60,6 @@ public class ChannelMemberState : AggregateState<ChannelMemberAggregate, Channel
         Left = snapshot.Left;
         Banned = snapshot.Banned;
         IsBot= snapshot.IsBot;
+        Broadcast= snapshot.Broadcast;
     }
 }

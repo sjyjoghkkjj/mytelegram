@@ -6,7 +6,9 @@ public class ChannelMemberSnapshot(
     bool kicked,
     long kickedBy,
     bool left,
-    bool isBot)
+    bool isBot,
+    bool broadcast
+    )
     : ISnapshot
 {
     public bool Banned { get; } = banned;
@@ -17,4 +19,5 @@ public class ChannelMemberSnapshot(
     public long KickedBy { get; } = kickedBy;
     public bool Left { get; } = left;
     public bool IsBot { get; } = isBot;
+    public bool Broadcast { get; } = broadcast;
 }

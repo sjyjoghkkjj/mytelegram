@@ -36,7 +36,8 @@ internal sealed class ReadDiscussionHandler(
             new GetDialogByIdQuery(DialogId.Create(input.UserId, peer)));
         if (dialogReadModel == null)
         {
-            RpcErrors.RpcErrors400.ChannelIdInvalid.ThrowRpcError();
+            return new TBoolTrue();
+            //RpcErrors.RpcErrors400.ChannelIdInvalid.ThrowRpcError();
         }
 
         if (dialogReadModel!.ReadInboxMaxId >= obj.ReadMaxId)

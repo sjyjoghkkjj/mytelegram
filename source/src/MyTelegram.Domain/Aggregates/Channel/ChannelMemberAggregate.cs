@@ -125,13 +125,13 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
         long memberUserId)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        Emit(new ChannelMemberLeftEvent(requestInfo, channelId, memberUserId, _state.IsBot));
+        Emit(new ChannelMemberLeftEvent(requestInfo, channelId, memberUserId, _state.IsBot, _state.Broadcast));
     }
 
     protected override Task<ChannelMemberSnapshot> CreateSnapshotAsync(CancellationToken cancellationToken)
     {
         return Task.FromResult(new ChannelMemberSnapshot(_state.Banned, _state.BannedRights, _state.Kicked,
-            _state.KickedBy, _state.Left, _state.IsBot));
+            _state.KickedBy, _state.Left, _state.IsBot, _state.Broadcast));
     }
 
     protected override Task LoadSnapshotAsync(ChannelMemberSnapshot snapshot, ISnapshotMetadata metadata, CancellationToken cancellationToken)

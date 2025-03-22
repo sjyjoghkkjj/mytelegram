@@ -85,9 +85,9 @@ internal sealed class GetParticipantsHandler(
                 case TChannelParticipantsBots:
                     return new TChannelParticipants
                     {
-                        Participants = new(),
-                        Users = new TVector<IUser>(),
-                        Chats = new TVector<IChat>()
+                        Participants = [],
+                        Users = [],
+                        Chats = []
                     };
                 case TChannelParticipantsKicked:
                     CheckAdminPermission(channelReadModel!, input.UserId);
@@ -109,6 +109,18 @@ internal sealed class GetParticipantsHandler(
 
             var channelMemberReadModels = query == null ? [] : await queryProcessor
                 .ProcessAsync(query);
+
+            if (channelMemberReadModels.Count == 0)
+            {
+                return new TChannelParticipants
+                {
+                    Chats = [],
+                    Count = 0,
+                    Participants = [],
+                    Users = []
+                };
+            }
+
 
             var userIdList = channelMemberReadModels.Select(p => p.UserId).ToList();
             var selfChannelMember = channelMemberReadModels.FirstOrDefault(p => p.UserId == input.UserId);
@@ -139,7 +151,7 @@ internal sealed class GetParticipantsHandler(
                 }
             }
 
-            if ((chatAdminReadModels?.Count == 0) && channelMemberReadModels.Count == 0)
+            if (chatAdminReadModels?.Count == 0 && channelMemberReadModels.Count == 0)
             {
                 return new TChannelParticipants
                 {
