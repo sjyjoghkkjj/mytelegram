@@ -99,6 +99,10 @@ internal sealed class GetFullChannelHandler(
             {
                 layeredChannelFull.ViewForumAsMessages = dialogReadModel?.ViewForumAsMessages ?? false;
                 layeredChannelFull.ParticipantsHidden = channelReadModel.ParticipantsHidden;
+                if (channelMemberReadModel == null || channelMemberReadModel.Left || channelMemberReadModel.Kicked)
+                {
+                    layeredChannelFull.CanViewParticipants = false;
+                }
 
                 // Set pending requests for channel admin
                 await SetRecentRequestersAsync(input, layeredChannelFull, chatFull);
