@@ -453,13 +453,19 @@ public partial class MessageDomainEventHandler(
             );
         }
 
+        // Only send member left message to group admins
+        if (aggregateEvent.MessageItem.MessageActionType == MessageActionType.ChatDeleteUser)
+        {
+            return;
+        }
+
         await PushUpdatesToPeerAsync(item.ToPeer,
-                channelMemberUpdates,
-                aggregateEvent.RequestInfo.AuthKeyId,
-                updatesType: updatesType,
-                skipSaveUpdates: true
-            )
-            ;
+            channelMemberUpdates,
+            aggregateEvent.RequestInfo.AuthKeyId,
+            updatesType: updatesType,
+            skipSaveUpdates: true
+        )
+        ;
     }
 
     private Task HandleSendOutboxMessageCompletedAsync(SendOutboxMessageCompletedSagaEvent aggregateEvent)
