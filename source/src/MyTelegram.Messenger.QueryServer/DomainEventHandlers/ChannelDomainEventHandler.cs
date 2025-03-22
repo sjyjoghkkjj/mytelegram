@@ -2,7 +2,6 @@
 using MyTelegram.Domain.Events.ChatInvite;
 using MyTelegram.Messenger.Services.Caching;
 using MyTelegram.Messenger.Services.Interfaces;
-using MyTelegram.Schema;
 using TChannelParticipant = MyTelegram.Schema.TChannelParticipant;
 
 namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
@@ -83,7 +82,7 @@ public class ChannelDomainEventHandler(
                 }
             ]),
             Chats = new TVector<IChat>([channel]),
-            Users = new TVector<IUser>(),
+            Users = [],
             Date = DateTime.UtcNow.ToTimestamp()
         };
         await PushMessageToPeerAsync(domainEvent.AggregateEvent.UserId.ToUserPeer(), updates);
@@ -121,8 +120,8 @@ public class ChannelDomainEventHandler(
         };
         var updates = new TUpdates
         {
-            Updates = new TVector<IUpdate>(),
-            Users = new TVector<IUser>(),
+            Updates = [],
+            Users = [],
             Chats = new TVector<IChat>(channelForbidden),
             Date = DateTime.UtcNow.ToTimestamp()
         };
@@ -135,7 +134,7 @@ public class ChannelDomainEventHandler(
         var updatesChannel = new TUpdates
         {
             Updates = new TVector<IUpdate>(updateChannel),
-            Users = new TVector<IUser>(),
+            Users = [],
             Chats = new TVector<IChat>(channelForbidden)
         };
         await PushUpdatesToPeerAsync(domainEvent.AggregateEvent.ChannelId.ToChannelPeer(), updatesChannel,
@@ -150,8 +149,8 @@ public class ChannelDomainEventHandler(
         var updates = new TUpdates
         {
             Updates = new TVector<IUpdate>(updateChannel),
-            Users = new TVector<IUser>(),
-            Chats = new TVector<IChat>(),
+            Users = [],
+            Chats = [],
             Date = DateTime.UtcNow.ToTimestamp()
         };
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, updates);
@@ -173,8 +172,8 @@ public class ChannelDomainEventHandler(
         var updates = new TUpdates
         {
             Chats = new TVector<IChat>(channel),
-            Users = new TVector<IUser>(),
-            Updates = new TVector<IUpdate>(),
+            Users = [],
+            Updates = [],
             Date = DateTime.UtcNow.ToTimestamp()
         };
 
@@ -212,9 +211,9 @@ public class ChannelDomainEventHandler(
         var updates = new TUpdates
         {
             Updates = new TVector<IUpdate>(update),
-            Chats = new TVector<IChat>(),
+            Chats = [],
             Date = DateTime.UtcNow.ToTimestamp(),
-            Users = new TVector<IUser>()
+            Users = []
         };
 
         foreach (var userId in domainEvent.AggregateEvent.ChannelAdmins)
@@ -232,10 +231,10 @@ public class ChannelDomainEventHandler(
         };
         var updates = new TUpdates
         {
-            Chats = new TVector<IChat>(),
+            Chats = [],
             Date = DateTime.UtcNow.ToTimestamp(),
             Updates = new TVector<IUpdate>(update),
-            Users = new TVector<IUser>()
+            Users = []
         };
 
         return SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, updates);
@@ -434,10 +433,8 @@ public class ChannelDomainEventHandler(
             aggregateEvent.RequestInfo.Layer);
         updates.Chats.Add(channel);
 
-        var userIds = aggregateEvent.MemberUserIds.ToList();
         var userReadModels = await userAppService.GetListAsync(aggregateEvent.MemberUserIds.ToList());
         var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels);
-
 
         var users = userConverterService.ToUserList(0, userReadModels, photoReadModels, [], [],
             aggregateEvent.RequestInfo.Layer);
@@ -536,23 +533,18 @@ public class ChannelDomainEventHandler(
 
         var updates = updatesConverterService.ToChannelUpdates(selfUserId, channelReadModel, channelPhotoReadModel, requestInfo.Layer);
         var updatesForMember = updatesConverterService.ToChannelUpdates(memberUserId, channelReadModel, channelPhotoReadModel, 0);
-        //var layeredUpdates = layeredUpdatesService.GetLayeredData(c =>
-        //    c.ToChannelUpdates(memberUserId, channelReadModel, channelPhotoReadModel));
-
+      
         await SendRpcMessageToClientAsync(requestInfo, updates);
         if (memberUserId != 0)
         {
             await PushUpdatesToPeerAsync(new Peer(PeerType.Channel, channelId),
-                //channelId,
                 updatesForMember,
                 onlySendToUserId: memberUserId,
-                //layeredData: layeredUpdates,
                 pts: pts);
         }
         else
         {
             await PushUpdatesToPeerAsync(new Peer(PeerType.Channel, channelId),
-                //channelId, 
                 updatesForMember,
                 excludeUserId: requestInfo.UserId
             );
@@ -573,8 +565,8 @@ public class ChannelDomainEventHandler(
             Chats = new TVector<IChat>(channel),
             Date = date,
             Seq = 0,
-            Users = new TVector<IUser>(),
-            Updates = new TVector<IUpdate>()
+            Users = [],
+            Updates = []
         };
 
         await SendRpcMessageToClientAsync(requestInfo, updates);

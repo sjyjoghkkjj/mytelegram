@@ -67,7 +67,7 @@ public class DialogAggregate : MyInMemorySnapshotAggregateRoot<DialogAggregate, 
         int channelHistoryMinId,
         int topMessageId)
     {
-        Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
+        //Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new DialogCreatedEvent(ownerId,
             toPeer,
             channelHistoryMinId,
@@ -88,7 +88,6 @@ public class DialogAggregate : MyInMemorySnapshotAggregateRoot<DialogAggregate, 
         Peer toPeer
     )
     {
-        //Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         if (maxMessageId > _state.ReadOutboxMaxId)
         {
             Emit(new OutboxMessageHasReadEvent(requestInfo,
@@ -203,12 +202,6 @@ public class DialogAggregate : MyInMemorySnapshotAggregateRoot<DialogAggregate, 
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new PinnedOrderChangedEvent(order));
-    }
-
-    public void StartDeleteUserMessages(RequestInfo requestInfo, bool revoke, List<int> messageIds, bool isClearHistory)
-    {
-        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        Emit(new DeleteUserMessagesStartedEvent(requestInfo, revoke, _state.ToPeer.PeerId, messageIds, isClearHistory));
     }
 
     public void TogglePinned(RequestInfo requestInfo,

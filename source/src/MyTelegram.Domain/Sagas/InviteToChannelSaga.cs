@@ -28,19 +28,16 @@ public class InviteToChannelSaga :
         var command = new IncrementParticipantCountCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId));
         Publish(command);
 
-        if (!domainEvent.AggregateEvent.IsRejoin)
-        {
-            var toPeer = new Peer(PeerType.Channel, domainEvent.AggregateEvent.ChannelId);
-            var createDialogCommand = new CreateDialogCommand(
-                DialogId.Create(domainEvent.AggregateEvent.UserId, toPeer),
-                _state.RequestInfo,
-                domainEvent.AggregateEvent.UserId,
-                toPeer,
-                _state.ChannelHistoryMinId,
-                _state.MaxMessageId
-            );
-            Publish(createDialogCommand);
-        }
+        var toPeer = new Peer(PeerType.Channel, domainEvent.AggregateEvent.ChannelId);
+        var createDialogCommand = new CreateDialogCommand(
+            DialogId.Create(domainEvent.AggregateEvent.UserId, toPeer),
+            _state.RequestInfo,
+            domainEvent.AggregateEvent.UserId,
+            toPeer,
+            _state.ChannelHistoryMinId,
+            _state.MaxMessageId
+        );
+        Publish(createDialogCommand);
 
         await HandleInviteToChannelCompletedAsync();
     }
@@ -48,14 +45,6 @@ public class InviteToChannelSaga :
     public Task HandleAsync(IDomainEvent<TempAggregate, TempId, InviteToChannelStartedEvent> domainEvent,
         ISagaContext sagaContext, CancellationToken cancellationToken)
     {
-        //if (domainEvent.AggregateEvent.Requested)
-        //{
-        //    var updateChatInviteRequestPendingCommand = new UpdateChatInviteRequestPendingCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId),
-        //        domainEvent.AggregateEvent.RequestInfo.UserId);
-        //    Publish(updateChatInviteRequestPendingCommand);
-        //    return CompleteAsync(cancellationToken);
-        //}
-
         Emit(new InviteToChannelSagaStartSagaEvent(
             domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.ChannelId,
@@ -101,7 +90,6 @@ public class InviteToChannelSaga :
         );
         Publish(command);
     }
-
 
     private Task HandleInviteToChannelCompletedAsync()
     {

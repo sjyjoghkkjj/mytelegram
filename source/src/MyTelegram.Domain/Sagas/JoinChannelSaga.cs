@@ -95,19 +95,16 @@ public class JoinChannelSaga : MyInMemoryAggregateSaga<JoinChannelSaga, JoinChan
         var command = new IncrementParticipantCountCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId));
         Publish(command);
 
-        if (!domainEvent.AggregateEvent.IsRejoin)
-        {
-            var toPeer = new Peer(PeerType.Channel, domainEvent.AggregateEvent.ChannelId);
-            var createDialogCommand = new CreateDialogCommand(
-                DialogId.Create(domainEvent.AggregateEvent.UserId, toPeer),
-                domainEvent.AggregateEvent.RequestInfo,
-                domainEvent.AggregateEvent.UserId,
-                toPeer,
-                _state.ChannelHistoryMinId,
-                _state.TopMessageId
-            );
-            Publish(createDialogCommand);
-        }
+        var toPeer = new Peer(PeerType.Channel, domainEvent.AggregateEvent.ChannelId);
+        var createDialogCommand = new CreateDialogCommand(
+            DialogId.Create(domainEvent.AggregateEvent.UserId, toPeer),
+            domainEvent.AggregateEvent.RequestInfo,
+            domainEvent.AggregateEvent.UserId,
+            toPeer,
+            _state.ChannelHistoryMinId,
+            _state.TopMessageId
+        );
+        Publish(createDialogCommand);
 
         return HandleJoinChannelCompletedAsync();
     }

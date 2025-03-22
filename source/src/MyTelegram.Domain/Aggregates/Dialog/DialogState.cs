@@ -49,6 +49,7 @@ public class DialogState : AggregateState<DialogAggregate, DialogId, DialogState
     {
         OwnerId = aggregateEvent.OwnerId;
         ToPeer = aggregateEvent.ToPeer;
+        TopMessage = aggregateEvent.TopMessageId;
         ChannelHistoryMinId = aggregateEvent.ChannelHistoryMinId;
     }
 
@@ -92,7 +93,7 @@ public class DialogState : AggregateState<DialogAggregate, DialogId, DialogState
     public void Apply(OutboxMessageHasReadEvent aggregateEvent)
     {
         ReadOutboxMaxId = aggregateEvent.MaxMessageId;
-        ToPeer= aggregateEvent.ToPeer;
+        ToPeer = aggregateEvent.ToPeer;
     }
 
     public void Apply(ParticipantHistoryClearedEvent aggregateEvent)
@@ -117,7 +118,7 @@ public class DialogState : AggregateState<DialogAggregate, DialogId, DialogState
         ToPeer = aggregateEvent.ToPeer;
 
         ReadInboxMaxId = aggregateEvent.MaxMessageId;
-        UnreadCount= aggregateEvent.UnreadCount;
+        UnreadCount = aggregateEvent.UnreadCount;
 
         if (TopMessage < aggregateEvent.MaxMessageId)
         {
@@ -178,15 +179,15 @@ public class DialogState : AggregateState<DialogAggregate, DialogId, DialogState
         Pinned = snapshot.Pinned;
         ChannelHistoryMinId = snapshot.ChannelHistoryMinId;
         Draft = snapshot.Draft;
-        UnreadMentionsCount= snapshot.UnreadMentionsCount;
-		FolderId = snapshot.FolderId;
+        UnreadMentionsCount = snapshot.UnreadMentionsCount;
+        FolderId = snapshot.FolderId;
     }
 
     public void Apply(DialogUpdatedEvent aggregateEvent)
     {
         TopMessage = aggregateEvent.TopMessageId;
         OwnerId = aggregateEvent.OwnerUserId;
-        ToPeer=aggregateEvent.ToPeer;
+        ToPeer = aggregateEvent.ToPeer;
     }
 
     public void Apply(DialogFolderUpdatedEvent aggregateEvent)
