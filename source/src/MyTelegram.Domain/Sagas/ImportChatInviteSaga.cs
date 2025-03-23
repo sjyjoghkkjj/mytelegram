@@ -81,6 +81,9 @@ public class ImportChatInviteSaga :
 
     public async Task HandleAsync(IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
     {
+        var incrementParticipantCountCommand = new IncrementParticipantCountCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId));
+        Publish(incrementParticipantCountCommand);
+
         if (!domainEvent.AggregateEvent.IsBroadcast)
         {
             var ownerPeerId = domainEvent.AggregateEvent.ChannelId;
