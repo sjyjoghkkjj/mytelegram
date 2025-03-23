@@ -42,9 +42,9 @@ services:
     #ports:
     #  - "27017:27017"
     volumes:
-      #- ./data/mongo/:/data
-      - ./data/mongo/db:/data/db
-      - ./data/mongo/configdb:/data/configdb
+      - ./data/mongo/:/data
+      # - ./data/mongo/db:/data/db
+      # - ./data/mongo/configdb:/data/configdb
     #environment:
     #  MONGO_INITDB_ROOT_USERNAME: admin
     #  MONGO_INITDB_ROOT_PASSWORD: admin
