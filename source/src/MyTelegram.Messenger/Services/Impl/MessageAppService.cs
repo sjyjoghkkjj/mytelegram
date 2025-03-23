@@ -48,6 +48,7 @@ public class MessageAppService(
                     var sendToChannelReadModel = await channelAppService.GetAsync(toPeer.PeerId);
                     // 1. Super group with linked channel
                     // 2. Channel: signature: true 
+                    // 3. Linked private channel
                     if (sendToChannelReadModel is not ({ MegaGroup: true, LinkedChatId: not null } or
                         { Broadcast: true, Signatures: true }))
                     {
@@ -59,11 +60,12 @@ public class MessageAppService(
                     // We can only use the public channels created by the current user as SendAs
                     if (sendAsChannelReadModel == null! ||
                         sendAsChannelReadModel.CreatorId != requestUserId ||
-                        string.IsNullOrEmpty(sendAsChannelReadModel.UserName))
+                        (string.IsNullOrEmpty(sendAsChannelReadModel.UserName) &&
+                         sendAsChannelReadModel.LinkedChatId != sendToChannelReadModel.ChannelId &&
+                         sendAsChannelReadModel.ChannelId != toPeer.PeerId))
                     {
                         RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
                     }
-
                     break;
             }
         }
