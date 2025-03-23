@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
+/// Get a list of default suggested <a href="https://corefork.telegram.org/api/emoji-status">channel emoji statuses</a>.
 /// See <a href="https://corefork.telegram.org/method/account.getChannelDefaultEmojiStatuses" />
 ///</summary>
 internal sealed class GetChannelDefaultEmojiStatusesHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestGetChannelDefaultEmojiStatuses, MyTelegram.Schema.Account.IEmojiStatuses>,
@@ -13,7 +12,7 @@ internal sealed class GetChannelDefaultEmojiStatusesHandler : RpcResultObjectHan
     {
         return Task.FromResult<MyTelegram.Schema.Account.IEmojiStatuses>(new TEmojiStatuses
         {
-            Statuses = new()
+            Statuses = []
         });
     }
 }

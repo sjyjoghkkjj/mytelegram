@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Returns a list of available <a href="https://corefork.telegram.org/api/wallpapers">wallpapers</a>.
@@ -12,6 +10,9 @@ internal sealed class GetWallPapersHandler : RpcResultObjectHandler<MyTelegram.S
     protected override Task<MyTelegram.Schema.Account.IWallPapers> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetWallPapers obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Account.IWallPapers>(new TWallPapers
+        {
+            Wallpapers = []
+        });
     }
 }

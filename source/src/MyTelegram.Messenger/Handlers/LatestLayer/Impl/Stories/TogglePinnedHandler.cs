@@ -11,6 +11,6 @@ internal sealed class TogglePinnedHandler : RpcResultObjectHandler<MyTelegram.Sc
     protected override Task<TVector<int>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestTogglePinned obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<TVector<int>>([]);
     }
 }

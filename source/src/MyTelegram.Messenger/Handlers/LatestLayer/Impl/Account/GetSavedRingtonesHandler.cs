@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Fetch saved notification sounds
@@ -14,7 +12,7 @@ internal sealed class GetSavedRingtonesHandler : RpcResultObjectHandler<MyTelegr
     {
         return Task.FromResult<Schema.Account.ISavedRingtones>(new TSavedRingtones
         {
-            Ringtones = new TVector<IDocument>()
+            Ringtones = []
         });
     }
 }

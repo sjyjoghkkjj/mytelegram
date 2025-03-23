@@ -13,6 +13,6 @@ internal sealed class UninstallStickerSetHandler : RpcResultObjectHandler<MyTele
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestUninstallStickerSet obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

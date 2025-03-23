@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
+/// Change the <a href="https://corefork.telegram.org/api/reactions#notifications-about-reactions">reaction notification settings »</a>.
 /// See <a href="https://corefork.telegram.org/method/account.setReactionsNotifySettings" />
 ///</summary>
 internal sealed class SetReactionsNotifySettingsHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestSetReactionsNotifySettings, MyTelegram.Schema.IReactionsNotifySettings>,
@@ -11,6 +10,10 @@ internal sealed class SetReactionsNotifySettingsHandler : RpcResultObjectHandler
     protected override Task<MyTelegram.Schema.IReactionsNotifySettings> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestSetReactionsNotifySettings obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IReactionsNotifySettings>(new MyTelegram.Schema.TReactionsNotifySettings
+        {
+            ShowPreviews = true,
+            Sound = new TNotificationSoundDefault()
+        });
     }
 }

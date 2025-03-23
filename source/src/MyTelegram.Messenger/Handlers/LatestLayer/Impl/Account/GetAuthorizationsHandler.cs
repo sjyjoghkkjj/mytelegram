@@ -1,30 +1,22 @@
-﻿// ReSharper disable All
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
-
-///<summary>
-/// Get logged-in sessions
-/// See <a href="https://corefork.telegram.org/method/account.getAuthorizations" />
-///</summary>
-internal sealed class GetAuthorizationsHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestGetAuthorizations, MyTelegram.Schema.Account.IAuthorizations>,
-    Account.IGetAuthorizationsHandler
+/// <summary>
+///     Get logged-in sessions
+///     See <a href="https://corefork.telegram.org/method/account.getAuthorizations" />
+/// </summary>
+internal sealed class GetAuthorizationsHandler(
+    IQueryProcessor queryProcessor,
+    ILayeredService<IAuthorizationConverter> layeredService)
+    :
+        RpcResultObjectHandler<Schema.Account.RequestGetAuthorizations, Schema.Account.IAuthorizations>,
+        Account.IGetAuthorizationsHandler
 {
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly ILayeredService<IAuthorizationConverter> _layeredService;
-
-    public GetAuthorizationsHandler(IQueryProcessor queryProcessor,
-        ILayeredService<IAuthorizationConverter> layeredService)
+    protected override async Task<Schema.Account.IAuthorizations> HandleCoreAsync(IRequestInput input,
+        Schema.Account.RequestGetAuthorizations obj)
     {
-        _queryProcessor = queryProcessor;
-        _layeredService = layeredService;
-    }
-
-    protected override async Task<MyTelegram.Schema.Account.IAuthorizations> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Account.RequestGetAuthorizations obj)
-    {
-        var deviceReadModelList = await _queryProcessor
-            .ProcessAsync(new GetDeviceByUserIdQuery(input.UserId), CancellationToken.None);
-        var r = _layeredService.GetConverter(input.Layer).ToAuthorizations(deviceReadModelList, input.PermAuthKeyId);
-        return new TAuthorizations { Authorizations = new TVector<Schema.IAuthorization>(r) };
+        var deviceReadModelList = await queryProcessor
+            .ProcessAsync(new GetDeviceByUserIdQuery(input.UserId));
+        var r = layeredService.GetConverter(input.Layer).ToAuthorizations(deviceReadModelList, input.PermAuthKeyId);
+        return new TAuthorizations { Authorizations = [.. r] };
     }
 }

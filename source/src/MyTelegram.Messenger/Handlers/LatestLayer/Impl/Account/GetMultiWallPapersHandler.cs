@@ -15,6 +15,6 @@ internal sealed class GetMultiWallPapersHandler : RpcResultObjectHandler<MyTeleg
     protected override Task<TVector<MyTelegram.Schema.IWallPaper>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetMultiWallPapers obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<TVector<MyTelegram.Schema.IWallPaper>>([]);
     }
 }

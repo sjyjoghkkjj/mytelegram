@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get dialogs manually marked as unread
@@ -12,6 +10,6 @@ internal sealed class GetDialogUnreadMarksHandler : RpcResultObjectHandler<MyTel
     protected override Task<TVector<MyTelegram.Schema.IDialogPeer>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestGetDialogUnreadMarks obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<TVector<IDialogPeer>>([]);
     }
 }

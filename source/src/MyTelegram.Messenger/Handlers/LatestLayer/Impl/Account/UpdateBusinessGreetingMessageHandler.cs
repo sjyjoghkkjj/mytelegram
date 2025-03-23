@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/account.updateBusinessGreetingMessage" />
@@ -11,6 +9,6 @@ internal sealed class UpdateBusinessGreetingMessageHandler : RpcResultObjectHand
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestUpdateBusinessGreetingMessage obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

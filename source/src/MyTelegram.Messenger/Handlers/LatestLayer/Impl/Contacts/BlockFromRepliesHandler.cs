@@ -13,6 +13,12 @@ internal sealed class BlockFromRepliesHandler : RpcResultObjectHandler<MyTelegra
     protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Contacts.RequestBlockFromReplies obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IUpdates>(new TUpdates
+        {
+            Updates = [],
+            Chats = [],
+            Users = [],
+            Date = CurrentDate
+        });
     }
 }

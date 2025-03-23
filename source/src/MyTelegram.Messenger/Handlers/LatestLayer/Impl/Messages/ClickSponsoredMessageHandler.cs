@@ -10,6 +10,6 @@ internal sealed class ClickSponsoredMessageHandler : RpcResultObjectHandler<MyTe
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestClickSponsoredMessage obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

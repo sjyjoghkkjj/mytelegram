@@ -15,6 +15,6 @@ internal sealed class SaveWallPaperHandler : RpcResultObjectHandler<MyTelegram.S
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestSaveWallPaper obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

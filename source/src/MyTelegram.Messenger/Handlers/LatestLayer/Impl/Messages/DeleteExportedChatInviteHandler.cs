@@ -39,11 +39,11 @@ internal sealed class DeleteExportedChatInviteHandler(
                     var command = new DeleteExportedInviteCommand(
                         ChatInviteId.Create(inputPeerChannel.ChannelId, chatInviteReadModel!.InviteId),
                         input.ToRequestInfo());
-                    await commandBus.PublishAsync(command, default);
+                    await commandBus.PublishAsync(command);
                 }
                 break;
 
-            case TInputPeerChat inputPeerChat:
+            case TInputPeerChat:
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

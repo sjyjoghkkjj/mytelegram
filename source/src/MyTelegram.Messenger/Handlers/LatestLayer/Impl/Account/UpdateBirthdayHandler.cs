@@ -1,20 +1,16 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
+/// Update our <a href="https://corefork.telegram.org/api/profile#birthday">birthday, see here »</a> for more info.
+/// <para>Possible errors</para>
+/// Code Type Description
+/// 400 BIRTHDAY_INVALID An invalid age was specified, must be between 0 and 150 years.
 /// See <a href="https://corefork.telegram.org/method/account.updateBirthday" />
 ///</summary>
-internal sealed class UpdateBirthdayHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestUpdateBirthday, IBool>,
-    Account.IUpdateBirthdayHandler
+internal sealed class UpdateBirthdayHandler(ICommandBus commandBus)
+    : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestUpdateBirthday, IBool>,
+        Account.IUpdateBirthdayHandler
 {
-    private readonly ICommandBus _commandBus;
-
-    public UpdateBirthdayHandler(ICommandBus commandBus)
-    {
-        _commandBus = commandBus;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestUpdateBirthday obj)
     {
@@ -25,7 +21,7 @@ internal sealed class UpdateBirthdayHandler : RpcResultObjectHandler<MyTelegram.
         }
 
         var command = new UpdateBirthdayCommand(UserId.Create(input.UserId), birthday);
-        await _commandBus.PublishAsync(command);
+        await commandBus.PublishAsync(command);
 
         return new TBoolTrue();
     }

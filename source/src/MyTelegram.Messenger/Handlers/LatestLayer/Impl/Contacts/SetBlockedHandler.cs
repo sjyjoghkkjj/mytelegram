@@ -10,6 +10,6 @@ internal sealed class SetBlockedHandler : RpcResultObjectHandler<MyTelegram.Sche
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Contacts.RequestSetBlocked obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

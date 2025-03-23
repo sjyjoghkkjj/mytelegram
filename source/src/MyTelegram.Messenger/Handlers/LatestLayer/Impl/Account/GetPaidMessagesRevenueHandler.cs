@@ -11,6 +11,9 @@ internal sealed class GetPaidMessagesRevenueHandler : RpcResultObjectHandler<MyT
     protected override Task<MyTelegram.Schema.Account.IPaidMessagesRevenue> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetPaidMessagesRevenue obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IPaidMessagesRevenue>(new TPaidMessagesRevenue
+        {
+            StarsAmount = 10000
+        });
     }
 }

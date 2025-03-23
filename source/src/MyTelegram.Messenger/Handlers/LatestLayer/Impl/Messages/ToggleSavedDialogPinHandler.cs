@@ -13,6 +13,6 @@ internal sealed class ToggleSavedDialogPinHandler : RpcResultObjectHandler<MyTel
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestToggleSavedDialogPin obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

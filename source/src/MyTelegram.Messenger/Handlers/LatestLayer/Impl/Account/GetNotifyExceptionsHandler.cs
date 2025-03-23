@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Returns list of chats with non-default notification settings
@@ -14,9 +12,9 @@ internal sealed class GetNotifyExceptionsHandler : RpcResultObjectHandler<MyTele
     {
         return Task.FromResult<IUpdates>(new TUpdates
         {
-            Updates = new TVector<IUpdate>(),
-            Chats = new TVector<IChat>(),
-            Users = new TVector<IUser>(),
+            Updates = [],
+            Chats = [],
+            Users = [],
             Date = CurrentDate
         });
     }

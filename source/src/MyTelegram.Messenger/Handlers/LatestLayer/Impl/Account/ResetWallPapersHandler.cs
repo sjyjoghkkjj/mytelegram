@@ -12,6 +12,6 @@ internal sealed class ResetWallPapersHandler : RpcResultObjectHandler<MyTelegram
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestResetWallPapers obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

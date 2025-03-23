@@ -1,5 +1,7 @@
 ﻿// ReSharper disable All
 
+using MyTelegram.Schema.Stories;
+
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stories;
 
 ///<summary>
@@ -11,6 +13,11 @@ internal sealed class SearchPostsHandler : RpcResultObjectHandler<MyTelegram.Sch
     protected override Task<MyTelegram.Schema.Stories.IFoundStories> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestSearchPosts obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IFoundStories>(new TFoundStories
+        {
+            Chats = [],
+            Stories = [],
+            Users = []
+        });
     }
 }

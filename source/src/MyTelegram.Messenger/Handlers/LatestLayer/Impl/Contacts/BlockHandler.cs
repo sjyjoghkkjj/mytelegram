@@ -18,6 +18,6 @@ internal sealed class BlockHandler : RpcResultObjectHandler<MyTelegram.Schema.Co
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestBlock obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

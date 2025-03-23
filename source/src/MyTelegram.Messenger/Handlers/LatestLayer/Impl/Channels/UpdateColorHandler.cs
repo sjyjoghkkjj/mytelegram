@@ -23,7 +23,7 @@ internal sealed class UpdateColorHandler(
 
         var color = new PeerColor(obj.Color, obj.BackgroundEmojiId);
         var command = new UpdateChannelColorCommand(ChannelId.Create(channel.PeerId), input.ToRequestInfo(), color, obj.BackgroundEmojiId, obj.ForProfile);
-        await commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

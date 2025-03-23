@@ -35,11 +35,11 @@ internal sealed class SearchHandler(
         var userId = input.UserId;
         var peer = peerHelper.GetPeer(obj.Peer, userId);
 
-        var ownerUid = peer.PeerType == PeerType.Channel ? peer.PeerId : userId;
+        var ownerPeerId = peer.PeerType == PeerType.Channel ? peer.PeerId : userId;
 
         var getMessageOutput = await messageAppService.SearchAsync(new SearchInput
         {
-            OwnerPeerId = ownerUid,
+            OwnerPeerId = ownerPeerId,
             SelfUserId = userId,
             Limit = obj.Limit,
             Q = obj.Q,
@@ -52,7 +52,6 @@ internal sealed class SearchHandler(
             MinId = obj.MinId,
             MessageType = GetMessageType(obj.Filter)
         });
-
         return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
     }
 

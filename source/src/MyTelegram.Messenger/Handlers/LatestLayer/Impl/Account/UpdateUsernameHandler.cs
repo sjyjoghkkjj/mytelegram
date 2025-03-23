@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Changes username for the current user.
@@ -15,7 +13,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 internal sealed class UpdateUsernameHandler(
     ICommandBus commandBus,
     IQueryProcessor queryProcessor
-)
+    )
     : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestUpdateUsername, MyTelegram.Schema.IUser>,
         Account.IUpdateUsernameHandler
 {
@@ -33,7 +31,7 @@ internal sealed class UpdateUsernameHandler(
             input.UserId.ToUserPeer(),
             obj.Username,
             oldUserName
-        );
+            );
         await commandBus.PublishAsync(command);
 
         return null!;

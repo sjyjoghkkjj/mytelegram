@@ -1,8 +1,4 @@
-﻿// ReSharper disable All
-
-using MyTelegram.Schema;
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Gets the default value of the Time-To-Live setting, applied to all new chats.

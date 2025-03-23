@@ -1,5 +1,7 @@
 ﻿// ReSharper disable All
 
+using MyTelegram.Schema.Stories;
+
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stories;
 
 ///<summary>
@@ -11,6 +13,11 @@ internal sealed class GetStoryReactionsListHandler : RpcResultObjectHandler<MyTe
     protected override Task<MyTelegram.Schema.Stories.IStoryReactionsList> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestGetStoryReactionsList obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IStoryReactionsList>(new TStoryReactionsList
+        {
+            Chats = [],
+            Users = [],
+            Reactions = []
+        });
     }
 }

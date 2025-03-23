@@ -21,7 +21,7 @@ internal sealed class DeleteContactsHandler(
             var command = new DeleteContactCommand(ContactId.Create(input.UserId, peer.PeerId),
                 input.ToRequestInfo(),
                 peer.PeerId);
-            await commandBus.PublishAsync(command, default);
+            await commandBus.PublishAsync(command);
         }
 
         return null!;

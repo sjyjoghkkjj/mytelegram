@@ -13,6 +13,6 @@ internal sealed class CheckQuickReplyShortcutHandler : RpcResultObjectHandler<My
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestCheckQuickReplyShortcut obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

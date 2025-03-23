@@ -23,6 +23,6 @@ internal sealed class UpdatePasswordSettingsHandler : RpcResultObjectHandler<MyT
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestUpdatePasswordSettings obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Get a list of <a href="https://corefork.telegram.org/api/channel">channels/supergroups</a> we left
@@ -15,6 +13,9 @@ internal sealed class GetLeftChannelsHandler : RpcResultObjectHandler<MyTelegram
     protected override Task<MyTelegram.Schema.Messages.IChats> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestGetLeftChannels obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IChats>(new TChats
+        {
+            Chats = []
+        });
     }
 }

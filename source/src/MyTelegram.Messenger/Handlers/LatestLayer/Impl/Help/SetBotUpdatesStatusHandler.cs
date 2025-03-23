@@ -13,6 +13,6 @@ internal sealed class SetBotUpdatesStatusHandler : RpcResultObjectHandler<MyTele
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Help.RequestSetBotUpdatesStatus obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

@@ -1,9 +1,4 @@
-﻿// ReSharper disable All
-
-using EventFlow.Aggregates.ExecutionResults;
-using MyTelegram.Domain.Aggregates.Device;
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Terminates all user's authorized sessions except for the current one.After calling this method it is necessary to reregister the current device using the method <a href="https://corefork.telegram.org/method/account.registerDevice">account.registerDevice</a>
@@ -12,6 +7,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 internal sealed class ResetAuthorizationsHandler(
     IQueryProcessor queryProcessor,
     IObjectMessageSender messageSender,
+    //IQueuedCommandExecutor<DeviceAggregate, DeviceId, IExecutionResult> commandExecutor,
     IEventBus eventBus)
     : RpcResultObjectHandler<MyTelegram.Schema.Auth.RequestResetAuthorizations, IBool>,
         Auth.IResetAuthorizationsHandler

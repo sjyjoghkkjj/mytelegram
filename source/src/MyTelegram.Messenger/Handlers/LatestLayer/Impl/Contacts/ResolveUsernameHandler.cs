@@ -24,7 +24,6 @@ internal sealed class ResolveUsernameHandler(
     protected override async Task<IResolvedPeer> HandleCoreAsync(IRequestInput input,
         RequestResolveUsername obj)
     {
-        //Console.WriteLine($"RequestResolveUsername:{obj.Username}");
         if (!string.IsNullOrEmpty(obj.Username))
         {
             var userNameReadModel = await queryProcessor

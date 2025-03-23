@@ -30,6 +30,7 @@ internal sealed class GetSendAsHandler(
             var channelReadModel = await channelAppService.GetAsync(inputPeerChannel.ChannelId);
             // 1. Super group with linked channel
             // 2. Channel: signature: true 
+            // 3. Linked private channel
             if (channelReadModel is { MegaGroup: true, LinkedChatId: not null } or { Broadcast: true, Signatures: true })
             {
                 var channelReadModels = await queryProcessor.ProcessAsync(new GetSendAsQuery(input.UserId));
@@ -37,7 +38,14 @@ internal sealed class GetSendAsHandler(
                 if (channelReadModel.MegaGroup && channelReadModel.CreatorId == input.UserId)
                 {
                     channelReadModels = [.. channelReadModels, channelReadModel];
+
+                    var linkedChannelReadModel = await channelAppService.GetAsync(channelReadModel.LinkedChatId);
+                    if (linkedChannelReadModel != null && linkedChannelReadModel.CreatorId == input.UserId)
+                    {
+                        channelReadModels = [.. channelReadModels, linkedChannelReadModel];
+                    }
                 }
+
                 var channelMemberReadModels = await queryProcessor.ProcessAsync(
                     new GetChannelMemberListByChannelIdListQuery(input.UserId,
                         [.. channelReadModels.Select(p => p.ChannelId)]));
