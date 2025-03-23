@@ -23,7 +23,7 @@ public abstract class ReadModelWithCacheAppService<TReadModel>(IReadModelCacheHe
         return readModel ?? throw new ArgumentException($"ReadModel({typeof(TReadModel).Name}) with id {id} not exists");
     }
 
-    public async Task<IReadOnlyCollection<TReadModel>> GetListAsync(List<long> ids)
+    public async Task<IReadOnlyCollection<TReadModel>> GetListAsync(IEnumerable<long> ids)
     {
         //var readModels = new List<TReadModel>();
         var readModels = new Dictionary<long, TReadModel>();

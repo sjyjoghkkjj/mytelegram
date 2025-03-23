@@ -55,7 +55,7 @@ public class DialogReadModel : IDialogReadModel,
 
     public virtual long ToPeerId { get; private set; }
     public virtual PeerType ToPeerType { get; private set; }
-    public virtual int TopMessage { get; private set; }
+    public virtual int TopMessage { get; set; }
     public virtual int UnreadCount { get; private set; }
     public virtual long? Version { get; set; }
     public virtual bool IsDeleted { get; private set; }
@@ -271,12 +271,6 @@ public class DialogReadModel : IDialogReadModel,
         NotifySettings = domainEvent.AggregateEvent.PeerNotifySettings;
 
         return Task.CompletedTask;
-    }
-    //#region Draft
-    public void SetNewTopMessageId(int newTopMessageId)
-    {
-        TopMessage = newTopMessageId;
-        //NewTopMessageId = newTopMessageId;
     }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<MessageAggregate, MessageId, OutboxMessageCreatedEvent> domainEvent, CancellationToken cancellationToken)

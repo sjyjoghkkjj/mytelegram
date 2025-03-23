@@ -8,5 +8,5 @@ public interface IReadModelWithCacheAppService<TReadModel>
     Task<TReadModel?> GetAsync(long? id);
     Task<TReadModel> GetAsync(long id);
 
-    Task<IReadOnlyCollection<TReadModel>> GetListAsync(List<long> ids);
+    Task<IReadOnlyCollection<TReadModel>> GetListAsync(IEnumerable<long> ids);
 }

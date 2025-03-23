@@ -30,10 +30,9 @@ public interface IDialogReadModel : IReadModel
     int ReadOutboxMaxId { get; }
     long ToPeerId { get; }
     PeerType ToPeerType { get; }
-    int TopMessage { get; }
+    int TopMessage { get; set; }
     int UnreadCount { get; }
     bool IsDeleted { get; }
-    void SetNewTopMessageId(int topMessageId);
     int? TtlPeriod { get; set; }
     int UnreadMentionsCount { get; }
     int UnreadReactionsCount { get; }

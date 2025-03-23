@@ -11,6 +11,94 @@ public class DialogAppService(
     IOffsetHelper offsetHelper)
     : BaseAppService, IDialogAppService, ITransientDependency
 {
+    public async Task<GetDialogOutput> GetDialogsAsync(GetDialogInput input)
+    {
+        var dialogReadModels = await GetDialogListAsync(input);
+        var (messageReadModels, channelReadModels) = await GetTopMessagesAndChannelsAsync(input, dialogReadModels);
+
+        HashSet<long> channelIds = [];
+        HashSet<long> userIds = [];
+        AddPeerIds(input, dialogReadModels, messageReadModels, userIds, channelIds);
+
+        var userIdList = userIds.ToList();
+        var userReadModels = await userAppService.GetListAsync(userIdList);
+        var contactReadModels = await queryProcessor
+            .ProcessAsync(new GetContactListQuery(input.OwnerId, userIdList));
+
+        var privacyReadModels = await privacyAppService.GetPrivacyListAsync(userIdList);
+        var channelDict = channelReadModels.ToDictionary(k => k.ChannelId, v => v);
+        foreach (var dialogReadModel in dialogReadModels)
+        {
+            if (dialogReadModel.ToPeerType == PeerType.Channel)
+            {
+                if (channelDict.TryGetValue(dialogReadModel.ToPeerId, out var channelReadModel))
+                {
+                    dialogReadModel.TopMessage = channelReadModel.TopMessageId;
+                }
+            }
+        }
+
+        IReadOnlyCollection<IChannelMemberReadModel> channelMemberList = new List<IChannelMemberReadModel>();
+        if (channelReadModels.Count > 0)
+        {
+            var channelIdList = channelReadModels.Select(p => p.ChannelId).ToList();
+            channelMemberList = await queryProcessor
+                .ProcessAsync(new GetChannelMemberListByChannelIdListQuery(input.OwnerId, channelIdList));
+        }
+
+        var pollIdList = messageReadModels.Where(p => p.PollId.HasValue).Select(p => p.PollId!.Value).ToList();
+        IReadOnlyCollection<IPollReadModel>? pollReadModels = null;
+        IReadOnlyCollection<IPollAnswerVoterReadModel>? chosenOptions = null;
+
+        if (pollIdList.Count > 0)
+        {
+            pollReadModels =
+                await queryProcessor.ProcessAsync(new GetPollsQuery(pollIdList));
+            chosenOptions = await queryProcessor
+                .ProcessAsync(new GetChosenVoteAnswersQuery(pollIdList, input.OwnerId));
+        }
+
+        channelReadModels = await channelAppService.GetListAsync(channelIds);
+        var photoReadModels =
+            await photoAppService.GetPhotosAsync(userReadModels, contactReadModels, channelReadModels);
+
+        var userReactionIds = new List<string>();
+        foreach (var messageReadModel in messageReadModels)
+        {
+            if (messageReadModel.Reactions?.Count > 0)
+            {
+                foreach (var reactionCount in messageReadModel.Reactions)
+                {
+                    userReactionIds.Add(UserReactionId.Create(input.OwnerId, messageReadModel.ToPeerId,
+                        messageReadModel.MessageId, reactionCount.GetReactionId()).Value);
+                }
+            }
+        }
+
+        var userReactionReadModels =
+            userReactionIds.Count > 0
+                ? await queryProcessor.ProcessAsync(new GetAllMessageReactionListQuery(userReactionIds))
+                : [];
+
+        await SetDialogTtlPeriodAsync(dialogReadModels);
+
+        return new GetDialogOutput(input.OwnerId,
+            dialogReadModels,
+            messageReadModels,
+            userReadModels,
+            photoReadModels,
+            [],
+            channelReadModels,
+            contactReadModels,
+            privacyReadModels,
+            channelMemberList,
+            pollReadModels,
+            chosenOptions,
+            userReactionReadModels,
+            input.Limit
+        );
+    }
+
     public async Task ReorderPinnedDialogsAsync(ReorderPinnedDialogsInput input)
     {
         var order = 0;
@@ -22,7 +110,106 @@ public class DialogAppService(
         }
     }
 
-    public async Task<GetDialogOutput> GetDialogsAsync(GetDialogInput input)
+    private void AddPeerIds(
+        GetDialogInput input,
+        IReadOnlyCollection<IDialogReadModel> dialogReadModels,
+        IReadOnlyCollection<IMessageReadModel> messageReadModels,
+        HashSet<long> userIds,
+        HashSet<long> channelIds)
+    {
+        void AddPeerIdIfNeed(Peer? peer)
+        {
+            switch (peer?.PeerType)
+            {
+                case PeerType.Channel:
+                    channelIds.Add(peer.PeerId);
+                    break;
+
+                case PeerType.User:
+                    userIds.Add(peer.PeerId);
+                    break;
+            }
+        }
+
+        if (dialogReadModels.Count > 0 || messageReadModels.Count > 0)
+        {
+            userIds.Add(input.OwnerId);
+        }
+
+        if (input.PeerIdList?.Count > 0)
+        {
+            foreach (var peerId in input.PeerIdList)
+            {
+                if (peerHelper.IsChannelPeer(peerId))
+                {
+                    channelIds.Add(peerId);
+                }
+            }
+        }
+
+        foreach (var dialogReadModel in dialogReadModels)
+        {
+            switch (dialogReadModel.ToPeerType)
+            {
+                case PeerType.Channel:
+                    channelIds.Add(dialogReadModel.ToPeerId);
+                    break;
+                case PeerType.User:
+                    userIds.Add(dialogReadModel.ToPeerId);
+                    break;
+            }
+        }
+
+        foreach (var messageReadModel in messageReadModels)
+        {
+            AddPeerIdIfNeed(messageReadModel.SendAs);
+            AddPeerIdIfNeed(messageReadModel.FwdHeader?.SavedFromPeer);
+
+            var fwd = messageReadModel.FwdHeader;
+            AddPeerIdIfNeed(fwd?.FromId);
+            AddPeerIdIfNeed(fwd?.SavedFromId);
+            AddPeerIdIfNeed(fwd?.SavedFromPeer);
+            AddPeerIdIfNeed(messageReadModel.SendAs);
+
+            switch (messageReadModel.ToPeerType)
+            {
+                case PeerType.Channel:
+                    channelIds.Add(messageReadModel.ToPeerId);
+                    channelIds.Add(messageReadModel.SenderPeerId);
+                    break;
+
+                case PeerType.User:
+                    userIds.Add(messageReadModel.ToPeerId);
+                    channelIds.Add(messageReadModel.SenderUserId);
+                    break;
+            }
+
+            switch (messageReadModel.MessageAction)
+            {
+                case TMessageActionChatAddUser messageActionChatAddUser:
+                    foreach (var userId in messageActionChatAddUser.Users)
+                    {
+                        userIds.Add(userId);
+                    }
+
+                    break;
+
+                case TMessageActionChatJoinedByLink messageActionChatJoinedByLink:
+                    userIds.Add(messageActionChatJoinedByLink.InviterId);
+                    break;
+
+                case TMessageActionChatJoinedByRequest:
+
+                    break;
+
+                case TMessageActionChatDeleteUser messageActionChatDeleteUser:
+                    userIds.Add(messageActionChatDeleteUser.UserId);
+                    break;
+            }
+        }
+    }
+
+    private async Task<IReadOnlyCollection<IDialogReadModel>> GetDialogListAsync(GetDialogInput input)
     {
         var offset = offsetHelper.GetOffsetInfo(input);
         DateTime? offsetDate = null;
@@ -32,6 +219,7 @@ public class DialogAppService(
             var dialog = await queryProcessor.ProcessAsync(new GetDialogByIdQuery(dialogId));
             offsetDate = dialog?.CreationTime;
         }
+
         var query = new GetDialogsQuery(input.OwnerId,
             input.Pinned,
             offsetDate,
@@ -39,14 +227,21 @@ public class DialogAppService(
             input.Limit,
             input.PeerIdList,
             input.FolderId
-            );
-        var dialogList = await queryProcessor.ProcessAsync(query);
+        );
+
+        var dialogReadModels = await queryProcessor.ProcessAsync(query);
         if (input.Pinned == true)
         {
-            dialogList = dialogList.OrderBy(p => p.PinnedOrder).ToList();
+            dialogReadModels = dialogReadModels.OrderBy(p => p.PinnedOrder).ToList();
         }
 
-        var channelIdList = dialogList.Where(p => p.ToPeerType == PeerType.Channel).Select(p => p.ToPeerId)
+        return dialogReadModels;
+    }
+
+    private async Task<(IReadOnlyCollection<IMessageReadModel>, IReadOnlyCollection<IChannelReadModel>)>
+        GetTopMessagesAndChannelsAsync(GetDialogInput input, IReadOnlyCollection<IDialogReadModel> dialogReadModels)
+    {
+        var channelIdList = dialogReadModels.Where(p => p.ToPeerType == PeerType.Channel).Select(p => p.ToPeerId)
             .ToList();
         if (input.PeerIdList?.Count > 0)
         {
@@ -63,119 +258,20 @@ public class DialogAppService(
             ? new List<IChannelReadModel>()
             : await channelAppService.GetListAsync(channelIdList);
 
-        var topMessageIdList = dialogList.Where(p => p.ToPeerType != PeerType.Channel)
+        var topMessageIdList = dialogReadModels.Where(p => p.ToPeerType != PeerType.Channel)
             .Select(p => MessageId.Create(p.OwnerId, p.TopMessage).Value).ToList();
         topMessageIdList.AddRange(channelList.Select(p => MessageId.Create(p.ChannelId, p.TopMessageId).Value));
-        var minIdList = dialogList.Where(p => p.ChannelHistoryMinId > 0)
+        var minIdList = dialogReadModels.Where(p => p.ChannelHistoryMinId > 0)
             .Select(p => MessageId.Create(input.OwnerId, p.ChannelHistoryMinId).Value).ToList();
         topMessageIdList.RemoveAll(minIdList.Contains);
-        var messageReadModels =
-            await queryProcessor.ProcessAsync(new GetMessagesByIdListQuery(topMessageIdList));
 
-        var extraChatUserIdList = GetExtraChatUserIdList(messageReadModels);
+        var messageReadModels = await queryProcessor.ProcessAsync(new GetMessagesByIdListQuery(topMessageIdList));
 
-
-        var chatIdList = messageReadModels.Where(p => p.ToPeerType == PeerType.Chat).Select(p => p.ToPeerId).ToList();
-        var userIdList = messageReadModels.Where(p => p.ToPeerType == PeerType.User).Select(p => p.ToPeerId).ToList();
-
-        if (dialogList.Count > 0 || messageReadModels.Count > 0)
-        {
-            userIdList.Add(input.OwnerId);
-        }
-        userIdList.AddRange(dialogList.Where(p => p.ToPeerType == PeerType.User).Select(p => p.ToPeerId));
-        userIdList.AddRange(extraChatUserIdList);
-
-        var userList = await userAppService.GetListAsync(userIdList);
-        var contactList = await queryProcessor
-            .ProcessAsync(new GetContactListQuery(input.OwnerId, userIdList));
-
-        var privacyList = await privacyAppService.GetPrivacyListAsync(userIdList);
-        // reset dialog top message box id
-        var channelDict = channelList.ToDictionary(k => k.ChannelId, v => v);
-        foreach (var dialogReadModel in dialogList)
-        {
-            if (dialogReadModel.ToPeerType == PeerType.Channel)
-            {
-                if (channelDict.TryGetValue(dialogReadModel.ToPeerId, out var channelReadModel))
-                {
-                    dialogReadModel.SetNewTopMessageId(channelReadModel.TopMessageId);
-                }
-            }
-        }
-
-        IReadOnlyCollection<IChannelMemberReadModel> channelMemberList = new List<IChannelMemberReadModel>();
-        if (channelIdList.Count > 0)
-        {
-            channelMemberList = await queryProcessor
-                .ProcessAsync(new GetChannelMemberListByChannelIdListQuery(input.OwnerId, channelIdList));
-        }
-
-        var pollIdList = messageReadModels.Where(p => p.PollId.HasValue).Select(p => p.PollId!.Value).ToList();
-        IReadOnlyCollection<IPollReadModel>? pollReadModels = null;
-        IReadOnlyCollection<IPollAnswerVoterReadModel>? chosenOptions = null;
-
-        if (pollIdList.Count > 0)
-        {
-            pollReadModels =
-                await queryProcessor.ProcessAsync(new GetPollsQuery(pollIdList));
-            chosenOptions = await queryProcessor
-                .ProcessAsync(new GetChosenVoteAnswersQuery(pollIdList, query.OwnerId));
-        }
-
-        var photoIds = new List<long>();
-        photoIds.AddRange(channelList.Select(p => p.PhotoId ?? 0));
-        photoIds.AddRange(userList.Select(p => p.ProfilePhotoId ?? 0));
-        photoIds.AddRange(userList.Select(p => p.FallbackPhotoId ?? 0));
-        photoIds.AddRange(userList.Select(p => p.PersonalPhotoId ?? 0));
-        photoIds.AddRange(contactList.Select(p => p.PhotoId ?? 0));
-        photoIds.RemoveAll(p => p == 0);
-
-        var photos = await photoAppService.GetListAsync(photoIds);
-
-        return new GetDialogOutput(input.OwnerId,
-            dialogList,
-            messageReadModels,
-            userList,
-            photos,
-            [],
-            channelList,
-            contactList,
-            privacyList,
-            channelMemberList,
-            pollReadModels,
-            chosenOptions,
-            [],
-            input.Limit
-            );
+        return (messageReadModels, channelList);
     }
 
-    private static List<long> GetExtraChatUserIdList(IReadOnlyCollection<IMessageReadModel> messageReadModels)
+    private Task SetDialogTtlPeriodAsync(IReadOnlyCollection<IDialogReadModel> dialogs)
     {
-        var extraChatUserIdList = new List<long>();
-        foreach (var messageReadModel in messageReadModels)
-        {
-            switch (messageReadModel.MessageAction)
-            {
-                case TMessageActionChatAddUser messageActionChatAddUser:
-                    extraChatUserIdList.AddRange(messageActionChatAddUser.Users);
-                    break;
-
-                case TMessageActionChatJoinedByLink messageActionChatJoinedByLink:
-                    extraChatUserIdList.Add(messageActionChatJoinedByLink.InviterId);
-                    break;
-
-                case TMessageActionChatJoinedByRequest:
-
-                    break;
-
-                case TMessageActionChatDeleteUser messageActionChatDeleteUser:
-                    extraChatUserIdList.Add(messageActionChatDeleteUser.UserId);
-                    break;
-            }
-
-            extraChatUserIdList.Add(messageReadModel.SenderPeerId);
-        }
-
-        return extraChatUserIdList;
+        return Task.CompletedTask;
     }
 }
