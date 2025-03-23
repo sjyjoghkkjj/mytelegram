@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Auth;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Accept QR code login token, logging in the app that generated it.Returns info about the new session.For more info, see <a href="https://corefork.telegram.org/api/qr-login">login via QR code</a>.

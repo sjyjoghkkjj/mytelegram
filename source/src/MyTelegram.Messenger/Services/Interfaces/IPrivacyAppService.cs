@@ -12,13 +12,20 @@ public interface IPrivacyAppService
         long selfUserId,
         IInputPrivacyKey key,
         IReadOnlyList<IInputPrivacyRule> ruleList);
+    Task ApplyPrivacyAsync(long selfUserId, long targetUserId, Action<PrivacyValueType> executeOnPrivacyNotMatch,
+        PrivacyType privacyType);
 
-    Task ApplyPrivacyAsync(long selfUserId, long targetUserId, Action executeOnPrivacyNotMatch,
+    //Task ApplyPrivacyAsync(SimpleUserItem userItem, long targetUserId, Action executeOnPrivacyNotMatch,
+    //    List<PrivacyType> privacyTypes);
+    Task ApplyPrivacyAsync(long selfUserId, long targetUserId, Action<PrivacyValueType> executeOnPrivacyNotMatch,
         List<PrivacyType> privacyTypes);
-
-    Task ApplyPrivacyListAsync(long selfUserId, IReadOnlyList<long> targetUserIdList, Action<long> executeOnPrivacyNotMatch,
+    //Task ApplyPrivacyListAsync(SimpleUserItem userItem, IReadOnlyList<long> targetUserIdList, Action<long> executeOnPrivacyNotMatch,
+    //    List<PrivacyType> privacyTypes);
+    Task ApplyPrivacyListAsync(long selfUserId, IReadOnlyList<long> targetUserIdList, Action<PrivacyValueType, long> executeOnPrivacyNotMatch,
         List<PrivacyType> privacyTypes);
 
     Task SetGlobalPrivacySettingsAsync(long userId, GlobalPrivacySettings globalPrivacySettings);
     Task<GlobalPrivacySettingsCacheItem?> GetGlobalPrivacySettingsAsync(long userId);
+    PrivacyValueData GetPrivacyValueData(IInputPrivacyRule rule);
+    List<PrivacyValueData> GetPrivacyValueDataList(IList<IInputPrivacyRule> rules);
 }

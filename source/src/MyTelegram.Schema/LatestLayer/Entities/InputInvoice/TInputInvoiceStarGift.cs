@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Used to buy a <a href="https://corefork.telegram.org/api/gifts">Telegram Star Gift, see here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/constructor/inputInvoiceStarGift" />
 ///</summary>
-[TlObject(0x25d8c1d8)]
+[TlObject(0xe8625e92)]
 public sealed class TInputInvoiceStarGift : IInputInvoice
 {
-    public uint ConstructorId => 0x25d8c1d8;
+    public uint ConstructorId => 0xe8625e92;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -21,12 +21,8 @@ public sealed class TInputInvoiceStarGift : IInputInvoice
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool HideName { get; set; }
-
-    ///<summary>
-    /// Identifier of the user that will receive the gift
-    /// See <a href="https://corefork.telegram.org/type/InputUser" />
-    ///</summary>
-    public MyTelegram.Schema.IInputUser UserId { get; set; }
+    public bool IncludeUpgrade { get; set; }
+    public MyTelegram.Schema.IInputPeer Peer { get; set; }
 
     ///<summary>
     /// Identifier of the gift, from <a href="https://corefork.telegram.org/constructor/starGift">starGift</a>.<code>id</code>
@@ -42,6 +38,7 @@ public sealed class TInputInvoiceStarGift : IInputInvoice
     public void ComputeFlag()
     {
         if (HideName) { Flags[0] = true; }
+        if (IncludeUpgrade) { Flags[2] = true; }
         if (Message != null) { Flags[1] = true; }
     }
 
@@ -50,7 +47,7 @@ public sealed class TInputInvoiceStarGift : IInputInvoice
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        writer.Write(UserId);
+        writer.Write(Peer);
         writer.Write(GiftId);
         if (Flags[1]) { writer.Write(Message); }
     }
@@ -59,7 +56,8 @@ public sealed class TInputInvoiceStarGift : IInputInvoice
     {
         Flags = reader.ReadBitArray();
         if (Flags[0]) { HideName = true; }
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        if (Flags[2]) { IncludeUpgrade = true; }
+        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         GiftId = reader.ReadInt64();
         if (Flags[1]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
     }

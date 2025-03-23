@@ -8,7 +8,7 @@ namespace MyTelegram.Schema;
 /// See <a href="https://corefork.telegram.org/constructor/chatInviteExported" />
 ///</summary>
 [TlObject(0xa22cbd96)]
-public sealed class TChatInviteExported : IExportedChatInvite
+public sealed class TChatInviteExported : IExportedChatInvite, ILayeredExportedChatInvite
 {
     public uint ConstructorId => 0xa22cbd96;
     ///<summary>

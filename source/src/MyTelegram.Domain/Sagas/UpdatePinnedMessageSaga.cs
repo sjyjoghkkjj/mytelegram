@@ -95,7 +95,7 @@ public class UpdatePinnedMessageSaga : MyInMemoryAggregateSaga<UpdatePinnedMessa
             domainEvent.AggregateEvent.ToPeer,
             domainEvent.AggregateEvent.RandomId,
             domainEvent.AggregateEvent.Date,
-            domainEvent.AggregateEvent.MessageActionData
+            domainEvent.AggregateEvent.MessageAction
         ));
 
         await IncrementPtsAsync(domainEvent.AggregateEvent.OwnerPeerId);
@@ -135,7 +135,7 @@ public class UpdatePinnedMessageSaga : MyInMemoryAggregateSaga<UpdatePinnedMessa
     {
         if (_state.IsCompleted || forceCompleted)
         {
-            switch (_state.ToPeer!.PeerType)
+            switch (_state.ToPeer.PeerType)
             {
                 case PeerType.Channel:
                     {
@@ -166,7 +166,7 @@ public class UpdatePinnedMessageSaga : MyInMemoryAggregateSaga<UpdatePinnedMessa
                     SendMessageType.MessageService,
                     MessageType.Text,
                     MessageSubType.UpdatePinnedMessage,
-                    MessageActionData: _state.MessageActionData,
+                    MessageAction: _state.MessageAction,
                     //replyToMsgId: _state.ReplyToMsgId,
                     InputReplyTo: new TInputReplyToMessage
                     {
@@ -175,7 +175,8 @@ public class UpdatePinnedMessageSaga : MyInMemoryAggregateSaga<UpdatePinnedMessa
                     MessageActionType: MessageActionType.PinMessage,
                     Post: _state.Post
                 );
-                var command = new StartSendMessageCommand(TempId.New, _state.RequestInfo with { RequestId = Guid.NewGuid() },
+                var command = new StartSendMessageCommand(TempId.New,
+                    _state.RequestInfo with { RequestId = Guid.NewGuid() },
                     [new SendMessageItem(messageItem)]);
 
                 Publish(command);
@@ -197,7 +198,7 @@ public class UpdatePinnedMessageSaga : MyInMemoryAggregateSaga<UpdatePinnedMessa
         }
 
         var shouldReplyRpcResult =
-            (_state.ToPeer!.PeerType == PeerType.Channel || _state.RequestInfo.UserId == peerId) && !_state.Pinned;
+            (_state.ToPeer.PeerType == PeerType.Channel || _state.RequestInfo.UserId == peerId) && !_state.Pinned;
         Emit(new UpdatePinnedMessageCompletedSagaEvent(_state.RequestInfo,
             shouldReplyRpcResult,
             _state.RequestInfo.UserId,

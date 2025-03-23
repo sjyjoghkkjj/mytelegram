@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
+/// Reorder pinned <a href="https://corefork.telegram.org/api/saved-messages">saved message dialogs »</a>.
 /// See <a href="https://corefork.telegram.org/method/messages.reorderPinnedSavedDialogs" />
 ///</summary>
 internal sealed class ReorderPinnedSavedDialogsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestReorderPinnedSavedDialogs, IBool>,
@@ -11,6 +10,6 @@ internal sealed class ReorderPinnedSavedDialogsHandler : RpcResultObjectHandler<
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestReorderPinnedSavedDialogs obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

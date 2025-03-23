@@ -1,11 +1,10 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Langpack;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
 
 ///<summary>
 /// Get localization pack strings
 /// <para>Possible errors</para>
 /// Code Type Description
+/// 400 LANGUAGE_INVALID The specified lang_code is invalid.
 /// 400 LANG_CODE_NOT_SUPPORTED The specified language code is not supported.
 /// 400 LANG_PACK_INVALID The provided language pack is invalid.
 /// See <a href="https://corefork.telegram.org/method/langpack.getLangPack" />
@@ -30,11 +29,11 @@ internal sealed class GetLangPackHandler(ILanguageCacheService languageCacheServ
             FromVersion = 0,
             LangCode = obj.LangCode,
             Version = languageReadModel!.LanguageVersion,
-            Strings = new TVector<ILangPackString>(texts.Select(p => new TLangPackString
+            Strings = [.. texts.Select(p => new TLangPackString
             {
                 Key = p.Key,
                 Value = p.Value
-            }))
+            })]
         };
 
         return langPackDifference;

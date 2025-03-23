@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Save a theme
@@ -12,6 +12,6 @@ internal sealed class SaveThemeHandler : RpcResultObjectHandler<MyTelegram.Schem
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestSaveTheme obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

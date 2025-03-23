@@ -34,7 +34,7 @@ public class MyEventStoreBase(
 
         if (uncommittedDomainEvents == null || uncommittedDomainEvents.Count == 0)
         {
-            return [];
+            return Array.Empty<IDomainEvent<TAggregate, TIdentity>>();
         }
 
         var aggregateType = typeof(TAggregate);

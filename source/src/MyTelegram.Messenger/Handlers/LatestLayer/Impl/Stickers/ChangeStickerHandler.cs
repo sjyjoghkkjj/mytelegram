@@ -1,12 +1,9 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Stickers;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stickers;
 
 ///<summary>
-/// Update the keywords, emojis or <a href="https://corefork.telegram.org/api/stickers#mask-stickers">mask coordinates</a> of a sticker, bots only.
+/// Update the keywords, emojis or <a href="https://corefork.telegram.org/api/stickers#mask-stickers">mask coordinates</a> of a sticker.
 /// <para>Possible errors</para>
 /// Code Type Description
-/// 400 BOT_MISSING Only bots can call this method, please use <a href="https://t.me/stickers">@stickers</a> if you're a user.
 /// 400 STICKER_INVALID The provided sticker is invalid.
 /// See <a href="https://corefork.telegram.org/method/stickers.changeSticker" />
 ///</summary>

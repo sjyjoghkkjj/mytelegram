@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Get <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a> messages
@@ -17,7 +15,7 @@ internal sealed class GetMessagesHandler(
     IMessageAppService messageAppService,
     IAccessHashHelper accessHashHelper,
     IChannelAppService channelAppService,
-    ILayeredService<IRpcResultProcessor> layeredService)
+    IGetHistoryConverterService getHistoryConverterService)
     : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestGetMessages, MyTelegram.Schema.Messages.IMessages>,
         Channels.IGetMessagesHandler
 {
@@ -53,7 +51,7 @@ internal sealed class GetMessagesHandler(
             }
         }
 
-        var dto = await messageAppService
+        var getMessageOutput = await messageAppService
             .GetMessagesAsync(
                 new GetMessagesInput(input.UserId,
                     channelId,
@@ -61,6 +59,6 @@ internal sealed class GetMessagesHandler(
                     new Peer(PeerType.Channel, channelId))
                 { Limit = 50 });
 
-        return layeredService.GetConverter(input.Layer).ToMessages(dto, input.Layer);
+        return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
     }
 }

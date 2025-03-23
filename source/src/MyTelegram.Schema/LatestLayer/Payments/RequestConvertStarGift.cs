@@ -7,20 +7,11 @@ namespace MyTelegram.Schema.Payments;
 /// Convert a <a href="https://corefork.telegram.org/api/gifts">received gift »</a> into Telegram Stars: this will permanently destroy the gift, converting it into <a href="https://corefork.telegram.org/constructor/starGift">starGift</a>.<code>convert_stars</code> <a href="https://corefork.telegram.org/api/stars">Telegram Stars</a>, added to the user's balance.Note that <a href="https://corefork.telegram.org/constructor/starGift">starGift</a>.<code>convert_stars</code> will be less than the buying price (<a href="https://corefork.telegram.org/constructor/starGift">starGift</a>.<code>stars</code>) of the gift if it was originally bought using Telegram Stars bought a long time ago.
 /// See <a href="https://corefork.telegram.org/method/payments.convertStarGift" />
 ///</summary>
-[TlObject(0x421e027)]
+[TlObject(0x74bf076b)]
 public sealed class RequestConvertStarGift : IRequest<IBool>
 {
-    public uint ConstructorId => 0x421e027;
-    ///<summary>
-    /// ID of the user that sent us the gift.
-    /// See <a href="https://corefork.telegram.org/type/InputUser" />
-    ///</summary>
-    public MyTelegram.Schema.IInputUser UserId { get; set; }
-
-    ///<summary>
-    /// The ID of the <a href="https://corefork.telegram.org/constructor/messageService">messageService</a> with the <a href="https://corefork.telegram.org/constructor/messageActionStarGift">messageActionStarGift</a>.
-    ///</summary>
-    public int MsgId { get; set; }
+    public uint ConstructorId => 0x74bf076b;
+    public MyTelegram.Schema.IInputSavedStarGift Stargift { get; set; }
 
     public void ComputeFlag()
     {
@@ -31,13 +22,11 @@ public sealed class RequestConvertStarGift : IRequest<IBool>
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(UserId);
-        writer.Write(MsgId);
+        writer.Write(Stargift);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        MsgId = reader.ReadInt32();
+        Stargift = reader.Read<MyTelegram.Schema.IInputSavedStarGift>();
     }
 }

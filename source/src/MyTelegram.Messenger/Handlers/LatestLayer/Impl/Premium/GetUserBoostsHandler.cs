@@ -2,9 +2,13 @@
 
 using MyTelegram.Schema.Premium;
 
-namespace MyTelegram.Handlers.Premium;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Premium;
 
 ///<summary>
+/// Returns the lists of boost that were applied to a channel/supergroup by a specific user (admins only)
+/// <para>Possible errors</para>
+/// Code Type Description
+/// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/premium.getUserBoosts" />
 ///</summary>
 internal sealed class GetUserBoostsHandler : RpcResultObjectHandler<MyTelegram.Schema.Premium.RequestGetUserBoosts, MyTelegram.Schema.Premium.IBoostsList>,
@@ -15,8 +19,8 @@ internal sealed class GetUserBoostsHandler : RpcResultObjectHandler<MyTelegram.S
     {
         return Task.FromResult<MyTelegram.Schema.Premium.IBoostsList>(new TBoostsList
         {
-            Boosts = new(),
-            Users = new(),
+            Boosts = [],
+            Users = [],
         });
     }
 }

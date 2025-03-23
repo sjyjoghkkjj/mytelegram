@@ -16,8 +16,8 @@ public class
             command.Date,
             command.IsBot,
             command.ChatInviteId,
-            command.IsBroadcast,
-            command.ChatJoinType
+            command.ChatJoinType,
+            command.IsBroadcast
             );
         return Task.CompletedTask;
     }

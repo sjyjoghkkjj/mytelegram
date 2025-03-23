@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Chatlists;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Chatlists;
 
 ///<summary>
 /// Import a <a href="https://corefork.telegram.org/api/links#chat-folder-links">chat folder deep link »</a>, joining some or all the chats in the folder.

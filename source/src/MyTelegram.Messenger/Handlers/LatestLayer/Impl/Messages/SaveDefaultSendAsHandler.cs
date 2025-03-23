@@ -1,9 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
-/// Change the default peer that should be used when sending messages to a specific group
+/// Change the default peer that should be used when sending messages, reactions, poll votes to a specific group
 /// <para>Possible errors</para>
 /// Code Type Description
 /// 400 PEER_ID_INVALID The provided peer id is invalid.

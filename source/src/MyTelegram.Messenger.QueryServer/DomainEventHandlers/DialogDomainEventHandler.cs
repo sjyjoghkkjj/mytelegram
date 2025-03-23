@@ -10,11 +10,7 @@ public class DialogDomainEventHandler(
     IAckCacheService ackCacheService,
     IResponseCacheAppService responseCacheAppService,
     IObjectMapper objectMapper)
-    : DomainEventHandlerBase(objectMessageSender,
-            commandBus,
-            idGenerator,
-            ackCacheService,
-            responseCacheAppService),
+    : DomainEventHandlerBase(objectMessageSender, commandBus, idGenerator, ackCacheService),
         ISubscribeSynchronousTo<DialogAggregate, DialogId, ChannelHistoryClearedEvent>,
         ISubscribeSynchronousTo<DialogAggregate, DialogId, DialogPinChangedEvent>,
         ISubscribeSynchronousTo<DialogFilterAggregate, DialogFilterId, DialogFilterUpdatedEvent>,

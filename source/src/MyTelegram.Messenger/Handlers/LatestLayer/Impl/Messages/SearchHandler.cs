@@ -1,9 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
-/// Returns found messages
+/// Search for messages.
 /// <para>Possible errors</para>
 /// Code Type Description
 /// 400 CHANNEL_INVALID The provided channel is invalid.
@@ -20,40 +18,28 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 USER_ID_INVALID The provided user ID is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.search" />
 ///</summary>
-internal sealed class SearchHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSearch, MyTelegram.Schema.Messages.IMessages>,
-    Messages.ISearchHandler
+internal sealed class SearchHandler(
+    IMessageAppService messageAppService,
+    IPeerHelper peerHelper,
+    IAccessHashHelper accessHashHelper,
+    IGetHistoryConverterService getHistoryConverterService
+    )
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSearch, IMessages>,
+        ISearchHandler
 {
-    private readonly IMessageAppService _messageAppService;
-    private readonly IPeerHelper _peerHelper;
-    //private readonly IRpcResultProcessor _rpcResultProcessor;
-    private readonly IAccessHashHelper _accessHashHelper;
-    private readonly ILayeredService<IRpcResultProcessor> _layeredService;
-    public SearchHandler(IMessageAppService messageAppService,
-        IPeerHelper peerHelper,
-        //IRpcResultProcessor rpcResultProcessor,
-        IAccessHashHelper accessHashHelper,
-        ILayeredService<IRpcResultProcessor> layeredService)
-    {
-        _messageAppService = messageAppService;
-        _peerHelper = peerHelper;
-        //_rpcResultProcessor = rpcResultProcessor;
-        _accessHashHelper = accessHashHelper;
-        _layeredService = layeredService;
-    }
-
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSearch obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await _accessHashHelper.CheckAccessHashAsync(obj.FromId);
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(obj.FromId);
         var userId = input.UserId;
-        var peer = _peerHelper.GetPeer(obj.Peer, userId);
+        var peer = peerHelper.GetPeer(obj.Peer, userId);
 
-        var ownerUid = peer.PeerType == PeerType.Channel ? peer.PeerId : userId;
+        var ownerPeerId = peer.PeerType == PeerType.Channel ? peer.PeerId : userId;
 
-        var r = await _messageAppService.SearchAsync(new SearchInput
+        var getMessageOutput = await messageAppService.SearchAsync(new SearchInput
         {
-            OwnerPeerId = ownerUid,
+            OwnerPeerId = ownerPeerId,
             SelfUserId = userId,
             Limit = obj.Limit,
             Q = obj.Q,
@@ -66,14 +52,11 @@ internal sealed class SearchHandler : RpcResultObjectHandler<MyTelegram.Schema.M
             MinId = obj.MinId,
             MessageType = GetMessageType(obj.Filter)
         });
-
-        //return _rpcResultProcessor.ToMessages(r, input.Layer);
-        return _layeredService.GetConverter(input.Layer).ToMessages(r, input.Layer);
+        return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
     }
 
     private static MessageType GetMessageType(IMessagesFilter? filter)
     {
-        //Expression<Func<MessageBox, bool>> predicate = null;
         if (filter != null)
         {
             var messageType = MessageType.Unknown;
@@ -154,13 +137,8 @@ internal sealed class SearchHandler : RpcResultObjectHandler<MyTelegram.Schema.M
             }
 
             return messageType;
-            //if (MessageType != MessageType.Unknown)
-            //{
-            //    predicate = x => x.MessageType == MessageType;
-            //}
         }
 
         return MessageType.Unknown;
-        //return predicate;
     }
 }

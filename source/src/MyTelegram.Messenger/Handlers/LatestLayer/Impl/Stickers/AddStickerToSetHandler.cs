@@ -1,12 +1,9 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Stickers;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stickers;
 
 ///<summary>
-/// Add a sticker to a stickerset, bots only. The sticker set must have been created by the bot.
+/// Add a sticker to a stickerset. The sticker set must have been created by the current user/bot.
 /// <para>Possible errors</para>
 /// Code Type Description
-/// 400 BOT_MISSING Only bots can call this method, please use <a href="https://t.me/stickers">@stickers</a> if you're a user.
 /// 400 STICKERPACK_STICKERS_TOO_MUCH There are too many stickers in this stickerpack, you can't add any more.
 /// 406 STICKERSET_INVALID The provided sticker set is invalid.
 /// 400 STICKERS_TOO_MUCH There are too many stickers in this stickerpack, you can't add any more.

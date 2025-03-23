@@ -8,7 +8,7 @@ namespace MyTelegram.Schema;
 /// See <a href="https://corefork.telegram.org/constructor/dialog" />
 ///</summary>
 [TlObject(0xd58a08c6)]
-public sealed class TDialog : IDialog
+public sealed class TDialog : ILayeredDialog
 {
     public uint ConstructorId => 0xd58a08c6;
     ///<summary>

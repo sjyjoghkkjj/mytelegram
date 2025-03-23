@@ -1,8 +1,4 @@
-﻿// ReSharper disable All
-
-using NotSupportedException = System.NotSupportedException;
-
-namespace MyTelegram.Handlers.Channels.LayerN;
+﻿namespace  MyTelegram.Handlers.Channels.LayerN;
 
 ///<summary>
 /// Get info about a <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a> participant
@@ -17,26 +13,14 @@ namespace MyTelegram.Handlers.Channels.LayerN;
 /// 400 USER_NOT_PARTICIPANT You're not a member of this supergroup/channel.
 /// See <a href="https://corefork.telegram.org/method/channels.getParticipant" />
 ///</summary>
-internal sealed class GetParticipantHandler(IHandlerHelper handlerHelper)
-    : ForwardRequestToNewHandler<MyTelegram.Schema.Channels.LayerN.RequestGetParticipant,
-            MyTelegram.Schema.Channels.RequestGetParticipant>(handlerHelper),
+internal sealed class GetParticipantHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Channels.LayerN.RequestGetParticipant,
+        MyTelegram.Schema.Channels.RequestGetParticipant> dataConverter)
+    : ForwardRequestToNewHandler<
+            MyTelegram.Schema.Channels.LayerN.RequestGetParticipant,
+            MyTelegram.Schema.Channels.RequestGetParticipant
+        >(handlerHelper, dataConverter),
         Channels.LayerN.IGetParticipantHandler
 {
-    protected override RequestGetParticipant GetNewData(IRequestInput input, Schema.Channels.LayerN.RequestGetParticipant obj)
-    {
-        if (obj.UserId is TInputUser inputUser)
-        {
-            return new RequestGetParticipant
-            {
-                Channel = obj.Channel,
-                Participant = new TInputPeerUser
-                {
-                    UserId = inputUser.UserId,
-                    AccessHash = inputUser.AccessHash
-                }
-            };
-        }
-
-        throw new NotSupportedException();
-    }
 }

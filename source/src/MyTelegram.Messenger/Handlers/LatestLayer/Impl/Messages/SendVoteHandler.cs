@@ -1,9 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
-/// Vote in a <a href="https://corefork.telegram.org/constructor/poll">poll</a>
+/// Vote in a <a href="https://corefork.telegram.org/constructor/poll">poll</a>Starting from layer 159, the vote will be sent from the peer specified using <a href="https://corefork.telegram.org/method/messages.saveDefaultSendAs">messages.saveDefaultSendAs</a>.
 /// <para>Possible errors</para>
 /// Code Type Description
 /// 400 CHANNEL_INVALID The provided channel is invalid.
@@ -17,31 +15,21 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 REVOTE_NOT_ALLOWED You cannot change your vote.
 /// See <a href="https://corefork.telegram.org/method/messages.sendVote" />
 ///</summary>
-internal sealed class SendVoteHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendVote, MyTelegram.Schema.IUpdates>,
-    Messages.ISendVoteHandler
+internal sealed class SendVoteHandler(
+    ICommandBus commandBus,
+    IQueryProcessor queryProcessor,
+    IPeerHelper peerHelper,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendVote, MyTelegram.Schema.IUpdates>,
+        Messages.ISendVoteHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public SendVoteHandler(ICommandBus commandBus,
-        IQueryProcessor queryProcessor,
-        IPeerHelper peerHelper,
-        IAccessHashHelper accessHashHelper)
-    {
-        _commandBus = commandBus;
-        _queryProcessor = queryProcessor;
-        _peerHelper = peerHelper;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestSendVote obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
 
-        var peer = _peerHelper.GetPeer(obj.Peer);
-        var pollId = await _queryProcessor.ProcessAsync(new GetPollIdByMessageIdQuery(peer.PeerId, obj.MsgId), default);
+        var peer = peerHelper.GetPeer(obj.Peer);
+        var pollId = await queryProcessor.ProcessAsync(new GetPollIdByMessageIdQuery(peer.PeerId, obj.MsgId), default);
         if (pollId == null)
         {
             RpcErrors.RpcErrors400.MessageIdInvalid.ThrowRpcError();
@@ -51,7 +39,7 @@ internal sealed class SendVoteHandler : RpcResultObjectHandler<MyTelegram.Schema
             input.ToRequestInfo(),
             input.UserId,
             obj.Options.Select(p => Encoding.UTF8.GetString(p)).ToList());
-        await _commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command, default);
 
         return null!;
     }

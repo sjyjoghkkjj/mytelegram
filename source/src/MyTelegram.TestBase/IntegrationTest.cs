@@ -1,4 +1,5 @@
-﻿using EventFlow;
+﻿using System.Text.Json;
+using EventFlow;
 using EventFlow.Aggregates;
 using EventFlow.EventStores;
 using EventFlow.Extensions;
@@ -14,6 +15,19 @@ namespace MyTelegram.TestBase;
 
 public abstract class IntegrationTest : MyTelegramTestBase, IDisposable
 {
+    protected IServiceProvider ServiceProvider { get; }
+    protected IAggregateStore AggregateStore { get; }
+    protected IEventStore EventStore { get; }
+    protected ISnapshotStore SnapshotStore { get; }
+    protected ISnapshotPersistence SnapshotPersistence { get; }
+    protected ISnapshotDefinitionService SnapshotDefinitionService { get; }
+    protected IEventPersistence EventPersistence { get; }
+    protected IQueryProcessor QueryProcessor { get; }
+    protected ICommandBus CommandBus { get; }
+    protected ISagaStore SagaStore { get; }
+    protected IReadModelPopulator ReadModelPopulator { get; }
+    protected ILogger Logger { get; }
+
     protected IntegrationTest()
     {
         ServiceProvider = CreateServiceProvider();
@@ -30,39 +44,22 @@ public abstract class IntegrationTest : MyTelegramTestBase, IDisposable
         Logger = ServiceProvider.GetRequiredService<ILogger<IntegrationTest>>();
     }
 
-    protected IServiceProvider ServiceProvider { get; }
-    protected IAggregateStore AggregateStore { get; }
-    protected IEventStore EventStore { get; }
-    protected ISnapshotStore SnapshotStore { get; }
-    protected ISnapshotPersistence SnapshotPersistence { get; }
-    protected ISnapshotDefinitionService SnapshotDefinitionService { get; }
-    protected IEventPersistence EventPersistence { get; }
-    protected IQueryProcessor QueryProcessor { get; }
-    protected ICommandBus CommandBus { get; }
-    protected ISagaStore SagaStore { get; }
-    protected IReadModelPopulator ReadModelPopulator { get; }
-    protected ILogger Logger { get; }
-
-    public void Dispose()
-    {
-        ((IDisposable)ServiceProvider).Dispose();
-    }
-
-    protected virtual IServiceProvider Configure(IEventFlowOptions options)
-    {
-        return options.ServiceCollection.BuildServiceProvider();
-    }
-
     private IServiceProvider CreateServiceProvider()
     {
         var eventFlowOptions = Options(EventFlowOptions.New())
                 .AddDefaults(typeof(IntegrationTest).Assembly)
             ;
+        
         return Configure(eventFlowOptions);
     }
 
-    protected virtual IEventFlowOptions Options(IEventFlowOptions options)
+    protected virtual IEventFlowOptions Options(IEventFlowOptions options) => options;
+
+    protected virtual IServiceProvider Configure(IEventFlowOptions options) =>
+        options.ServiceCollection.BuildServiceProvider();
+
+    public void Dispose()
     {
-        return options;
+        ((IDisposable)ServiceProvider).Dispose();
     }
 }

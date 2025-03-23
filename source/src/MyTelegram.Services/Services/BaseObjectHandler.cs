@@ -1,6 +1,4 @@
-﻿using MyTelegram.Schema;
-
-namespace MyTelegram.Services.Services;
+﻿namespace MyTelegram.Services.Services;
 
 public abstract class BaseObjectHandler<TInput, TOutput> : IObjectHandler, ITransientDependency
     where TInput : IRequest<TOutput>

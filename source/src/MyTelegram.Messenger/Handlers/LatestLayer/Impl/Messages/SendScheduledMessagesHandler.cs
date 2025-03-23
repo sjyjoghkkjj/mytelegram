@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Send scheduled messages right away
@@ -16,6 +16,12 @@ internal sealed class SendScheduledMessagesHandler : RpcResultObjectHandler<MyTe
     protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSendScheduledMessages obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IUpdates>(new TUpdates
+        {
+            Updates = [],
+            Chats = [],
+            Users = [],
+            Date = CurrentDate
+        });
     }
 }

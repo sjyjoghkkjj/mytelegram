@@ -33,8 +33,18 @@ public class ChannelSnapshot(
     int participantCount,
     PeerColor? color,
     bool hasLink,
-    bool isDeleted
-    )
+    bool isDeleted,
+    long? wallPaperId,
+    string? themeEmoticon,
+    WallPaperSettings? wallPaperSettings,
+    bool isGeoGroup,
+    int topMessageId,
+    long? stickerSetId,
+    long? emojiStickerSetId,
+    EmojiStatus? emojiStatus,
+    bool participantsHidden,
+    bool joinRequest
+)
     : ISnapshot
 {
     //bool megaGroup,
@@ -82,4 +92,14 @@ public class ChannelSnapshot(
     public PeerColor? Color { get; } = color;
     public bool HasLink { get; } = hasLink;
     public bool IsDeleted { get; } = isDeleted;
+    public long? WallPaperId { get; } = wallPaperId;
+    public string? ThemeEmoticon { get; } = themeEmoticon;
+    public WallPaperSettings? WallPaperSettings { get; } = wallPaperSettings;
+    public bool IsGeoGroup { get; } = isGeoGroup;
+    public int TopMessageId { get; } = topMessageId;
+    public long? StickerSetId { get; } = stickerSetId;
+    public long? EmojiStickerSetId { get; } = emojiStickerSetId;
+    public EmojiStatus? EmojiStatus { get; } = emojiStatus;
+    public bool ParticipantsHidden { get; } = participantsHidden;
+    public bool JoinRequest { get; } = joinRequest;
 }

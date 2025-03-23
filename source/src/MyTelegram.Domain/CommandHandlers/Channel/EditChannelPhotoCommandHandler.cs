@@ -8,8 +8,7 @@ public class EditChannelPhotoCommandHandler : CommandHandler<ChannelAggregate, C
     {
         aggregate.EditPhoto(command.RequestInfo,
             command.FileId,
-            //command.Photo,
-            command.MessageActionData,
+            command.MessageAction,
             command.RandomId);
         return Task.CompletedTask;
     }

@@ -109,10 +109,7 @@ builder.ConfigureServices((ctx,
     });
 
     services.AddMyTelegramMessengerCommandServer();
-
     services.AddHostedService<MyTelegramCommandServerBackgroundService>();
-    //services.AddHostedService<DataProcessorBackgroundService>();
-    //services.AddHostedService<ObjectMessageSenderBackgroundService>();
     services.AddHostedService<MyTelegramInvokeAfterMsgProcessorBackgroundService>();
 
     services.AddHostedService<MessageQueueDataProcessorBackgroundService<MessengerCommandDataReceivedEvent>>();
@@ -130,7 +127,7 @@ builder.ConfigureServices((ctx,
 
 
 var app = builder.Build();
-
 var eventBus = app.Services.GetRequiredService<IEventBus>();
 eventBus.ConfigureEventBus();
+
 await app.RunAsync();

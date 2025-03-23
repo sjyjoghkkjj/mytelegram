@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Set sensitive content settings (for viewing or hiding NSFW content)
@@ -15,6 +15,6 @@ internal sealed class SetContentSettingsHandler : RpcResultObjectHandler<MyTeleg
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestSetContentSettings obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

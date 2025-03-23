@@ -98,8 +98,10 @@ public class PollAggregate : AggregateRoot<PollAggregate, PollId>
         IReadOnlyCollection<PollAnswer> answers,
         IReadOnlyCollection<string>? correctAnswers,
         string? solution,
-        byte[]? solutionEntities,
-        byte[]? questionEntities
+        //byte[]? solutionEntities,
+        //byte[]? questionEntities
+        IList<IMessageEntity>? solutionEntities,
+        IList<IMessageEntity>? questionEntities
         )
     {
         Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
@@ -117,7 +119,9 @@ public class PollAggregate : AggregateRoot<PollAggregate, PollId>
             answers.ToList(),
             correctAnswers,
             solution,
+            null,
             solutionEntities,
+            null,
             questionEntities
             ));
     }

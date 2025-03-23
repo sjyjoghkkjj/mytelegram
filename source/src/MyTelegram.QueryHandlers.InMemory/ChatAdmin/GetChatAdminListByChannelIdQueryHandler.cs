@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MyTelegram.QueryHandlers.InMemory.ChatAdmin;
+﻿namespace MyTelegram.QueryHandlers.InMemory.ChatAdmin;
 
 public class GetChatAdminListByChannelIdQueryHandler(IQueryOnlyReadModelStore<ChatAdminReadModel> store) : IQueryHandler<GetChatAdminListByChannelIdQuery,
     IReadOnlyCollection<IChatAdminReadModel>>

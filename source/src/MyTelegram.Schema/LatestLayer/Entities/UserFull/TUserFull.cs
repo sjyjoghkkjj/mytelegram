@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Extended user infoWhen updating the <a href="https://corefork.telegram.org/api/peers">local peer database »</a>, all fields from the newly received constructor take priority over the old constructor cached locally (including by removing fields that aren't set in the new constructor).
 /// See <a href="https://corefork.telegram.org/constructor/userFull" />
 ///</summary>
-[TlObject(0x979d2376)]
+[TlObject(0xd2234ea0)]
 public sealed class TUserFull : IUserFull
 {
-    public uint ConstructorId => 0x979d2376;
+    public uint ConstructorId => 0xd2234ea0;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -206,11 +206,6 @@ public sealed class TUserFull : IUserFull
     public MyTelegram.Schema.IChatAdminRights? BotBroadcastAdminRights { get; set; }
 
     ///<summary>
-    /// Telegram Premium subscriptions gift options
-    ///</summary>
-    public TVector<MyTelegram.Schema.IPremiumGiftOption>? PremiumGifts { get; set; }
-
-    ///<summary>
     /// <a href="https://corefork.telegram.org/api/wallpapers">Wallpaper</a> to use in the private chat with the user.
     /// See <a href="https://corefork.telegram.org/type/WallPaper" />
     ///</summary>
@@ -278,6 +273,8 @@ public sealed class TUserFull : IUserFull
     /// See <a href="https://corefork.telegram.org/type/StarRefProgram" />
     ///</summary>
     public MyTelegram.Schema.IStarRefProgram? StarrefProgram { get; set; }
+    public MyTelegram.Schema.IBotVerification? BotVerification { get; set; }
+    public long? SendPaidMessagesStars { get; set; }
 
     public void ComputeFlag()
     {
@@ -309,7 +306,6 @@ public sealed class TUserFull : IUserFull
         if (PrivateForwardName != null) { Flags[16] = true; }
         if (BotGroupAdminRights != null) { Flags[17] = true; }
         if (BotBroadcastAdminRights != null) { Flags[18] = true; }
-        if (PremiumGifts?.Count > 0) { Flags[19] = true; }
         if (Wallpaper != null) { Flags[24] = true; }
         if (Stories != null) { Flags[25] = true; }
         if (BusinessWorkHours != null) { Flags2[0] = true; }
@@ -322,6 +318,8 @@ public sealed class TUserFull : IUserFull
         if (/*PersonalChannelMessage != 0 && */PersonalChannelMessage.HasValue) { Flags2[6] = true; }
         if (/*StargiftsCount != 0 && */StargiftsCount.HasValue) { Flags2[8] = true; }
         if (StarrefProgram != null) { Flags2[11] = true; }
+        if (BotVerification != null) { Flags2[12] = true; }
+        if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2[14] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -346,7 +344,6 @@ public sealed class TUserFull : IUserFull
         if (Flags[16]) { writer.Write(PrivateForwardName); }
         if (Flags[17]) { writer.Write(BotGroupAdminRights); }
         if (Flags[18]) { writer.Write(BotBroadcastAdminRights); }
-        if (Flags[19]) { writer.Write(PremiumGifts); }
         if (Flags[24]) { writer.Write(Wallpaper); }
         if (Flags[25]) { writer.Write(Stories); }
         if (Flags2[0]) { writer.Write(BusinessWorkHours); }
@@ -359,6 +356,8 @@ public sealed class TUserFull : IUserFull
         if (Flags2[6]) { writer.Write(PersonalChannelMessage.Value); }
         if (Flags2[8]) { writer.Write(StargiftsCount.Value); }
         if (Flags2[11]) { writer.Write(StarrefProgram); }
+        if (Flags2[12]) { writer.Write(BotVerification); }
+        if (Flags2[14]) { writer.Write(SendPaidMessagesStars.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -397,7 +396,6 @@ public sealed class TUserFull : IUserFull
         if (Flags[16]) { PrivateForwardName = reader.ReadString(); }
         if (Flags[17]) { BotGroupAdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>(); }
         if (Flags[18]) { BotBroadcastAdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>(); }
-        if (Flags[19]) { PremiumGifts = reader.Read<TVector<MyTelegram.Schema.IPremiumGiftOption>>(); }
         if (Flags[24]) { Wallpaper = reader.Read<MyTelegram.Schema.IWallPaper>(); }
         if (Flags[25]) { Stories = reader.Read<MyTelegram.Schema.IPeerStories>(); }
         if (Flags2[0]) { BusinessWorkHours = reader.Read<MyTelegram.Schema.IBusinessWorkHours>(); }
@@ -410,5 +408,7 @@ public sealed class TUserFull : IUserFull
         if (Flags2[6]) { PersonalChannelMessage = reader.ReadInt32(); }
         if (Flags2[8]) { StargiftsCount = reader.ReadInt32(); }
         if (Flags2[11]) { StarrefProgram = reader.Read<MyTelegram.Schema.IStarRefProgram>(); }
+        if (Flags2[12]) { BotVerification = reader.Read<MyTelegram.Schema.IBotVerification>(); }
+        if (Flags2[14]) { SendPaidMessagesStars = reader.ReadInt64(); }
     }
 }

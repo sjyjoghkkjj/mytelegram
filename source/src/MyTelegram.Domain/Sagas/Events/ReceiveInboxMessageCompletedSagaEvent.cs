@@ -3,7 +3,7 @@
 public class ReceiveInboxMessageCompletedSagaEvent(List<MessageItem> messageItems,
     bool isSendQuickReplyMessages,
     bool isSendGroupedMessages
-)
+    )
     : AggregateEvent<SendMessageSaga, SendMessageSagaId>
 {
     public MessageItem MessageItem => MessageItems.Last();

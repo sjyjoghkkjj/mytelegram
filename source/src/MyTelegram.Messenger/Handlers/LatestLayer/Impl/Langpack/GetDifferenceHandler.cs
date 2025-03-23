@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Langpack;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
 
 ///<summary>
 /// Get new strings in language pack
@@ -23,11 +21,11 @@ internal sealed class GetDifferenceHandler(ILanguageCacheService languageCacheSe
         {
             FromVersion = obj.FromVersion,
             LangCode = obj.LangCode,
-            Strings = new(texts.Select(p => new TLangPackString
+            Strings = [.. texts.Select(p => new TLangPackString
             {
                 Key = p.Key,
                 Value = p.Value
-            })),
+            })],
             Version = version
         };
 

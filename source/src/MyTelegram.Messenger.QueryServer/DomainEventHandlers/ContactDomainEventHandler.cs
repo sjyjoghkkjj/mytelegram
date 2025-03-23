@@ -1,7 +1,4 @@
-﻿using MyTelegram.Messenger.Services.Caching;
-using MyTelegram.Messenger.Services.Interfaces;
-using MyTelegram.Messenger.TLObjectConverters.Interfaces;
-using MyTelegram.Services.TLObjectConverters;
+﻿using MyTelegram.Messenger.Services.Interfaces;
 using TPeerSettings = MyTelegram.Schema.TPeerSettings;
 using TPhoto = MyTelegram.Schema.Photos.TPhoto;
 
@@ -12,18 +9,14 @@ public class ContactDomainEventHandler(
     ICommandBus commandBus,
     IIdGenerator idGenerator,
     IAckCacheService ackCacheService,
-    IResponseCacheAppService responseCacheAppService,
-    IQueryProcessor queryProcessor,
-    ILayeredService<IUserConverter> layeredUserService,
+    IUserConverterService userConverterService,
     IPhotoAppService photoAppService,
-    ILayeredService<IPhotoConverter> layeredPhotoService,
-    IUserAppService userAppService,
-    IPrivacyAppService privacyAppService)
+    ILayeredService<IPhotoConverter> photoLayeredService
+    )
     : DomainEventHandlerBase(objectMessageSender,
             commandBus,
             idGenerator,
-            ackCacheService,
-            responseCacheAppService),
+            ackCacheService),
         ISubscribeSynchronousTo<ContactAggregate, ContactId, ContactAddedEvent>,
         ISubscribeSynchronousTo<ContactAggregate, ContactId, ContactDeletedEvent>,
         ISubscribeSynchronousTo<ImportContactsSaga, ImportContactsSagaId, ImportContactsCompletedSagaEvent>,
@@ -32,14 +25,15 @@ public class ContactDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<ContactAggregate, ContactId, ContactAddedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var targetUser = await userAppService.GetAsync(domainEvent.AggregateEvent.TargetUserId);
-        var photos = await photoAppService.GetPhotosAsync(targetUser);
-        var privacyReadModels = await privacyAppService.GetPrivacyListAsync(domainEvent.AggregateEvent.TargetUserId);
-        var tUser = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-            .ToUser(domainEvent.AggregateEvent.SelfUserId, targetUser!, photos, null, privacyReadModels);
-        tUser.Contact = true;
-        tUser.FirstName = domainEvent.AggregateEvent.FirstName;
-        tUser.LastName = domainEvent.AggregateEvent.LastName;
+        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.SelfUserId,
+            domainEvent.AggregateEvent.TargetUserId,
+            true,
+            false,
+            domainEvent.AggregateEvent.RequestInfo.Layer
+        );
+        user.Contact = true;
+        user.FirstName = domainEvent.AggregateEvent.FirstName;
+        user.LastName = domainEvent.AggregateEvent.LastName;
 
         var r = new TUpdates
         {
@@ -51,7 +45,7 @@ public class ContactDomainEventHandler(
                 Peer = new TPeerUser { UserId = domainEvent.AggregateEvent.TargetUserId },
                 Settings = new TPeerSettings { NeedContactsException = false }
             }),
-            Users = new TVector<IUser>(tUser)
+            Users = new TVector<IUser>(user)
         };
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, r);
     }
@@ -59,11 +53,11 @@ public class ContactDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<ContactAggregate, ContactId, ContactDeletedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var targetUser = await userAppService.GetAsync(domainEvent.AggregateEvent.TargetUid);
-        var photos = await photoAppService.GetPhotosAsync(targetUser);
-        var privacyList = await privacyAppService.GetPrivacyListAsync(domainEvent.AggregateEvent.TargetUid);
-        var tUser = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-            .ToUser(domainEvent.AggregateEvent.RequestInfo.UserId, targetUser!, photos, null, privacyList);
+        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+            domainEvent.AggregateEvent.TargetUid,
+            true, false,
+            domainEvent.AggregateEvent.RequestInfo.Layer
+        );
 
         var r = new TUpdates
         {
@@ -75,7 +69,7 @@ public class ContactDomainEventHandler(
                 Peer = new TPeerUser { UserId = domainEvent.AggregateEvent.TargetUid },
                 Settings = new TPeerSettings()
             }),
-            Users = new TVector<IUser>(tUser)
+            Users = new TVector<IUser>(user)
         };
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, r);
     }
@@ -84,23 +78,19 @@ public class ContactDomainEventHandler(
         IDomainEvent<ContactAggregate, ContactId, ContactProfilePhotoChangedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var userReadModel = await userAppService.GetAsync(domainEvent.AggregateEvent.TargetUserId);
-        var privacyList = await privacyAppService.GetPrivacyListAsync(domainEvent.AggregateEvent.TargetUserId);
-        var photoReadModels = await photoAppService.GetPhotosAsync(userReadModel);
+        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.SelfUserId,
+            domainEvent.AggregateEvent.TargetUserId,
+            false,
+            false,
+            domainEvent.AggregateEvent.RequestInfo.Layer
+        );
         var photoReadModel = await photoAppService.GetAsync(domainEvent.AggregateEvent.PhotoId);
-        var contactReadModel =
-            await queryProcessor.ProcessAsync(
-                new GetContactQuery(domainEvent.AggregateEvent.RequestInfo.UserId,
-                    domainEvent.AggregateEvent.TargetUserId), cancellationToken);
-
-        var user = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-            .ToUser(domainEvent.AggregateEvent.SelfUserId, userReadModel!, photoReadModels, contactReadModel,
-                privacyList);
+        var photo = photoLayeredService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
+            .ToPhoto(photoReadModel);
         var r = new TPhoto
         {
             Users = new TVector<IUser>(user),
-            Photo = layeredPhotoService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-                .ToPhoto(photoReadModel)
+            Photo = photo
         };
 
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, r);
@@ -114,19 +104,11 @@ public class ContactDomainEventHandler(
             .Where(p => p.UserId > 0)
             .Select(p => new TImportedContact { ClientId = p.ClientId, UserId = p.UserId }).ToList();
         var userIds = importedContacts.Select(p => p.UserId).ToList();
-        var userReadModels =
-            await queryProcessor.ProcessAsync(
-                new GetUsersByUserIdListQuery(userIds), cancellationToken);
-        var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels);
-        var privacyReadModels = await privacyAppService.GetPrivacyListAsync(userIds);
-        var contactReadModels =
-            await queryProcessor.ProcessAsync(new GetContactListQuery(domainEvent.AggregateEvent.RequestInfo.UserId,
-                userIds), cancellationToken);
+        var users = await userConverterService.GetUserListAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+            userIds, true, false, domainEvent.AggregateEvent.RequestInfo.Layer
+        );
 
-        var userList = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).ToUserList(
-            domainEvent.AggregateEvent.RequestInfo.UserId, userReadModels, photoReadModels, contactReadModels,
-            privacyReadModels);
-        foreach (var layeredUser in userList)
+        foreach (var layeredUser in users)
         {
             layeredUser.Contact = true;
         }
@@ -136,7 +118,7 @@ public class ContactDomainEventHandler(
             Imported = new TVector<IImportedContact>(importedContacts),
             PopularInvites = new TVector<IPopularContact>(),
             RetryContacts = new TVector<long>(),
-            Users = new TVector<IUser>(userList)
+            Users = new TVector<IUser>(users)
         };
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, r);
 
@@ -157,8 +139,8 @@ public class ContactDomainEventHandler(
         await PushMessageToPeerAsync(domainEvent.AggregateEvent.RequestInfo.UserId.ToUserPeer(), new TUpdates
         {
             Updates = new TVector<IUpdate>(updates),
-            Users = new TVector<IUser>(userList),
-            Chats = new TVector<IChat>(),
+            Users = new TVector<IUser>(users),
+            Chats = [],
             Date = DateTime.Now.ToTimestamp()
         });
     }

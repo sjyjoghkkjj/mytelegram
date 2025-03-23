@@ -1,8 +1,4 @@
-﻿// ReSharper disable All
-
-using RequestGetMessages = MyTelegram.Schema.Channels.RequestGetMessages;
-
-namespace MyTelegram.Handlers.Channels.LayerN;
+﻿namespace  MyTelegram.Handlers.Channels.LayerN;
 
 ///<summary>
 /// Get <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a> messages
@@ -15,20 +11,14 @@ namespace MyTelegram.Handlers.Channels.LayerN;
 /// 400 USER_BANNED_IN_CHANNEL You're banned from sending messages in supergroups/channels.
 /// See <a href="https://corefork.telegram.org/method/channels.getMessages" />
 ///</summary>
-internal sealed class GetMessagesHandler(IHandlerHelper handlerHelper) : ForwardRequestToNewHandler<
-        MyTelegram.Schema.Channels.LayerN.RequestGetMessages,
-        MyTelegram.Schema.Channels.RequestGetMessages>(handlerHelper),
-    Channels.LayerN.IGetMessagesHandler
+internal sealed class GetMessagesHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Channels.LayerN.RequestGetMessages,
+        MyTelegram.Schema.Channels.RequestGetMessages> dataConverter)
+    : ForwardRequestToNewHandler<
+            MyTelegram.Schema.Channels.LayerN.RequestGetMessages,
+            MyTelegram.Schema.Channels.RequestGetMessages
+        >(handlerHelper, dataConverter),
+        Channels.LayerN.IGetMessagesHandler
 {
-    protected override RequestGetMessages GetNewData(IRequestInput input, Schema.Channels.LayerN.RequestGetMessages obj)
-    {
-        return new RequestGetMessages
-        {
-            Channel = obj.Channel,
-            Id = new TVector<IInputMessage>(obj.Id.Select(p => new TInputMessageID
-            {
-                Id = p
-            }))
-        };
-    }
 }

@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Confirm a phone number to cancel account deletion, for more info <a href="https://corefork.telegram.org/api/account-deletion">click here »</a>
@@ -16,6 +14,6 @@ internal sealed class ConfirmPhoneHandler : RpcResultObjectHandler<MyTelegram.Sc
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestConfirmPhone obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

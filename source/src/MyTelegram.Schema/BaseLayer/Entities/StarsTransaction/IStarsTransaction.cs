@@ -38,6 +38,7 @@ public interface IStarsTransaction : IObject
     /// This transaction is a <a href="https://corefork.telegram.org/api/reactions#paid-reactions">paid reaction »</a>.
     ///</summary>
     bool Reaction { get; set; }
+    bool StargiftUpgrade { get; set; }
 
     ///<summary>
     /// Transaction ID.
@@ -140,4 +141,6 @@ public interface IStarsTransaction : IObject
     /// See <a href="https://corefork.telegram.org/type/StarsAmount" />
     ///</summary>
     MyTelegram.Schema.IStarsAmount? StarrefAmount { get; set; }
+    int? PaidMessages { get; set; }
+    int? PremiumGiftMonths { get; set; }
 }

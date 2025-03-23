@@ -115,19 +115,17 @@ public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, User
     }
 
     public void UpdateProfilePhoto(RequestInfo requestInfo,
-            //long userId,
             long photoId,
-            bool fallback)//,
-                          //byte[]? photo, 
-                          //VideoSizeEmojiMarkup? videoEmojiMarkup /*, bool hasVideo, double videoStartTs*/)
+            bool fallback)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new UserProfilePhotoChangedEvent(requestInfo,
             _state.UserId,
             photoId,
-            fallback
-            //videoEmojiMarkup
-            /*, hasVideo, videoStartTs*/));
+            fallback,
+            _state.IsBot,
+            DateTime.UtcNow.ToTimestamp()
+            ));
     }
 
     public void UpdateUserName(RequestInfo requestInfo,
@@ -141,7 +139,8 @@ public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, User
                 _state.FirstName,
                 _state.LastName,
                 userName),
-            _state.UserName));
+            _state.UserName, DateTime.UtcNow.ToTimestamp())
+            );
     }
 
     public void UpdateUserPremiumStatus(bool premium)
@@ -159,7 +158,8 @@ public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, User
         Emit(new UserProfilePhotoUploadedEvent(requestInfo,
             photoId,
             fallback,
-            videoEmojiMarkup
+            videoEmojiMarkup,
+            DateTime.UtcNow.ToTimestamp()
             /*, hasVideo, videoStartTs*/));
     }
     protected override Task<UserSnapshot> CreateSnapshotAsync(CancellationToken cancellationToken)
@@ -185,7 +185,9 @@ public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, User
             _state.GlobalPrivacySettings,
             _state.Premium,
             _state.PersonalChannelId,
-            _state.Birthday
+            _state.Birthday,
+            _state.ProfilePhotoUpdateDate,
+            _state.UserNameUpdateDate
         ));
     }
 

@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
+/// Get the current <a href="https://corefork.telegram.org/api/reactions#notifications-about-reactions">reaction notification settings »</a>.
 /// See <a href="https://corefork.telegram.org/method/account.getReactionsNotifySettings" />
 ///</summary>
 internal sealed class GetReactionsNotifySettingsHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestGetReactionsNotifySettings, MyTelegram.Schema.IReactionsNotifySettings>,

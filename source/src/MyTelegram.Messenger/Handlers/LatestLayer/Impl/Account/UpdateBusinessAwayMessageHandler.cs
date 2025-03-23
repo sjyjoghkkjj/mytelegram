@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/account.updateBusinessAwayMessage" />
@@ -11,6 +9,6 @@ internal sealed class UpdateBusinessAwayMessageHandler : RpcResultObjectHandler<
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestUpdateBusinessAwayMessage obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

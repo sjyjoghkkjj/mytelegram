@@ -1,11 +1,10 @@
-﻿using System.Collections.ObjectModel;
-using EventFlow.MongoDB.EventStore;
+﻿using EventFlow.MongoDB.EventStore;
 using EventFlow.MongoDB.SnapshotStores;
 using EventFlow.MongoDB.ValueObjects;
-using EventFlow.Sagas;
 using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Core.Operations;
-
+using MyTelegram.Converters.TLObjects.Interfaces;
+using System.Collections.ObjectModel;
+using EventFlow.Sagas;
 //using MyTelegram.Domain.Aggregates.Bot;
 using DialogReadModel = MyTelegram.ReadModel.MongoDB.DialogReadModel;
 
@@ -16,10 +15,8 @@ public static class NativeAotExtensions
 {
 
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IAuthorizationConverter>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IChatConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IConfigConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IDialogConverter>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IDifferenceConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IMessageConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IPeerConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IPeerNotifySettingsConverter>))]
@@ -27,15 +24,11 @@ public static class NativeAotExtensions
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IPollConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IPremiumPromoConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<ISendAsPeerConverter>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<ITranslationTextConverter>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IUpdatesConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ILayeredService<IUserConverter>))]
 
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IAuthorizationConverter>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IChatConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IConfigConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IDialogConverter>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IDifferenceConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IMessageConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IPeerConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IPeerNotifySettingsConverter>))]
@@ -43,8 +36,6 @@ public static class NativeAotExtensions
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IPollConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IPremiumPromoConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<ISendAsPeerConverter>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<ITranslationTextConverter>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IUpdatesConverter>))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(LayeredService<IUserConverter>))]
 
 

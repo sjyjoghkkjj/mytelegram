@@ -1,6 +1,6 @@
 # MyTelegram
 
-[![API Layer](https://img.shields.io/badge/API_Layer-195-blueviolet)](https://corefork.telegram.org/methods)
+[![API Layer](https://img.shields.io/badge/API_Layer-200-blueviolet)](https://corefork.telegram.org/methods)
 [![MTProto](https://img.shields.io/badge/MTProto_Protocol-2.0-green)](https://corefork.telegram.org/mtproto/)
 [![Support Chat](https://img.shields.io/badge/Chat_with_us-on_Telegram-0088cc)](https://t.me/+S-aNBoRvCRpPyXrR)
 
@@ -8,7 +8,7 @@ MyTelegram is telegram server side api implementation written in c#,support priv
 
 ## Features
 
-- API Layer: **`195`**
+- API Layer: **`200`**
 - [MTProto transports](https://corefork.telegram.org/mtproto/mtproto-transports): **`Abridged`**,**`Intermediate`**
 - Private chat
 - Group chat
@@ -16,12 +16,12 @@ MyTelegram is telegram server side api implementation written in c#,support priv
 - Channel
 - End-to-end-encryption chat(Pro version)
 - Voice/video call(Pro version)
-- Bot(Partial support,Pro version)
+- Bot(Partial support, Pro version)
 - 2FA(Pro version)
 - Stickers(Pro version)
 - Reactions(Pro version)
 - ForumTopics(Pro version)
-- Themes/Wallpapers/Auto-Delete/Schedule Messages/Telegram Business/Email Login/Email Sender/Push Server(Firebase) (Pro version)
+- Themes/Wallpapers/Auto-Delete/Scheduled Messages/Telegram Business/Email Login/Email Sender/Push Server(Firebase) (Pro version)
 
 ## Build MyTelegram Server
 

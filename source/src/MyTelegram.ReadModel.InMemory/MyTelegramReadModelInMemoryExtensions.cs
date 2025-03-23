@@ -24,7 +24,6 @@ public static class MyTelegramReadModelInMemoryExtensions
             .UseMyInMemoryReadStoreFor<PeerNotifySettingsReadModel>()
             .UseMyInMemoryReadStoreFor<PtsReadModel, IPtsReadModelLocator>()
             .UseMyInMemoryReadStoreFor<UserReadModel, IUserReadModelLocator>()
-            .UseMyInMemoryReadStoreFor<ChatReadModel>()
             .UseMyInMemoryReadStoreFor<ChannelReadModel, IChannelReadModelLocator>()
             .UseMyInMemoryReadStoreFor<ChannelFullReadModel, IChannelFullReadModelLocator>()
             .UseMyInMemoryReadStoreFor<ChannelMemberReadModel>()
@@ -35,7 +34,6 @@ public static class MyTelegramReadModelInMemoryExtensions
             .UseMyInMemoryReadStoreFor<ChatInviteReadModel>()
             .UseMyInMemoryReadStoreFor<RpcResultReadModel>()
             .UseMyInMemoryReadStoreFor<UserNameReadModel>()
-            //.UseMyInMemoryReadStoreFor<PushUpdatesReadModel>()
             .UseMyInMemoryReadStoreFor<PtsForAuthKeyIdReadModel>()
             ;
 

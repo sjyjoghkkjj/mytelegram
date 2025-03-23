@@ -1,0 +1,97 @@
+﻿namespace MyTelegram.Schema.LayerN.Entities.MessageMedia;
+
+///<summary>
+/// Document (video, audio, voice, sticker, any media type except photo)
+/// See <a href="https://corefork.telegram.org/constructor/messageMediaDocument" />
+///</summary>
+[TlObject(0x4cf4d72d)]
+public sealed class TMessageMediaDocumentLayer160 : IMessageMedia
+{
+    public uint ConstructorId => 0x4cf4d72d;
+    ///<summary>
+    /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
+    ///</summary>
+    public BitArray Flags { get; set; } = new BitArray(32);
+
+    ///<summary>
+    /// Whether this is a normal sticker, if not set this is a premium sticker and a premium sticker animation must be played.
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    public bool Nopremium { get; set; }
+
+    ///<summary>
+    /// Whether this media should be hidden behind a spoiler warning
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    public bool Spoiler { get; set; }
+
+    ///<summary>
+    /// Whether this is a video.
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    public bool Video { get; set; }
+
+    ///<summary>
+    /// Whether this is a round video.
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    public bool Round { get; set; }
+
+    ///<summary>
+    /// Whether this is a voice message.
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    public bool Voice { get; set; }
+
+    ///<summary>
+    /// Attached document
+    /// See <a href="https://corefork.telegram.org/type/Document" />
+    ///</summary>
+    public MyTelegram.Schema.IDocument? Document { get; set; }
+
+    ///<summary>
+    /// Currently only used for story videos, may contain an alternative version of the story video, explicitly encoded using H.264 (in MPEG4 transport) at a lower resolution than <code>document</code>.
+    /// See <a href="https://corefork.telegram.org/type/Document" />
+    ///</summary>
+    public MyTelegram.Schema.IDocument? AltDocument { get; set; }
+
+    ///<summary>
+    /// Time to live of self-destructing document
+    ///</summary>
+    public int? TtlSeconds { get; set; }
+
+    public void ComputeFlag()
+    {
+        if (Nopremium) { Flags[3] = true; }
+        if (Spoiler) { Flags[4] = true; }
+        if (Video) { Flags[6] = true; }
+        if (Round) { Flags[7] = true; }
+        if (Voice) { Flags[8] = true; }
+        if (Document != null) { Flags[0] = true; }
+        if (AltDocument != null) { Flags[5] = true; }
+        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[2] = true; }
+    }
+
+    public void Serialize(IBufferWriter<byte> writer)
+    {
+        ComputeFlag();
+        writer.Write(ConstructorId);
+        writer.Write(Flags);
+        if (Flags[0]) { writer.Write(Document); }
+        if (Flags[5]) { writer.Write(AltDocument); }
+        if (Flags[2]) { writer.Write(TtlSeconds.Value); }
+    }
+
+    public void Deserialize(ref SequenceReader<byte> reader)
+    {
+        Flags = reader.ReadBitArray();
+        if (Flags[3]) { Nopremium = true; }
+        if (Flags[4]) { Spoiler = true; }
+        if (Flags[6]) { Video = true; }
+        if (Flags[7]) { Round = true; }
+        if (Flags[8]) { Voice = true; }
+        if (Flags[0]) { Document = reader.Read<MyTelegram.Schema.IDocument>(); }
+        if (Flags[5]) { AltDocument = reader.Read<MyTelegram.Schema.IDocument>(); }
+        if (Flags[2]) { TtlSeconds = reader.ReadInt32(); }
+    }
+}

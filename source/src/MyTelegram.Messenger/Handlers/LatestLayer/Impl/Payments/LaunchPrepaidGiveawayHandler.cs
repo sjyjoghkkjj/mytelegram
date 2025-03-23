@@ -1,8 +1,10 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Payments;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Payments;
 
 ///<summary>
+/// Launch a <a href="https://corefork.telegram.org/api/giveaways">prepaid giveaway »</a>.
+/// <para>Possible errors</para>
+/// Code Type Description
+/// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/payments.launchPrepaidGiveaway" />
 ///</summary>
 internal sealed class LaunchPrepaidGiveawayHandler : RpcResultObjectHandler<MyTelegram.Schema.Payments.RequestLaunchPrepaidGiveaway, MyTelegram.Schema.IUpdates>,

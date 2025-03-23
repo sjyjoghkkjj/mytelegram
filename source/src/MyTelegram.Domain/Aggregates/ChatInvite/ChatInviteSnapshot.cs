@@ -7,13 +7,16 @@ public class ChatInviteSnapshot(
     long adminId,
     string? title,
     bool requestNeeded,
+    int date,
     int? startDate,
     int? expireDate,
     int? usageLimit,
     bool permanent,
     bool revoked,
     int? usage,
-    int? requested)
+    int? requested,
+    bool isBroadcast
+    )
     : ISnapshot
 {
     public long ChannelId { get; } = channelId;
@@ -22,6 +25,7 @@ public class ChatInviteSnapshot(
     public long AdminId { get; } = adminId;
     public string? Title { get; } = title;
     public bool RequestNeeded { get; } = requestNeeded;
+    public int Date { get; } = date;
     public int? StartDate { get; } = startDate;
     public int? ExpireDate { get; } = expireDate;
     public int? UsageLimit { get; } = usageLimit;
@@ -29,4 +33,5 @@ public class ChatInviteSnapshot(
     public bool Revoked { get; } = revoked;
     public int? Usage { get; } = usage;
     public int? Requested { get; } = requested;
+    public bool IsBroadcast { get; } = isBroadcast;
 }

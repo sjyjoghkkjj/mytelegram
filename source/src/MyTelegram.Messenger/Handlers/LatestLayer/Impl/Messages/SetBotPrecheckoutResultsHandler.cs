@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Once the user has confirmed their payment and shipping details, the bot receives an <a href="https://corefork.telegram.org/constructor/updateBotPrecheckoutQuery">updateBotPrecheckoutQuery</a> update.<br>
@@ -9,6 +7,7 @@ namespace MyTelegram.Handlers.Messages;
 /// <para>Possible errors</para>
 /// Code Type Description
 /// 400 ERROR_TEXT_EMPTY The provided error message is empty.
+/// 400 USER_BOT_REQUIRED This method can only be called by a bot.
 /// See <a href="https://corefork.telegram.org/method/messages.setBotPrecheckoutResults" />
 ///</summary>
 internal sealed class SetBotPrecheckoutResultsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSetBotPrecheckoutResults, IBool>,

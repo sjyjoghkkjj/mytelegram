@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// An accepted phone call
 /// See <a href="https://corefork.telegram.org/constructor/phoneCallAccepted" />
 ///</summary>
-[TlObject(0x3660c311)]
+[TlObject(0x22fd7181)]
 public sealed class TPhoneCallAccepted : IPhoneCall
 {
-    public uint ConstructorId => 0x3660c311;
+    public uint ConstructorId => 0x22fd7181;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -57,11 +57,12 @@ public sealed class TPhoneCallAccepted : IPhoneCall
     /// See <a href="https://corefork.telegram.org/type/PhoneCallProtocol" />
     ///</summary>
     public MyTelegram.Schema.IPhoneCallProtocol Protocol { get; set; }
+    public MyTelegram.Schema.IInputGroupCall? ConferenceCall { get; set; }
 
     public void ComputeFlag()
     {
         if (Video) { Flags[6] = true; }
-
+        if (ConferenceCall != null) { Flags[8] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -76,6 +77,7 @@ public sealed class TPhoneCallAccepted : IPhoneCall
         writer.Write(ParticipantId);
         writer.Write(GB);
         writer.Write(Protocol);
+        if (Flags[8]) { writer.Write(ConferenceCall); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -89,5 +91,6 @@ public sealed class TPhoneCallAccepted : IPhoneCall
         ParticipantId = reader.ReadInt64();
         GB = reader.ReadBytes();
         Protocol = reader.Read<MyTelegram.Schema.IPhoneCallProtocol>();
+        if (Flags[8]) { ConferenceCall = reader.Read<MyTelegram.Schema.IInputGroupCall>(); }
     }
 }

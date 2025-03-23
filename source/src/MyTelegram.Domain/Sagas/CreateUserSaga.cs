@@ -12,18 +12,11 @@ public class CreateUserSaga(
     {
         if (!string.IsNullOrEmpty(domainEvent.AggregateEvent.UserName))
         {
-            var requestInfo = domainEvent.AggregateEvent.RequestInfo;
-            if (requestInfo.UserId == 0)
-            {
-                requestInfo = requestInfo with { UserId = domainEvent.AggregateEvent.UserId };
-            }
-
             var command = new SetUserNameCommand(UserNameId.Create(domainEvent.AggregateEvent.UserName),
-                requestInfo,
-                domainEvent.AggregateEvent.UserId.ToUserPeer(),
+                domainEvent.AggregateEvent.RequestInfo, domainEvent.AggregateEvent.UserId.ToUserPeer(),
                 domainEvent.AggregateEvent.UserName,
                 null
-            );
+                );
             Publish(command);
         }
 

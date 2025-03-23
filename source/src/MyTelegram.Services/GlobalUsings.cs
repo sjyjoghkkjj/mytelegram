@@ -1,5 +1,10 @@
 ﻿global using MyTelegram.EventBus;
 global using MyTelegram.Core;
+global using Microsoft.Extensions.Logging;
+global using MyTelegram.EventFlow.Extensions;
+global using EventFlow.Aggregates;
+global using EventFlow.Provided.Jobs;
+global using EventFlow.Snapshots;
 global using MyTelegram.Services.Extensions;
 global using MyTelegram.Schema.Extensions;
-global using Microsoft.Extensions.Logging;
+global using MyTelegram.Schema;

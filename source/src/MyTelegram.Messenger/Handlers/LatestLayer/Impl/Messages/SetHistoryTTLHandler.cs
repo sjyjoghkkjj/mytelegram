@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Set maximum Time-To-Live of all messages in the specified chat
@@ -16,8 +16,12 @@ internal sealed class SetHistoryTTLHandler : RpcResultObjectHandler<MyTelegram.S
     protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSetHistoryTTL obj)
     {
-        RpcErrors.RpcErrors400.ChatNotModified.ThrowRpcError();
-
-        return null!;
+        return Task.FromResult<IUpdates>(new TUpdates
+        {
+            Updates = [],
+            Chats = [],
+            Users = [],
+            Date = CurrentDate
+        });
     }
 }

@@ -1,11 +1,10 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Ban/unban/kick a user in a <a href="https://corefork.telegram.org/api/channel">supergroup/channel</a>.
 /// <para>Possible errors</para>
 /// Code Type Description
+/// 406 BANNED_RIGHTS_INVALID You provided some invalid flags in the banned rights.
 /// 400 CHANNEL_INVALID The provided channel is invalid.
 /// 406 CHANNEL_PRIVATE You haven't joined this channel/supergroup.
 /// 403 CHAT_ADMIN_REQUIRED You must be an admin in this chat to do this.
@@ -18,38 +17,30 @@ namespace MyTelegram.Handlers.Channels;
 /// 400 USER_ID_INVALID The provided user ID is invalid.
 /// See <a href="https://corefork.telegram.org/method/channels.editBanned" />
 ///</summary>
-internal sealed class EditBannedHandler : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestEditBanned, MyTelegram.Schema.IUpdates>,
-    Channels.IEditBannedHandler
+internal sealed class EditBannedHandler(
+    IPeerHelper peerHelper,
+    ICommandBus commandBus,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestEditBanned, MyTelegram.Schema.IUpdates>,
+        Channels.IEditBannedHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public EditBannedHandler(IPeerHelper peerHelper,
-        ICommandBus commandBus,
-        IAccessHashHelper accessHashHelper)
-    {
-        _peerHelper = peerHelper;
-        _commandBus = commandBus;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestEditBanned obj)
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await _accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
 
-            var channel = _peerHelper.GetChannel(obj.Channel);
-            var peer = _peerHelper.GetPeer(obj.Participant);
-            var bannedRights = ChatBannedRights.FromValue(obj.BannedRights.Flags.ToInt(), obj.BannedRights.UntilDate);
+            var channel = peerHelper.GetChannel(obj.Channel);
+            var peer = peerHelper.GetPeer(obj.Participant);
+            var bannedRights = ChatBannedRights.FromValue(obj.BannedRights.Flags.ToInt32(), obj.BannedRights.UntilDate);
             var command = new EditBannedCommand(ChannelMemberId.Create(channel.PeerId, peer.PeerId),
                 input.ToRequestInfo(),
                 input.UserId,
                 channel.PeerId,
                 peer.PeerId,
                 bannedRights);
-            await _commandBus.PublishAsync(command, default);
+            await commandBus.PublishAsync(command, default);
             return null!;
         }
 

@@ -13,6 +13,11 @@ public class EditChannelTitleSaga(EditChannelTitleSagaId id, IEventStore eventSt
         //var aggregateId = MessageId.Create(domainEvent.AggregateEvent.ChannelId, outMessageId);
         var ownerPeer = new Peer(PeerType.Channel, domainEvent.AggregateEvent.ChannelId);
         var senderPeer = new Peer(PeerType.User, domainEvent.AggregateEvent.RequestInfo.UserId);
+        Peer? sendAs = null;
+        if (!domainEvent.AggregateEvent.Broadcast && domainEvent.AggregateEvent.LinkedChannelId != null)
+        {
+            sendAs = domainEvent.AggregateEvent.ChannelId.ToChannelPeer();
+        }
         var messageItem = new MessageItem(
             ownerPeer,
             ownerPeer,
@@ -27,14 +32,16 @@ public class EditChannelTitleSaga(EditChannelTitleSagaId id, IEventStore eventSt
             MessageType.Text,
             MessageSubType.Normal,
             null,
-            domainEvent.AggregateEvent.MessageActionData,
+            domainEvent.AggregateEvent.MessageAction,
             MessageActionType.ChatEditTitle,
-            Post: domainEvent.AggregateEvent.Broadcast
+            Post: domainEvent.AggregateEvent.Broadcast,
+            SendAs: sendAs
         );
         //var command = new CreateOutboxMessageCommand(aggregateId,
         //    domainEvent.AggregateEvent.RequestInfo,
         //    messageItem);
-        var command = new StartSendMessageCommand(TempId.New, domainEvent.AggregateEvent.RequestInfo,
+        var command = new StartSendMessageCommand(TempId.New,
+            domainEvent.AggregateEvent.RequestInfo,
             [new SendMessageItem(messageItem)]);
 
         Publish(command);

@@ -28,6 +28,18 @@ public sealed class RequestSearchGlobal : IRequest<MyTelegram.Schema.Messages.IM
     public bool BroadcastsOnly { get; set; }
 
     ///<summary>
+    /// &nbsp;
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    public bool GroupsOnly { get; set; }
+
+    ///<summary>
+    /// &nbsp;
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    public bool UsersOnly { get; set; }
+
+    ///<summary>
     /// <a href="https://corefork.telegram.org/api/folders#peer-folders">Peer folder ID, for more info click here</a>
     ///</summary>
     public int? FolderId { get; set; }
@@ -77,6 +89,8 @@ public sealed class RequestSearchGlobal : IRequest<MyTelegram.Schema.Messages.IM
     public void ComputeFlag()
     {
         if (BroadcastsOnly) { Flags[1] = true; }
+        if (GroupsOnly) { Flags[2] = true; }
+        if (UsersOnly) { Flags[3] = true; }
         if (/*FolderId != 0 && */FolderId.HasValue) { Flags[0] = true; }
 
     }
@@ -101,6 +115,8 @@ public sealed class RequestSearchGlobal : IRequest<MyTelegram.Schema.Messages.IM
     {
         Flags = reader.ReadBitArray();
         if (Flags[1]) { BroadcastsOnly = true; }
+        if (Flags[2]) { GroupsOnly = true; }
+        if (Flags[3]) { UsersOnly = true; }
         if (Flags[0]) { FolderId = reader.ReadInt32(); }
         Q = reader.ReadString();
         Filter = reader.Read<MyTelegram.Schema.IMessagesFilter>();

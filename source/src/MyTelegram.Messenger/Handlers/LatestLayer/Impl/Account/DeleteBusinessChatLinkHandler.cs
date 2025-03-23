@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Delete a <a href="https://corefork.telegram.org/api/business#business-chat-links">business chat deep link »</a>.
@@ -16,6 +14,6 @@ internal sealed class DeleteBusinessChatLinkHandler : RpcResultObjectHandler<MyT
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestDeleteBusinessChatLink obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

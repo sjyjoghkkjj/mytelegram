@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Change privacy settings of current account
@@ -17,6 +17,11 @@ internal sealed class SetPrivacyHandler : RpcResultObjectHandler<MyTelegram.Sche
     protected override Task<MyTelegram.Schema.Account.IPrivacyRules> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestSetPrivacy obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Account.IPrivacyRules>(new TPrivacyRules
+        {
+            Users = [],
+            Chats = [],
+            Rules = []
+        });
     }
 }

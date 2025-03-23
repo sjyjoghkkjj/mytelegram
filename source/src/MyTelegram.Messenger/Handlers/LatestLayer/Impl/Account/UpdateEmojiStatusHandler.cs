@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Set an <a href="https://corefork.telegram.org/api/emoji-status">emoji status</a>
@@ -12,6 +12,6 @@ internal sealed class UpdateEmojiStatusHandler : RpcResultObjectHandler<MyTelegr
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestUpdateEmojiStatus obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

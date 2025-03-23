@@ -9,7 +9,7 @@ public class
     //public PhoneContact PhoneContact { get; private set; }
     public List<PhoneContact> PhoneContacts { get; private set; } = null!;
     //public long ReqMsgId { get; private set; }
-    public RequestInfo RequestInfo { get; private set; } = default!;
+    public RequestInfo RequestInfo { get; private set; }
     public int TotalCount { get; private set; }
 
     public void Apply(ImportContactsSagaSingleContactImportedSagaEvent aggregateEvent)

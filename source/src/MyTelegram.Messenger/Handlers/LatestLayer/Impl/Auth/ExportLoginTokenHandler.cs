@@ -1,9 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Auth;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
-/// Generate a login token, for <a href="https://corefork.telegram.org/api/qr-login">login via QR code</a>
+/// Generate a login token, for <a href="https://corefork.telegram.org/api/qr-login">login via QR code</a>.<br>
 /// The generated login token should be encoded using base64url, then shown as a <code>tg://login?token=base64encodedtoken</code> <a href="https://corefork.telegram.org/api/links#qr-code-login-links">deep link »</a> in the QR code.For more info, see <a href="https://corefork.telegram.org/api/qr-login">login via QR code</a>.
 /// <para>Possible errors</para>
 /// Code Type Description
@@ -15,10 +13,10 @@ internal sealed class ExportLoginTokenHandler(
     ICacheHelper<long, long> cacheHelper,
     ICommandBus commandBus,
     IRandomHelper randomHelper,
-    IUserAppService userAppService,
     IEventBus eventBus,
+    IUserAppService userAppService,
     ILayeredService<IAuthorizationConverter> layeredService,
-    ILayeredService<IUserConverter> layeredUserService,
+    IUserConverterService userConverterService,
     IPhotoAppService photoAppService)
     : RpcResultObjectHandler<MyTelegram.Schema.Auth.RequestExportLoginToken, MyTelegram.Schema.Auth.ILoginToken>,
         Auth.IExportLoginTokenHandler
@@ -33,7 +31,7 @@ internal sealed class ExportLoginTokenHandler(
 
             var userReadModel = await userAppService.GetAsync(userId);
             var photos = await photoAppService.GetPhotosAsync(userReadModel);
-            ILayeredUser? user = userReadModel == null ? null : layeredUserService.GetConverter(input.Layer).ToUser(userReadModel.UserId, userReadModel, photos);
+            ILayeredUser? user = userReadModel == null ? null : userConverterService.ToUser(userReadModel.UserId, userReadModel, photos);
             return new TLoginTokenSuccess
             {
                 Authorization = layeredService.GetConverter(input.Layer).CreateAuthorization(user)

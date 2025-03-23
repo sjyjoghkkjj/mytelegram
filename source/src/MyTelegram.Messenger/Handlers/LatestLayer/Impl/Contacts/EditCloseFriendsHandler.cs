@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Contacts;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
+/// Edit the <a href="https://corefork.telegram.org/api/privacy">close friends list, see here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/method/contacts.editCloseFriends" />
 ///</summary>
 internal sealed class EditCloseFriendsHandler : RpcResultObjectHandler<MyTelegram.Schema.Contacts.RequestEditCloseFriends, IBool>,
@@ -11,6 +10,6 @@ internal sealed class EditCloseFriendsHandler : RpcResultObjectHandler<MyTelegra
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Contacts.RequestEditCloseFriends obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

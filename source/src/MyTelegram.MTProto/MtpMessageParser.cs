@@ -126,13 +126,13 @@ public class MtpMessageParser(
         else
         {
             logger.LogWarning(
-                "[ConnectionId={ConnectionId}] Invalid packet,length is greater than {MaxFirstByte},but first byte is not {MaxFirstByte},first byte={FirstByte}",
+                "[ConnectionId: {ConnectionId}] Invalid packet, length is greater than {MaxFirstByte}, but first byte is not {MaxFirstByte}, first byte: {FirstByte}",
                 d.ConnectionId,
                 maxFirstByteValue,
                 maxFirstByteValue,
                 firstByte
             );
-            throw new ArgumentException($"Invalid packet,first byte={firstByte}");
+            throw new ArgumentException($"Invalid packet, first byte: {firstByte}");
         }
 
         return packetLength;
@@ -218,7 +218,7 @@ public class MtpMessageParser(
             {
                 UnObfuscationFirstPacketLength => reader.UnreadSequence.Slice(0, UnObfuscationFirstPacketLength),
                 >= ConnectionStartPrefixSize => reader.UnreadSequence.Slice(0, ConnectionStartPrefixSize),
-                _ => throw new ArgumentException($"Invalid first packet size:{reader.Remaining}")
+                _ => throw new ArgumentException($"Invalid first packet size: {reader.Remaining}")
             };
             buffer = reader.UnreadSequence.Slice(data.End);
             return true;
@@ -228,7 +228,7 @@ public class MtpMessageParser(
         if (packetLength > MaxPacketLength)
         {
             logger.LogWarning(
-                "[ConnectionId={ConnectionId}] Packet length is greater than the max value({MaxPacketLength})",
+                "[ConnectionId: {ConnectionId}] Packet length is greater than the max value({MaxPacketLength})",
                 clientData.ConnectionId,
                 MaxPacketLength);
 
@@ -239,7 +239,7 @@ public class MtpMessageParser(
         if (reader.Remaining < packetLength)
         {
             logger.LogDebug(
-                "[ConnectionId={ConnectionId}] Packet length is {ActualLength},remaining is {Remaining} need more data({MoreDataBytes})",
+                "[ConnectionId: {ConnectionId}] Packet length is {ActualLength}, remaining is {Remaining} need more data({MoreDataBytes})",
                 clientData.ConnectionId,
                 packetLength,
                 reader.Remaining,
@@ -259,7 +259,7 @@ public class MtpMessageParser(
 
         data = reader.UnreadSequence.Slice(skipCount, packetLength);
         buffer = reader.UnreadSequence.Slice(data.End);
-        logger.LogTrace("[ConnectionId={ConnectionId}] Packet length is {PacketLength}",
+        logger.LogTrace("[ConnectionId: {ConnectionId}] Packet length is {PacketLength}",
             clientData.ConnectionId,
             packetLength);
 

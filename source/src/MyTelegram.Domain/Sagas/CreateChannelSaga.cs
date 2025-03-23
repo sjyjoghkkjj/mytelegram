@@ -22,8 +22,7 @@ public class CreateChannelSaga :
     {
         var ownerPeerId = domainEvent.AggregateEvent.ChannelId;
         var creatorId = domainEvent.AggregateEvent.RequestInfo.UserId;
-        var outMessageId =
-            await _idGenerator.NextIdAsync(IdType.MessageId, ownerPeerId, cancellationToken: cancellationToken);
+        var outMessageId = await _idGenerator.NextIdAsync(IdType.MessageId, ownerPeerId, cancellationToken: cancellationToken);
         var subType = _state.MigratedFromChat ? MessageSubType.MigrateChat : MessageSubType.CreateChannel;
         if (_state.AutoCreateFromChat)
         {
@@ -76,8 +75,10 @@ public class CreateChannelSaga :
             domainEvent.AggregateEvent.MigratedFromChat,
             domainEvent.AggregateEvent.AutoCreateFromChat,
             domainEvent.AggregateEvent.TtlPeriod,
-            domainEvent.AggregateEvent.TtlFromDefaultSetting
-        ));
+            domainEvent.AggregateEvent.TtlFromDefaultSetting,
+            domainEvent.AggregateEvent.MemberUserIds,
+            domainEvent.AggregateEvent.BotUserIds
+            ));
         var ownerPeerId = domainEvent.AggregateEvent.ChannelId;
         await _idGenerator.NextIdAsync(IdType.Pts, ownerPeerId, cancellationToken: cancellationToken);
 
@@ -121,7 +122,8 @@ public class CreateChannelSaga :
             null,
             null,
             true,
-            DateTime.UtcNow.ToTimestamp()
+            DateTime.UtcNow.ToTimestamp(),
+            domainEvent.AggregateEvent.Broadcast
         );
         Publish(createChatInviteCommand);
     }

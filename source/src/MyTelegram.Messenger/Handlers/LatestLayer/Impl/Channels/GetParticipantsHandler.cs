@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Get the participants of a <a href="https://corefork.telegram.org/api/channel">supergroup/channel</a>
@@ -9,51 +7,62 @@ namespace MyTelegram.Handlers.Channels;
 /// 400 CHANNEL_INVALID The provided channel is invalid.
 /// 406 CHANNEL_PRIVATE You haven't joined this channel/supergroup.
 /// 403 CHAT_ADMIN_REQUIRED You must be an admin in this chat to do this.
+/// 400 MSG_ID_INVALID Invalid message ID provided.
 /// See <a href="https://corefork.telegram.org/method/channels.getParticipants" />
 ///</summary>
 internal sealed class GetParticipantsHandler(
     IQueryProcessor queryProcessor,
-    ILayeredService<IChatConverter> layeredService,
+    IChatConverterService chatConverterService,
     IAccessHashHelper accessHashHelper,
-    ILayeredService<IUserConverter> layeredUserService,
-    IUserAppService userAppService,
-    IChannelAppService channelAppService,
+    IUserConverterService userConverterService,
     IPhotoAppService photoAppService,
-    IPrivacyAppService privacyAppService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestGetParticipants,
-            MyTelegram.Schema.Channels.IChannelParticipants>,
-        Channels.IGetParticipantsHandler
+    IChannelAdminRightsChecker channelAdminRightsChecker,
+    IChannelAppService channelAppService)
+    : RpcResultObjectHandler<RequestGetParticipants,
+            IChannelParticipants>,
+        IGetParticipantsHandler
 {
-    //,
-
-    protected override async Task<MyTelegram.Schema.Channels.IChannelParticipants> HandleCoreAsync(IRequestInput input,
+    protected override async Task<IChannelParticipants> HandleCoreAsync(IRequestInput input,
         RequestGetParticipants obj)
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
             await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
             var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
-
             channelReadModel.ThrowExceptionIfChannelDeleted();
+            if (channelReadModel.ParticipantsHidden)
+            {
+                if (!await channelAdminRightsChecker.HasChatAdminRightAsync(inputChannel.ChannelId, input.UserId,
+                        p => p.IsCreator || p.AdminRights.ChangeInfo))
+                {
+                    return new TChannelParticipants
+                    {
+                        Chats = [],
+                        Count = 0,
+                        Participants = [],
+                        Users = []
+                    };
+                }
+            }
 
             var joinedChannelIdList = await queryProcessor.ProcessAsync(new GetJoinedChannelIdListQuery(input.UserId,
-                    new List<long> { inputChannel.ChannelId }));
+                    [inputChannel.ChannelId]));
 
-            if (joinedChannelIdList.Count == 0 && channelReadModel!.Broadcast)
+            if (joinedChannelIdList.Count == 0 && channelReadModel.Broadcast)
             {
                 return new TChannelParticipants
                 {
-                    Chats = new TVector<IChat>(),
+                    Chats = [],
                     Count = 0,
-                    Participants = new(),
-                    Users = new TVector<IUser>()
+                    Participants = [],
+                    Users = []
                 };
             }
 
             void CheckAdminPermission(IChannelReadModel channel,
                 long userId)
             {
-                if (channelReadModel!.Broadcast)
+                if (channelReadModel.Broadcast)
                 {
                     if (channel.CreatorId != userId &&
                         channel.AdminList?.FirstOrDefault(p => p.UserId == userId) == null)
@@ -63,14 +72,12 @@ internal sealed class GetParticipantsHandler(
                 }
             }
 
-            var memberUidList = new List<long>();
             var forceNotLeft = false;
             IReadOnlyCollection<IChatAdminReadModel>? chatAdminReadModels = null;
             IQuery<IReadOnlyCollection<IChannelMemberReadModel>>? query = null;
             switch (obj.Filter)
             {
-                case TChannelParticipantsAdmins channelParticipantsAdmins:
-                    //CheckAdminPermission(channelReadModel, input.UserId);
+                case TChannelParticipantsAdmins:
                     chatAdminReadModels = await queryProcessor.ProcessAsync(
                         new GetChatAdminListByChannelIdQuery(inputChannel.ChannelId, obj.Offset, obj.Limit));
 
@@ -78,9 +85,9 @@ internal sealed class GetParticipantsHandler(
                 case TChannelParticipantsBots:
                     return new TChannelParticipants
                     {
-                        Participants = new(),
-                        Users = new TVector<IUser>(),
-                        Chats = new TVector<IChat>()
+                        Participants = [],
+                        Users = [],
+                        Chats = []
                     };
                 case TChannelParticipantsKicked:
                     CheckAdminPermission(channelReadModel!, input.UserId);
@@ -89,20 +96,31 @@ internal sealed class GetParticipantsHandler(
                     break;
                 default:
                     query = new GetChannelMembersByChannelIdQuery(inputChannel.ChannelId,
-                        new List<long>(),
-                        false,
+                        [],
                         obj.Offset,
                         obj.Limit);
                     break;
             }
 
-            if (joinedChannelIdList.Contains(channelReadModel!.ChannelId))
+            if (joinedChannelIdList.Contains(channelReadModel.ChannelId))
             {
                 forceNotLeft = true;
             }
 
-            var channelMemberReadModels = query == null ? Array.Empty<IChannelMemberReadModel>() : await queryProcessor
+            var channelMemberReadModels = query == null ? [] : await queryProcessor
                 .ProcessAsync(query);
+
+            if (channelMemberReadModels.Count == 0)
+            {
+                return new TChannelParticipants
+                {
+                    Chats = [],
+                    Count = 0,
+                    Participants = [],
+                    Users = []
+                };
+            }
+
 
             var userIdList = channelMemberReadModels.Select(p => p.UserId).ToList();
             var selfChannelMember = channelMemberReadModels.FirstOrDefault(p => p.UserId == input.UserId);
@@ -111,26 +129,13 @@ internal sealed class GetParticipantsHandler(
                 userIdList.Add(selfChannelMember.InviterId);
             }
 
-            var userReadModels = await userAppService.GetListAsync(userIdList);
-            var contactReadModels = await queryProcessor
-                .ProcessAsync(new GetContactListQuery(input.UserId, userIdList));
-            var privacies = await privacyAppService.GetPrivacyListAsync(userIdList);
+            var users = await userConverterService.GetUserListAsync(input.UserId, userIdList, false, false, input.Layer);
 
-            var photos = await photoAppService.GetPhotosAsync(userReadModels, contactReadModels);
-            var users = layeredUserService.GetConverter(input.Layer)
-                .ToUserList(input.UserId, userReadModels, photos, contactReadModels, privacies);
             var chatPhoto = await photoAppService.GetAsync(channelReadModel.PhotoId);
 
             var creatorId = channelReadModel.CreatorId;
             if (channelReadModel.Broadcast || (channelReadModel.HasLink && input.UserId != creatorId))
             {
-                if (chatAdminReadModels?.Count > 0)
-                {
-                    var newAdminList = chatAdminReadModels.ToList();
-                    newAdminList.RemoveAll(p => p.UserId == creatorId);
-                    chatAdminReadModels = newAdminList;
-                }
-
                 if (channelMemberReadModels.Count > 0)
                 {
                     var newChannelMemberReadModels = channelMemberReadModels.ToList();
@@ -146,7 +151,7 @@ internal sealed class GetParticipantsHandler(
                 }
             }
 
-            if ((chatAdminReadModels == null || chatAdminReadModels.Count == 0) && channelMemberReadModels.Count == 0)
+            if (chatAdminReadModels?.Count == 0 && channelMemberReadModels.Count == 0)
             {
                 return new TChannelParticipants
                 {
@@ -156,16 +161,17 @@ internal sealed class GetParticipantsHandler(
                 };
             }
 
-            return layeredService.GetConverter(input.Layer).ToChannelParticipants(
+            return chatConverterService.ToChannelParticipants(
                 input.UserId,
                 channelReadModel,
                 chatPhoto,
                 chatAdminReadModels,
                 channelMemberReadModels,
-                //userReadModels,
                 users,
                 DeviceType.Unknown,
-                forceNotLeft);
+                forceNotLeft,
+                input.Layer
+                );
         }
 
         throw new NotImplementedException();

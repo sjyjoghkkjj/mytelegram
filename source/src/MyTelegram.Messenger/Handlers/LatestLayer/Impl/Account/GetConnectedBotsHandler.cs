@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
+/// List all currently connected <a href="https://corefork.telegram.org/api/business#connected-bots">business bots »</a>
 /// See <a href="https://corefork.telegram.org/method/account.getConnectedBots" />
 ///</summary>
 internal sealed class GetConnectedBotsHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestGetConnectedBots, MyTelegram.Schema.Account.IConnectedBots>,
@@ -13,8 +12,8 @@ internal sealed class GetConnectedBotsHandler : RpcResultObjectHandler<MyTelegra
     {
         return Task.FromResult<MyTelegram.Schema.Account.IConnectedBots>(new TConnectedBots
         {
-            ConnectedBots = new(),
-            Users = new()
+            ConnectedBots = [],
+            Users = []
         });
     }
 }

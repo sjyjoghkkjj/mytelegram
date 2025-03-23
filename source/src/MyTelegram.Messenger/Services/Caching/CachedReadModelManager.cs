@@ -11,9 +11,7 @@ public abstract class CachedReadModelManager<TReadModelInterface, TReadModel>(
     where TReadModelInterface : IReadModel
 {
     private static readonly Type StaticReadModelType = typeof(TReadModel);
-    // ReSharper disable once StaticMemberInGenericType
     private static readonly HashSet<Type> AggregateEventTypes;
-
 
     static CachedReadModelManager()
     {
@@ -28,7 +26,7 @@ public abstract class CachedReadModelManager<TReadModelInterface, TReadModel>(
                 $"Read model type '{StaticReadModelType.PrettyPrint()}' does not implement any '{typeof(IAmReadModelFor<,,>).PrettyPrint()}'");
         }
 
-        AggregateEventTypes = new HashSet<Type>(iAmReadModelForInterfaceTypes.Select(i => i.GetTypeInfo().GetGenericArguments()[2]));
+        AggregateEventTypes = [.. iAmReadModelForInterfaceTypes.Select(i => i.GetTypeInfo().GetGenericArguments()[2])];
         if (AggregateEventTypes.Count != iAmReadModelForInterfaceTypes.Count)
         {
             throw new ArgumentException(

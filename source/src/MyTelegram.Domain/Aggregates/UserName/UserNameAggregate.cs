@@ -20,9 +20,10 @@ public class UserNameAggregate : SnapshotAggregateRoot<UserNameAggregate, UserNa
         string? oldUserName
         )
     {
+        var date = DateTime.UtcNow.ToTimestamp();
         if (string.IsNullOrEmpty(userName))
         {
-            Emit(new UserNameChangedEvent(requestInfo, peer, userName, oldUserName));
+            Emit(new UserNameChangedEvent(requestInfo, peer, userName, oldUserName, date));
             return;
         }
 
@@ -34,13 +35,13 @@ public class UserNameAggregate : SnapshotAggregateRoot<UserNameAggregate, UserNa
         }
         if (IsNew)
         {
-            Emit(new UserNameChangedEvent(requestInfo, peer, userName, oldUserName));
+            Emit(new UserNameChangedEvent(requestInfo, peer, userName, oldUserName, date));
         }
         else
         {
             if (_state.IsDeleted)
             {
-                Emit(new UserNameChangedEvent(requestInfo, peer, userName, oldUserName));
+                Emit(new UserNameChangedEvent(requestInfo, peer, userName, oldUserName, date));
             }
             else
             {
@@ -51,7 +52,7 @@ public class UserNameAggregate : SnapshotAggregateRoot<UserNameAggregate, UserNa
 
     protected override Task<UserNameSnapshot> CreateSnapshotAsync(CancellationToken cancellationToken)
     {
-        return Task.FromResult(new UserNameSnapshot(_state.UserName, _state.IsDeleted, _state.Peer));
+        return Task.FromResult(new UserNameSnapshot(_state.UserName, _state.IsDeleted));
     }
     protected override Task LoadSnapshotAsync(UserNameSnapshot snapshot,
         ISnapshotMetadata metadata,

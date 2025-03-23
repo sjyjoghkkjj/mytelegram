@@ -188,12 +188,6 @@ public interface IUserFull : IObject
     MyTelegram.Schema.IChatAdminRights? BotBroadcastAdminRights { get; set; }
 
     ///<summary>
-    /// Telegram Premium subscriptions gift options
-    /// See <a href="https://corefork.telegram.org/type/PremiumGiftOption" />
-    ///</summary>
-    TVector<MyTelegram.Schema.IPremiumGiftOption>? PremiumGifts { get; set; }
-
-    ///<summary>
     /// <a href="https://corefork.telegram.org/api/wallpapers">Wallpaper</a> to use in the private chat with the user.
     /// See <a href="https://corefork.telegram.org/type/WallPaper" />
     ///</summary>
@@ -261,4 +255,6 @@ public interface IUserFull : IObject
     /// See <a href="https://corefork.telegram.org/type/StarRefProgram" />
     ///</summary>
     MyTelegram.Schema.IStarRefProgram? StarrefProgram { get; set; }
+    MyTelegram.Schema.IBotVerification? BotVerification { get; set; }
+    long? SendPaidMessagesStars { get; set; }
 }

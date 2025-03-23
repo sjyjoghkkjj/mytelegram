@@ -11,7 +11,9 @@ public class PollCreatedEvent(
     IReadOnlyCollection<string>? correctAnswers,
     string? solution,
     byte[]? solutionEntities,
-    byte[]? questionEntities
+    IList<IMessageEntity>? solutionEntities2,
+    byte[]? questionEntities,
+    IList<IMessageEntity>? questionEntities2
     )
     : AggregateEvent<PollAggregate, PollId>
 {
@@ -25,5 +27,7 @@ public class PollCreatedEvent(
     public IReadOnlyCollection<string>? CorrectAnswers { get; } = correctAnswers;
     public string? Solution { get; } = solution;
     public byte[]? SolutionEntities { get; } = solutionEntities;
+    public IList<IMessageEntity>? SolutionEntities2 { get; } = solutionEntities2;
     public byte[]? QuestionEntities { get; } = questionEntities;
+    public IList<IMessageEntity>? QuestionEntities2 { get; } = questionEntities2;
 }

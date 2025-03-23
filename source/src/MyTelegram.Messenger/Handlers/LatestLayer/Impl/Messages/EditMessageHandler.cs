@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Edit message
@@ -46,22 +46,17 @@ internal sealed class EditMessageHandler(
     IMediaHelper mediaHelper,
     ICommandBus commandBus,
     IPeerHelper peerHelper,
-    IAccessHashHelper accessHashHelper,
-    IQueryProcessor queryProcessor)
+    IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestEditMessage, MyTelegram.Schema.IUpdates>,
         Messages.IEditMessageHandler
 {
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestEditMessage obj)
     {
-        IChatReadModel? chatReadModel = null;
         switch (obj.Peer)
         {
             case TInputPeerChannel inputPeerChannel:
                 await accessHashHelper.CheckAccessHashAsync(inputPeerChannel.ChannelId, inputPeerChannel.AccessHash);
-                break;
-            case TInputPeerChat inputPeerChat:
-                chatReadModel = await queryProcessor.ProcessAsync(new GetChatByChatIdQuery(inputPeerChat.ChatId));
                 break;
             case TInputPeerUser inputPeerUser:
                 await accessHashHelper.CheckAccessHashAsync(inputPeerUser.UserId, inputPeerUser.AccessHash);
@@ -97,7 +92,7 @@ internal sealed class EditMessageHandler(
                 CurrentDate,
                 media,
                 obj.ReplyMarkup,
-                chatReadModel?.ChatMembers.Select(p => p.UserId).ToList(),
+                [],
                 obj.InvertMedia
             );
         await commandBus.PublishAsync(command, default);

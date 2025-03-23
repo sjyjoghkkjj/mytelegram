@@ -13,9 +13,4 @@ public interface IExportedMessageLink : IObject
     /// URL
     ///</summary>
     string Link { get; set; }
-
-    ///<summary>
-    /// Embed code
-    ///</summary>
-    string Html { get; set; }
 }

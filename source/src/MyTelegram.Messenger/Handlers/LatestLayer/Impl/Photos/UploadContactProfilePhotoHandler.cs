@@ -1,28 +1,21 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Photos;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 
 ///<summary>
 /// Upload a custom profile picture for a contact, or suggest a new profile picture to a contact.The <code>file</code>, <code>video</code> and <code>video_emoji_markup</code> flags are mutually exclusive.
 /// <para>Possible errors</para>
 /// Code Type Description
+/// 400 CONTACT_MISSING The specified user is not a contact.
 /// 400 USER_ID_INVALID The provided user ID is invalid.
 /// See <a href="https://corefork.telegram.org/method/photos.uploadContactProfilePhoto" />
 ///</summary>
-internal sealed class UploadContactProfilePhotoHandler : RpcResultObjectHandler<MyTelegram.Schema.Photos.RequestUploadContactProfilePhoto, MyTelegram.Schema.Photos.IPhoto>,
-    Photos.IUploadContactProfilePhotoHandler
+internal sealed class UploadContactProfilePhotoHandler(
+    ICommandBus commandBus,
+    IMediaHelper mediaHelper,
+    IPeerHelper peerHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Photos.RequestUploadContactProfilePhoto,
+            MyTelegram.Schema.Photos.IPhoto>,
+        Photos.IUploadContactProfilePhotoHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IMediaHelper _mediaHelper;
-    private readonly IPeerHelper _peerHelper;
-
-    public UploadContactProfilePhotoHandler(ICommandBus commandBus, IMediaHelper mediaHelper, IPeerHelper peerHelper)
-    {
-        _commandBus = commandBus;
-        _mediaHelper = mediaHelper;
-        _peerHelper = peerHelper;
-    }
-
     protected override async Task<MyTelegram.Schema.Photos.IPhoto> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Photos.RequestUploadContactProfilePhoto obj)
     {
@@ -43,16 +36,6 @@ internal sealed class UploadContactProfilePhotoHandler : RpcResultObjectHandler<
         }
 
         VideoSizeEmojiMarkup? videoSizeEmojiMarkup = null;
-        if (obj.VideoEmojiMarkup != null)
-        {
-            switch (obj.VideoEmojiMarkup)
-            {
-                case TVideoSizeEmojiMarkup videoSizeEmojiMarkup1:
-                    videoSizeEmojiMarkup = new VideoSizeEmojiMarkup(videoSizeEmojiMarkup1.EmojiId,
-                        videoSizeEmojiMarkup1.BackgroundColors.ToList());
-                    break;
-            }
-        }
 
         var photoId = 0L;
         IPhoto? photo = null;
@@ -60,7 +43,7 @@ internal sealed class UploadContactProfilePhotoHandler : RpcResultObjectHandler<
         {
             var r = file == null
                 ? null
-                : await _mediaHelper.SavePhotoAsync(input.ReqMsgId,
+                : await mediaHelper.SavePhotoAsync(input.ReqMsgId,
                     input.UserId,
                     file.GetFileId(),
                     obj.Video != null,
@@ -68,11 +51,14 @@ internal sealed class UploadContactProfilePhotoHandler : RpcResultObjectHandler<
                     parts,
                     name,
                     md5 ?? string.Empty);
-            photoId = r?.PhotoId ?? 0;
-            photo = r?.Photo;
+            if (r != null)
+            {
+                photoId = r.PhotoId;
+                photo = r.Photo;
+            }
         }
 
-        var peer = _peerHelper.GetPeer(obj.UserId);
+        var peer = peerHelper.GetPeer(obj.UserId);
         var command = new UpdateContactProfilePhotoCommand(
             ContactId.Create(input.UserId, peer.PeerId),
             input.ToRequestInfo(),
@@ -80,13 +66,10 @@ internal sealed class UploadContactProfilePhotoHandler : RpcResultObjectHandler<
             peer.PeerId,
             photoId,
             obj.Suggest,
-            !obj.Suggest ? null : new TMessageActionSuggestProfilePhoto
-            {
-                Photo = photo
-            }.ToBytes().ToHexString()
+            obj.Suggest ? photo : null
         );
 
-        await _commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

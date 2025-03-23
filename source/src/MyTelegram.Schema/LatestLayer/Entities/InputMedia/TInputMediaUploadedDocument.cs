@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// New document
 /// See <a href="https://corefork.telegram.org/constructor/inputMediaUploadedDocument" />
 ///</summary>
-[TlObject(0x5b38c6c1)]
+[TlObject(0x37c9330)]
 public sealed class TInputMediaUploadedDocument : IInputMedia
 {
-    public uint ConstructorId => 0x5b38c6c1;
+    public uint ConstructorId => 0x37c9330;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -60,6 +60,8 @@ public sealed class TInputMediaUploadedDocument : IInputMedia
     /// Attached stickers
     ///</summary>
     public TVector<MyTelegram.Schema.IInputDocument>? Stickers { get; set; }
+    public MyTelegram.Schema.IInputPhoto? VideoCover { get; set; }
+    public int? VideoTimestamp { get; set; }
 
     ///<summary>
     /// Time to live in seconds of self-destructing document
@@ -73,6 +75,8 @@ public sealed class TInputMediaUploadedDocument : IInputMedia
         if (Spoiler) { Flags[5] = true; }
         if (Thumb != null) { Flags[2] = true; }
         if (Stickers?.Count > 0) { Flags[0] = true; }
+        if (VideoCover != null) { Flags[6] = true; }
+        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[7] = true; }
         if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[1] = true; }
     }
 
@@ -86,6 +90,8 @@ public sealed class TInputMediaUploadedDocument : IInputMedia
         writer.Write(MimeType);
         writer.Write(Attributes);
         if (Flags[0]) { writer.Write(Stickers); }
+        if (Flags[6]) { writer.Write(VideoCover); }
+        if (Flags[7]) { writer.Write(VideoTimestamp.Value); }
         if (Flags[1]) { writer.Write(TtlSeconds.Value); }
     }
 
@@ -100,6 +106,8 @@ public sealed class TInputMediaUploadedDocument : IInputMedia
         MimeType = reader.ReadString();
         Attributes = reader.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
         if (Flags[0]) { Stickers = reader.Read<TVector<MyTelegram.Schema.IInputDocument>>(); }
+        if (Flags[6]) { VideoCover = reader.Read<MyTelegram.Schema.IInputPhoto>(); }
+        if (Flags[7]) { VideoTimestamp = reader.ReadInt32(); }
         if (Flags[1]) { TtlSeconds = reader.ReadInt32(); }
     }
 }

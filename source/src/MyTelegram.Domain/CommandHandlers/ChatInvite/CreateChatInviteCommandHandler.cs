@@ -6,7 +6,7 @@ public class CreateChatInviteCommandHandler : CommandHandler<ChatInviteAggregate
         CancellationToken cancellationToken)
     {
         aggregate.CreateChatInvite(command.RequestInfo, command.ChannelId, command.InviteId, command.Hash, command.AdminId, command.Title,
-            command.RequestNeeded, command.StartDate, command.ExpireDate, command.UsageLimit, command.Permanent, command.Date);
+            command.RequestNeeded, command.StartDate, command.ExpireDate, command.UsageLimit, command.Permanent, command.Date, command.IsBroadcast);
 
         return Task.CompletedTask;
     }

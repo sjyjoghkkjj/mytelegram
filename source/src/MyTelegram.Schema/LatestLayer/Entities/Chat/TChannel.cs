@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Channel/supergroup infoWhen updating the <a href="https://corefork.telegram.org/api/peers">local peer database</a>, all fields from the newly received constructor take priority over the old constructor cached locally (including by removing fields that aren't set in the new constructor).The only exception to the above rule is when the <code>min</code> flag is set, in which case <strong>only</strong> the following fields must be applied over any locally stored version:See <a href="https://github.com/tdlib/td/blob/a24af0992245f838f2b4b418a0a2d5fa9caa27b5/td/telegram/ChatManager.cpp#L8329">here »</a> for an implementation of the logic to use when updating the <a href="https://corefork.telegram.org/api/peers">local user peer database</a>.
 /// See <a href="https://corefork.telegram.org/constructor/channel" />
 ///</summary>
-[TlObject(0xfe4478bd)]
+[TlObject(0x7482147e)]
 public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
 {
-    public uint ConstructorId => 0xfe4478bd;
+    public uint ConstructorId => 0x7482147e;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -261,6 +261,8 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
     /// Expiration date of the <a href="https://corefork.telegram.org/api/stars#star-subscriptions">Telegram Star subscription »</a> the current user has bought to gain access to this channel.
     ///</summary>
     public int? SubscriptionUntilDate { get; set; }
+    public long? BotVerificationIcon { get; set; }
+    public long? SendPaidMessagesStars { get; set; }
 
     public void ComputeFlag()
     {
@@ -302,6 +304,8 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         if (EmojiStatus != null) { Flags2[9] = true; }
         if (/*Level != 0 && */Level.HasValue) { Flags2[10] = true; }
         if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags2[11] = true; }
+        if (/*BotVerificationIcon != 0 &&*/ BotVerificationIcon.HasValue) { Flags2[13] = true; }
+        if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2[14] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -328,6 +332,8 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         if (Flags2[9]) { writer.Write(EmojiStatus); }
         if (Flags2[10]) { writer.Write(Level.Value); }
         if (Flags2[11]) { writer.Write(SubscriptionUntilDate.Value); }
+        if (Flags2[13]) { writer.Write(BotVerificationIcon.Value); }
+        if (Flags2[14]) { writer.Write(SendPaidMessagesStars.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -376,5 +382,7 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         if (Flags2[9]) { EmojiStatus = reader.Read<MyTelegram.Schema.IEmojiStatus>(); }
         if (Flags2[10]) { Level = reader.ReadInt32(); }
         if (Flags2[11]) { SubscriptionUntilDate = reader.ReadInt32(); }
+        if (Flags2[13]) { BotVerificationIcon = reader.ReadInt64(); }
+        if (Flags2[14]) { SendPaidMessagesStars = reader.ReadInt64(); }
     }
 }

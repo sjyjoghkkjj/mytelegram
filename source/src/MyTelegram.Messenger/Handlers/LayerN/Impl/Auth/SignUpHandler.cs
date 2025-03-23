@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Auth.LayerN;
+﻿namespace  MyTelegram.Handlers.Auth.LayerN;
 
 ///<summary>
 /// Registers a validated phone number in the system.
@@ -16,19 +14,14 @@ namespace MyTelegram.Handlers.Auth.LayerN;
 /// 400 PHONE_NUMBER_OCCUPIED The phone number is already in use.
 /// See <a href="https://corefork.telegram.org/method/auth.signUp" />
 ///</summary>
-internal sealed class SignUpHandler(IHandlerHelper handlerHelper) :
-    ForwardRequestToNewHandler<MyTelegram.Schema.Auth.LayerN.RequestSignUp,
-        MyTelegram.Schema.Auth.RequestSignUp>(handlerHelper),
-    Auth.ISignUpHandler
+internal sealed class SignUpHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Auth.LayerN.RequestSignUp,
+        MyTelegram.Schema.Auth.RequestSignUp> dataConverter)
+    : ForwardRequestToNewHandler<
+            MyTelegram.Schema.Auth.LayerN.RequestSignUp,
+            MyTelegram.Schema.Auth.RequestSignUp
+        >(handlerHelper, dataConverter),
+        Auth.LayerN.ISignUpHandler, IDistinctObjectHandler
 {
-    protected override RequestSignUp GetNewData(IRequestInput input, Schema.Auth.LayerN.RequestSignUp obj)
-    {
-        return new RequestSignUp
-        {
-            FirstName = obj.FirstName,
-            LastName = obj.LastName,
-            PhoneCodeHash = obj.PhoneCodeHash,
-            PhoneNumber = obj.PhoneNumber,
-        };
-    }
 }

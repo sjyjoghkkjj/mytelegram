@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Contacts;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Reset <a href="https://corefork.telegram.org/api/top-rating">rating</a> of top peer
@@ -15,6 +13,6 @@ internal sealed class ResetTopPeerRatingHandler : RpcResultObjectHandler<MyTeleg
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Contacts.RequestResetTopPeerRating obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

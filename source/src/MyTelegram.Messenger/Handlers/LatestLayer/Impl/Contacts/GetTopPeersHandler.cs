@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Contacts;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Get most used peers
@@ -16,9 +14,9 @@ internal sealed class GetTopPeersHandler : RpcResultObjectHandler<MyTelegram.Sch
         RequestGetTopPeers obj)
     {
         ITopPeers r = new TTopPeers {
-            Categories = new TVector<ITopPeerCategoryPeers>(),
-            Chats = new TVector<IChat>(),
-            Users = new TVector<IUser>()
+            Categories = [],
+            Chats = [],
+            Users = []
         };
 
         return Task.FromResult(r);

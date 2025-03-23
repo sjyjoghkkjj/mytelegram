@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Chat invite info
 /// See <a href="https://corefork.telegram.org/constructor/chatInvite" />
 ///</summary>
-[TlObject(0xfe65389d)]
+[TlObject(0x5c9d3702)]
 public sealed class TChatInvite : IChatInvite
 {
-    public uint ConstructorId => 0xfe65389d;
+    public uint ConstructorId => 0x5c9d3702;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -111,6 +111,7 @@ public sealed class TChatInvite : IChatInvite
     /// For <a href="https://corefork.telegram.org/api/stars#star-subscriptions">Telegram Star subscriptions »</a>, the ID of the payment form for the subscription.
     ///</summary>
     public long? SubscriptionFormId { get; set; }
+    public MyTelegram.Schema.IBotVerification? BotVerification { get; set; }
 
     public void ComputeFlag()
     {
@@ -127,6 +128,7 @@ public sealed class TChatInvite : IChatInvite
         if (Participants?.Count > 0) { Flags[4] = true; }
         if (SubscriptionPricing != null) { Flags[10] = true; }
         if (/*SubscriptionFormId != 0 &&*/ SubscriptionFormId.HasValue) { Flags[12] = true; }
+        if (BotVerification != null) { Flags[13] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -142,6 +144,7 @@ public sealed class TChatInvite : IChatInvite
         writer.Write(Color);
         if (Flags[10]) { writer.Write(SubscriptionPricing); }
         if (Flags[12]) { writer.Write(SubscriptionFormId.Value); }
+        if (Flags[13]) { writer.Write(BotVerification); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -164,5 +167,6 @@ public sealed class TChatInvite : IChatInvite
         Color = reader.ReadInt32();
         if (Flags[10]) { SubscriptionPricing = reader.Read<MyTelegram.Schema.IStarsSubscriptionPricing>(); }
         if (Flags[12]) { SubscriptionFormId = reader.ReadInt64(); }
+        if (Flags[13]) { BotVerification = reader.Read<MyTelegram.Schema.IBotVerification>(); }
     }
 }

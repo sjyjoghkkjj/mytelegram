@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Upload;
 
 ///<summary>
 /// Returns content of a web file, by proxying the request through telegram, see the <a href="https://corefork.telegram.org/api/files#downloading-webfiles">webfile docs for more info</a>.<strong>Note</strong>: the query must be sent to the DC specified in the <code>webfile_dc_id</code> <a href="https://corefork.telegram.org/api/config#mtproto-configuration">MTProto configuration field</a>.

@@ -37,10 +37,6 @@ public class ChatInviteReadModel : Impl.ChatInviteReadModel, IMongoDbReadModel
 {
 }
 
-public class ChatReadModel : Impl.ChatReadModel, IMongoDbReadModel
-{
-}
-
 public class ContactReadModel : Impl.ContactReadModel, IMongoDbReadModel
 {
 }
@@ -213,6 +209,10 @@ public class LanguageReadModel : Impl.LanguageReadModel, IMongoDbReadModel
 }
 
 public class LanguageTextReadModel : Impl.LanguageTextReadModel, IMongoDbReadModel
+{
+
+}
+public class JoinChannelRequestReadModel : Impl.JoinChannelRequestReadModel, IMongoDbReadModel
 {
 
 }

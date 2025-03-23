@@ -8,7 +8,7 @@ public class
         CancellationToken cancellationToken)
     {
         aggregate.UpdateProfilePhoto(command.RequestInfo, command.SelfUserId, command.TargetUserId, command.PhotoId,
-            command.Suggest, command.MessageActionData);
+            command.Suggest, command.SuggestPhoto);
         return Task.CompletedTask;
     }
 }

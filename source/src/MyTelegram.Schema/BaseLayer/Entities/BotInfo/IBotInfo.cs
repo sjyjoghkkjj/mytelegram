@@ -63,4 +63,5 @@ public interface IBotInfo : IObject
     /// See <a href="https://corefork.telegram.org/type/BotAppSettings" />
     ///</summary>
     MyTelegram.Schema.IBotAppSettings? AppSettings { get; set; }
+    MyTelegram.Schema.IBotVerifierSettings? VerifierSettings { get; set; }
 }

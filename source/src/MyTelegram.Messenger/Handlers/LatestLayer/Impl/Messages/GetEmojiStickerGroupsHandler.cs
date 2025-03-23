@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
+/// Represents a list of <a href="https://corefork.telegram.org/api/emoji-categories">emoji categories</a>, to be used when choosing a sticker.
 /// See <a href="https://corefork.telegram.org/method/messages.getEmojiStickerGroups" />
 ///</summary>
 internal sealed class GetEmojiStickerGroupsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetEmojiStickerGroups, MyTelegram.Schema.Messages.IEmojiGroups>,

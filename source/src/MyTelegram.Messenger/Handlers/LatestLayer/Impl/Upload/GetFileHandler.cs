@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Upload;
 
 ///<summary>
 /// Returns content of a whole file or its part.

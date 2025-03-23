@@ -4,7 +4,8 @@ public class ChatInviteState : AggregateState<ChatInviteAggregate, ChatInviteId,
     IApply<ChatInviteCreatedEvent>,
     IApply<ChatInviteEditedEvent>,
     IApply<ChatInviteImportedEvent>,
-    IApply<ChatInviteDeletedEvent>
+    IApply<ChatInviteDeletedEvent>,
+    IApply<ChatInviteExportedEvent>
 {
     public long ChannelId { get; private set; }
     public long InviteId { get; private set; }
@@ -12,6 +13,7 @@ public class ChatInviteState : AggregateState<ChatInviteAggregate, ChatInviteId,
     public long AdminId { get; private set; }
     public string? Title { get; private set; }
     public bool RequestNeeded { get; private set; }
+    public int Date { get; private set; }
     public int? StartDate { get; private set; }
     public int? ExpireDate { get; private set; }
     public int? UsageLimit { get; private set; }
@@ -20,6 +22,7 @@ public class ChatInviteState : AggregateState<ChatInviteAggregate, ChatInviteId,
 
     public int? Requested { get; private set; }
     public int? Usage { get; private set; }
+    public bool IsBroadcast { get; private set; }
 
     public void Apply(ChatInviteCreatedEvent aggregateEvent)
     {
@@ -33,6 +36,8 @@ public class ChatInviteState : AggregateState<ChatInviteAggregate, ChatInviteId,
         ExpireDate = aggregateEvent.ExpireDate;
         UsageLimit = aggregateEvent.UsageLimit;
         Permanent = aggregateEvent.Permanent;
+        IsBroadcast = aggregateEvent.IsBroadcast;
+        Date = aggregateEvent.Date;
     }
 
     public void Apply(ChatInviteEditedEvent aggregateEvent)
@@ -54,12 +59,14 @@ public class ChatInviteState : AggregateState<ChatInviteAggregate, ChatInviteId,
         AdminId = snapshot.AdminId;
         Title = snapshot.Title;
         RequestNeeded = snapshot.RequestNeeded;
+        Date = snapshot.Date;
         StartDate = snapshot.StartDate;
         ExpireDate = snapshot.ExpireDate;
         UsageLimit = snapshot.UsageLimit;
         Permanent = snapshot.Permanent;
         Usage = snapshot.Usage;
         Requested = snapshot.Requested;
+        IsBroadcast = snapshot.IsBroadcast;
     }
 
     public void Apply(ChatInviteImportedEvent aggregateEvent)
@@ -71,5 +78,21 @@ public class ChatInviteState : AggregateState<ChatInviteAggregate, ChatInviteId,
     public void Apply(ChatInviteDeletedEvent aggregateEvent)
     {
         //throw new NotImplementedException();
+    }
+
+    public void Apply(ChatInviteExportedEvent aggregateEvent)
+    {
+        ChannelId = aggregateEvent.ChannelId;
+        InviteId = aggregateEvent.InviteId;
+        Hash = aggregateEvent.Hash;
+        AdminId = aggregateEvent.AdminId;
+        Title = aggregateEvent.Title;
+        RequestNeeded = aggregateEvent.RequestNeeded;
+        StartDate = aggregateEvent.StartDate;
+        ExpireDate = aggregateEvent.ExpireDate;
+        UsageLimit = aggregateEvent.UsageLimit;
+        Permanent = aggregateEvent.Permanent;
+        IsBroadcast = aggregateEvent.IsBroadcast;
+        Date = aggregateEvent.Date;
     }
 }

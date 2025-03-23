@@ -1,38 +1,63 @@
-﻿using EventFlow.ReadStores;
-using MyTelegram.EventFlow.MongoDB;
-using MyTelegram.Domain.Aggregates.PeerSettings;
-using MyTelegram.Domain.Aggregates.Photo;
+﻿using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MyTelegram.Domain.Aggregates.Language;
+using MyTelegram.Domain.Aggregates.PeerNotifySetting;
+using MyTelegram.Domain.Aggregates.PeerSetting;
+using MyTelegram.Domain.Aggregates.Photo;
+using MyTelegram.Schema;
+using System.Reflection;
+using System.Text.Json.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace MyTelegram.ReadModel.MongoDB;
 
 public static class MyTelegramServerReadModelMongoDbExtensions
 {
-    //public static IEventFlowOptions AddMyMongoDbReadModel(/*this IServiceCollection services*/ this IEventFlowOptions options)
-    //{
-    //    // default readmodel dbcontext
-    //    options.ServiceCollection.AddSingleton<DefaultReadModelMongoDbContext>();
-    //    options.ServiceCollection.AddSingleton<IMongoDbContext, DefaultReadModelMongoDbContext>();
-    //    options.ServiceCollection.AddSingleton(typeof(IMongoDbContextFactory<>),
-    //        typeof(DefaultMongoDbContextFactory<>));
-
-    //    //options.ServiceCollection.AddTransient(typeof(IMongoDbReadModelStore<>), typeof(MyMongoDbReadModelStore<>));
-    //    //options.ServiceCollection.AddTransient(typeof(IReadModelStore<>), typeof(IMongoDbReadModelStore<>));
-
-    //    //options.ServiceCollection.AddTransient(typeof(IMongoDbReadModelStore<>), typeof(MyMongoDbReadModelStore<>));
-    //    //options.ServiceCollection.AddTransient(typeof(IMyMongoDbReadModelStore<>), typeof(MyMongoDbReadModelStore<>));
-
-    //    return options;
-    //}
-
-    public static IEventFlowOptions AddPushUpdatesMongoDbReadModel(this IEventFlowOptions options)
+    public static void RegisterMongoDbSerializer(this IServiceCollection services)
     {
-        //options.UseMongoDbReadModel<PtsReadModel, IPtsReadModelLocator>();
-        //options.UseMongoDbReadModel<PushUpdatesAggregate, PushUpdatesId, PushUpdatesReadModel>();
-        //options.UseMongoDbReadModel<PtsAggregate, PtsId, PtsForAuthKeyIdReadModel>();
-        //options.UseMongoDbReadModel<EncryptedChatAggregate, EncryptedChatId, EncryptedPushUpdatesReadModel>();
-        return options;
+        var pack = new ConventionPack
+        {
+            new IgnoreExtraElementsConvention(true)
+        };
+        ConventionRegistry.Register("IgnoreExtraElements", pack, _ => true);
+
+        var baseType = typeof(IObject);
+
+        var objectSerializer = new ObjectSerializer(type => type.IsAssignableTo(baseType));
+        //var guidSerializer = new GuidSerializer(GuidRepresentation.Standard);
+
+        BsonSerializer.RegisterSerializer(objectSerializer);
+        //BsonSerializer.RegisterSerializer(guidSerializer);
+
+        var asm = baseType.Assembly;
+        var baseInterfaceTypes = asm
+            .GetTypes()
+            .Where(t => t.IsInterface && t.IsAssignableTo(baseType) &&
+                        t.GetCustomAttributes<JsonDerivedTypeAttribute>().Any())
+            .ToList();
+
+        var types = asm.GetTypes()
+                .Where(t => baseInterfaceTypes.Any(t.IsAssignableTo) &&
+                            t is { IsAbstract: false, IsInterface: false })
+            ;
+
+        foreach (var type in types)
+        {
+            var discriminator = type.Name;
+            var ns = type.Namespace;
+            if (!string.IsNullOrEmpty(ns))
+            {
+                var lastItem = ns.Split(".").Last();
+                if (lastItem.StartsWith("Layer"))
+                {
+                    discriminator = $"{type.Name}{lastItem}";
+                }
+            }
+            var cm = new BsonClassMap(type);
+            cm.AutoMap();
+            cm.SetDiscriminator(discriminator);
+            BsonClassMap.RegisterClassMap(cm);
+        }
     }
 
     public static IEventFlowOptions AddMessengerMongoDbReadModel(this IEventFlowOptions options)
@@ -70,7 +95,6 @@ public static class MyTelegramServerReadModelMongoDbExtensions
             //.UseMongoDbReadModel<PtsReadModel, IPtsReadModelLocator>()
             .UseMongoDbReadModel<UserReadModel, IUserReadModelLocator>()
             //.UseMongoDbReadModel<BotAggregate, BotId, BotReadModel>()
-            .UseMongoDbReadModel<ChatAggregate, ChatId, ChatReadModel>()
             .UseMongoDbReadModel<ChannelReadModel, IChannelReadModelLocator>()
             .UseMongoDbReadModel<ChannelFullReadModel, IChannelFullReadModelLocator>()
             .UseMongoDbReadModel<ChannelMemberAggregate, ChannelMemberId, ChannelMemberReadModel>()
@@ -101,6 +125,8 @@ public static class MyTelegramServerReadModelMongoDbExtensions
             .UseMongoDbReadModel<PtsAggregate, PtsId, PtsForAuthKeyIdReadModel>()
             .UseMongoDbReadModel<LanguageAggregate, LanguageId, LanguageReadModel>()
             .UseMongoDbReadModel<LanguageTextAggregate, LanguageTextId, LanguageTextReadModel>()
+            .UseMongoDbReadModel<JoinChannelAggregate, JoinChannelId, JoinChannelRequestReadModel>()
+
             ;
     }
 }

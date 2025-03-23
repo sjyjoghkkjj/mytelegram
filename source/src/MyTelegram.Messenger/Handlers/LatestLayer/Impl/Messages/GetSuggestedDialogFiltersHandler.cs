@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get <a href="https://corefork.telegram.org/api/folders">suggested folders</a>
@@ -9,8 +7,8 @@ namespace MyTelegram.Handlers.Messages;
 internal sealed class GetSuggestedDialogFiltersHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetSuggestedDialogFilters, TVector<MyTelegram.Schema.IDialogFilterSuggested>>,
     Messages.IGetSuggestedDialogFiltersHandler
 {
-    protected override Task<TVector<MyTelegram.Schema.IDialogFilterSuggested>> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Messages.RequestGetSuggestedDialogFilters obj)
+    protected override Task<TVector<IDialogFilterSuggested>> HandleCoreAsync(IRequestInput input,
+        RequestGetSuggestedDialogFilters obj)
     {
         var r = new TVector<IDialogFilterSuggested>();
 

@@ -28,12 +28,23 @@ public class MessageIdLocator : IMessageIdLocator
                         postChannelIdUpdatedEvent.MessageId).Value;
                     break;
                 case SendOutboxMessageCompletedSagaEvent sendOutboxMessageSuccessEvent:
-                    yield return MessageId.Create(sendOutboxMessageSuccessEvent.MessageItem.OwnerPeer.PeerId,
-                        sendOutboxMessageSuccessEvent.MessageItem.MessageId).Value;
+                    //yield return MessageId.Create(sendOutboxMessageSuccessEvent.MessageItem.OwnerPeer.PeerId,
+                    //    sendOutboxMessageSuccessEvent.MessageItem.MessageId, sendOutboxMessageSuccessEvent.MessageItem.QuickReplyItem != null).Value;
+                    foreach (var item in sendOutboxMessageSuccessEvent.MessageItems)
+                    {
+                        yield return MessageId
+                            .Create(item.OwnerPeer.PeerId, item.MessageId, item.QuickReplyItem != null).Value;
+                    }
+
                     break;
                 case ReceiveInboxMessageCompletedSagaEvent receiveInboxMessageSuccessEvent:
-                    yield return MessageId.Create(receiveInboxMessageSuccessEvent.MessageItem.OwnerPeer.PeerId,
-                        receiveInboxMessageSuccessEvent.MessageItem.MessageId).Value;
+                    //yield return MessageId.Create(receiveInboxMessageSuccessEvent.MessageItem.OwnerPeer.PeerId,
+                    //    receiveInboxMessageSuccessEvent.MessageItem.MessageId).Value;
+                    foreach (var item in receiveInboxMessageSuccessEvent.MessageItems)
+                    {
+                        yield return MessageId
+                            .Create(item.OwnerPeer.PeerId, item.MessageId, item.QuickReplyItem != null).Value;
+                    }
                     break;
             }
         }

@@ -40,34 +40,6 @@ public class MessengerEventHandler(
     {
         newDeviceCreatedProcessor.Enqueue(eventData, eventData.PermAuthKeyId);
         return Task.CompletedTask;
-        //try
-        //{
-        //    var createDeviceCommand = new CreateDeviceCommand(DeviceId.Create(eventData.PermAuthKeyId),
-        //        eventData.RequestInfo,
-        //        eventData.PermAuthKeyId,
-        //        eventData.TempAuthKeyId,
-        //        eventData.UserId,
-        //        eventData.ApiId,
-        //        eventData.AppVersion,
-        //        eventData.AppVersion,
-        //        eventData.Hash,
-        //        eventData.OfficialApp,
-        //        eventData.PasswordPending,
-        //        eventData.DeviceModel,
-        //        eventData.Platform,
-        //        eventData.SystemVersion,
-        //        eventData.SystemLangCode,
-        //        eventData.LangPack,
-        //        eventData.LangCode,
-        //        eventData.Ip,
-        //        eventData.Layer
-        //    );
-        //    await _commandBus.PublishAsync(createDeviceCommand, default);
-        //}
-        //catch (DuplicateOperationException)
-        //{
-            // Ignore duplicate exception
-        //}
     }
 
     public Task HandleEventAsync(UserIsOnlineEvent eventData)

@@ -4,6 +4,6 @@ public class DomainEventDataProcessor(ICachedReadModelUpdater cachedReadModelMan
 {
     public Task ProcessAsync(IDomainEvent data)
     {
-        return cachedReadModelManager.UpdateAsync([data], default);
+        return cachedReadModelManager.UpdateAsync([data], CancellationToken.None);
     }
 }

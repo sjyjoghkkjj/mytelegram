@@ -12,6 +12,6 @@ public class
             return new List<ChannelReadModel>();
         }
 
-        return await store.FindAsync(p => query.ChannelIdList.Contains(p.ChannelId), cancellationToken: cancellationToken);
+        return await store.FindAsync(p => query.ChannelIdList.Contains(p.ChannelId) && !p.IsDeleted, cancellationToken: cancellationToken);
     }
 }

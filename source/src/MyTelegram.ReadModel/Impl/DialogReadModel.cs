@@ -55,7 +55,7 @@ public class DialogReadModel : IDialogReadModel,
 
     public virtual long ToPeerId { get; private set; }
     public virtual PeerType ToPeerType { get; private set; }
-    public virtual int TopMessage { get; private set; }
+    public virtual int TopMessage { get; set; }
     public virtual int UnreadCount { get; private set; }
     public virtual long? Version { get; set; }
     public virtual bool IsDeleted { get; private set; }
@@ -63,6 +63,7 @@ public class DialogReadModel : IDialogReadModel,
     public int UnreadMentionsCount { get; private set; }
     public int UnreadReactionsCount { get; private set; }
     public int? FolderId { get; private set; }
+    public bool ViewForumAsMessages { get; private set; }
 
     public Task ApplyAsync(IReadModelContext context,
         IDomainEvent<DialogAggregate, DialogId, ChannelHistoryClearedEvent> domainEvent,
@@ -264,14 +265,12 @@ public class DialogReadModel : IDialogReadModel,
         IDomainEvent<PeerNotifySettingsAggregate, PeerNotifySettingsId, PeerNotifySettingsUpdatedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
+        Id = DialogId.Create(domainEvent.AggregateEvent.OwnerPeerId,
+            domainEvent.AggregateEvent.PeerType,
+            domainEvent.AggregateEvent.PeerId).Value;
         NotifySettings = domainEvent.AggregateEvent.PeerNotifySettings;
+
         return Task.CompletedTask;
-    }
-    //#region Draft
-    public void SetNewTopMessageId(int newTopMessageId)
-    {
-        TopMessage = newTopMessageId;
-        //NewTopMessageId = newTopMessageId;
     }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<MessageAggregate, MessageId, OutboxMessageCreatedEvent> domainEvent, CancellationToken cancellationToken)
@@ -321,6 +320,7 @@ public class DialogReadModel : IDialogReadModel,
             domainEvent.AggregateEvent.MessageItem.ToPeer).Value;
 
         Pts = domainEvent.AggregateEvent.MessageItem.Pts;
+        TopMessage = domainEvent.AggregateEvent.MessageItem.MessageId;
 
         return Task.CompletedTask;
     }

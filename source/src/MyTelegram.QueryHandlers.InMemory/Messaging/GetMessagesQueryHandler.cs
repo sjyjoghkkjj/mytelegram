@@ -11,14 +11,22 @@ public class
         Expression<Func<MessageReadModel, bool>> predicate;
         if (query.IsSearchGlobal)
         {
-            predicate = x => x.OwnerPeerId == query.OwnerPeerId || x.SenderPeerId == query.SelfUserId;
+            predicate = x => x.OwnerPeerId == query.OwnerPeerId;
+            if (query.JoinedChannelIdList?.Count > 0)
+            {
+                predicate = predicate.Or(p => query.JoinedChannelIdList.Contains(p.OwnerPeerId));
+            }
         }
         else
         {
             predicate = x => x.OwnerPeerId == query.OwnerPeerId;
         }
 
-        predicate = predicate.WhereIf(query.Q?.Length > 2, p => p.Message.Contains(query.Q!))
+        predicate = predicate
+                .WhereIf(query.MessageActionType == null, p => p.MessageActionType != MessageActionType.CreateQuickReplyMessage)
+                .WhereIf(query.MessageActionType.HasValue, p => p.MessageActionType == query.MessageActionType)
+                //.WhereIf(query.Q?.Length > 2, p => p.Message.Contains(query.Q!))
+                .WhereIf(query.Q?.Length > 0, p => p.Message.Contains(query.Q!))
                 .WhereIf(
                     query.MessageType != MessageType.Unknown && query.MessageType != MessageType.Pinned,
                     p => p.MessageType == query.MessageType)
@@ -28,9 +36,12 @@ public class
                 .WhereIf(query.Offset?.LoadType == LoadType.Forward, p => p.MessageId > query.Offset!.FromId)
                 .WhereIf(query.Offset?.MaxId > 0, p => p.MessageId < query.Offset!.MaxId)
                 .WhereIf(query.Pts > 0, p => p.Pts > query.Pts)
-                .WhereIf(query.Peer != null,
+                .WhereIf(query.Peer != null && query.Peer.PeerType != PeerType.Empty,
                     p => p.ToPeerType == query.Peer!.PeerType && p.ToPeerId == query.Peer.PeerId)
                 .WhereIf(query.ReplyToMsgId > 0, p => p.ReplyToMsgId == query.ReplyToMsgId)
+                .WhereIf(query.BroadcastsOnly, p => p.ToPeerType == PeerType.Channel && p.Post)
+                .WhereIf(query.GroupsOnly, p => p.ToPeerType == PeerType.Channel && !p.Post)
+                .WhereIf(query.UsersOnly, p => p.ToPeerType == PeerType.User)
             ;
 
         return await store.FindAsync(predicate,

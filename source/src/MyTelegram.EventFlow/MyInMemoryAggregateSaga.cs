@@ -23,8 +23,8 @@ public abstract class MyInMemoryAggregateSaga<TSaga, TIdentity, TLocator>(TIdent
     protected virtual Task CompleteAsync(CancellationToken cancellationToken = default)
     {
         Complete();
-        // Aggregate emit events will not be completed immediately,so delay 100ms to remove it from memory
-        Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ContinueWith(_ =>
+        // Aggregate emit events will not be completed immediately,so delay 1000ms to remove it from memory
+        Task.Delay(TimeSpan.FromMilliseconds(1000), cancellationToken).ContinueWith(_ =>
                 eventStore.DeleteAggregateAsync<TSaga, TIdentity>(Id, cancellationToken),
             cancellationToken);
         return Task.CompletedTask;

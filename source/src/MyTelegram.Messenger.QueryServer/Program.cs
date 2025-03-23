@@ -116,7 +116,8 @@ builder.ConfigureServices((ctx,
 });
 
 var app = builder.Build();
-
+var handlerHelper = app.Services.GetRequiredService<IHandlerHelper>();
+handlerHelper.InitAllHandlers();
 var eventBus = app.Services.GetRequiredService<IEventBus>();
 eventBus.ConfigureEventBus();
 

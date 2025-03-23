@@ -93,4 +93,9 @@ public interface IPeerSettings : IObject
     /// Contains a <a href="https://corefork.telegram.org/api/links">deep link »</a>, used to open a management menu in the business bot. This flag is set if and only if <code>business_bot_id</code> is set.
     ///</summary>
     string? BusinessBotManageUrl { get; set; }
+    long? ChargePaidMessageStars { get; set; }
+    string? RegistrationMonth { get; set; }
+    string? PhoneCountry { get; set; }
+    int? NameChangeDate { get; set; }
+    int? PhotoChangeDate { get; set; }
 }

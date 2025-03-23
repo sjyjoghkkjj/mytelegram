@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Domain.Aggregates.Dialog;
+﻿//namespace MyTelegram.Domain.Aggregates.Dialog;
 
-public record InputPeer(Peer Peer,
-    long AccessHash);
+//public record InputPeer(Peer Peer,
+//    long AccessHash);

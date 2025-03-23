@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get recent stickers
@@ -14,9 +12,9 @@ internal sealed class GetRecentStickersHandler : RpcResultObjectHandler<MyTelegr
     {
         return Task.FromResult<MyTelegram.Schema.Messages.IRecentStickers>(new TRecentStickers
         {
-            Dates = new(),
-            Packs = new(),
-            Stickers = new(),
+            Dates = [],
+            Packs = [],
+            Stickers = [],
         });
     }
 }

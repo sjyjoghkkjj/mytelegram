@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
+/// Associate (or remove) a personal <a href="https://corefork.telegram.org/api/channel">channel »</a>, that will be listed on our personal <a href="https://corefork.telegram.org/api/profile#personal-channel">profile page »</a>.Changing it will emit an <a href="https://corefork.telegram.org/constructor/updateUser">updateUser</a> update.
 /// See <a href="https://corefork.telegram.org/method/account.updatePersonalChannel" />
 ///</summary>
 internal sealed class UpdatePersonalChannelHandler(
@@ -20,8 +19,7 @@ internal sealed class UpdatePersonalChannelHandler(
         {
             case TInputChannel inputChannel:
                 await accessHashHelper.CheckAccessHashAsync(inputChannel);
-                var channelReadModel =
-                    await channelAppService.GetAsync(inputChannel.ChannelId);
+                var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
                 if (channelReadModel!.CreatorId != input.UserId)
                 {
                     RpcErrors.RpcErrors400.ChatIdInvalid.ThrowRpcError();

@@ -22,7 +22,10 @@ public class UserSnapshot(
     GlobalPrivacySettings globalPrivacySettings,
     bool premium,
     long? personalChannelId,
-    Birthday? birthday)
+    Birthday? birthday,
+    int? profilePhotoUpdateDate,
+    int? userNameUpdateDate
+    )
     : ISnapshot
 {
     public long AccessHash { get; } = accessHash;
@@ -48,7 +51,8 @@ public class UserSnapshot(
     public bool Premium { get; } = premium;
     public long? PersonalChannelId { get; } = personalChannelId;
     public Birthday? Birthday { get; } = birthday;
-
+    public int? ProfilePhotoUpdateDate { get; } = profilePhotoUpdateDate;
+    public int? UserNameUpdateDate { get; } = userNameUpdateDate;
     public long UserId { get; } = userId;
     public string? UserName { get; } = userName;
 }

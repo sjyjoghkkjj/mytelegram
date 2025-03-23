@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Auth;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Registers a validated phone number in the system.
@@ -26,10 +24,14 @@ internal sealed class SignUpHandler(
     protected override async Task<MyTelegram.Schema.Auth.IAuthorization> HandleCoreAsync(IRequestInput input,
         RequestSignUp obj)
     {
+        if (string.IsNullOrEmpty(obj.PhoneCodeHash))
+        {
+            RpcErrors.RpcErrors400.PhoneCodeEmpty.ThrowRpcError();
+        }
+
         var phoneNumber = obj.PhoneNumber.ToPhoneNumber();
         var userReadModel = await queryProcessor
-            .ProcessAsync(new GetUserByPhoneNumberQuery(phoneNumber), default)
-     ;
+            .ProcessAsync(new GetUserByPhoneNumberQuery(phoneNumber));
         var userId = userReadModel?.UserId ?? 0;
 
         var command = new CheckSignUpCodeCommand(AppCodeId.Create(phoneNumber, obj.PhoneCodeHash),
@@ -39,7 +41,8 @@ internal sealed class SignUpHandler(
             randomHelper.NextInt64(),
             phoneNumber,
             obj.FirstName,
-            obj.LastName);
+            obj.LastName
+            );
 
         await commandBus.PublishAsync(command);
 

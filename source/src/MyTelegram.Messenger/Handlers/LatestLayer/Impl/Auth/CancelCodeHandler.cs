@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Auth;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Auth;
 
 ///<summary>
 /// Cancel the login verification code
@@ -14,7 +12,7 @@ internal sealed class CancelCodeHandler : RpcResultObjectHandler<MyTelegram.Sche
     Auth.ICancelCodeHandler
 {
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Auth.RequestCancelCode obj)
+        RequestCancelCode obj)
     {
         // todo:cancel code
         return Task.FromResult<IBool>(new TBoolTrue());

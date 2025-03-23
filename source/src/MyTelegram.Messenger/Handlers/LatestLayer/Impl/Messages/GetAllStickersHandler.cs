@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get all installed stickers
@@ -12,7 +10,7 @@ internal sealed class GetAllStickersHandler : RpcResultObjectHandler<MyTelegram.
     protected override Task<MyTelegram.Schema.Messages.IAllStickers> HandleCoreAsync(IRequestInput input,
         RequestGetAllStickers obj)
     {
-        var r = new MyTelegram.Schema.Messages.TAllStickers { Sets = new TVector<MyTelegram.Schema.IStickerSet>() };
+        var r = new MyTelegram.Schema.Messages.TAllStickers { Sets = [] };
 
         return Task.FromResult<IAllStickers>(r);
     }

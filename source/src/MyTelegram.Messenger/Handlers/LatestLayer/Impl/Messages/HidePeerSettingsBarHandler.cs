@@ -1,30 +1,25 @@
-﻿// ReSharper disable All
+﻿using MyTelegram.Domain.Aggregates.PeerSetting;
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
-/// Should be called after the user hides the report spam/add as contact bar of a new chat, effectively prevents the user from executing the actions specified in the <a href="https://corefork.telegram.org/constructor/peerSettings">peer's settings</a>.
+/// Should be called after the user hides the <a href="https://corefork.telegram.org/api/action-bar">report spam/add as contact bar</a> of a new chat, effectively prevents the user from executing the actions specified in the <a href="https://corefork.telegram.org/api/action-bar">action bar »</a>.
+/// <para>Possible errors</para>
+/// Code Type Description
+/// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.hidePeerSettingsBar" />
 ///</summary>
-internal sealed class HidePeerSettingsBarHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestHidePeerSettingsBar, IBool>,
-    Messages.IHidePeerSettingsBarHandler
+internal sealed class HidePeerSettingsBarHandler(IPeerHelper peerHelper, ICommandBus commandBus)
+    : RpcResultObjectHandler<RequestHidePeerSettingsBar, IBool>,
+        IHidePeerSettingsBarHandler
 {
-    private readonly IPeerHelper _peerHelper;
-    private readonly ICommandBus _commandBus;
-
-    public HidePeerSettingsBarHandler(IPeerHelper peerHelper, ICommandBus commandBus)
-    {
-        _peerHelper = peerHelper;
-        _commandBus = commandBus;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestHidePeerSettingsBar obj)
     {
-        var peer = _peerHelper.GetPeer(obj.Peer);
+        var peer = peerHelper.GetPeer(obj.Peer);
         var command = new HidePeerSettingsBarCommand(PeerSettingsId.Create(input.UserId, peer.PeerId),
             input.ToRequestInfo(), peer.PeerId);
-        await _commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command);
 
         return new TBoolTrue();
     }

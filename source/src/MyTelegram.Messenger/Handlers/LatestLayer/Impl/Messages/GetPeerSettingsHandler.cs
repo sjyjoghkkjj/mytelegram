@@ -1,8 +1,4 @@
-﻿// ReSharper disable All
-
-using TPeerSettings = MyTelegram.Schema.TPeerSettings;
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get peer settings
@@ -14,35 +10,26 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.getPeerSettings" />
 ///</summary>
-internal sealed class GetPeerSettingsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetPeerSettings, MyTelegram.Schema.Messages.IPeerSettings>,
-    Messages.IGetPeerSettingsHandler
+internal sealed class GetPeerSettingsHandler(
+    IPeerSettingsAppService peerSettingsAppService,
+    IPeerHelper peerHelper,
+    IObjectMapper objectMapper,
+    IQueryProcessor queryProcessor,
+    IAccessHashHelper accessHashHelper,
+    IContactAppService contactAppService,
+    ILayeredService<IPeerSettingsConverter> layeredService)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetPeerSettings,
+            MyTelegram.Schema.Messages.IPeerSettings>,
+        Messages.IGetPeerSettingsHandler
 {
-    private readonly IObjectMapper _objectMapper;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IPeerSettingsAppService _peerSettingsAppService;
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly IAccessHashHelper _accessHashHelper;
-    private readonly ILayeredService<IPeerSettingsConverter> _layeredService;
-    public GetPeerSettingsHandler(IPeerSettingsAppService peerSettingsAppService,
-        IPeerHelper peerHelper,
-        IObjectMapper objectMapper,
-        IQueryProcessor queryProcessor,
-        IAccessHashHelper accessHashHelper, ILayeredService<IPeerSettingsConverter> layeredService)
-    {
-        _peerSettingsAppService = peerSettingsAppService;
-        _peerHelper = peerHelper;
-        _objectMapper = objectMapper;
-        _queryProcessor = queryProcessor;
-        _accessHashHelper = accessHashHelper;
-        _layeredService = layeredService;
-    }
+    private readonly IObjectMapper _objectMapper = objectMapper;
 
     protected override async Task<MyTelegram.Schema.Messages.IPeerSettings> HandleCoreAsync(IRequestInput input,
         RequestGetPeerSettings obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
         var userId = input.UserId;
-        var peer = _peerHelper.GetPeer(obj.Peer, userId);
+        var peer = peerHelper.GetPeer(obj.Peer, userId);
         if (peer.PeerId == MyTelegramServerDomainConsts.OfficialUserId || peer.PeerType == PeerType.Self)
         {
             return new MyTelegram.Schema.Messages.TPeerSettings
@@ -59,21 +46,13 @@ internal sealed class GetPeerSettingsHandler : RpcResultObjectHandler<MyTelegram
         {
             //contactReadModel = await _queryProcessor.ProcessAsync(new GetContactQuery(userId, peer.PeerId));
             var contactReadModels =
-                await _queryProcessor.ProcessAsync(
+                await queryProcessor.ProcessAsync(
                     new GetContactListBySelfIdAndTargetUserIdQuery(input.UserId, peer.PeerId));
-            switch (contactReadModels.Count)
-            {
-                case 1:
-                    contactType = ContactType.Unilateral;
-                    break;
-                case 2:
-                    contactType = ContactType.Mutual;
-                    break;
-            }
+            contactType = contactAppService.GetContactType(input.UserId, peer.PeerId, contactReadModels);
         }
 
-        var r = await _peerSettingsAppService.GetPeerSettingsAsync(userId, peer.PeerId);
-        var settings = _layeredService.GetConverter(input.Layer).ToPeerSettings(input.UserId, peer.PeerId, r, contactType);
+        var r = await peerSettingsAppService.GetPeerSettingsAsync(userId, peer.PeerId);
+        var settings = layeredService.GetConverter(input.Layer).ToPeerSettings(input.UserId, peer.PeerId, r, contactType);
 
         if (r == null && peer.PeerType == PeerType.Channel)
         {

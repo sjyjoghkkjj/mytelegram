@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Edits notification settings from a given user/group, from all users/all groups.
@@ -13,29 +11,21 @@ namespace MyTelegram.Handlers.Account;
 /// 400 SETTINGS_INVALID Invalid settings were provided.
 /// See <a href="https://corefork.telegram.org/method/account.updateNotifySettings" />
 ///</summary>
-internal sealed class UpdateNotifySettingsHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestUpdateNotifySettings, IBool>,
-    Account.IUpdateNotifySettingsHandler
+internal sealed class UpdateNotifySettingsHandler(
+    ICommandBus commandBus,
+    IPeerHelper peerHelper) : RpcResultObjectHandler<RequestUpdateNotifySettings, IBool>,
+    IUpdateNotifySettingsHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IPeerHelper _peerHelper;
-
-    public UpdateNotifySettingsHandler(ICommandBus commandBus,
-        IPeerHelper peerHelper)
-    {
-        _commandBus = commandBus;
-        _peerHelper = peerHelper;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestUpdateNotifySettings obj)
     {
         if (obj.Peer is TInputNotifyPeer inputNotifyPeer)
         {
             var userId = input.UserId;
-            var targetPeer = _peerHelper.GetPeer(inputNotifyPeer.Peer, userId);
+            var targetPeer = peerHelper.GetPeer(inputNotifyPeer.Peer, userId);
             var aggregateId = PeerNotifySettingsId.Create(userId, targetPeer.PeerType, targetPeer.PeerId);
             var updatePeerNotifySettingsCommand = new UpdatePeerNotifySettingsCommand(aggregateId,
-                input.ToRequestInfo(), 
+                input.ToRequestInfo(),
                 input.UserId,
                 targetPeer.PeerType,
                 targetPeer.PeerId,
@@ -43,12 +33,10 @@ internal sealed class UpdateNotifySettingsHandler : RpcResultObjectHandler<MyTel
                 obj.Settings.Silent,
                 obj.Settings.MuteUntil,
                 string.Empty
-                //obj.Settings.Sound
             );
-            await _commandBus.PublishAsync(updatePeerNotifySettingsCommand, CancellationToken.None)
-         ;
+            await commandBus.PublishAsync(updatePeerNotifySettingsCommand);
+
             return null!;
-            //return new TBoolTrue();
         }
 
         throw new NotImplementedException();

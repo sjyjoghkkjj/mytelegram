@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get messages in a reply thread
@@ -13,43 +11,30 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 TOPIC_ID_INVALID The specified topic ID is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.getReplies" />
 ///</summary>
-internal sealed class GetRepliesHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetReplies, MyTelegram.Schema.Messages.IMessages>,
-    Messages.IGetRepliesHandler
+internal sealed class GetRepliesHandler(
+    IPeerHelper peerHelper,
+    IMessageAppService messageAppService,
+    IAccessHashHelper accessHashHelper,
+    IGetHistoryConverterService getHistoryConverterService)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetReplies, MyTelegram.Schema.Messages.IMessages>,
+        Messages.IGetRepliesHandler
 {
-    private readonly IAccessHashHelper _accessHashHelper;
-    private readonly IMessageAppService _messageAppService;
-    private readonly IPeerHelper _peerHelper;
-    //private readonly IRpcResultProcessor _rpcResultProcessor;
-    private readonly ILayeredService<IRpcResultProcessor> _layeredService;
-
-    public GetRepliesHandler(
-        IPeerHelper peerHelper,
-        IMessageAppService messageAppService,
-        IAccessHashHelper accessHashHelper,
-        ILayeredService<IRpcResultProcessor> layeredService)
-    {
-        _peerHelper = peerHelper;
-        _messageAppService = messageAppService;
-        _accessHashHelper = accessHashHelper;
-        _layeredService = layeredService;
-    }
-
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         RequestGetReplies obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        var peer = _peerHelper.GetPeer(obj.Peer);
-        var r = await _messageAppService.GetRepliesAsync(new GetRepliesInput
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        var peer = peerHelper.GetPeer(obj.Peer);
+        var getMessageOutput = await messageAppService.GetRepliesAsync(new GetRepliesInput
         {
             ReplyToMsgId = obj.MsgId,
             OwnerPeerId = peer.PeerId,
             AddOffset = obj.AddOffset,
             Limit = obj.Limit,
-            //OffsetId = obj.OffsetId,
+            OffsetId = obj.OffsetId,
             MinDate = obj.OffsetDate,
             SelfUserId = input.UserId
         });
-        //return _rpcResultProcessor.ToMessages(r, input.Layer);
-        return _layeredService.GetConverter(input.Layer).ToMessages(r, input.Layer);
+
+        return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
     }
 }

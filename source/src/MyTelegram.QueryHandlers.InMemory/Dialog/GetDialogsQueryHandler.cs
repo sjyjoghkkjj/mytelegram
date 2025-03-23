@@ -27,6 +27,7 @@ public class GetDialogsQueryHandler(IQueryOnlyReadModelStore<DialogReadModel> st
                 .WhereIf(needOffsetDate, p => p.CreationTime > offsetDate)
                 .WhereIf(needPinnedParameter, p => p.Pinned == pinned)
                 .WhereIf(query.PeerIdList?.Count > 0, p => query.PeerIdList!.Contains(p.ToPeerId))
+                .WhereIf(query.FolderId.HasValue && query.FolderId != 0, p => p.FolderId == query.FolderId)
             ;
 
         var sort = new SortOptions<DialogReadModel>(p => p.TopMessage, SortType.Descending);

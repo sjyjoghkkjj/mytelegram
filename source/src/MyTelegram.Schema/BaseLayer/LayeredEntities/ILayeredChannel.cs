@@ -11,4 +11,10 @@ public interface ILayeredChannel : IChat
     IChatBannedRights? DefaultBannedRights { get; set; }
     int? ParticipantsCount { get; set; }
     //bool Deactivated { get; set; }
+
+    ///<summary>
+    /// <a href="https://corefork.telegram.org/api/emoji-status">Emoji status</a>
+    /// See <a href="https://corefork.telegram.org/type/EmojiStatus" />
+    ///</summary>
+    MyTelegram.Schema.IEmojiStatus? EmojiStatus { get; set; }
 }

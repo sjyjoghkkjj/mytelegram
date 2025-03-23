@@ -8,7 +8,7 @@ public class UpdateDialogCommand(
     int topMessageId,
     int pts,
     int? defaultHistoryTtl
-)
+    )
     : Command<DialogAggregate, DialogId, IExecutionResult>(aggregateId)
 {
     public RequestInfo RequestInfo { get; } = requestInfo;

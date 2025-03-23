@@ -15,7 +15,8 @@ public class UpdatePinnedMessageState :
     public int Date { get; private set; }
     public int InboxCount { get; private set; }
     public bool IsCompleted => InboxCount == UpdatedInboxCount;
-    public string? MessageActionData { get; private set; }
+    //public string? MessageActionData { get; private set; }
+    public IMessageAction? MessageAction { get; private set; }
 
     public bool NeedWaitForOutboxPinnedUpdated { get; private set; }
     public bool Pinned { get; private set; }
@@ -69,7 +70,8 @@ public class UpdatePinnedMessageState :
         NeedWaitForOutboxPinnedUpdated = aggregateEvent.NeedWaitForOutboxPinnedUpdated;
         InboxCount = aggregateEvent.InboxCount;
         RandomId = aggregateEvent.RandomId;
-        MessageActionData = aggregateEvent.MessageActionData;
+        //MessageActionData = aggregateEvent.MessageActionData;
+        MessageAction = aggregateEvent.MessageAction;
         //CorrelationId = aggregateEvent.CorrelationId;
         ReplyToMsgId = aggregateEvent.ReplyToMsgId;
         SenderPeerId = aggregateEvent.SenderPeerId;

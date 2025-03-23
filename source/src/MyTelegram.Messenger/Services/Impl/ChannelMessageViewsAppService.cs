@@ -10,8 +10,6 @@ public class ChannelMessageViewsAppService(
     ICuckooFilter cuckooFilter)
     : IChannelMessageViewsAppService, ITransientDependency
 {
-    //private readonly IBloomFilter _bloomFilter;
-
     public async Task IncrementViewsIfNotIncrementedAsync(long selfUserId,
         long authKeyId,
         long channelId,
@@ -103,7 +101,7 @@ public class ChannelMessageViewsAppService(
                         Replies = reply?.Replies ?? 0,
                         RepliesPts = reply?.RepliesPts ?? 0,
                         MaxId = reply?.MaxId,
-                        RecentRepliers = new TVector<IPeer>(recentRepliers)
+                        RecentRepliers = [.. recentRepliers]
                     }
                 });
             }

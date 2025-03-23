@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Indicates info about a certain user.Unless specified otherwise, when updating the <a href="https://corefork.telegram.org/api/peers">local peer database</a>, all fields from the newly received constructor take priority over the old constructor cached locally (including by removing fields that aren't set in the new constructor).See <a href="https://github.com/tdlib/td/blob/cb164927417f22811c74cd8678ed4a5ab7cb80ba/td/telegram/UserManager.cpp#L2267">here »</a> for an implementation of the logic to use when updating the <a href="https://corefork.telegram.org/api/peers">local user peer database</a>.
 /// See <a href="https://corefork.telegram.org/constructor/user" />
 ///</summary>
-[TlObject(0x83314fca)]
+[TlObject(0x20b1422)]
 public sealed class TUser : IUser, ILayeredUser
 {
-    public uint ConstructorId => 0x83314fca;
+    public uint ConstructorId => 0x20b1422;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -265,6 +265,8 @@ public sealed class TUser : IUser, ILayeredUser
     /// Monthly Active Users (MAU) of this bot (may be absent for small bots).
     ///</summary>
     public int? BotActiveUsers { get; set; }
+    public long? BotVerificationIcon { get; set; }
+    public long? SendPaidMessagesStars { get; set; }
 
     public void ComputeFlag()
     {
@@ -310,6 +312,8 @@ public sealed class TUser : IUser, ILayeredUser
         if (Color != null) { Flags2[8] = true; }
         if (ProfileColor != null) { Flags2[9] = true; }
         if (/*BotActiveUsers != 0 && */BotActiveUsers.HasValue) { Flags2[12] = true; }
+        if (/*BotVerificationIcon != 0 &&*/ BotVerificationIcon.HasValue) { Flags2[14] = true; }
+        if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2[15] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -336,6 +340,8 @@ public sealed class TUser : IUser, ILayeredUser
         if (Flags2[8]) { writer.Write(Color); }
         if (Flags2[9]) { writer.Write(ProfileColor); }
         if (Flags2[12]) { writer.Write(BotActiveUsers.Value); }
+        if (Flags2[14]) { writer.Write(BotVerificationIcon.Value); }
+        if (Flags2[15]) { writer.Write(SendPaidMessagesStars.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -385,5 +391,7 @@ public sealed class TUser : IUser, ILayeredUser
         if (Flags2[8]) { Color = reader.Read<MyTelegram.Schema.IPeerColor>(); }
         if (Flags2[9]) { ProfileColor = reader.Read<MyTelegram.Schema.IPeerColor>(); }
         if (Flags2[12]) { BotActiveUsers = reader.ReadInt32(); }
+        if (Flags2[14]) { BotVerificationIcon = reader.ReadInt64(); }
+        if (Flags2[15]) { SendPaidMessagesStars = reader.ReadInt64(); }
     }
 }

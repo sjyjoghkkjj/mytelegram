@@ -13,7 +13,7 @@ public class SendMessageSagaState : AggregateState<SendMessageSaga, SendMessageS
 {
     public RequestInfo RequestInfo { get; set; } = default!;
     //public MessageItem MessageItem { get; set; } = default!;
-    public List<long>? MentionedUserIds { get; private set; } = [];
+    public List<long>? MentionedUserIds { get; private set; }
     //public int GroupItemCount { get; set; }
     public long? LinkedChannelId { get; set; }
     public List<long>? ChatMembers { get; private set; } = new();
@@ -33,7 +33,7 @@ public class SendMessageSagaState : AggregateState<SendMessageSaga, SendMessageS
 
     public int TotalCount { get; private set; }
 
-    public SendMessageItem FirstMessageItem { get; private set; } = default!;
+    public SendMessageItem FirstMessageItem { get; private set; }
 
     public List<MessageItem> InboxMessageItems { get; private set; } = [];
 

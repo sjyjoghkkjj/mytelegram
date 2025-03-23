@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Folders;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Folders;
 
 ///<summary>
 /// Edit peers in <a href="https://corefork.telegram.org/api/folders#peer-folders">peer folder</a>

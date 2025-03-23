@@ -1,5 +1,7 @@
 ﻿// ReSharper disable All
 
+using MyTelegram.Schema.LayerN.Entities.MessageMedia;
+
 namespace MyTelegram.Schema;
 
 ///<summary>
@@ -12,6 +14,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TMessageMediaContact), nameof(TMessageMediaContact))]
 [JsonDerivedType(typeof(TMessageMediaUnsupported), nameof(TMessageMediaUnsupported))]
 [JsonDerivedType(typeof(TMessageMediaDocument), nameof(TMessageMediaDocument))]
+[JsonDerivedType(typeof(TMessageMediaDocumentLayer160), nameof(TMessageMediaDocumentLayer160))]
 [JsonDerivedType(typeof(TMessageMediaWebPage), nameof(TMessageMediaWebPage))]
 [JsonDerivedType(typeof(TMessageMediaVenue), nameof(TMessageMediaVenue))]
 [JsonDerivedType(typeof(TMessageMediaGame), nameof(TMessageMediaGame))]

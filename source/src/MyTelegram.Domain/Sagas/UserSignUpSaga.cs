@@ -16,8 +16,7 @@ public class UserSignUpSaga(UserSignUpSagaId id, IIdGenerator idGenerator)
         var userId = domainEvent.AggregateEvent.UserId;
         if (userId == 0)
         {
-            userId = await idGenerator.NextLongIdAsync(IdType.UserId, cancellationToken: cancellationToken)
-         ;
+            userId = await idGenerator.NextLongIdAsync(IdType.UserId, cancellationToken: cancellationToken);
 
             var createUserCommand = new CreateUserCommand(UserId.Create(userId),
                 domainEvent.AggregateEvent.RequestInfo,
@@ -28,7 +27,6 @@ public class UserSignUpSaga(UserSignUpSagaId id, IIdGenerator idGenerator)
                 domainEvent.AggregateEvent.LastName
             );
             Publish(createUserCommand);
-
             Emit(new UserSignUpSuccessSagaEvent(domainEvent.AggregateEvent.RequestInfo,
                 userId,
                 domainEvent.AggregateEvent.PhoneNumber));

@@ -1,38 +1,31 @@
-﻿using MyTelegram.Messenger.Services.Caching;
-using MyTelegram.Messenger.TLObjectConverters.Interfaces;
-using MyTelegram.Services.Extensions;
-using MyTelegram.Services.TLObjectConverters;
-
-namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
+﻿namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
 
 public class ReadHistoryDomainEventHandler(
     IObjectMessageSender objectMessageSender,
     ICommandBus commandBus,
     IIdGenerator idGenerator,
     IAckCacheService ackCacheService,
-    IResponseCacheAppService responseCacheAppService,
     IPeerHelper peerHelper,
-    ILayeredService<IUpdatesConverter> layeredUpdatesService)
+    IReadHistoryConverterService readHistoryConverterService
+    //ILayeredService<IUpdatesConverter> layeredUpdatesService
+    )
     : DomainEventHandlerBase(objectMessageSender,
             commandBus,
             idGenerator,
-            ackCacheService,
-            responseCacheAppService),
+            ackCacheService),
         ISubscribeSynchronousTo<ReadHistorySaga, ReadHistorySagaId, ReadHistoryCompletedSagaEvent>,
         ISubscribeSynchronousTo<ReadChannelHistorySaga, ReadChannelHistorySagaId, ReadChannelHistoryCompletedSagaEvent>,
         ISubscribeSynchronousTo<ReadHistorySaga, ReadHistorySagaId, UpdateInboxMaxIdCompletedSagaEvent>,
         ISubscribeSynchronousTo<ReadHistorySaga, ReadHistorySagaId, UpdateOutboxMaxIdCompletedSagaEvent>
 {
-    //private readonly ITlUpdatesConverter _updatesConverter;
-
     public async Task HandleAsync(
         IDomainEvent<ReadChannelHistorySaga, ReadChannelHistorySagaId, ReadChannelHistoryCompletedSagaEvent>
             domainEvent,
         CancellationToken cancellationToken)
     {
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo,
-                new TBoolTrue(),
-                domainEvent.AggregateEvent.SenderPeerId);
+            new TBoolTrue(),
+            domainEvent.AggregateEvent.SenderPeerId);
 
         var updates = new TUpdateShort
         {
@@ -56,7 +49,7 @@ public class ReadHistoryDomainEventHandler(
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo,
                 affectedMessages,
                 domainEvent.AggregateEvent.ReaderUserId)
-     ;
+            ;
         var peer = domainEvent.AggregateEvent.ReaderToPeer;
         var updateReadHistoryInbox = new TUpdateReadHistoryInbox
         {
@@ -82,8 +75,7 @@ public class ReadHistoryDomainEventHandler(
         if (!domainEvent.AggregateEvent.IsOut && !domainEvent.AggregateEvent.OutboxAlreadyRead &&
             !peerHelper.IsBotUser(domainEvent.AggregateEvent.SenderPeerId))
         {
-            var readHistoryUpdates =
-                layeredUpdatesService.Converter.ToReadHistoryUpdates(domainEvent.AggregateEvent);
+            var readHistoryUpdates = readHistoryConverterService.ToReadHistoryUpdates(domainEvent.AggregateEvent);
 
             var toPeer = new Peer(PeerType.User, domainEvent.AggregateEvent.SenderPeerId);
             await PushUpdatesToPeerAsync(
@@ -95,7 +87,9 @@ public class ReadHistoryDomainEventHandler(
         }
     }
 
-    public async Task HandleAsync(IDomainEvent<ReadHistorySaga, ReadHistorySagaId, UpdateInboxMaxIdCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)
+    public async Task HandleAsync(
+        IDomainEvent<ReadHistorySaga, ReadHistorySagaId, UpdateInboxMaxIdCompletedSagaEvent> domainEvent,
+        CancellationToken cancellationToken)
     {
         var affectedMessages = new TAffectedMessages { Pts = domainEvent.AggregateEvent.Pts, PtsCount = 1 };
 
@@ -120,15 +114,17 @@ public class ReadHistoryDomainEventHandler(
         };
         await PushUpdatesToPeerAsync(domainEvent.AggregateEvent.RequestInfo.UserId.ToUserPeer(),
             selfOtherDevicesUpdates,
-            excludeAuthKeyId: domainEvent.AggregateEvent.RequestInfo.AuthKeyId,
+            domainEvent.AggregateEvent.RequestInfo.AuthKeyId,
             pts: domainEvent.AggregateEvent.Pts
         );
     }
 
-    public async Task HandleAsync(IDomainEvent<ReadHistorySaga, ReadHistorySagaId, UpdateOutboxMaxIdCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)
+    public async Task HandleAsync(
+        IDomainEvent<ReadHistorySaga, ReadHistorySagaId, UpdateOutboxMaxIdCompletedSagaEvent> domainEvent,
+        CancellationToken cancellationToken)
     {
         var readHistoryUpdates =
-            layeredUpdatesService.Converter.ToReadHistoryUpdates(domainEvent.AggregateEvent);
+            readHistoryConverterService.ToReadHistoryUpdates(domainEvent.AggregateEvent);
 
         var toPeer = new Peer(PeerType.User, domainEvent.AggregateEvent.UserId);
         await PushUpdatesToPeerAsync(

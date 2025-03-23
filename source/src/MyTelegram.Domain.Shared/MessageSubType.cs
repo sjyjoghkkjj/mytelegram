@@ -22,5 +22,12 @@ public enum MessageSubType
     EditForumTopic = 15,
     MigrateChat = 16,
     EditChannelPhoto = 17,
-    AutoCreateChannelFromChat = 18
+    AutoCreateChannelFromChat = 18,
+    SetChatWallPaper = 19,
+    SetChatTheme = 20,
+    CreateQuickReplyMessage = 21,
+    SetHistoryTtl = 22,
+    ChatJoinByLink = 23,
+    ChatJoinBySelf = 24,
+    ChatJoinByRequest = 25,
 }

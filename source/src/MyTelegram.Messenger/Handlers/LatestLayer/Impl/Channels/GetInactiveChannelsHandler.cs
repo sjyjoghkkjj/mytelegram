@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Get inactive channels and supergroups
@@ -12,6 +10,11 @@ internal sealed class GetInactiveChannelsHandler : RpcResultObjectHandler<MyTele
     protected override Task<MyTelegram.Schema.Messages.IInactiveChats> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestGetInactiveChannels obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Messages.IInactiveChats>(new TInactiveChats
+        {
+            Chats = [],
+            Dates = [],
+            Users = []
+        });
     }
 }

@@ -19,7 +19,8 @@ public record SendMessageInput
         SendMessageType sendMessageType = SendMessageType.Text,
         MessageType messageType = MessageType.Text,
         //MessageActionType messageActionType = MessageActionType.None,
-        string? messageActionData = null,
+        //string? messageActionData = null,
+        IMessageAction? messageAction = null,
         long? groupId = null,
         int groupItemCount = 1,
         long? pollId = null,
@@ -39,6 +40,7 @@ public record SendMessageInput
         RequestInfo = requestInfo;
         SendMessageType = sendMessageType;
         MessageType = messageType;
+        MessageAction = messageAction;
         //MessageActionType = messageActionType;
         SenderUserId = senderUserId;
         //Peer = peer;
@@ -46,7 +48,7 @@ public record SendMessageInput
         Message = message;
         RandomId = randomId;
         //ReplyToMsgId = replyToMsgId;
-        MessageActionData = messageActionData;
+        //MessageActionData = messageActionData;
         Entities = entities;
         InputReplyTo = inputReplyTo;
         ClearDraft = clearDraft;
@@ -85,9 +87,12 @@ public record SendMessageInput
     public bool InvertMedia { get; }
     public IMessageMedia? Media { get; }
     public string Message { get; }
-    public string? MessageActionData { get; }
+    //public string? MessageActionData { get; }
     //public MessageActionType MessageActionType { get; }
     public MessageType MessageType { get; }
+
+    public IMessageAction? MessageAction { get; }
+
     //public Peer? Peer { get; }
     public long RandomId { get; }
     //public int? ReplyToMsgId { get; }

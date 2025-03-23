@@ -10,6 +10,6 @@ public class DataProcessorBackgroundService(
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Data processor started");
-        return processor.ProcessAsync();
+        return processor.ProcessAsync(stoppingToken);
     }
 }

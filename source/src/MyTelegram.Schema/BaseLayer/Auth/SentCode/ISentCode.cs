@@ -8,6 +8,7 @@ namespace MyTelegram.Schema.Auth;
 ///</summary>
 [JsonDerivedType(typeof(TSentCode), nameof(TSentCode))]
 [JsonDerivedType(typeof(TSentCodeSuccess), nameof(TSentCodeSuccess))]
+[JsonDerivedType(typeof(MyTelegram.Schema.Auth.LayerN.TSentCode), "TSentCodeLayerN")]
 public interface ISentCode : IObject
 {
 

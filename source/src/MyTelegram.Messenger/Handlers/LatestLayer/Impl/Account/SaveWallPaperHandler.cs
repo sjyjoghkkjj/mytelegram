@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Install/uninstall <a href="https://corefork.telegram.org/api/wallpapers">wallpaper</a>
@@ -15,6 +15,6 @@ internal sealed class SaveWallPaperHandler : RpcResultObjectHandler<MyTelegram.S
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestSaveWallPaper obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

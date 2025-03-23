@@ -7,5 +7,6 @@ public enum LoadType
     FirstUnread,
     AroundMessage,
     AroundDate,
-    LimitIs1
+    LimitIs1,
+    FromUnread
 }

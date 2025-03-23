@@ -12,6 +12,12 @@ public class CreateChannelSagaState : AggregateState<CreateChannelSaga, CreateCh
     public int? TtlPeriod { get; private set; }
     public bool IsTtlFromDefaultSetting { get; private set; }
     public long ChannelId { get; private set; }
+
+    public List<long> MemberUserIds { get; private set; } = [];
+    public List<long> BotUserIds { get; private set; } = [];
+
+    public bool ShouldCreateChannelMember => MemberUserIds.Count > 0 || BotUserIds.Count > 0;
+
     public void Apply(CreateChannelSagaStartedSagaEvent aggregateEvent)
     {
         RequestInfo = aggregateEvent.RequestInfo;
@@ -23,5 +29,7 @@ public class CreateChannelSagaState : AggregateState<CreateChannelSaga, CreateCh
         Broadcast = aggregateEvent.Broadcast;
         TtlPeriod = aggregateEvent.TtlPeriod;
         IsTtlFromDefaultSetting = aggregateEvent.IsTtlFromDefaultSetting;
+        MemberUserIds = aggregateEvent.MemberUserIds;
+        BotUserIds = aggregateEvent.BotUserIds;
     }
 }

@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Modify the admin rights of a user in a <a href="https://corefork.telegram.org/api/channel">supergroup/channel</a>.
@@ -24,7 +22,7 @@ namespace MyTelegram.Handlers.Channels;
 /// 400 USERS_TOO_MUCH The maximum number of users has been exceeded (to create a chat, for example).
 /// 400 USER_BLOCKED User blocked.
 /// 403 USER_CHANNELS_TOO_MUCH One of the users you tried to add is already in too many channels/supergroups.
-/// 400 USER_CREATOR You can't leave this channel, because you're its creator.
+/// 400 USER_CREATOR For channels.editAdmin: you've tried to edit the admin rights of the owner, but you're not the owner; for channels.leaveChannel: you can't leave this channel, because you're its creator.
 /// 400 USER_ID_INVALID The provided user ID is invalid.
 /// 403 USER_NOT_MUTUAL_CONTACT The provided user is not a mutual contact.
 /// 403 USER_PRIVACY_RESTRICTED The user's privacy settings do not allow you to do this.
@@ -63,6 +61,7 @@ internal sealed class EditAdminHandler(
                 CurrentDate
             );
             await commandBus.PublishAsync(command);
+
             return null!;
         }
 

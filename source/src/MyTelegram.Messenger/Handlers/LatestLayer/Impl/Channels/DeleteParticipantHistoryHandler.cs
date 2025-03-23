@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Delete all messages sent by a specific participant of a given supergroup
@@ -14,40 +12,28 @@ namespace MyTelegram.Handlers.Channels;
 /// 400 PARTICIPANT_ID_INVALID The specified participant ID is invalid.
 /// See <a href="https://corefork.telegram.org/method/channels.deleteParticipantHistory" />
 ///</summary>
-internal sealed class DeleteParticipantHistoryHandler : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestDeleteParticipantHistory, MyTelegram.Schema.Messages.IAffectedHistory>,
-    Channels.IDeleteParticipantHistoryHandler
+internal sealed class DeleteParticipantHistoryHandler(
+    IQueryProcessor queryProcessor,
+    ICommandBus commandBus,
+    IPeerHelper peerHelper,
+    IPtsHelper ptsHelper,
+    IAccessHashHelper accessHashHelper,
+    IChannelAdminRightsChecker channelAdminRightsChecker)
+    : RpcResultObjectHandler<RequestDeleteParticipantHistory,
+            IAffectedHistory>,
+        IDeleteParticipantHistoryHandler
 {
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly ICommandBus _commandBus;
-    private readonly IPeerHelper _peerHelper;
-    private readonly IPtsHelper _ptsHelper;
-    private readonly IAccessHashHelper _accessHashHelper;
-    private readonly IChannelAdminRightsChecker _channelAdminRightsChecker;
-    public DeleteParticipantHistoryHandler(IQueryProcessor queryProcessor,
-        ICommandBus commandBus,
-        IPeerHelper peerHelper,
-        IPtsHelper ptsHelper,
-        IAccessHashHelper accessHashHelper, IChannelAdminRightsChecker channelAdminRightsChecker)
-    {
-        _queryProcessor = queryProcessor;
-        _commandBus = commandBus;
-        _peerHelper = peerHelper;
-        _ptsHelper = ptsHelper;
-        _accessHashHelper = accessHashHelper;
-        _channelAdminRightsChecker = channelAdminRightsChecker;
-    }
-
-    protected override async Task<MyTelegram.Schema.Messages.IAffectedHistory> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Channels.RequestDeleteParticipantHistory obj)
+    protected override async Task<IAffectedHistory> HandleCoreAsync(IRequestInput input,
+        RequestDeleteParticipantHistory obj)
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await _accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
-            await _channelAdminRightsChecker.CheckAdminRightAsync(inputChannel.ChannelId, input.UserId,
+            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await channelAdminRightsChecker.CheckAdminRightAsync(inputChannel.ChannelId, input.UserId,
                 rights => rights.AdminRights.DeleteMessages, RpcErrors.RpcErrors403.ChatAdminRequired);
 
-            var peer = _peerHelper.GetPeer(obj.Participant);
-            var messageIds = (await _queryProcessor
+            var peer = peerHelper.GetPeer(obj.Participant);
+            var messageIds = (await queryProcessor
                 .ProcessAsync(new GetMessageIdListByUserIdQuery(inputChannel.ChannelId,
                     peer.PeerId,
                     MyTelegramServerDomainConsts.ClearHistoryDefaultPageSize))).ToList();
@@ -55,7 +41,7 @@ internal sealed class DeleteParticipantHistoryHandler : RpcResultObjectHandler<M
             if (messageIds.Count > 0)
             {
                 var newTopMessageId =
-                    await _queryProcessor.ProcessAsync(new GetTopMessageIdQuery(inputChannel.ChannelId,
+                    await queryProcessor.ProcessAsync(new GetTopMessageIdQuery(inputChannel.ChannelId,
                         messageIds));
 
                 var command = new StartDeleteParticipantHistoryCommand(TempId.New,
@@ -64,19 +50,17 @@ internal sealed class DeleteParticipantHistoryHandler : RpcResultObjectHandler<M
                     messageIds,
                     newTopMessageId
                 );
-                await _commandBus.PublishAsync(command);
+                await commandBus.PublishAsync(command);
 
                 return null!;
             }
-            else
+
+            return new TAffectedHistory
             {
-                return new TAffectedHistory
-                {
-                    Pts = _ptsHelper.GetCachedPts(inputChannel.ChannelId),
-                    PtsCount = 0,
-                    Offset = 0
-                };
-            }
+                Pts = ptsHelper.GetCachedPts(inputChannel.ChannelId),
+                PtsCount = 0,
+                Offset = 0
+            };
         }
 
         throw new NotImplementedException();

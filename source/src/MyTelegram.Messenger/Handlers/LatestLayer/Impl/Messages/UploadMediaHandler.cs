@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Upload a file and associate it to a chat (without actually sending it to the chat)
@@ -13,7 +11,7 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 CHAT_RESTRICTED You can't send messages in this chat, you were restricted.
 /// 403 CHAT_WRITE_FORBIDDEN You can't write in this chat.
 /// 400 FILE_PARTS_INVALID The number of file parts is invalid.
-/// 500 FILE_WRITE_EMPTY &nbsp;
+/// 400 FILE_PART_LENGTH_INVALID The length of a file part is invalid.
 /// 400 IMAGE_PROCESS_FAILED Failure while processing image.
 /// 400 INPUT_USER_DEACTIVATED The specified user was deleted.
 /// 400 MEDIA_INVALID Media invalid.
@@ -26,20 +24,20 @@ namespace MyTelegram.Handlers.Messages;
 /// 400 WEBPAGE_CURL_FAILED Failure while fetching the webpage with cURL.
 /// See <a href="https://corefork.telegram.org/method/messages.uploadMedia" />
 ///</summary>
-internal sealed class UploadMediaHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestUploadMedia, MyTelegram.Schema.IMessageMedia>,
-    Messages.IUploadMediaHandler
+internal sealed class UploadMediaHandler(IMediaHelper mediaHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestUploadMedia, MyTelegram.Schema.IMessageMedia>,
+        Messages.IUploadMediaHandler
 {
-    private readonly IMediaHelper _mediaHelper;
-
-    public UploadMediaHandler(IMediaHelper mediaHelper)
-    {
-        _mediaHelper = mediaHelper;
-    }
-
     protected override async Task<IMessageMedia> HandleCoreAsync(IRequestInput input,
         RequestUploadMedia obj)
     {
-        var media = await _mediaHelper.SaveMediaAsync(obj.Media);
-        return media;
+        var media = await mediaHelper.SaveMediaAsync(obj.Media);
+
+        if (media == null)
+        {
+            RpcErrors.RpcErrors400.MediaInvalid.ThrowRpcError();
+        }
+
+        return media!;
     }
 }

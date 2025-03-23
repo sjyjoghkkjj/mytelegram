@@ -32,11 +32,6 @@ public class ExceptionProcessor(
                 await eventBus.PublishAsync(eventData);
                 return;
             //break;
-            case UserFriendlyException userFriendlyException:
-                errorCode = userFriendlyException.ErrorCode;
-                errorMessage = userFriendlyException.Message;
-                break;
-
             case NotImplementedException:
                 errorCode = MyTelegramServerDomainConsts.InternalErrorCode;
                 errorMessage = "API NotImplemented";

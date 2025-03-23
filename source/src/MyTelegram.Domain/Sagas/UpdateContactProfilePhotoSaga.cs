@@ -16,7 +16,6 @@ public class UpdateContactProfilePhotoSaga(
 
             var outMessageId = await idGenerator.NextIdAsync(IdType.MessageId, ownerPeerId, cancellationToken: cancellationToken);
             var randomId = Random.Shared.NextInt64();
-            var aggregateId = MessageId.Create(ownerPeerId, outMessageId);
             var ownerPeer = new Peer(PeerType.User, ownerPeerId);
             var senderPeer = new Peer(PeerType.User, ownerPeerId);
             var toPeer = new Peer(PeerType.User, domainEvent.AggregateEvent.TargetUserId);
@@ -30,9 +29,13 @@ public class UpdateContactProfilePhotoSaga(
                 SendMessageType.MessageService,
                 MessageType.Text,
                 MessageSubType.None,
-                MessageActionData: domainEvent.AggregateEvent.MessageActionData
+                MessageAction: domainEvent.AggregateEvent.SuggestPhoto != null ? new TMessageActionSuggestProfilePhoto
+                {
+                    Photo = domainEvent.AggregateEvent.SuggestPhoto
+                } : null
             );
-            var command = new StartSendMessageCommand(TempId.New, domainEvent.AggregateEvent.RequestInfo with { RequestId = Guid.NewGuid() },
+            var command = new StartSendMessageCommand(TempId.New,
+                domainEvent.AggregateEvent.RequestInfo with { RequestId = Guid.NewGuid() },
                 [new SendMessageItem(messageItem)]);
 
             Publish(command);

@@ -14,7 +14,7 @@ public class UpdatePinnedMessageStartedEvent(
     int senderMessageId,
     Peer toPeer,
     long randomId,
-    string messageActionData
+    IMessageAction messageAction
     )
     : RequestAggregateEvent2<MessageAggregate, MessageId>(requestInfo)
 {
@@ -30,5 +30,5 @@ public class UpdatePinnedMessageStartedEvent(
     public int SenderMessageId { get; } = senderMessageId;
     public Peer ToPeer { get; } = toPeer;
     public long RandomId { get; } = randomId;
-    public string MessageActionData { get; } = messageActionData;
+    public IMessageAction MessageAction { get; } = messageAction;
 }

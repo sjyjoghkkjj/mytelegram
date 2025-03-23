@@ -13,5 +13,7 @@ public enum PrivacyType
     AddedByPhone,
     VoiceMessages,
     About,
-    Birthday
+    Birthday,
+    StarGiftsAutoSave,
+    NoPaidMessages,
 }

@@ -6,12 +6,12 @@ public class ContactProfilePhotoChangedEvent(
     long targetUserId,
     long photoId,
     bool suggest,
-    string? messageActionData)
+    IPhoto? suggestPhoto)
     : RequestAggregateEvent2<ContactAggregate, ContactId>(requestInfo)
 {
     public long SelfUserId { get; } = selfUserId;
     public long TargetUserId { get; } = targetUserId;
     public long PhotoId { get; } = photoId;
     public bool Suggest { get; } = suggest;
-    public string? MessageActionData { get; } = messageActionData;
+    public IPhoto? SuggestPhoto { get; } = suggestPhoto;
 }

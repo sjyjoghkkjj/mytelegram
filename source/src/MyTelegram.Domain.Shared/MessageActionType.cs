@@ -32,5 +32,10 @@ public enum MessageActionType
     SetMessagesTtl,
     ChannelAddUser,
     ForumTopicCreated,
-    ForumTopicEdited
+    ForumTopicEdited,
+    SetChatWallPaper,
+    SetChatTheme,
+    CreateQuickReplyMessage,
+    ChatJoinBySelf,
+    ChatJoinByRequest,
 }

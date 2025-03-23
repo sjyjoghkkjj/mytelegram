@@ -1,6 +1,4 @@
-﻿using MyTelegram.Schema.Extensions;
-
-namespace MyTelegram.Domain.Sagas;
+﻿namespace MyTelegram.Domain.Sagas;
 
 [JsonConverter(typeof(SystemTextJsonSingleValueObjectConverter<UpdateMessagePinnedSagaId>))]
 public class UpdateMessagePinnedSagaId(string value) : SingleValueObject<string>(value), ISagaId;
@@ -257,9 +255,7 @@ public class UpdateMessagePinnedSaga : MyInMemoryAggregateSaga<UpdateMessagePinn
             SendMessageType.MessageService,
             MessageType.Text,
             MessageSubType.UpdatePinnedMessage,
-            MessageActionData: BitConverter.ToString(new TMessageActionPinMessage().ToBytes())
-                .Replace("-", string.Empty),
-            //replyToMsgId: _state.ReplyToMsgId,
+            MessageAction: new TMessageActionPinMessage(),
             InputReplyTo: new TInputReplyToMessage
             {
                 ReplyToMsgId = replyToMsgId
@@ -268,7 +264,8 @@ public class UpdateMessagePinnedSaga : MyInMemoryAggregateSaga<UpdateMessagePinn
             Post: post,
             ReplyToMsgItems: replyToMsgItems
         );
-        var command = new StartSendMessageCommand(TempId.New, _state.RequestInfo with { RequestId = Guid.NewGuid() },
+        var command = new StartSendMessageCommand(TempId.New,
+            _state.RequestInfo with { RequestId = Guid.NewGuid() },
             [new SendMessageItem(messageItem)]);
 
         Publish(command);

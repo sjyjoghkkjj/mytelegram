@@ -21,6 +21,7 @@ public sealed class TWebPage : IWebPage
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool HasLargeMedia { get; set; }
+    public bool VideoCoverPhoto { get; set; }
 
     ///<summary>
     /// Preview ID
@@ -118,6 +119,7 @@ public sealed class TWebPage : IWebPage
     public void ComputeFlag()
     {
         if (HasLargeMedia) { Flags[13] = true; }
+        if (VideoCoverPhoto) { Flags[14] = true; }
         if (Type != null) { Flags[0] = true; }
         if (SiteName != null) { Flags[1] = true; }
         if (Title != null) { Flags[2] = true; }
@@ -163,6 +165,7 @@ public sealed class TWebPage : IWebPage
     {
         Flags = reader.ReadBitArray();
         if (Flags[13]) { HasLargeMedia = true; }
+        if (Flags[14]) { VideoCoverPhoto = true; }
         Id = reader.ReadInt64();
         Url = reader.ReadString();
         DisplayUrl = reader.ReadString();

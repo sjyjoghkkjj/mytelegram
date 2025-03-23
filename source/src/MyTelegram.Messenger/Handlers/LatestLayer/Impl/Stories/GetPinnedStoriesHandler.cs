@@ -2,7 +2,7 @@
 
 using MyTelegram.Schema.Stories;
 
-namespace MyTelegram.Handlers.Stories;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stories;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/stories.getPinnedStories" />

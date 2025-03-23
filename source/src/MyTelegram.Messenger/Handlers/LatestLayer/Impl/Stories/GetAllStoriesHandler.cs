@@ -2,9 +2,10 @@
 
 using MyTelegram.Schema.Stories;
 
-namespace MyTelegram.Handlers.Stories;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stories;
 
 ///<summary>
+/// Fetch the List of active (or active and hidden) stories, see <a href="https://corefork.telegram.org/api/stories#watching-stories">here »</a> for more info on watching stories.
 /// See <a href="https://corefork.telegram.org/method/stories.getAllStories" />
 ///</summary>
 internal sealed class GetAllStoriesHandler : RpcResultObjectHandler<MyTelegram.Schema.Stories.RequestGetAllStories, MyTelegram.Schema.Stories.IAllStories>,
@@ -15,9 +16,9 @@ internal sealed class GetAllStoriesHandler : RpcResultObjectHandler<MyTelegram.S
     {
         return Task.FromResult<MyTelegram.Schema.Stories.IAllStories>(new TAllStories
         {
-            Chats = new(),
-            PeerStories = new(),
-            Users = new(),
+            Chats = [],
+            PeerStories = [],
+            Users = [],
             StealthMode = new TStoriesStealthMode { },
             HasMore = false,
             State = "",

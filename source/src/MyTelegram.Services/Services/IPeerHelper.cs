@@ -1,5 +1,4 @@
-﻿using MyTelegram.Schema;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace MyTelegram.Services.Services;
 
@@ -18,6 +17,7 @@ public interface IPeerHelper
 
     bool IsBotUser(long userId);
     bool IsChannelPeer(long peerId);
+    bool IsUserPeer(long peerId);
     IPeer ToPeer(Peer peer);
 
     IPeer ToPeer(PeerType peerType,

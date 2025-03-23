@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Global privacy settings
 /// See <a href="https://corefork.telegram.org/constructor/globalPrivacySettings" />
 ///</summary>
-[TlObject(0x734c4ccb)]
+[TlObject(0xc9d8df1c)]
 public sealed class TGlobalPrivacySettings : IGlobalPrivacySettings
 {
-    public uint ConstructorId => 0x734c4ccb;
+    public uint ConstructorId => 0xc9d8df1c;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -45,6 +45,7 @@ public sealed class TGlobalPrivacySettings : IGlobalPrivacySettings
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool NewNoncontactPeersRequirePremium { get; set; }
+    public long? NoncontactPeersPaidStars { get; set; }
 
     public void ComputeFlag()
     {
@@ -53,6 +54,7 @@ public sealed class TGlobalPrivacySettings : IGlobalPrivacySettings
         if (KeepArchivedFolders) { Flags[2] = true; }
         if (HideReadMarks) { Flags[3] = true; }
         if (NewNoncontactPeersRequirePremium) { Flags[4] = true; }
+        if (/*NoncontactPeersPaidStars != 0 &&*/ NoncontactPeersPaidStars.HasValue) { Flags[5] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -60,7 +62,7 @@ public sealed class TGlobalPrivacySettings : IGlobalPrivacySettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-
+        if (Flags[5]) { writer.Write(NoncontactPeersPaidStars.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -71,5 +73,6 @@ public sealed class TGlobalPrivacySettings : IGlobalPrivacySettings
         if (Flags[2]) { KeepArchivedFolders = true; }
         if (Flags[3]) { HideReadMarks = true; }
         if (Flags[4]) { NewNoncontactPeersRequirePremium = true; }
+        if (Flags[5]) { NoncontactPeersPaidStars = reader.ReadInt64(); }
     }
 }

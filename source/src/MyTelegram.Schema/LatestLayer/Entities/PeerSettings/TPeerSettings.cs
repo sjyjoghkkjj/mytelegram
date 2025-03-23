@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// List of actions that are possible when interacting with this user, to be shown as suggested actions in the <a href="https://corefork.telegram.org/api/action-bar">chat action bar »</a>, see <a href="https://corefork.telegram.org/api/action-bar">here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/constructor/peerSettings" />
 ///</summary>
-[TlObject(0xacd66c5e)]
+[TlObject(0xf47741f7)]
 public sealed class TPeerSettings : IPeerSettings
 {
-    public uint ConstructorId => 0xacd66c5e;
+    public uint ConstructorId => 0xf47741f7;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -106,6 +106,11 @@ public sealed class TPeerSettings : IPeerSettings
     /// Contains a <a href="https://corefork.telegram.org/api/links">deep link »</a>, used to open a management menu in the business bot. This flag is set if and only if <code>business_bot_id</code> is set.
     ///</summary>
     public string? BusinessBotManageUrl { get; set; }
+    public long? ChargePaidMessageStars { get; set; }
+    public string? RegistrationMonth { get; set; }
+    public string? PhoneCountry { get; set; }
+    public int? NameChangeDate { get; set; }
+    public int? PhotoChangeDate { get; set; }
 
     public void ComputeFlag()
     {
@@ -125,6 +130,11 @@ public sealed class TPeerSettings : IPeerSettings
         if (/*RequestChatDate != 0 && */RequestChatDate.HasValue) { Flags[9] = true; }
         if (/*BusinessBotId != 0 &&*/ BusinessBotId.HasValue) { Flags[13] = true; }
         if (BusinessBotManageUrl != null) { Flags[13] = true; }
+        if (/*ChargePaidMessageStars != 0 &&*/ ChargePaidMessageStars.HasValue) { Flags[14] = true; }
+        if (RegistrationMonth != null) { Flags[15] = true; }
+        if (PhoneCountry != null) { Flags[16] = true; }
+        if (/*NameChangeDate != 0 && */NameChangeDate.HasValue) { Flags[17] = true; }
+        if (/*PhotoChangeDate != 0 && */PhotoChangeDate.HasValue) { Flags[18] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -137,6 +147,11 @@ public sealed class TPeerSettings : IPeerSettings
         if (Flags[9]) { writer.Write(RequestChatDate.Value); }
         if (Flags[13]) { writer.Write(BusinessBotId.Value); }
         if (Flags[13]) { writer.Write(BusinessBotManageUrl); }
+        if (Flags[14]) { writer.Write(ChargePaidMessageStars.Value); }
+        if (Flags[15]) { writer.Write(RegistrationMonth); }
+        if (Flags[16]) { writer.Write(PhoneCountry); }
+        if (Flags[17]) { writer.Write(NameChangeDate.Value); }
+        if (Flags[18]) { writer.Write(PhotoChangeDate.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -158,5 +173,10 @@ public sealed class TPeerSettings : IPeerSettings
         if (Flags[9]) { RequestChatDate = reader.ReadInt32(); }
         if (Flags[13]) { BusinessBotId = reader.ReadInt64(); }
         if (Flags[13]) { BusinessBotManageUrl = reader.ReadString(); }
+        if (Flags[14]) { ChargePaidMessageStars = reader.ReadInt64(); }
+        if (Flags[15]) { RegistrationMonth = reader.ReadString(); }
+        if (Flags[16]) { PhoneCountry = reader.ReadString(); }
+        if (Flags[17]) { NameChangeDate = reader.ReadInt32(); }
+        if (Flags[18]) { PhotoChangeDate = reader.ReadInt32(); }
     }
 }

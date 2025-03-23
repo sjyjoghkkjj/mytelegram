@@ -1,78 +1,62 @@
-﻿using MyTelegram.Core;
+﻿namespace MyTelegram.Services.TLObjectConverters;
 
-namespace MyTelegram.Services.TLObjectConverters;
-
-public class LayeredService<TLayeredConverter> : ILayeredService<TLayeredConverter> where TLayeredConverter : ILayeredConverter
+public class LayeredService<TLayeredConverter> : ILayeredService<TLayeredConverter>
+    where TLayeredConverter : ILayeredConverter
 {
-    private readonly IEnumerable<TLayeredConverter> _converters;
-    public LayeredService(TLayeredConverter converter,
-        IEnumerable<TLayeredConverter> converters)
+    private readonly Dictionary<int, TLayeredConverter> _layeredConverters;
+    private readonly int[] _layers;
+    private readonly int _minLayer;
+    private readonly int _maxLayer;
+    private readonly TLayeredConverter _maxLayerConverter;
+    private readonly TLayeredConverter _minLayerConverter;
+
+    public LayeredService(IEnumerable<TLayeredConverter> converters)
     {
-        Converter = converter;
-        //_converters = converters;
-        _converters = converters.OrderByDescending(p => p.Layer);
+        var allConverters = converters.OrderBy(p => p.Layer).ToList();
+        _layeredConverters = allConverters.ToDictionary(k => k.Layer);
+        _layers = allConverters.Select(p => p.Layer).ToArray();
+
+        _minLayer = _layers[0];
+        _maxLayer = _layers[^1];
+
+        Converter = allConverters[^1];
+        _minLayerConverter = allConverters[0];
+        _maxLayerConverter = Converter;
     }
 
     public TLayeredConverter Converter { get; }
-    public int MinLayer => 158;
 
     public TLayeredConverter GetConverter(int layer)
     {
-        var converter = Converter;
-
-        if (layer == 0)
+        if (layer == 0 || layer == Converter.Layer)
         {
-            //Converter.RequestLayer = layer;
-            converter.RequestLayer = layer;
+            return Converter;
+        }
+
+        if (_layeredConverters.TryGetValue(layer, out var converter))
+        {
             return converter;
         }
 
-        // latest layer converter
-        foreach (var layeredConverter in _converters)
+        if (layer < _minLayer)
         {
-            // if we can not find converter.Layer==layer,return the latest layer where converter.Layer<layer
-            if (layeredConverter.Layer == layer)
-            {
-                converter = layeredConverter;
-                break;
-            }
-
-            if (layeredConverter.Layer < layer)
-            {
-                converter = layeredConverter;
-                break;
-            }
-            //else if (layeredConverter.Layer > layer)
-            //{
-            //    break;
-            //}
+            return _minLayerConverter;
         }
-        converter.RequestLayer = layer;
-        return converter;
-    }
 
-    //public LayeredData GetLayeredData(Func<TLayeredConverter, IObject> func)
-    //{
-    //    return new LayeredData(GetLayeredData<IObject>(func).DataWithLayer);
-    //}
-
-    public LayeredData<TData> GetLayeredData<TData>(Func<TLayeredConverter, TData> func)
-    {
-        Dictionary<int, TData>? data = null;
-        foreach (var layeredConverter in _converters)
+        if (layer > _maxLayer)
         {
-            if (layeredConverter.Layer < MinLayer)
-            {
-                continue;
-            }
+            return _maxLayerConverter;
+        }
 
-            //if (layeredConverter.Layer != Converter.Layer)
+        // Since the total number of layers is relatively small(<100), we can directly use foreach to find the nearest layer
+        foreach (var theLayer in _layers)
+        {
+            if (theLayer > layer)
             {
-                data ??= new();
-                data.TryAdd(layeredConverter.Layer, func(layeredConverter));
+                return _layeredConverters[theLayer];
             }
         }
 
-        return new LayeredData<TData>(data);
+        return _maxLayerConverter;
     }
 }

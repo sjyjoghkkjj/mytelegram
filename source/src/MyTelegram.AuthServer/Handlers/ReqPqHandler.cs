@@ -3,8 +3,7 @@
 public class ReqPqHandler(
     IStep1Helper step1ServerHelper,
     ILogger<ReqPqHandler> logger,
-    ICacheManager<AuthCacheItem> cacheManager,
-    IHashHelper hashHelper
+    ICacheManager<AuthCacheItem> cacheManager
 ) : BaseObjectHandler<RequestReqPq, IResPQ>, IReqPqHandler
 {
     protected override async Task<IResPQ> HandleCoreAsync(IRequestInput input, RequestReqPq obj)

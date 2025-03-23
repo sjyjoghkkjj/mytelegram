@@ -2,7 +2,9 @@
 public class ChannelReadModel : IChannelReadModel,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelCreatedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, IncrementParticipantCountEvent>,
+
     //IAmReadModelFor<MessageSaga, MessageSagaId, SendChannelMessageSuccessEvent>,
+
     IAmReadModelFor<ChannelAggregate, ChannelId, StartSendChannelMessageEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelTitleEditedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelAboutEditedEvent>,
@@ -16,17 +18,21 @@ public class ChannelReadModel : IChannelReadModel,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberBannedRightsChangedEvent>,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberJoinedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, DiscussionGroupUpdatedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelNoForwardsChangedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelSignatureChangedEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelColorUpdatedEvent>,
-    IAmReadModelFor<ChannelAggregate,ChannelId, LinkedChannelChangedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, LinkedChannelChangedEvent>,
 
-    IAmReadModelFor<DeleteChannelMessagesSaga,DeleteChannelMessagesSagaId, DeleteChannelMessagesCompletedSagaEvent>,
-    IAmReadModelFor<DeleteChannelMessagesSaga,DeleteChannelMessagesSagaId, DeleteChannelHistoryCompletedSagaEvent>,
+    IAmReadModelFor<DeleteChannelMessagesSaga, DeleteChannelMessagesSagaId, DeleteChannelMessagesCompletedSagaEvent>,
+    IAmReadModelFor<DeleteChannelMessagesSaga, DeleteChannelMessagesSagaId, DeleteChannelHistoryCompletedSagaEvent>,
     IAmReadModelFor<DeleteReplyMessagesSaga, DeleteReplyMessagesSagaId, DeleteReplyMessagesCompletedSagaEvent>,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelDeletedEvent>,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent>,
-    IAmReadModelFor<ChannelAggregate,ChannelId, ChannelParticipantCountChangedEvent>
-    //IAmReadModelFor<ChannelAggregate, ChannelId, ChannelAvailableReactionsChangedEvent>
-
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelParticipantCountChangedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelTopMessageIdUpdatedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, PreHistoryHiddenChangedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelParticipantsHiddenUpdatedEvent>,
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelJoinRequestUpdatedEvent>
 {
     public string? About { get; private set; }
     public long AccessHash { get; private set; }
@@ -69,6 +75,14 @@ public class ChannelReadModel : IChannelReadModel,
     public int? Level { get; private set; }
     public bool HasLink { get; private set; }
     public bool IsDeleted { get; private set; }
+    public EmojiStatus? EmojiStatus { get; private set; }
+    public bool SignatureProfiles { get; private set; }
+    public int? SubscriptionUntilDate { get; private set; }
+    public bool HiddenPreHistory { get; private set; }
+    public List<string>? Usernames { get; private set; } = [];
+    public bool ParticipantsHidden { get; private set; }
+    public bool JoinToSend { get; private set; }
+    public bool JoinRequest { get; private set; }
 
     //public ReactionType ReactionType { get; private set; }
     //public bool AllowCustomReaction { get; private set; }
@@ -316,18 +330,29 @@ public class ChannelReadModel : IChannelReadModel,
     //}
 
 
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelNoForwardsChangedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        NoForwards = domainEvent.AggregateEvent.Enabled;
 
+        return Task.CompletedTask;
+    }
 
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelSignatureChangedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        Signatures = domainEvent.AggregateEvent.SignatureEnabled;
+        SignatureProfiles = domainEvent.AggregateEvent.ProfilesEnabled;
+
+        return Task.CompletedTask;
+    }
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelColorUpdatedEvent> domainEvent, CancellationToken cancellationToken)
     {
         if (domainEvent.AggregateEvent.ForProfile)
         {
-            Color = domainEvent.AggregateEvent.Color;
-
+            ProfileColor = domainEvent.AggregateEvent.Color;
         }
         else
         {
-            ProfileColor = domainEvent.AggregateEvent.Color;
+            Color = domainEvent.AggregateEvent.Color;
         }
         BackgroundEmojiId = domainEvent.AggregateEvent.BackgroundEmojiId;
 
@@ -337,19 +362,12 @@ public class ChannelReadModel : IChannelReadModel,
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, LinkedChannelChangedEvent> domainEvent, CancellationToken cancellationToken)
     {
         LinkedChatId = domainEvent.AggregateEvent.LinkedChannelId;
-        HasLink= domainEvent.AggregateEvent.LinkedChannelId.HasValue;
+        HasLink = domainEvent.AggregateEvent.LinkedChannelId.HasValue;
 
         return Task.CompletedTask;
     }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<DeleteChannelMessagesSaga, DeleteChannelMessagesSagaId, DeleteChannelMessagesCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)
-    {
-        TopMessageId = domainEvent.AggregateEvent.NewTopMessageId;
-
-        return Task.CompletedTask;
-    }
-
-    public Task ApplyAsync(IReadModelContext context, IDomainEvent<DeleteReplyMessagesSaga, DeleteReplyMessagesSagaId, DeleteReplyMessagesCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)
     {
         TopMessageId = domainEvent.AggregateEvent.NewTopMessageId;
 
@@ -385,6 +403,38 @@ public class ChannelReadModel : IChannelReadModel,
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelParticipantCountChangedEvent> domainEvent, CancellationToken cancellationToken)
     {
         ParticipantsCount = domainEvent.AggregateEvent.NewParticipantCount;
+
+        return Task.CompletedTask;
+    }
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelTopMessageIdUpdatedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        TopMessageId = domainEvent.AggregateEvent.TopMessageId;
+
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, PreHistoryHiddenChangedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        HiddenPreHistory = domainEvent.AggregateEvent.Hidden;
+
+        return Task.CompletedTask;
+    }
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelParticipantsHiddenUpdatedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        ParticipantsHidden = domainEvent.AggregateEvent.Enabled;
+
+        return Task.CompletedTask;
+    }
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelAggregate, ChannelId, ChannelJoinRequestUpdatedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        JoinRequest = domainEvent.AggregateEvent.Enabled;
+
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<DeleteReplyMessagesSaga, DeleteReplyMessagesSagaId, DeleteReplyMessagesCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        TopMessageId = domainEvent.AggregateEvent.NewTopMessageId;
 
         return Task.CompletedTask;
     }

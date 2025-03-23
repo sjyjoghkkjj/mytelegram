@@ -16,6 +16,7 @@ public class ForwardMessageState : AggregateState<ForwardMessageSaga, ForwardMes
     public bool ForwardFromLinkedChannel { get; private set; }
     public bool Post { get; private set; }
     public int? TtlPeriod { get; private set; }
+    public Dictionary<long, string>? FromNames { get; private set; }
 
     public void Apply(ForwardMessageSagaStartedSagaEvent aggregateEvent)
     {
@@ -27,6 +28,7 @@ public class ForwardMessageState : AggregateState<ForwardMessageSaga, ForwardMes
         ForwardFromLinkedChannel = aggregateEvent.ForwardFromLinkedChannel;
         Post = aggregateEvent.Post;
         TtlPeriod = aggregateEvent.TtlPeriod;
+        FromNames = aggregateEvent.FromNames;
     }
 
     public void Apply(ForwardSingleMessageSuccessSagaEvent aggregateEvent)

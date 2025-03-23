@@ -1,6 +1,8 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+using MyTelegram.Schema.Messages;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get recently used <a href="https://corefork.telegram.org/api/reactions">message reactions</a>
@@ -12,9 +14,9 @@ internal sealed class GetRecentReactionsHandler : RpcResultObjectHandler<MyTeleg
     protected override Task<MyTelegram.Schema.Messages.IReactions> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestGetRecentReactions obj)
     {
-        return Task.FromResult<MyTelegram.Schema.Messages.IReactions>(new TReactions
+        return Task.FromResult<IReactions>(new TReactions
         {
-            Reactions = new(),
+            Reactions = []
         });
     }
 }

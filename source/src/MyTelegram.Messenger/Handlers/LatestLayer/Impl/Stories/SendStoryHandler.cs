@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stories;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stories;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/stories.sendStory" />
@@ -11,6 +11,12 @@ internal sealed class SendStoryHandler : RpcResultObjectHandler<MyTelegram.Schem
     protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestSendStory obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IUpdates>(new TUpdates
+        {
+            Updates = [],
+            Chats = [],
+            Users = [],
+            Date = CurrentDate
+        });
     }
 }

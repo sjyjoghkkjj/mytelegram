@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get stickers by emoji
@@ -12,10 +10,10 @@ namespace MyTelegram.Handlers.Messages;
 internal sealed class GetStickersHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetStickers, MyTelegram.Schema.Messages.IStickers>,
     Messages.IGetStickersHandler
 {
-    protected override Task<MyTelegram.Schema.Messages.IStickers> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Messages.RequestGetStickers obj)
+    protected override Task<IStickers> HandleCoreAsync(IRequestInput input,
+        RequestGetStickers obj)
     {
-        var r = new TStickers { Hash = obj.Hash, Stickers = new TVector<IDocument>() };
+        var r = new TStickers { Hash = obj.Hash, Stickers = [] };
 
         return Task.FromResult<IStickers>(r);
     }

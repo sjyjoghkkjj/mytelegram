@@ -1,31 +1,22 @@
 ﻿using Microsoft.Extensions.Hosting;
-using MyTelegram.Messenger.Services.Filters;
+using MyTelegram.Messenger.Services.Caching;
 
 namespace MyTelegram.Messenger.CommandServer.BackgroundServices;
 
 public class MyTelegramCommandServerBackgroundService(
-    IServiceProvider serviceProvider,
     ILogger<MyTelegramCommandServerBackgroundService> logger,
     IHandlerHelper handlerHelper,
-    IDataSeeder dataSeeder,
-    IOptions<MyTelegramMessengerServerOptions> options,
+    IInMemoryCacheLoader inMemoryCacheLoader,
     IMongoDbIndexesCreator mongoDbIndexesCreator)
     : BackgroundService
 {
-    private readonly MyTelegramMessengerServerOptions _options = options.Value;
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Command server starting...");
         handlerHelper.InitAllHandlers();
-        //IdGeneratorFactory.SetDefaultIdGenerator(_idGenerator);
         await mongoDbIndexesCreator.CreateAllIndexesAsync();
-        if (_options.UseInMemoryFilters)
-        {
-            await serviceProvider.GetRequiredService<IInMemoryFilterDataLoader>().LoadAllFilterDataAsync()
-         ;
-        }
-        await dataSeeder.SeedAsync();
+        await inMemoryCacheLoader.LoadAsync();
+
         logger.LogInformation("Command server started");
     }
 }

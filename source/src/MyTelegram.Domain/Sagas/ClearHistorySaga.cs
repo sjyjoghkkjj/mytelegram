@@ -146,11 +146,12 @@ public class ClearHistorySaga : MyInMemoryAggregateSaga<ClearHistorySaga, ClearH
                     true,
                     SendMessageType.MessageService,
                     MessageSubType: MessageSubType.ClearHistory,
-                    MessageActionData: _state.MessageActionData,
+                    //MessageActionData: _state.MessageActionData,
+
                     MessageActionType: MessageActionType.HistoryClear);
                 //var command = new CreateOutboxMessageCommand(aggregateId, _state.RequestInfo with { RequestId = Guid.NewGuid() }, messageItem);
                 var command = new StartSendMessageCommand(TempId.New,
-                    _state.RequestInfo with { RequestId = Guid.NewGuid() },
+                                    _state.RequestInfo with { RequestId = Guid.NewGuid() },
                     [new SendMessageItem(messageItem)]
                 );
                 Publish(command);

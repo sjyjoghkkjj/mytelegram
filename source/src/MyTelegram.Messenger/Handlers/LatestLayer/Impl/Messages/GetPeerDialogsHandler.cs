@@ -1,8 +1,9 @@
 ﻿// ReSharper disable All
 
+using MyTelegram.Messenger.Converters.ConverterServices;
 using MyTelegram.Schema.Updates;
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Get dialog info of specified peers
@@ -18,13 +19,11 @@ internal sealed class GetPeerDialogsHandler(
     IDialogAppService dialogAppService,
     IPeerHelper peerHelper,
     IPtsHelper ptsHelper,
-    ILayeredService<IDialogConverter> layeredService,
     IAccessHashHelper accessHashHelper,
     ILogger<GetPeerDialogsHandler> logger,
     IQueryProcessor queryProcessor,
-    IPhotoAppService photoAppService,
-    ILayeredService<IUserConverter> layeredUserService,
-    IPrivacyAppService privacyAppService)
+    IUserConverterService userConverterService,
+    IDialogConverterService dialogConverterService)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetPeerDialogs, MyTelegram.Schema.Messages.IPeerDialogs>,
         Messages.IGetPeerDialogsHandler
 {
@@ -82,9 +81,9 @@ internal sealed class GetPeerDialogsHandler(
 
         output.PtsReadModel = pts;
         output.CachedPts = cachedPts;
-        var r = layeredService.GetConverter(input.Layer).ToPeerDialogs(output);
+        var peerDialogs = dialogConverterService.ToPeerDialogs(output, input.Layer);
 
-        foreach (var dialog in r.Dialogs)
+        foreach (var dialog in peerDialogs.Dialogs)
         {
             switch (dialog)
             {
@@ -98,18 +97,13 @@ internal sealed class GetPeerDialogsHandler(
             }
         }
 
-        if (r.Dialogs.Count == 0)
+        if (peerDialogs.Dialogs.Count == 0)
         {
             var userIds = peerList.Where(p => p.PeerType == PeerType.User).Select(p => p.PeerId).Distinct().ToList();
-            //var userReadModels=await _quer
-            var userReadModels = await queryProcessor.ProcessAsync(new GetUsersByUserIdListQuery(userIds));
-            var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels);
-            var contactReadModels = await queryProcessor.ProcessAsync(new GetContactListQuery(input.UserId, userIds));
-            var privacyReadModels = await privacyAppService.GetPrivacyListAsync(userIds);
-            var users = layeredUserService.GetConverter(input.Layer)
-                .ToUserList(input.UserId, userReadModels, photoReadModels, contactReadModels, privacyReadModels);
+            var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
+
             var channels = output.ChannelList.ToDictionary(k => k.ChannelId, v => v);
-            r.Dialogs = new TVector<IDialog>(peerList.Select(p =>
+            peerDialogs.Dialogs = [.. peerList.Select(p =>
             {
                 var d = new TDialog
                 {
@@ -126,21 +120,21 @@ internal sealed class GetPeerDialogsHandler(
                 }
 
                 return d;
-            }));
+            })];
 
-            if (r.Users == null)
+            if (peerDialogs.Users == null)
             {
-                r.Users = [];
+                peerDialogs.Users = [];
             }
 
             foreach (var user in users)
             {
-                r.Users.Add(user);
+                peerDialogs.Users.Add(user);
             }
         }
 
         var ptsCacheItem = await ptsHelper.GetPtsForUserAsync(input.UserId);
-        r.State = new TState
+        peerDialogs.State = new TState
         {
             Pts = ptsCacheItem.Pts,
             Qts = ptsCacheItem.Qts,
@@ -148,6 +142,6 @@ internal sealed class GetPeerDialogsHandler(
             Date = ptsCacheItem.Date
         };
 
-        return r;
+        return peerDialogs;
     }
 }

@@ -46,10 +46,10 @@ namespace MyTelegram.Schema.Messages;
 /// 400 YOU_BLOCKED_USER You blocked this user.
 /// See <a href="https://corefork.telegram.org/method/messages.sendInlineBotResult" />
 ///</summary>
-[TlObject(0x3ebee86a)]
+[TlObject(0xc0cf7646)]
 public sealed class RequestSendInlineBotResult : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0x3ebee86a;
+    public uint ConstructorId => 0xc0cf7646;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -122,6 +122,7 @@ public sealed class RequestSendInlineBotResult : IRequest<MyTelegram.Schema.IUpd
     /// See <a href="https://corefork.telegram.org/type/InputQuickReplyShortcut" />
     ///</summary>
     public MyTelegram.Schema.IInputQuickReplyShortcut? QuickReplyShortcut { get; set; }
+    public long? AllowPaidStars { get; set; }
 
     public void ComputeFlag()
     {
@@ -133,6 +134,7 @@ public sealed class RequestSendInlineBotResult : IRequest<MyTelegram.Schema.IUpd
         if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[10] = true; }
         if (SendAs != null) { Flags[13] = true; }
         if (QuickReplyShortcut != null) { Flags[17] = true; }
+        if (/*AllowPaidStars != 0 &&*/ AllowPaidStars.HasValue) { Flags[21] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -148,6 +150,7 @@ public sealed class RequestSendInlineBotResult : IRequest<MyTelegram.Schema.IUpd
         if (Flags[10]) { writer.Write(ScheduleDate.Value); }
         if (Flags[13]) { writer.Write(SendAs); }
         if (Flags[17]) { writer.Write(QuickReplyShortcut); }
+        if (Flags[21]) { writer.Write(AllowPaidStars.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -165,5 +168,6 @@ public sealed class RequestSendInlineBotResult : IRequest<MyTelegram.Schema.IUpd
         if (Flags[10]) { ScheduleDate = reader.ReadInt32(); }
         if (Flags[13]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
         if (Flags[17]) { QuickReplyShortcut = reader.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }
+        if (Flags[21]) { AllowPaidStars = reader.ReadInt64(); }
     }
 }

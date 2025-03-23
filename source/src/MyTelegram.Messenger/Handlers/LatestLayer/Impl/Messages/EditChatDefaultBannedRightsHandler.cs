@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Edit the default banned rights of a <a href="https://corefork.telegram.org/api/channel">channel/supergroup/group</a>.
@@ -38,16 +36,6 @@ internal sealed class EditChatDefaultBannedRightsHandler : RpcResultObjectHandle
 
         switch (peer.PeerType)
         {
-            case PeerType.Chat:
-                {
-                    var command = new EditChatDefaultBannedRightsCommand(ChatId.Create(peer.PeerId),
-                        input.ToRequestInfo(),
-                        GetChatBannedRights(obj.BannedRights)
-                        ,
-                        input.UserId);
-                    await _commandBus.PublishAsync(command);
-                }
-                break;
             case PeerType.Channel:
                 {
                     var command = new EditChannelDefaultBannedRightsCommand(ChannelId.Create(peer.PeerId),
@@ -65,22 +53,5 @@ internal sealed class EditChatDefaultBannedRightsHandler : RpcResultObjectHandle
     private ChatBannedRights GetChatBannedRights(IChatBannedRights chatBannedRights)
     {
         return ChatBannedRights.FromValue(chatBannedRights.Flags.ToInt(), chatBannedRights.UntilDate);
-        //ChatBannedRights r = new();
-        //switch (chatBannedRights)
-        //{
-        //    case TChatBannedRights r1:
-        //        r = _objectMapper.Map<TChatBannedRights, ChatBannedRights>(r1);
-        //        break;
-        //    case Schema.TChatBannedRights r2:
-        //        r = _objectMapper.Map<Schema.TChatBannedRights, ChatBannedRights>(r2);
-
-        //        break;
-        //    case Schema.TChatBannedRights r3:
-        //        r = _objectMapper.Map<Schema.TChatBannedRights, ChatBannedRights>(r3);
-
-        //        break;
-        //}
-
-        //return r;
     }
 }

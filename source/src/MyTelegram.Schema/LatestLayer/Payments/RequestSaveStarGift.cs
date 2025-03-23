@@ -7,10 +7,10 @@ namespace MyTelegram.Schema.Payments;
 /// Display or remove a <a href="https://corefork.telegram.org/api/gifts">received gift »</a> from our profile.
 /// See <a href="https://corefork.telegram.org/method/payments.saveStarGift" />
 ///</summary>
-[TlObject(0x87acf08e)]
+[TlObject(0x2a2a697c)]
 public sealed class RequestSaveStarGift : IRequest<IBool>
 {
-    public uint ConstructorId => 0x87acf08e;
+    public uint ConstructorId => 0x2a2a697c;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -21,17 +21,7 @@ public sealed class RequestSaveStarGift : IRequest<IBool>
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool Unsave { get; set; }
-
-    ///<summary>
-    /// ID of the user that sent us the gift.
-    /// See <a href="https://corefork.telegram.org/type/InputUser" />
-    ///</summary>
-    public MyTelegram.Schema.IInputUser UserId { get; set; }
-
-    ///<summary>
-    /// The ID of the <a href="https://corefork.telegram.org/constructor/messageService">messageService</a> with the <a href="https://corefork.telegram.org/constructor/messageActionStarGift">messageActionStarGift</a>.
-    ///</summary>
-    public int MsgId { get; set; }
+    public MyTelegram.Schema.IInputSavedStarGift Stargift { get; set; }
 
     public void ComputeFlag()
     {
@@ -44,15 +34,13 @@ public sealed class RequestSaveStarGift : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        writer.Write(UserId);
-        writer.Write(MsgId);
+        writer.Write(Stargift);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Flags = reader.ReadBitArray();
         if (Flags[0]) { Unsave = true; }
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        MsgId = reader.ReadInt32();
+        Stargift = reader.Read<MyTelegram.Schema.IInputSavedStarGift>();
     }
 }

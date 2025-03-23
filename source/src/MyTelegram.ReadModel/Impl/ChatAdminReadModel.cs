@@ -2,8 +2,7 @@
 
 public class ChatAdminReadModel : IChatAdminReadModel,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelCreatedEvent>,
-    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelAdminRightsEditedEvent>,
-    IAmReadModelFor<ChatAggregate,ChatId,ChatAdminRightsEditedEvent>
+    IAmReadModelFor<ChannelAggregate, ChannelId, ChannelAdminRightsEditedEvent>
 {
     public virtual string Id { get; private set; } = null!;
     //public long ChannelId { get; private set; }
@@ -32,7 +31,7 @@ public class ChatAdminReadModel : IChatAdminReadModel,
             if (domainEvent.AggregateEvent.IsNewAdmin)
             {
                 //ChannelId = domainEvent.AggregateEvent.ChannelId;
-                PeerId= domainEvent.AggregateEvent.ChannelId;
+                PeerId = domainEvent.AggregateEvent.ChannelId;
                 PromotedBy = domainEvent.AggregateEvent.PromotedBy;
                 UserId = domainEvent.AggregateEvent.UserId;
                 IsBot = domainEvent.AggregateEvent.IsBot;
@@ -53,7 +52,7 @@ public class ChatAdminReadModel : IChatAdminReadModel,
         Id = AdminId.Create(domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.CreatorId).Value;
 
         //ChannelId = domainEvent.AggregateEvent.ChannelId;
-        PeerId= domainEvent.AggregateEvent.ChannelId;
+        PeerId = domainEvent.AggregateEvent.ChannelId;
 
         PromotedBy = domainEvent.AggregateEvent.CreatorId;
         UserId = domainEvent.AggregateEvent.CreatorId;
@@ -62,35 +61,6 @@ public class ChatAdminReadModel : IChatAdminReadModel,
         Rank = null;
         IsCreator = true;
         AdminRights = ChatAdminRights.GetCreatorRights();
-
-        return Task.CompletedTask;
-    }
-
-    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChatAggregate, ChatId, ChatAdminRightsEditedEvent> domainEvent, CancellationToken cancellationToken)
-    {
-        Id = AdminId.Create(domainEvent.AggregateEvent.ChatId, domainEvent.AggregateEvent.UserId).Value;
-
-        if (domainEvent.AggregateEvent.RemoveAdminFromList)
-        {
-            context.MarkForDeletion();
-        }
-        else
-        {
-            if (domainEvent.AggregateEvent.IsNewAdmin)
-            {
-                //ChannelId = domainEvent.AggregateEvent.ChannelId;
-                PeerId = domainEvent.AggregateEvent.ChatId;
-                PromotedBy = domainEvent.AggregateEvent.PromotedBy;
-                UserId = domainEvent.AggregateEvent.UserId;
-                IsBot = domainEvent.AggregateEvent.IsBot;
-
-                Date = domainEvent.AggregateEvent.Date;
-            }
-
-            CanEdit = domainEvent.AggregateEvent.CanEdit;
-            Rank = domainEvent.AggregateEvent.Rank;
-            AdminRights = domainEvent.AggregateEvent.AdminRights;
-        }
 
         return Task.CompletedTask;
     }

@@ -10,6 +10,8 @@ public interface IQueryOnlyReadModel : IReadModel
 public interface IQueryOnlyReadModelStore<TQueryOnlyReadModel> //: IReadModelStore<TQueryOnlyReadModel>
     where TQueryOnlyReadModel : class, IReadModel
 {
+    IQueryable<TQueryOnlyReadModel> GetAll();
+
     Task<IReadOnlyCollection<TQueryOnlyReadModel>> FindAsync(
         Expression<Func<TQueryOnlyReadModel, bool>> filter,
         int skip = 0,

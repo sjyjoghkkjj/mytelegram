@@ -11,6 +11,5 @@ public class ObjectMessageSenderBackgroundService(
     {
         logger.LogInformation("Object message sender service started");
         return processor.ProcessAsync();
-        //_logger.LogInformation("Object message sender service started");
     }
 }

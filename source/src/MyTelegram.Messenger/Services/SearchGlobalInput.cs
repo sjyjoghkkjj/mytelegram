@@ -8,4 +8,10 @@ public class SearchGlobalInput : GetPagedListInput
     public long OwnerPeerId { get; set; }
     public string Q { get; set; } = default!;
     public long SelfUserId { get; set; }
+
+    public List<long> JoinedChannelList { get; set; } = [];
+
+    public bool BroadcastsOnly { get; set; }
+    public bool GroupsOnly { get; set; }
+    public bool UsersOnly { get; set; }
 }

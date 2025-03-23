@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Dialog filter AKA <a href="https://corefork.telegram.org/api/folders">folder</a>
 /// See <a href="https://corefork.telegram.org/constructor/dialogFilter" />
 ///</summary>
-[TlObject(0x5fb5523b)]
+[TlObject(0xaa472651)]
 public sealed class TDialogFilter : IDialogFilter
 {
-    public uint ConstructorId => 0x5fb5523b;
+    public uint ConstructorId => 0xaa472651;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -63,6 +63,7 @@ public sealed class TDialogFilter : IDialogFilter
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool ExcludeArchived { get; set; }
+    public bool TitleNoanimate { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/folders">Folder</a> ID
@@ -71,8 +72,9 @@ public sealed class TDialogFilter : IDialogFilter
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/folders">Folder</a> name (max 12 UTF-8 chars)
+    /// See <a href="https://corefork.telegram.org/type/TextWithEntities" />
     ///</summary>
-    public string Title { get; set; }
+    public MyTelegram.Schema.ITextWithEntities Title { get; set; }
 
     ///<summary>
     /// Emoji to use as icon for the folder.
@@ -109,6 +111,7 @@ public sealed class TDialogFilter : IDialogFilter
         if (ExcludeMuted) { Flags[11] = true; }
         if (ExcludeRead) { Flags[12] = true; }
         if (ExcludeArchived) { Flags[13] = true; }
+        if (TitleNoanimate) { Flags[28] = true; }
         if (Emoticon != null) { Flags[25] = true; }
         if (/*Color != 0 && */Color.HasValue) { Flags[27] = true; }
 
@@ -139,8 +142,9 @@ public sealed class TDialogFilter : IDialogFilter
         if (Flags[11]) { ExcludeMuted = true; }
         if (Flags[12]) { ExcludeRead = true; }
         if (Flags[13]) { ExcludeArchived = true; }
+        if (Flags[28]) { TitleNoanimate = true; }
         Id = reader.ReadInt32();
-        Title = reader.ReadString();
+        Title = reader.Read<MyTelegram.Schema.ITextWithEntities>();
         if (Flags[25]) { Emoticon = reader.ReadString(); }
         if (Flags[27]) { Color = reader.ReadInt32(); }
         PinnedPeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();

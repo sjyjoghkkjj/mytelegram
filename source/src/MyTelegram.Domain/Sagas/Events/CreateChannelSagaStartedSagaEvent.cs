@@ -9,8 +9,9 @@ public class CreateChannelSagaStartedSagaEvent(
     bool migratedFromChat,
     bool autoCreateFromChat,
     int? ttlPeriod,
-    bool isTtlFromDefaultSetting
-)
+    bool isTtlFromDefaultSetting,
+    List<long> memberUserIds,
+    List<long> botUserIds)
     : AggregateEvent<CreateChannelSaga, CreateChannelSagaId>
 {
     public RequestInfo RequestInfo { get; } = requestInfo;
@@ -22,4 +23,6 @@ public class CreateChannelSagaStartedSagaEvent(
     public bool AutoCreateFromChat { get; } = autoCreateFromChat;
     public int? TtlPeriod { get; } = ttlPeriod;
     public bool IsTtlFromDefaultSetting { get; } = isTtlFromDefaultSetting;
+    public List<long> MemberUserIds { get; } = memberUserIds;
+    public List<long> BotUserIds { get; } = botUserIds;
 }

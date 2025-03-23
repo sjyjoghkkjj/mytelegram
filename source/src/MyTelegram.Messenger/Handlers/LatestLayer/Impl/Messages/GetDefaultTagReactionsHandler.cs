@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
+/// Fetch a default recommended list of <a href="https://corefork.telegram.org/api/saved-messages#tags">saved message tag reactions</a>.
 /// See <a href="https://corefork.telegram.org/method/messages.getDefaultTagReactions" />
 ///</summary>
 internal sealed class GetDefaultTagReactionsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetDefaultTagReactions, MyTelegram.Schema.Messages.IReactions>,
@@ -13,7 +12,7 @@ internal sealed class GetDefaultTagReactionsHandler : RpcResultObjectHandler<MyT
     {
         return Task.FromResult<MyTelegram.Schema.Messages.IReactions>(new TReactions
         {
-            Reactions = new()
+            Reactions = []
         });
     }
 }

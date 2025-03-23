@@ -14,4 +14,10 @@ public interface IDraftMessage : IObject
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
     BitArray Flags { get; set; }
+
+    ///<summary>
+    /// Media.
+    /// See <a href="https://corefork.telegram.org/type/InputMedia" />
+    ///</summary>
+    MyTelegram.Schema.IInputMedia? Media { get; set; }
 }

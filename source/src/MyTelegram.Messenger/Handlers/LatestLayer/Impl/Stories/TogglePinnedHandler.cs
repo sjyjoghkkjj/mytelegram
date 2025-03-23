@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Stories;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stories;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/stories.togglePinned" />
@@ -11,6 +11,6 @@ internal sealed class TogglePinnedHandler : RpcResultObjectHandler<MyTelegram.Sc
     protected override Task<TVector<int>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestTogglePinned obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<TVector<int>>([]);
     }
 }

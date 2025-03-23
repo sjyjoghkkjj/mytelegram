@@ -1,12 +1,11 @@
-﻿using MyTelegram.Domain.Sagas;
-using MyTelegram.Domain.Sagas.Identities;
+﻿using EventFlow.Sagas;
 
 namespace MyTelegram.Messenger.NativeAot;
 
 public class MySagaAggregateStore(
     IAggregateStore aggregateStore,
     ICommandBus commandBus)
-    : SagaStore
+    : SagaStore, ITransientDependency
 {
     public override async Task<ISaga> UpdateAsync(ISagaId sagaId,
         Type sagaType,
@@ -82,16 +81,6 @@ public class MySagaAggregateStore(
                 domainEvents = await aggregateStore.UpdateAsync<ImportChatInviteSaga, ImportChatInviteSagaId>(importChatInviteSagaId, sourceId, updateSaga, cancellationToken);
                 break;
 
-            //case DeleteMessageSaga2Id deleteMessageSaga2Id:
-            //    domainEvents = await _aggregateStore
-            //        .UpdateAsync<DeleteMessageSaga2, DeleteMessageSaga2Id>(deleteMessageSaga2Id,
-            //            sourceId,
-            //            updateSaga,
-            //            cancellationToken);
-            //    break;
-            case AddChatUserSagaId addChatUserSagaId:
-                domainEvents = await aggregateStore.UpdateAsync<AddChatUserSaga, AddChatUserSagaId>(addChatUserSagaId, sourceId, updateSaga, cancellationToken);
-                break;
             case ApproveJoinChannelSagaId approveJoinChannelSagaId:
                 domainEvents = await aggregateStore.UpdateAsync<ApproveJoinChannelSaga, ApproveJoinChannelSagaId>(approveJoinChannelSagaId, sourceId, updateSaga, cancellationToken);
 
@@ -104,26 +93,11 @@ public class MySagaAggregateStore(
                 domainEvents = await aggregateStore.UpdateAsync<CreateChannelSaga, CreateChannelSagaId>(createChannelSagaId, sourceId, updateSaga, cancellationToken);
 
                 break;
-            case CreateChatSagaId createChatSagaId:
-                domainEvents = await aggregateStore.UpdateAsync<CreateChatSaga, CreateChatSagaId>(createChatSagaId, sourceId, updateSaga, cancellationToken);
-
-                break;
+           
             case CreateUserSagaId createUserSagaId:
                 domainEvents = await aggregateStore.UpdateAsync<CreateUserSaga, CreateUserSagaId>(createUserSagaId, sourceId, updateSaga, cancellationToken);
                 break;
-            case DeleteChatUserSagaId deleteChatUserSagaId:
-                domainEvents = await aggregateStore.UpdateAsync<DeleteChatUserSaga, DeleteChatUserSagaId>(deleteChatUserSagaId, sourceId, updateSaga, cancellationToken);
-
-                break;
-            //case DeleteMessageSagaId deleteMessageSagaId:
-            //    domainEvents = await _aggregateStore.UpdateAsync<DeleteMessageSaga, DeleteMessageSagaId>(deleteMessageSagaId, sourceId, updateSaga, cancellationToken);
-
-            //    break;
-            //case DeleteParticipantHistorySagaId deleteParticipantHistorySagaId:
-            //    domainEvents = await _aggregateStore.UpdateAsync<DeleteParticipantHistorySaga, DeleteParticipantHistorySagaId>(deleteParticipantHistorySagaId, sourceId, updateSaga, cancellationToken);
-
-            //    break;
-    
+          
             case EditAdminSagaId editAdminSagaId:
                 domainEvents = await aggregateStore.UpdateAsync<EditAdminSaga, EditAdminSagaId>(editAdminSagaId, sourceId, updateSaga, cancellationToken);
                 break;
@@ -136,12 +110,6 @@ public class MySagaAggregateStore(
                 break;
             case EditChannelTitleSagaId editChannelTitleSagaId:
                 domainEvents = await aggregateStore.UpdateAsync<EditChannelTitleSaga, EditChannelTitleSagaId>(editChannelTitleSagaId, sourceId, updateSaga, cancellationToken);
-                break;
-            case EditChatPhotoSagaId editChatPhotoSagaId:
-                domainEvents = await aggregateStore.UpdateAsync<EditChatPhotoSaga, EditChatPhotoSagaId>(editChatPhotoSagaId, sourceId, updateSaga, cancellationToken);
-                break;
-            case EditChatTitleSagaId editChatTitleSagaId:
-                domainEvents = await aggregateStore.UpdateAsync<EditChatTitleSaga, EditChatTitleSagaId>(editChatTitleSagaId, sourceId, updateSaga, cancellationToken);
                 break;
             case EditMessageSagaId editMessageSagaId:
                 domainEvents = await aggregateStore.UpdateAsync<EditMessageSaga, EditMessageSagaId>(editMessageSagaId, sourceId, updateSaga, cancellationToken);

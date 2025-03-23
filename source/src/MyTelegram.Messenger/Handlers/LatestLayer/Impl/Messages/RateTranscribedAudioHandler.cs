@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Rate <a href="https://corefork.telegram.org/api/transcribe">transcribed voice message</a>
@@ -12,6 +10,6 @@ internal sealed class RateTranscribedAudioHandler : RpcResultObjectHandler<MyTel
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestRateTranscribedAudio obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

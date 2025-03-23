@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Associate a group to a channel as <a href="https://corefork.telegram.org/api/discussion">discussion group</a> for that channel
@@ -15,24 +13,18 @@ namespace MyTelegram.Handlers.Channels;
 /// 400 MEGAGROUP_PREHISTORY_HIDDEN Group with hidden history for new members can't be set as discussion groups.
 /// See <a href="https://corefork.telegram.org/method/channels.setDiscussionGroup" />
 ///</summary>
-internal sealed class SetDiscussionGroupHandler : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestSetDiscussionGroup, IBool>,
-    Channels.ISetDiscussionGroupHandler
+internal sealed class SetDiscussionGroupHandler(
+    ICommandBus commandBus,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestSetDiscussionGroup, IBool>,
+        Channels.ISetDiscussionGroupHandler
 {
-    private readonly ICommandBus _commandBus;
-    private readonly IAccessHashHelper _accessHashHelper;
-    public SetDiscussionGroupHandler(ICommandBus commandBus,
-        IAccessHashHelper accessHashHelper)
-    {
-        _commandBus = commandBus;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestSetDiscussionGroup obj)
     {
         if (obj.Broadcast is TInputChannel broadcastChannel)
         {
-            await _accessHashHelper.CheckAccessHashAsync(broadcastChannel.ChannelId, broadcastChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(broadcastChannel.ChannelId, broadcastChannel.AccessHash);
         }
         else
         {
@@ -43,7 +35,7 @@ internal sealed class SetDiscussionGroupHandler : RpcResultObjectHandler<MyTeleg
 
         if (obj.Group is TInputChannel groupChannel)
         {
-            await _accessHashHelper.CheckAccessHashAsync(groupChannel.ChannelId, groupChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(groupChannel.ChannelId, groupChannel.AccessHash);
         }
 
         switch (obj.Group)
@@ -62,14 +54,9 @@ internal sealed class SetDiscussionGroupHandler : RpcResultObjectHandler<MyTeleg
                 throw new ArgumentOutOfRangeException();
         }
 
-        //var command = new SetDiscussionGroupCommand(ChannelId.Create(broadcastChannel.ChannelId),
-        //    input.ToRequestInfo(),
-        //    input.UserId,
-        //    broadcastChannel.ChannelId,
-        //    groupId);
         var command =
             new StartSetDiscussionGroupCommand(TempId.New, input.ToRequestInfo(), broadcastChannel.ChannelId, groupId);
-        await _commandBus.PublishAsync(command, CancellationToken.None);
+        await commandBus.PublishAsync(command);
         return null!;
     }
 }

@@ -1,34 +1,25 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Help;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Returns current configuration, including data center configuration.
 /// See <a href="https://corefork.telegram.org/method/help.getConfig" />
 ///</summary>
-internal sealed class GetConfigHandler : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetConfig, MyTelegram.Schema.IConfig>,
-    Help.IGetConfigHandler
+internal sealed class GetConfigHandler(
+    IOptions<MyTelegramMessengerServerOptions> optionsAccessor,
+    IDataCenterHelper dataCenterHelper,
+    IUserAppService userAppService,
+    ILayeredService<IConfigConverter> layeredService)
+    : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetConfig, MyTelegram.Schema.IConfig>,
+        Help.IGetConfigHandler
 {
-    private readonly IDataCenterHelper _dataCenterHelper;
+    private readonly MyTelegramMessengerServerOptions _options = optionsAccessor.Value;
 
-    private readonly MyTelegramMessengerServerOptions _options;
-    private readonly ILayeredService<IConfigConverter> _layeredService;
-
-    public GetConfigHandler(IOptions<MyTelegramMessengerServerOptions> optionsAccessor,
-        IDataCenterHelper dataCenterHelper,
-        ILayeredService<IConfigConverter> layeredService)
-    {
-        _options = optionsAccessor.Value;
-        _dataCenterHelper = dataCenterHelper;
-        _layeredService = layeredService;
-    }
-
-    protected override Task<IConfig> HandleCoreAsync(IRequestInput input,
+    protected override async Task<IConfig> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Help.RequestGetConfig obj)
     {
-        //todo: desktop and app returns different config
-        var r = _layeredService.GetConverter(input.Layer)
-            .ToConfig(_options.DcOptions.Where(p => p.Enabled).ToList(), _options.ThisDcId, _dataCenterHelper.GetMediaDcId());
-        return Task.FromResult(r);
+        var config = layeredService.GetConverter(input.Layer)
+            .ToConfig(_options.DcOptions.Where(p => p.Enabled).ToList(), _options.ThisDcId, dataCenterHelper.GetMediaDcId());
+
+        return config;
     }
 }

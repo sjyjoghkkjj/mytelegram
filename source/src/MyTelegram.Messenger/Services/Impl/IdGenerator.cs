@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.Services.Impl;
+﻿using MyTelegram.Services.Services.IdGenerator;
+
+namespace MyTelegram.Messenger.Services.Impl;
 
 public class IdGenerator(
     IHiLoValueGeneratorCache cache,

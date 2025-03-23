@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Updates;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Updates;
 
 ///<summary>
 /// Returns the difference between the current state of updates of a certain channel and transmitted.
@@ -24,7 +22,8 @@ internal sealed class GetChannelDifferenceHandler(
     IMessageAppService messageAppService,
     IQueryProcessor queryProcessor,
     IAckCacheService ackCacheService,
-    ILayeredService<IDifferenceConverter> layeredService,
+    //ILayeredService<IDifferenceConverter> layeredService,
+    IDifferenceConverterService differenceConverterService,
     IAccessHashHelper accessHashHelper,
     ILogger<GetChannelDifferenceHandler> logger)
     : RpcResultObjectHandler<MyTelegram.Schema.Updates.RequestGetChannelDifference,
@@ -37,21 +36,16 @@ internal sealed class GetChannelDifferenceHandler(
     protected override async Task<MyTelegram.Schema.Updates.IChannelDifference> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Updates.RequestGetChannelDifference obj)
     {
-        //logger.LogInformation("[{UserId}]GetDifference:{@Data}",input.UserId, obj);
         await accessHashHelper.CheckAccessHashAsync(obj.Channel);
         if (obj.Channel is TInputChannel inputChannel)
         {
-            // Console.WriteLine($"[{input.UserId}]get channel difference:{inputChannel.ChannelId} pts:{obj.Pts}");
-
             var isChannelMember = true;
             var channelMemberReadModel = await queryProcessor
-                .ProcessAsync(new GetChannelMemberByUserIdQuery(inputChannel.ChannelId, input.UserId))
-         ;
+                .ProcessAsync(new GetChannelMemberByUserIdQuery(inputChannel.ChannelId, input.UserId));
             isChannelMember = channelMemberReadModel != null;
 
             if (channelMemberReadModel != null && channelMemberReadModel.Kicked)
             {
-                //ThrowHelper.ThrowUserFriendlyException("CHANNEL_PUBLIC_GROUP_NA");
                 RpcErrors.RpcErrors403.ChannelPublicGroupNa.ThrowRpcError();
             }
 
@@ -65,15 +59,12 @@ internal sealed class GetChannelDifferenceHandler(
             var updatesReadModels = await queryProcessor
                 .ProcessAsync(new GetUpdatesQuery(input.UserId, inputChannel.ChannelId, pts, 0, limit));
 
-            //Console.WriteLine($"=============== {input.UserId} {inputChannel.ChannelId}   updates:{updatesReadModels.Count}  pts:{obj.Pts}");
-            //_logger.LogWarning("##### GetChannelDifferenceHandler:{UserId}  channelId={ChannelId} pts={Pts}  updates count={Count}", input.UserId, inputChannel.ChannelId, obj.Pts, updatesReadModels.Count);
-
             var messageIds = updatesReadModels.Where(p => p.UpdatesType == UpdatesType.NewMessages)
                  .Select(p => p.MessageId ?? 0)
                  .ToList()
                  ;
-            var users = updatesReadModels.SelectMany(p => p.Users ?? new List<long>(0)).ToList();
-            var chats = updatesReadModels.SelectMany(p => p.Chats ?? new List<long>(0)).ToList();
+            var users = updatesReadModels.SelectMany(p => p.Users ?? []).ToList();
+            var chats = updatesReadModels.SelectMany(p => p.Chats ?? []).ToList();
             chats.Add(inputChannel.ChannelId);
 
             var dto = await messageAppService
@@ -96,10 +87,8 @@ internal sealed class GetChannelDifferenceHandler(
             }
 
             var allUpdateList = updatesReadModels.Where(p => p.UpdatesType == UpdatesType.Updates)
-                .SelectMany(p => p.Updates ?? new List<IUpdate>(0)).ToList();
-            var r = layeredService.GetConverter(input.Layer).ToChannelDifference(dto, isChannelMember, allUpdateList, maxPts);
-
-            //logger.LogInformation("[{UserId}]Get channelDifference:updatesCount={Count} {@Input} {@Data},fromPts={Pts} channel updates count={Count}", input.UserId, updatesReadModels.Count, input, new { }, obj.Pts, updatesReadModels.Count);
+                .SelectMany(p => p.Updates ?? []).ToList();
+            var r = differenceConverterService.ToChannelDifference(dto, isChannelMember, allUpdateList, maxPts, layer: input.Layer);
 
             return r;
         }

@@ -3,7 +3,7 @@
 public class PeerSettingsReadModel : IPeerSettingsReadModel,
     IAmReadModelFor<PeerSettingsAggregate, PeerSettingsId, PeerSettingsBarHiddenEvent>
 {
-    public string Id { get; private set; } = default!;
+    public string Id { get; private set; } = null!;
     public long OwnerPeerId { get; private set; }
     public long PeerId { get; private set; }
     public PeerSettings? PeerSettings { get; private set; }
@@ -17,7 +17,6 @@ public class PeerSettingsReadModel : IPeerSettingsReadModel,
         OwnerPeerId = domainEvent.AggregateEvent.OwnerPeerId;
         PeerId = domainEvent.AggregateEvent.PeerId;
         HiddenPeerSettingsBar = true;
-        PeerSettings = null;
 
         return Task.CompletedTask;
     }

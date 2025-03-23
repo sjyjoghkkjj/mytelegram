@@ -18,8 +18,31 @@ public class TempAggregate(TempId id) : AggregateRoot<TempAggregate, TempId>(id)
     IApply<UpdateMessagePinnedStartedEvent>,
     IApply<EditPeerFoldersStartedEvent>,
     IApply<SendMessageStartedEvent>,
-    IApply<DraftDeletedEvent>
+    IApply<DraftDeletedEvent>,
+    IApply<JoinChannelStartedEvent>,
+    IApply<InviteToChannelStartedEvent>
 {
+
+    public void StartInviteToChannel(RequestInfo requestInfo,
+        long channelId,
+        bool isBroadcast,
+        bool hasLink,
+        long inviterId,
+        int channelHistoryMinId,
+        int maxMessageId,
+        List<long> memberUserIds,
+        List<long> botUserIds,
+        ChatJoinType chatJoinType
+    )
+    {
+        Emit(new InviteToChannelStartedEvent(requestInfo, channelId, isBroadcast, hasLink, inviterId, channelHistoryMinId, maxMessageId, memberUserIds, botUserIds, chatJoinType));
+    }
+
+    public void StartJoinChannel(RequestInfo requestInfo, long channelId, bool broadcast, int topMessageId, int channelHistoryMinId)
+    {
+        Emit(new JoinChannelStartedEvent(requestInfo, channelId, broadcast, topMessageId, channelHistoryMinId));
+    }
+
     public void DeleteDraft(long ownerPeerId, Peer toPeer)
     {
         Emit(new DraftDeletedEvent(ownerPeerId, toPeer));
@@ -54,7 +77,7 @@ public class TempAggregate(TempId id) : AggregateRoot<TempAggregate, TempId>(id)
         List<int> messageIds, List<long> randomIds, int? scheduleDate, Peer? sendAs, bool forwardFromLinkedChannel, bool post)
     {
         Emit(new ForwardMessagesStartedEvent(requestInfo, silent, background, withMyScore, dropAuthor, dropMediaCaptions,
-            noForwards, fromPeer, toPeer, messageIds, randomIds, scheduleDate, sendAs, forwardFromLinkedChannel, post));
+            noForwards, fromPeer, toPeer, messageIds, randomIds, scheduleDate, sendAs, forwardFromLinkedChannel, post, null, null));
     }
 
     public void StartDeleteReplyMessages(RequestInfo requestInfo, long channelId, List<int> messageIds, int newTopMessageId)
@@ -158,6 +181,16 @@ public class TempAggregate(TempId id) : AggregateRoot<TempAggregate, TempId>(id)
     }
 
     public void Apply(DraftDeletedEvent aggregateEvent)
+    {
+
+    }
+
+    public void Apply(JoinChannelStartedEvent aggregateEvent)
+    {
+
+    }
+
+    public void Apply(InviteToChannelStartedEvent aggregateEvent)
     {
 
     }

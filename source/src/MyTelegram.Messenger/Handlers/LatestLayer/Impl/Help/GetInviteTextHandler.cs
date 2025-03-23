@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Help;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
 ///<summary>
 /// Returns localized text of a text message with an invitation.
@@ -12,7 +10,7 @@ internal sealed class GetInviteTextHandler : RpcResultObjectHandler<MyTelegram.S
     protected override Task<IInviteText> HandleCoreAsync(IRequestInput input,
         RequestGetInviteText obj)
     {
-        IInviteText r = new TInviteText { Message = @"{0} invite you to use telegram." };
+        IInviteText r = new TInviteText { Message = @"{0} invite you to use mytelegram." };
 
         return Task.FromResult(r);
     }

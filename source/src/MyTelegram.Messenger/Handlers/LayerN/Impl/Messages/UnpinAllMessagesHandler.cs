@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages.LayerN;
+﻿namespace  MyTelegram.Handlers.Messages.LayerN;
 
 ///<summary>
 /// <a href="https://corefork.telegram.org/api/pin">Unpin</a> all pinned messages
@@ -8,18 +6,17 @@ namespace MyTelegram.Handlers.Messages.LayerN;
 /// Code Type Description
 /// 400 CHAT_ADMIN_REQUIRED You must be an admin in this chat to do this.
 /// 400 CHAT_NOT_MODIFIED No changes were made to chat information because the new information you passed is identical to the current information.
+/// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.unpinAllMessages" />
 ///</summary>
-internal sealed class UnpinAllMessagesHandler(IHandlerHelper handlerHelper)
-    : ForwardRequestToNewHandler<MyTelegram.Schema.Messages.LayerN.RequestUnpinAllMessages,
-            MyTelegram.Schema.Messages.RequestUnpinAllMessages>(handlerHelper),
-        Messages.IUnpinAllMessagesHandler
+internal sealed class UnpinAllMessagesHandler(
+    IHandlerHelper handlerHelper,
+    IRequestConverter<MyTelegram.Schema.Messages.LayerN.RequestUnpinAllMessages,
+        MyTelegram.Schema.Messages.RequestUnpinAllMessages> dataConverter)
+    : ForwardRequestToNewHandler<
+            MyTelegram.Schema.Messages.LayerN.RequestUnpinAllMessages,
+            MyTelegram.Schema.Messages.RequestUnpinAllMessages
+        >(handlerHelper, dataConverter),
+        Messages.LayerN.IUnpinAllMessagesHandler, IDistinctObjectHandler
 {
-    protected override RequestUnpinAllMessages GetNewData(IRequestInput request, Schema.Messages.LayerN.RequestUnpinAllMessages obj)
-    {
-        return new RequestUnpinAllMessages
-        {
-            Peer = obj.Peer
-        };
-    }
 }

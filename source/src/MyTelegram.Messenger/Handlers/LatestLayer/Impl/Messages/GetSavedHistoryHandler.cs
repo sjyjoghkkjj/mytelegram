@@ -1,8 +1,10 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Messages;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
+/// Returns <a href="https://corefork.telegram.org/api/saved-messages">saved messages »</a> forwarded from a specific peer
+/// <para>Possible errors</para>
+/// Code Type Description
+/// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.getSavedHistory" />
 ///</summary>
 internal sealed class GetSavedHistoryHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetSavedHistory, MyTelegram.Schema.Messages.IMessages>,
@@ -13,9 +15,9 @@ internal sealed class GetSavedHistoryHandler : RpcResultObjectHandler<MyTelegram
     {
         return Task.FromResult<MyTelegram.Schema.Messages.IMessages>(new TMessages
         {
-            Chats = new(),
-            Messages = new(),
-            Users = new(),
+            Chats = [],
+            Messages = [],
+            Users = [],
         });
     }
 }

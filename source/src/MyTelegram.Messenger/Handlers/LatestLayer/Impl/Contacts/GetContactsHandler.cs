@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Contacts;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Returns the current user's contact list.
@@ -8,9 +6,10 @@ namespace MyTelegram.Handlers.Contacts;
 ///</summary>
 internal sealed class GetContactsHandler(
     IQueryProcessor queryProcessor,
-    ILayeredService<IUserConverter> layeredUserService,
+    IUserConverterService userConverterService,
     IPhotoAppService photoAppService,
     IHashCalculator hashCalculator,
+    IUserAppService userAppService,
     IPrivacyAppService privacyAppService)
     : RpcResultObjectHandler<MyTelegram.Schema.Contacts.RequestGetContacts, MyTelegram.Schema.Contacts.IContacts>,
         Contacts.IGetContactsHandler
@@ -22,11 +21,10 @@ internal sealed class GetContactsHandler(
             .ProcessAsync(new GetContactsByUserIdQuery(input.UserId), CancellationToken.None);
         var userIdList = contactReadModels.Select(p => p.TargetUserId).ToList();
         userIdList.Add(input.UserId);
-        var userReadModels = await queryProcessor
-            .ProcessAsync(new GetUsersByUserIdListQuery(userIdList));
-        var privacies = await privacyAppService.GetPrivacyListAsync(userIdList);
+        var userReadModels = await userAppService.GetListAsync(userIdList);
+        var privacyReadModels = await privacyAppService.GetPrivacyListAsync(userIdList);
         var photos = await photoAppService.GetPhotosAsync(userReadModels, contactReadModels);
-        var userList = layeredUserService.GetConverter(input.Layer).ToUserList(input.UserId, userReadModels, photos, contactReadModels, privacies);
+        var userList = userConverterService.ToUserList(input.UserId, userReadModels, photos, contactReadModels, privacyReadModels, input.Layer);
 
         var validUserIds = new List<long>();
         foreach (var user in userList)
@@ -42,16 +40,15 @@ internal sealed class GetContactsHandler(
             return new TContactsNotModified();
         }
 
-        var r = new TContacts
+        var contacts = new TContacts
         {
             Contacts =
-                new TVector<IContact>(contactReadModels.Where(p => validUserIds.Contains(p.TargetUserId)).Select(p =>
-                    new TContact { UserId = p.TargetUserId, Mutual = false })),
-            Users = new TVector<IUser>(userList),
+                [.. contactReadModels.Where(p => validUserIds.Contains(p.TargetUserId)).Select(p =>
+                    new TContact { UserId = p.TargetUserId, Mutual = false })],
+            Users = [.. userList],
             SavedCount = contactReadModels.Count,
         };
 
-        return r;
-        //return Task.FromResult<IContacts>(r);
+        return contacts;
     }
 }

@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// A folder imported using a <a href="https://corefork.telegram.org/api/links#chat-folder-links">chat folder deep link »</a>.
 /// See <a href="https://corefork.telegram.org/constructor/dialogFilterChatlist" />
 ///</summary>
-[TlObject(0x9fe28ea4)]
+[TlObject(0x96537bd7)]
 public sealed class TDialogFilterChatlist : IDialogFilter
 {
-    public uint ConstructorId => 0x9fe28ea4;
+    public uint ConstructorId => 0x96537bd7;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -21,6 +21,7 @@ public sealed class TDialogFilterChatlist : IDialogFilter
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool HasMyInvites { get; set; }
+    public bool TitleNoanimate { get; set; }
 
     ///<summary>
     /// ID of the folder
@@ -29,8 +30,9 @@ public sealed class TDialogFilterChatlist : IDialogFilter
 
     ///<summary>
     /// Name of the folder (max 12 UTF-8 chars)
+    /// See <a href="https://corefork.telegram.org/type/TextWithEntities" />
     ///</summary>
-    public string Title { get; set; }
+    public MyTelegram.Schema.ITextWithEntities Title { get; set; }
 
     ///<summary>
     /// Emoji to use as icon for the folder.
@@ -55,6 +57,7 @@ public sealed class TDialogFilterChatlist : IDialogFilter
     public void ComputeFlag()
     {
         if (HasMyInvites) { Flags[26] = true; }
+        if (TitleNoanimate) { Flags[28] = true; }
         if (Emoticon != null) { Flags[25] = true; }
         if (/*Color != 0 && */Color.HasValue) { Flags[27] = true; }
 
@@ -77,8 +80,9 @@ public sealed class TDialogFilterChatlist : IDialogFilter
     {
         Flags = reader.ReadBitArray();
         if (Flags[26]) { HasMyInvites = true; }
+        if (Flags[28]) { TitleNoanimate = true; }
         Id = reader.ReadInt32();
-        Title = reader.ReadString();
+        Title = reader.Read<MyTelegram.Schema.ITextWithEntities>();
         if (Flags[25]) { Emoticon = reader.ReadString(); }
         if (Flags[27]) { Color = reader.ReadInt32(); }
         PinnedPeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();

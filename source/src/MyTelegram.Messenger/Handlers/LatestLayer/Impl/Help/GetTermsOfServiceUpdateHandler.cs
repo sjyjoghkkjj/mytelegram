@@ -1,11 +1,9 @@
-﻿// ReSharper disable All
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
-namespace MyTelegram.Handlers.Help;
-
-/// <summary>
-///     Look for updates of telegram's terms of service
-///     See <a href="https://corefork.telegram.org/method/help.getTermsOfServiceUpdate" />
-/// </summary>
+///<summary>
+/// Look for updates of telegram's terms of service
+/// See <a href="https://corefork.telegram.org/method/help.getTermsOfServiceUpdate" />
+///</summary>
 internal sealed class GetTermsOfServiceUpdateHandler : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetTermsOfServiceUpdate, MyTelegram.Schema.Help.ITermsOfServiceUpdate>,
     Help.IGetTermsOfServiceUpdateHandler
 {
@@ -29,7 +27,7 @@ internal sealed class GetTermsOfServiceUpdateHandler : RpcResultObjectHandler<My
             //TermsOfService=new TTermsOfService()
             TermsOfService = new TTermsOfService
             {
-                Entities = new TVector<IMessageEntity>(),
+                Entities = [],
                 //Popup = false,
                 Id = new TDataJSON
                 {

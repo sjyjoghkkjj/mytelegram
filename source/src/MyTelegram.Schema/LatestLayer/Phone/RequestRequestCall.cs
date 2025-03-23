@@ -15,10 +15,10 @@ namespace MyTelegram.Schema.Phone;
 /// 403 USER_PRIVACY_RESTRICTED The user's privacy settings do not allow you to do this.
 /// See <a href="https://corefork.telegram.org/method/phone.requestCall" />
 ///</summary>
-[TlObject(0x42ff96ed)]
+[TlObject(0xa6c4600c)]
 public sealed class RequestRequestCall : IRequest<MyTelegram.Schema.Phone.IPhoneCall>
 {
-    public uint ConstructorId => 0x42ff96ed;
+    public uint ConstructorId => 0xa6c4600c;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -35,6 +35,7 @@ public sealed class RequestRequestCall : IRequest<MyTelegram.Schema.Phone.IPhone
     /// See <a href="https://corefork.telegram.org/type/InputUser" />
     ///</summary>
     public MyTelegram.Schema.IInputUser UserId { get; set; }
+    public MyTelegram.Schema.IInputGroupCall? ConferenceCall { get; set; }
 
     ///<summary>
     /// Random ID to avoid resending the same object
@@ -55,6 +56,7 @@ public sealed class RequestRequestCall : IRequest<MyTelegram.Schema.Phone.IPhone
     public void ComputeFlag()
     {
         if (Video) { Flags[0] = true; }
+        if (ConferenceCall != null) { Flags[1] = true; }
 
     }
 
@@ -64,6 +66,7 @@ public sealed class RequestRequestCall : IRequest<MyTelegram.Schema.Phone.IPhone
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(UserId);
+        if (Flags[1]) { writer.Write(ConferenceCall); }
         writer.Write(RandomId);
         writer.Write(GAHash);
         writer.Write(Protocol);
@@ -74,6 +77,7 @@ public sealed class RequestRequestCall : IRequest<MyTelegram.Schema.Phone.IPhone
         Flags = reader.ReadBitArray();
         if (Flags[0]) { Video = true; }
         UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        if (Flags[1]) { ConferenceCall = reader.Read<MyTelegram.Schema.IInputGroupCall>(); }
         RandomId = reader.ReadInt32();
         GAHash = reader.ReadBytes();
         Protocol = reader.Read<MyTelegram.Schema.IPhoneCallProtocol>();

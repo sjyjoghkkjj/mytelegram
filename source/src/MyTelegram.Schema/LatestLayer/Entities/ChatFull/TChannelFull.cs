@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Full info about a <a href="https://corefork.telegram.org/api/channel#channels">channel</a>, <a href="https://corefork.telegram.org/api/channel#supergroups">supergroup</a> or <a href="https://corefork.telegram.org/api/channel#gigagroups">gigagroup</a>.When updating the <a href="https://corefork.telegram.org/api/peers">local peer database »</a>, all fields from the newly received constructor take priority over the old constructor cached locally (including by removing fields that aren't set in the new constructor).
 /// See <a href="https://corefork.telegram.org/constructor/channelFull" />
 ///</summary>
-[TlObject(0xbbab348d)]
+[TlObject(0x52d6806b)]
 public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelFull
 {
-    public uint ConstructorId => 0xbbab348d;
+    public uint ConstructorId => 0x52d6806b;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -134,6 +134,8 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool PaidReactionsAvailable { get; set; }
+    public bool StargiftsAvailable { get; set; }
+    public bool PaidMessagesAvailable { get; set; }
 
     ///<summary>
     /// ID of the channel
@@ -351,6 +353,8 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
     /// See <a href="https://corefork.telegram.org/type/StickerSet" />
     ///</summary>
     public MyTelegram.Schema.IStickerSet? Emojiset { get; set; }
+    public MyTelegram.Schema.IBotVerification? BotVerification { get; set; }
+    public int? StargiftsCount { get; set; }
 
     public void ComputeFlag()
     {
@@ -373,6 +377,8 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
         if (PaidMediaAllowed) { Flags2[14] = true; }
         if (CanViewStarsRevenue) { Flags2[15] = true; }
         if (PaidReactionsAvailable) { Flags2[16] = true; }
+        if (StargiftsAvailable) { Flags2[19] = true; }
+        if (PaidMessagesAvailable) { Flags2[20] = true; }
         if (/*ParticipantsCount != 0 && */ParticipantsCount.HasValue) { Flags[0] = true; }
         if (/*AdminsCount != 0 && */AdminsCount.HasValue) { Flags[1] = true; }
         if (/*KickedCount != 0 && */KickedCount.HasValue) { Flags[2] = true; }
@@ -405,6 +411,8 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
         if (/*BoostsApplied != 0 && */BoostsApplied.HasValue) { Flags2[8] = true; }
         if (/*BoostsUnrestrict != 0 && */BoostsUnrestrict.HasValue) { Flags2[9] = true; }
         if (Emojiset != null) { Flags2[10] = true; }
+        if (BotVerification != null) { Flags2[17] = true; }
+        if (/*StargiftsCount != 0 && */StargiftsCount.HasValue) { Flags2[18] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -454,6 +462,8 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
         if (Flags2[8]) { writer.Write(BoostsApplied.Value); }
         if (Flags2[9]) { writer.Write(BoostsUnrestrict.Value); }
         if (Flags2[10]) { writer.Write(Emojiset); }
+        if (Flags2[17]) { writer.Write(BotVerification); }
+        if (Flags2[18]) { writer.Write(StargiftsCount.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -479,6 +489,8 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
         if (Flags2[14]) { PaidMediaAllowed = true; }
         if (Flags2[15]) { CanViewStarsRevenue = true; }
         if (Flags2[16]) { PaidReactionsAvailable = true; }
+        if (Flags2[19]) { StargiftsAvailable = true; }
+        if (Flags2[20]) { PaidMessagesAvailable = true; }
         Id = reader.ReadInt64();
         About = reader.ReadString();
         if (Flags[0]) { ParticipantsCount = reader.ReadInt32(); }
@@ -520,5 +532,7 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
         if (Flags2[8]) { BoostsApplied = reader.ReadInt32(); }
         if (Flags2[9]) { BoostsUnrestrict = reader.ReadInt32(); }
         if (Flags2[10]) { Emojiset = reader.Read<MyTelegram.Schema.IStickerSet>(); }
+        if (Flags2[17]) { BotVerification = reader.Read<MyTelegram.Schema.IBotVerification>(); }
+        if (Flags2[18]) { StargiftsCount = reader.ReadInt32(); }
     }
 }

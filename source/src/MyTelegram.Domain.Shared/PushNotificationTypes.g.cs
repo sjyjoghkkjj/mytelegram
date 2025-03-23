@@ -20,12 +20,36 @@ public class PushNotificationTypes
     public static readonly string MessageDeleted = "MESSAGE_DELETED";
 
     /// <summary>
+    /// data.custom.channel_id: For channels and supergroups, Channel/supergroup identifierdata.custom.chat_id: For chats, Chat identifierdata.custom.from_id: For PMs, Author identifierdata.custom.messages: Comma-separated IDs of messages whose reactions were read
+    /// <code>
+    /// Reactions were read on messages, remove reaction-related notifications for those messages
+    /// </code>
+    /// </summary>
+    public static readonly string ReadReaction = "READ_REACTION";
+
+    /// <summary>
     /// data.custom.channel_id: For channels and supergroups, Channel/supergroup identifierdata.custom.chat_id: For chats, Chat identifierdata.custom.from_id: For PMs, Author identifierdata.custom.max_id: Maximum ID of read messages
     /// <code>
     /// Message history was read, remove multiple notifications for this chat
     /// </code>
     /// </summary>
     public static readonly string ReadHistory = "READ_HISTORY";
+
+    /// <summary>
+    /// data.custom.channel_id: For channels and supergroups, Channel/supergroup identifierdata.custom.from_id: For user-sent stories, Author identifierdata.custom.max_id: Maximum ID of read story
+    /// <code>
+    /// Notifications from stories were read, remove story-related notifications for this chat
+    /// </code>
+    /// </summary>
+    public static readonly string ReadStories = "READ_STORIES";
+
+    /// <summary>
+    /// data.custom.channel_id: For channels and supergroups, Channel/supergroup identifierdata.custom.from_id: For user-sent stories, Author identifierdata.custom.story_id: ID of deleted story
+    /// <code>
+    /// A story was deleted, remove notifications for this story
+    /// </code>
+    /// </summary>
+    public static readonly string StoryDeleted = "STORY_DELETED";
 
     /// <summary>
     ///  
@@ -172,12 +196,28 @@ public class PushNotificationTypes
     public static readonly string ChannelMessageGiveaway = "CHANNEL_MESSAGE_GIVEAWAY";
 
     /// <summary>
+    /// {1} posted a giveaway of {3} stars {2}
+    /// <code>
+    /// 1. Channel name 2. Number of winners in the giveaway 3. Number of Telegram Stars being given away
+    /// </code>
+    /// </summary>
+    public static readonly string ChannelMessageGiveawayStars = "CHANNEL_MESSAGE_GIVEAWAY_STARS";
+
+    /// <summary>
     /// {1} posted a message
     /// <code>
     /// 1. Channel name
     /// </code>
     /// </summary>
     public static readonly string ChannelMessageNotext = "CHANNEL_MESSAGE_NOTEXT";
+
+    /// <summary>
+    /// {1} posted a paid post for {2} star
+    /// <code>
+    /// 1. Channel name 2. Stars
+    /// </code>
+    /// </summary>
+    public static readonly string ChannelMessagePaidMedia = "CHANNEL_MESSAGE_PAID_MEDIA";
 
     /// <summary>
     /// {1} posted a photo
@@ -420,6 +460,14 @@ public class PushNotificationTypes
     public static readonly string ChatMessageGiveaway = "CHAT_MESSAGE_GIVEAWAY";
 
     /// <summary>
+    /// {1} sent a giveaway of {4} stars {3} to the group {2}
+    /// <code>
+    /// 1. User name 2. Group name 3. Number of winners in the giveaway 4. Number of Telegram Stars being given away
+    /// </code>
+    /// </summary>
+    public static readonly string ChatMessageGiveawayStars = "CHAT_MESSAGE_GIVEAWAY_STARS";
+
+    /// <summary>
     /// {1} sent an invoice to the group {2} for {3}
     /// <code>
     /// 1. User name 2. Group name 3. Product name
@@ -434,6 +482,14 @@ public class PushNotificationTypes
     /// </code>
     /// </summary>
     public static readonly string ChatMessageNotext = "CHAT_MESSAGE_NOTEXT";
+
+    /// <summary>
+    /// {1} posted a paid post in {2} group for {3} star
+    /// <code>
+    /// 1. Message author 2. Chat name 3. Stars
+    /// </code>
+    /// </summary>
+    public static readonly string ChatMessagePaidMedia = "CHAT_MESSAGE_PAID_MEDIA";
 
     /// <summary>
     /// {1} sent a photo to the group {2}
@@ -610,6 +666,14 @@ public class PushNotificationTypes
     /// </code>
     /// </summary>
     public static readonly string ChatReactNotext = "CHAT_REACT_NOTEXT";
+
+    /// <summary>
+    /// {1} reacted {3} in group {2} to your paid post for {4} star
+    /// <code>
+    /// 1. User name 2. Group name 3. Reaction 4. Stars
+    /// </code>
+    /// </summary>
+    public static readonly string ChatReactPaidMedia = "CHAT_REACT_PAID_MEDIA";
 
     /// <summary>
     /// {1}: {3} to your photo in {2}
@@ -868,6 +932,14 @@ public class PushNotificationTypes
     public static readonly string MessageGiveaway = "MESSAGE_GIVEAWAY";
 
     /// <summary>
+    /// {1} sent you a giveaway of {3} stars {2}
+    /// <code>
+    /// 1. User name 2. Number of winners in the giveaway 3. Number of Telegram Stars being given away
+    /// </code>
+    /// </summary>
+    public static readonly string MessageGiveawayStars = "MESSAGE_GIVEAWAY_STARS";
+
+    /// <summary>
     /// {1} sent you an invoice for {2}
     /// <code>
     /// 1. User name 2. Product
@@ -882,6 +954,14 @@ public class PushNotificationTypes
     /// </code>
     /// </summary>
     public static readonly string MessageNotext = "MESSAGE_NOTEXT";
+
+    /// <summary>
+    /// {1} sent you a paid post for {2} star
+    /// <code>
+    /// 1. Message author 2. Stars
+    /// </code>
+    /// </summary>
+    public static readonly string MessagePaidMedia = "MESSAGE_PAID_MEDIA";
 
     /// <summary>
     /// {1} sent you a photo
@@ -962,6 +1042,14 @@ public class PushNotificationTypes
     /// </code>
     /// </summary>
     public static readonly string MessageScreenshot = "MESSAGE_SCREENSHOT";
+
+    /// <summary>
+    /// {1} sent you a Gift worth {2} Stars
+    /// <code>
+    /// 1. User name 2. Number of Telegram Stars
+    /// </code>
+    /// </summary>
+    public static readonly string MessageStargift = "MESSAGE_STARGIFT";
 
     /// <summary>
     /// {1} sent you a {2} sticker
@@ -1154,6 +1242,16 @@ public class PushNotificationTypes
     public static readonly string PinnedNotext = "PINNED_NOTEXT";
 
     /// <summary>
+    /// {1} pinned a paid post for {2} star
+    /// <para>{1} pinned a paid post for {3} star in the group {2}</para>
+    /// <code>
+    /// 1. User name 2. Stars
+    /// 1. User name 2. Group name 3. Stars
+    /// </code>
+    /// </summary>
+    public static readonly string PinnedPaidMedia = "PINNED_PAID_MEDIA";
+
+    /// <summary>
     /// {1} pinned a photo
     /// <para>{1} pinned a photo in the group {2}</para>
     /// <code>
@@ -1288,6 +1386,14 @@ public class PushNotificationTypes
     public static readonly string ReactGiveaway = "REACT_GIVEAWAY";
 
     /// <summary>
+    /// New reaction to your message
+    /// <code>
+    ///  
+    /// </code>
+    /// </summary>
+    public static readonly string ReactHidden = "REACT_HIDDEN";
+
+    /// <summary>
     /// {1}: {2} to your invoice
     /// <code>
     /// 1. User name 2. Reaction
@@ -1344,6 +1450,22 @@ public class PushNotificationTypes
     public static readonly string ReactSticker = "REACT_STICKER";
 
     /// <summary>
+    /// {1}: {2} to your story
+    /// <code>
+    /// 1. Peer where the story was posted 2. Reaction
+    /// </code>
+    /// </summary>
+    public static readonly string ReactStory = "REACT_STORY";
+
+    /// <summary>
+    /// New reaction to your story
+    /// <code>
+    ///  
+    /// </code>
+    /// </summary>
+    public static readonly string ReactStoryHidden = "REACT_STORY_HIDDEN";
+
+    /// <summary>
     /// {1}: {2} to your "{3}"
     /// <code>
     /// 1. User name 2. Reaction 3. Message body
@@ -1360,7 +1482,7 @@ public class PushNotificationTypes
     public static readonly string ReactVideo = "REACT_VIDEO";
 
     /// <summary>
-    /// A new story was posted (comment: emitted when previews are hidden for this peer)
+    /// A new story was posted
     /// <code>
     ///  
     /// </code>

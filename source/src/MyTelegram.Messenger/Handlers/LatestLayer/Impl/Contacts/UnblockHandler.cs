@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Contacts;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Contacts;
 
 ///<summary>
 /// Deletes the user from the blacklist.
@@ -18,6 +18,6 @@ internal sealed class UnblockHandler : RpcResultObjectHandler<MyTelegram.Schema.
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Contacts.RequestUnblock obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

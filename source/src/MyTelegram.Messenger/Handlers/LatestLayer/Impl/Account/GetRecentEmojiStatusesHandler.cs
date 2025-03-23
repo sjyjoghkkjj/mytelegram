@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Get recently used <a href="https://corefork.telegram.org/api/emoji-status">emoji statuses</a>
@@ -18,7 +16,7 @@ internal sealed class GetRecentEmojiStatusesHandler(IUserAppService userAppServi
         {
             return new TEmojiStatuses
             {
-                Statuses = new()
+                Statuses = []
             };
         }
 
@@ -32,16 +30,16 @@ internal sealed class GetRecentEmojiStatusesHandler(IUserAppService userAppServi
         {
             return new TEmojiStatuses
             {
-                Statuses = new TVector<IEmojiStatus>(user!.RecentEmojiStatuses.Select(p => new TEmojiStatus()
+                Statuses = [.. user!.RecentEmojiStatuses.Select(p => new TEmojiStatus()
                 {
                     DocumentId = p
-                }))
+                })]
             };
         }
 
         return new TEmojiStatuses
         {
-            Statuses = new()
+            Statuses = []
         };
     }
 }

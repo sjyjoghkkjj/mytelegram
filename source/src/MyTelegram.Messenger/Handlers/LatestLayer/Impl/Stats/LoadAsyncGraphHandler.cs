@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Stats;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stats;
 
 ///<summary>
 /// Load <a href="https://corefork.telegram.org/api/stats">channel statistics graph</a> asynchronously

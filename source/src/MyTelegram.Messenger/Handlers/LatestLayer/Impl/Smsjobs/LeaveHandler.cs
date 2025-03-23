@@ -1,8 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Smsjobs;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Smsjobs;
 
 ///<summary>
+/// Disable SMS jobs (official clients only).
 /// See <a href="https://corefork.telegram.org/method/smsjobs.leave" />
 ///</summary>
 internal sealed class LeaveHandler : RpcResultObjectHandler<MyTelegram.Schema.Smsjobs.RequestLeave, IBool>,

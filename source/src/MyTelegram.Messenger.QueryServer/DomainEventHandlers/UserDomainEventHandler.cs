@@ -1,40 +1,24 @@
-﻿using MyTelegram.Messenger.Services.Caching;
-using MyTelegram.Messenger.Services.Interfaces;
-using MyTelegram.Messenger.TLObjectConverters.Interfaces;
-using MyTelegram.Services.TLObjectConverters;
-
-namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
+﻿namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
 
 public class UserDomainEventHandler(
     IObjectMessageSender objectMessageSender,
     ICommandBus commandBus,
     IIdGenerator idGenerator,
     IAckCacheService ackCacheService,
-    IResponseCacheAppService responseCacheAppService,
     IEventBus eventBus,
-    IQueryProcessor queryProcessor,
     ILogger<UserDomainEventHandler> logger,
-    ILayeredService<IUserConverter> layeredUserService,
     ILayeredService<IAuthorizationConverter> layeredAuthorizationService,
-    ILayeredService<IPhotoConverter> layeredPhotoService,
-    IUserAppService userAppService,
-    IPhotoAppService photoAppService)
+    IUserConverterService userConverterService)
     : DomainEventHandlerBase(objectMessageSender,
             commandBus,
             idGenerator,
-            ackCacheService,
-            responseCacheAppService),
+            ackCacheService),
         ISubscribeSynchronousTo<UserAggregate, UserId, UserCreatedEvent>,
         ISubscribeSynchronousTo<UserAggregate, UserId, UserProfileUpdatedEvent>,
         ISubscribeSynchronousTo<UserAggregate, UserId, UserNameUpdatedEvent>,
         ISubscribeSynchronousTo<UserAggregate, UserId, UserProfilePhotoChangedEvent>,
         ISubscribeSynchronousTo<UserAggregate, UserId, UserProfilePhotoUploadedEvent>
 {
-    //private readonly ITlAuthorizationConverter _authorizationConverter;
-    //private readonly ITlUserConverter _userConverter;
-    private readonly ILayeredService<IPhotoConverter> _layeredPhotoService = layeredPhotoService;
-
-
     public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserCreatedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
@@ -46,12 +30,15 @@ public class UserDomainEventHandler(
             domainEvent.AggregateEvent.LastName
         );
 
-        await eventBus.PublishAsync(new UserSignUpSuccessIntegrationEvent(domainEvent.AggregateEvent.RequestInfo.AuthKeyId,
+        var userId = domainEvent.AggregateEvent.UserId;
+
+        await eventBus.PublishAsync(new UserSignUpSuccessIntegrationEvent(
+            domainEvent.AggregateEvent.RequestInfo.AuthKeyId,
             domainEvent.AggregateEvent.RequestInfo.PermAuthKeyId,
-            domainEvent.AggregateEvent.UserId));
-        var user = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-            .ToUser(domainEvent.AggregateEvent);
-        var r = layeredAuthorizationService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).CreateAuthorization(user);
+            userId));
+        var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
+        var r = layeredAuthorizationService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
+            .CreateAuthorization(user);
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo,
             r,
             domainEvent.AggregateEvent.UserId);
@@ -60,47 +47,35 @@ public class UserDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserNameUpdatedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var user = await userAppService.GetAsync(domainEvent.AggregateEvent.RequestInfo.UserId);
-        var photos = await photoAppService.GetPhotosAsync(user);
-        var r = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-            .ToUser(domainEvent.AggregateEvent.RequestInfo.UserId, user!, photos);
+        var userId = domainEvent.AggregateEvent.RequestInfo.UserId;
+        var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
 
-        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, r);
+        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, user);
     }
 
     public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserProfilePhotoChangedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var photo = await photoAppService.GetAsync(domainEvent.AggregateEvent.PhotoId);
-        var userReadModel = await userAppService.GetAsync(domainEvent.AggregateEvent.UserId);
-        var r = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).ToUserPhoto(userReadModel!, photo);
+        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.UserId,
+            domainEvent.AggregateEvent.UserId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
 
-        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, r);
+        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, user);
     }
 
-    public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserProfilePhotoUploadedEvent> domainEvent, CancellationToken cancellationToken)
+    public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserProfilePhotoUploadedEvent> domainEvent,
+        CancellationToken cancellationToken)
     {
-        var photoReadModel = await photoAppService.GetAsync(domainEvent.AggregateEvent.PhotoId);
-        var userReadModel = await userAppService.GetAsync(domainEvent.AggregateEvent.RequestInfo.UserId);
+        var userId = domainEvent.AggregateEvent.RequestInfo.UserId;
+        var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
 
-        var r = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).ToUserPhoto(userReadModel!, photoReadModel);
-
-        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, r);
+        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, user);
     }
 
     public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserProfileUpdatedEvent> domainEvent,
-            CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
-        var userReadModel = await queryProcessor.ProcessAsync(new GetUserByIdQuery(domainEvent.AggregateEvent.UserId),
-            cancellationToken);
-
-        var photos = await photoAppService.GetPhotosAsync(userReadModel);
-
-        var r = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).ToUser(userReadModel!.UserId, userReadModel, photos);
-
-        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo,
-            r,
-            domainEvent.AggregateEvent.UserId);
+        var userId = domainEvent.AggregateEvent.RequestInfo.UserId;
+        var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
+        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, user, domainEvent.AggregateEvent.UserId);
     }
 }
-

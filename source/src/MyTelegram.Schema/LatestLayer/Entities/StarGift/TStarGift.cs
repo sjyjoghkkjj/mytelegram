@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Represents a <a href="https://corefork.telegram.org/api/gifts">star gift, see here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/constructor/starGift" />
 ///</summary>
-[TlObject(0x49c577cd)]
+[TlObject(0x2cc73c8)]
 public sealed class TStarGift : IStarGift
 {
-    public uint ConstructorId => 0x49c577cd;
+    public uint ConstructorId => 0x2cc73c8;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -74,6 +74,7 @@ public sealed class TStarGift : IStarGift
     /// For sold out gifts only: when was the gift last bought.
     ///</summary>
     public int? LastSaleDate { get; set; }
+    public long? UpgradeStars { get; set; }
 
     public void ComputeFlag()
     {
@@ -84,6 +85,7 @@ public sealed class TStarGift : IStarGift
         if (/*AvailabilityTotal != 0 && */AvailabilityTotal.HasValue) { Flags[0] = true; }
         if (/*FirstSaleDate != 0 && */FirstSaleDate.HasValue) { Flags[1] = true; }
         if (/*LastSaleDate != 0 && */LastSaleDate.HasValue) { Flags[1] = true; }
+        if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags[3] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -99,6 +101,7 @@ public sealed class TStarGift : IStarGift
         writer.Write(ConvertStars);
         if (Flags[1]) { writer.Write(FirstSaleDate.Value); }
         if (Flags[1]) { writer.Write(LastSaleDate.Value); }
+        if (Flags[3]) { writer.Write(UpgradeStars.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -115,5 +118,6 @@ public sealed class TStarGift : IStarGift
         ConvertStars = reader.ReadInt64();
         if (Flags[1]) { FirstSaleDate = reader.ReadInt32(); }
         if (Flags[1]) { LastSaleDate = reader.ReadInt32(); }
+        if (Flags[3]) { UpgradeStars = reader.ReadInt64(); }
     }
 }

@@ -7,29 +7,36 @@ namespace MyTelegram.Schema;
 /// An <a href="https://corefork.telegram.org/api/emoji-status">emoji status</a>
 /// See <a href="https://corefork.telegram.org/constructor/emojiStatus" />
 ///</summary>
-[TlObject(0x929b619d)]
+[TlObject(0xe7ff068a)]
 public sealed class TEmojiStatus : IEmojiStatus
 {
-    public uint ConstructorId => 0x929b619d;
+    public uint ConstructorId => 0xe7ff068a;
+    public BitArray Flags { get; set; } = new BitArray(32);
+
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/custom-emoji">Custom emoji document ID</a>
     ///</summary>
     public long DocumentId { get; set; }
+    public int? Until { get; set; }
 
     public void ComputeFlag()
     {
-
+        if (/*Until != 0 && */Until.HasValue) { Flags[0] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
         writer.Write(DocumentId);
+        if (Flags[0]) { writer.Write(Until.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
+        Flags = reader.ReadBitArray();
         DocumentId = reader.ReadInt64();
+        if (Flags[0]) { Until = reader.ReadInt32(); }
     }
 }

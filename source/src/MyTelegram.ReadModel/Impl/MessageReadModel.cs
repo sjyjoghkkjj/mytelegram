@@ -32,14 +32,15 @@ public class MessageReadModel : IMessageReadModel,
     public TVector<IMessageEntity>? Entities2 { get; private set; }
     public MessageFwdHeader? FwdHeader { get; private set; }
     public long? GroupedId { get; private set; }
-    public string Id { get; private set; } = default!;
+    public string Id { get; private set; } = null!;
     public byte[]? Media { get; private set; }
     public IMessageMedia? Media2 { get; private set; }
-    public string Message { get; private set; } = default!;
+    public string Message { get; private set; } = null!;
     public string? MessageActionData { get; private set; }
     public IMessageAction? MessageAction { get; private set; }
     public MessageActionType MessageActionType { get; private set; }
     public MessageType MessageType { get; private set; }
+    public List<MessageReactor>? TopReactors { get; private set; }
     public int MessageId { get; private set; }
     public bool Out { get; private set; }
     public long OwnerPeerId { get; private set; }
@@ -73,6 +74,7 @@ public class MessageReadModel : IMessageReadModel,
     public int? PostMessageId { get; private set; }
     public bool IsQuickReplyMessage { get; private set; }
     public int? ShortcutId { get; private set; }
+    public QuickReplyItem? QuickReplyItem { get; private set; }
     public Guid BatchId { get; private set; }
 
     public long? Effect { get; private set; }
@@ -81,8 +83,8 @@ public class MessageReadModel : IMessageReadModel,
 
     public int? ScheduleDate { get; private set; }
     public int? TtlPeriod { get; private set; }
-    public List<UserReaction>? UserReactions { get; set; }
     public List<ReactionCount>? Reactions { get; private set; }
+    public List<MessagePeerReaction>? RecentReactions2 { get; private set; }
     public List<Reaction>? RecentReactions { get; private set; }
     public bool CanSeeList { get; private set; }
 
@@ -106,7 +108,7 @@ public class MessageReadModel : IMessageReadModel,
         Entities2 = messageItem.Entities;
         Date = messageItem.Date;
         SenderMessageId = messageItem.MessageId;
-        MessageActionData = messageItem.MessageActionData;
+        //MessageActionData = messageItem.MessageActionData;
         MessageActionType = messageItem.MessageActionType;
         //ReplyToMsgId = messageItem.ReplyToMsgId;
         TopMsgId = messageItem.TopMsgId;
@@ -178,7 +180,7 @@ public class MessageReadModel : IMessageReadModel,
         Entities2 = messageItem.Entities;
         Date = messageItem.Date;
         SenderMessageId = domainEvent.AggregateEvent.SenderMessageId;
-        MessageActionData = messageItem.MessageActionData;
+        //MessageActionData = messageItem.MessageActionData;
         MessageActionType = messageItem.MessageActionType;
         //ReplyToMsgId = messageItem.ReplyToMsgId;
         FwdHeader = messageItem.FwdHeader;
@@ -209,7 +211,7 @@ public class MessageReadModel : IMessageReadModel,
             ExpirationTime = messageItem.Date + messageItem.TtlPeriod.Value;
         }
 
-        InvertMedia = InvertMedia;
+        InvertMedia = messageItem.InvertMedia;
 
         return Task.CompletedTask;
     }

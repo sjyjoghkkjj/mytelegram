@@ -13,7 +13,9 @@ public class CreateChatInviteCommand(
     int? expireDate,
     int? usageLimit,
     bool permanent,
-    int date)
+    int date,
+    bool isBroadcast
+    )
     : RequestCommand2<ChatInviteAggregate, ChatInviteId, IExecutionResult>(aggregateId, requestInfo)
 {
     public long ChannelId { get; } = channelId;
@@ -27,4 +29,5 @@ public class CreateChatInviteCommand(
     public int? UsageLimit { get; } = usageLimit;
     public bool Permanent { get; } = permanent;
     public int Date { get; } = date;
+    public bool IsBroadcast { get; } = isBroadcast;
 }

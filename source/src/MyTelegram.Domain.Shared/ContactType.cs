@@ -3,6 +3,10 @@
 public enum ContactType
 {
     None,
-    Unilateral,
+    TargetUserIsMyContact,
+    /// <summary>
+    /// I am the contact person of the target user
+    /// </summary>
+    ContactOfTargetUser,
     Mutual
 }

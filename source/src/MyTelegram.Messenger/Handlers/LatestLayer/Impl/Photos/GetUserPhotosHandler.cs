@@ -3,7 +3,7 @@
 using MyTelegram.Schema.Photos;
 using IPhoto = MyTelegram.Schema.IPhoto;
 
-namespace MyTelegram.Handlers.Photos;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 
 ///<summary>
 /// Returns the list of user photos.
@@ -14,14 +14,72 @@ namespace MyTelegram.Handlers.Photos;
 /// 400 USER_ID_INVALID The provided user ID is invalid.
 /// See <a href="https://corefork.telegram.org/method/photos.getUserPhotos" />
 ///</summary>
-internal sealed class GetUserPhotosHandler : RpcResultObjectHandler<MyTelegram.Schema.Photos.RequestGetUserPhotos, MyTelegram.Schema.Photos.IPhotos>,
+internal sealed class GetUserPhotosHandler(
+    IQueryProcessor queryProcessor,
+    IUserAppService userAppService,
+    ILayeredService<IPhotoConverter> photoLayeredService,
+    IPrivacyAppService privacyAppService,
+    IAccessHashHelper accessHashHelper,
+    IPeerHelper peerHelper) : RpcResultObjectHandler<Schema.Photos.RequestGetUserPhotos, Schema.Photos.IPhotos>,
     Photos.IGetUserPhotosHandler
 {
-    protected override Task<MyTelegram.Schema.Photos.IPhotos> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Photos.RequestGetUserPhotos obj)
+    protected override async Task<Schema.Photos.IPhotos> HandleCoreAsync(IRequestInput input,
+        Schema.Photos.RequestGetUserPhotos obj)
     {
-        // todo:get user photos
-        return Task.FromResult<MyTelegram.Schema.Photos.IPhotos>(new TPhotos { Photos = new TVector<IPhoto>(), Users = new TVector<IUser>() });
-        //throw new NotImplementedException();
+        var peer = peerHelper.GetPeer(obj.UserId, input.UserId);
+        await accessHashHelper.CheckAccessHashAsync(obj.UserId);
+        bool shouldReturnEmptyProfilePhotos = false;
+        if (peer.PeerId != input.UserId)
+        {
+            await privacyAppService.ApplyPrivacyAsync(input.UserId, peer.PeerId, _ =>
+                {
+                    shouldReturnEmptyProfilePhotos = true;
+                },
+                 [PrivacyType.ProfilePhoto]);
+        }
+
+        if (!shouldReturnEmptyProfilePhotos)
+        {
+            var photoReadModels = await queryProcessor.ProcessAsync(new GetUserProfilePhotosQuery(peer.PeerId));
+            if (photoReadModels.Count > 0)
+            {
+                var photos = photoReadModels.Select(p => photoLayeredService.GetConverter(input.Layer).ToPhoto(p)).ToList();
+                if (photos.Count > 1)
+                {
+                    // If photos.Count>1, set the user's main photo in the first position
+                    var userReadModel = await userAppService.GetAsync(peer.PeerId);
+                    if (userReadModel != null)
+                    {
+                        long? photoId = userReadModel.ProfilePhotoId;
+                        if (photoId == null && userReadModel.UserId == input.UserId)
+                        {
+                            photoId = userReadModel.PersonalPhotoId;
+                        }
+
+                        if (photoId != null)
+                        {
+                            var photo = photos.FirstOrDefault(p => p.Id == photoId.Value);
+                            if (photo != null)
+                            {
+                                photos.RemoveAll(p => p.Id == photo.Id);
+                                photos.Insert(0, photo);
+                            }
+                        }
+                    }
+                }
+
+                return new TPhotos
+                {
+                    Photos = [.. photos],
+                    Users = []
+                };
+            }
+        }
+
+        return new TPhotos
+        {
+            Photos = [],
+            Users = []
+        };
     }
 }

@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Adds a user to a chat and sends a service message on it.May also return 0-N updates of type <a href="https://corefork.telegram.org/constructor/updateGroupInvitePrivacyForbidden">updateGroupInvitePrivacyForbidden</a>: it indicates we couldn't add a user to a chat because of their privacy settings; if required, an <a href="https://corefork.telegram.org/api/invites">invite link</a> can be shared with the user, instead.
@@ -46,28 +46,6 @@ internal sealed class AddChatUserHandler : RpcResultObjectHandler<MyTelegram.Sch
     protected override async Task<MyTelegram.Schema.Messages.IInvitedUsers> HandleCoreAsync(IRequestInput input,
         RequestAddChatUser obj)
     {
-        if (obj.UserId is TInputUser inputUser)
-        {
-            await _accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
-            await _privacyAppService.ApplyPrivacyAsync(input.UserId,
-                inputUser.UserId,
-                () => RpcErrors.RpcErrors403.UserPrivacyRestricted.ThrowRpcError(),
-                new List<PrivacyType>
-                {
-                    PrivacyType.ChatInvite
-                });
-
-            var peer = _peerHelper.GetPeer(obj.UserId);
-            var command = new AddChatUserCommand(ChatId.Create(obj.ChatId),
-                input.ToRequestInfo(),
-                peer.PeerId,
-                CurrentDate,
-                new TMessageActionChatAddUser { Users = new TVector<long>(peer.PeerId) }.ToBytes().ToHexString(),
-                _randomHelper.NextInt64());
-            await _commandBus.PublishAsync(command, CancellationToken.None);
-            return null!;
-        }
-
         throw new NotImplementedException();
     }
 }

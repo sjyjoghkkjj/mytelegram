@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Channels;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Get the admin log of a <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a>
@@ -19,6 +19,11 @@ internal sealed class GetAdminLogHandler : RpcResultObjectHandler<MyTelegram.Sch
     protected override Task<MyTelegram.Schema.Channels.IAdminLogResults> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestGetAdminLog obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Channels.IAdminLogResults>(new TAdminLogResults
+        {
+            Events = [],
+            Chats = [],
+            Users = []
+        });
     }
 }

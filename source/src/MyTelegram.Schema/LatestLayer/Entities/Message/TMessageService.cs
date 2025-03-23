@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Indicates a service message
 /// See <a href="https://corefork.telegram.org/constructor/messageService" />
 ///</summary>
-[TlObject(0x2b085862)]
-public sealed class TMessageService : IMessage
+[TlObject(0xd3d28540)]
+public sealed class TMessageService : ILayeredServiceMessage
 {
-    public uint ConstructorId => 0x2b085862;
+    public uint ConstructorId => 0xd3d28540;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -33,6 +33,7 @@ public sealed class TMessageService : IMessage
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool MediaUnread { get; set; }
+    public bool ReactionsArePossible { get; set; }
 
     ///<summary>
     /// Whether the message is silent
@@ -85,6 +86,7 @@ public sealed class TMessageService : IMessage
     /// See <a href="https://corefork.telegram.org/type/MessageAction" />
     ///</summary>
     public MyTelegram.Schema.IMessageAction Action { get; set; }
+    public MyTelegram.Schema.IMessageReactions? Reactions { get; set; }
 
     ///<summary>
     /// Time To Live of the message, once message.date+message.ttl_period === time(), the message will be deleted on the server, and must be deleted locally as well.
@@ -96,11 +98,13 @@ public sealed class TMessageService : IMessage
         if (Out) { Flags[1] = true; }
         if (Mentioned) { Flags[4] = true; }
         if (MediaUnread) { Flags[5] = true; }
+        if (ReactionsArePossible) { Flags[9] = true; }
         if (Silent) { Flags[13] = true; }
         if (Post) { Flags[14] = true; }
         if (Legacy) { Flags[19] = true; }
         if (FromId != null) { Flags[8] = true; }
         if (ReplyTo != null) { Flags[3] = true; }
+        if (Reactions != null) { Flags[20] = true; }
         if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags[25] = true; }
     }
 
@@ -115,6 +119,7 @@ public sealed class TMessageService : IMessage
         if (Flags[3]) { writer.Write(ReplyTo); }
         writer.Write(Date);
         writer.Write(Action);
+        if (Flags[20]) { writer.Write(Reactions); }
         if (Flags[25]) { writer.Write(TtlPeriod.Value); }
     }
 
@@ -124,6 +129,7 @@ public sealed class TMessageService : IMessage
         if (Flags[1]) { Out = true; }
         if (Flags[4]) { Mentioned = true; }
         if (Flags[5]) { MediaUnread = true; }
+        if (Flags[9]) { ReactionsArePossible = true; }
         if (Flags[13]) { Silent = true; }
         if (Flags[14]) { Post = true; }
         if (Flags[19]) { Legacy = true; }
@@ -133,6 +139,7 @@ public sealed class TMessageService : IMessage
         if (Flags[3]) { ReplyTo = reader.Read<MyTelegram.Schema.IMessageReplyHeader>(); }
         Date = reader.ReadInt32();
         Action = reader.Read<MyTelegram.Schema.IMessageAction>();
+        if (Flags[20]) { Reactions = reader.Read<MyTelegram.Schema.IMessageReactions>(); }
         if (Flags[25]) { TtlPeriod = reader.ReadInt32(); }
     }
 }

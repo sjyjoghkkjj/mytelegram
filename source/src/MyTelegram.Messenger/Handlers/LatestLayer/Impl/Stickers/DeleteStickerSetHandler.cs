@@ -1,12 +1,9 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Stickers;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Stickers;
 
 ///<summary>
-/// Deletes a stickerset we created, bots only.
+/// Deletes a stickerset we created.
 /// <para>Possible errors</para>
 /// Code Type Description
-/// 400 BOT_MISSING Only bots can call this method, please use <a href="https://t.me/stickers">@stickers</a> if you're a user.
 /// 400 STICKERSET_INVALID The provided sticker set is invalid.
 /// See <a href="https://corefork.telegram.org/method/stickers.deleteStickerSet" />
 ///</summary>

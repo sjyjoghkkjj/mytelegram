@@ -36,7 +36,7 @@ public static class Extensions
         return new Peer(PeerType.Channel, peerId);
     }
 
-    public static int ToInt(this BitArray bitArray)
+    public static int ToInt32(this BitArray bitArray)
     {
         return BitConverter.ToInt32(ToByteArray(bitArray));
     }
@@ -47,5 +47,10 @@ public static class Extensions
         bitArray.CopyTo(bytes, 0);
 
         return bytes;
+    }
+
+    public static BitArray ToBitArray(this int value)
+    {
+        return new BitArray(BitConverter.GetBytes(value));
     }
 }

@@ -1,6 +1,4 @@
-﻿//// ReSharper disable All
-
-namespace MyTelegram.Handlers.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Check if a username is free and can be assigned to a channel/supergroup
@@ -10,31 +8,26 @@ namespace MyTelegram.Handlers.Channels;
 /// 400 CHANNEL_INVALID The provided channel is invalid.
 /// 400 CHANNEL_PRIVATE You haven't joined this channel/supergroup.
 /// 400 CHAT_ID_INVALID The provided chat id is invalid.
+/// 400 MSG_ID_INVALID Invalid message ID provided.
+/// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// 400 USERNAME_INVALID The provided username is not valid.
 /// 400 USERNAME_OCCUPIED The provided username is already occupied.
 /// 400 USERNAME_PURCHASE_AVAILABLE The specified username can be purchased on <a href="https://fragment.com/">https://fragment.com</a>.
 /// See <a href="https://corefork.telegram.org/method/channels.checkUsername" />
 ///</summary>
-internal sealed class CheckUsernameHandler : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestCheckUsername, IBool>,
-    Channels.ICheckUsernameHandler
+internal sealed class CheckUsernameHandler(
+    IQueryProcessor queryProcessor,
+    IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestCheckUsername, IBool>,
+        Channels.ICheckUsernameHandler
 {
-    private readonly IQueryProcessor _queryProcessor;
-    private readonly IAccessHashHelper _accessHashHelper;
-
-    public CheckUsernameHandler(IQueryProcessor queryProcessor,
-        IAccessHashHelper accessHashHelper)
-    {
-        _queryProcessor = queryProcessor;
-        _accessHashHelper = accessHashHelper;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestCheckUsername obj)
     {
         switch (obj.Channel)
         {
             case TInputChannel inputChannel1:
-                await _accessHashHelper.CheckAccessHashAsync(inputChannel1.ChannelId, inputChannel1.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(inputChannel1.ChannelId, inputChannel1.AccessHash);
                 break;
             case TInputChannelEmpty _:
                 break;
@@ -48,7 +41,7 @@ internal sealed class CheckUsernameHandler : RpcResultObjectHandler<MyTelegram.S
             RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
         }
 
-        var item = await _queryProcessor
+        var item = await queryProcessor
             .ProcessAsync(new GetUserNameByIdQuery(obj.Username.ToLower()));
         if (item == null)
         {

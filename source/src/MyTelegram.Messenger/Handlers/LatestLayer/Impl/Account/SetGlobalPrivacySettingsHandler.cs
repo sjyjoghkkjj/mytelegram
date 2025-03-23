@@ -1,24 +1,18 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Set global privacy settings
 /// <para>Possible errors</para>
 /// Code Type Description
-/// 400 AUTOARCHIVE_NOT_AVAILABLE The autoarchive setting is not available at this time: please check the value of the <a href="https://corefork.telegram.org/api/config#client-configuration">autoarchive_setting_available field in client config »</a> before calling this method.
+/// 400 AUTOARCHIVE_NOT_AVAILABLE The autoarchive setting is not available at this time: please check the value of the <a href="https://corefork.telegram.org/api/config#client-configuration">autoarchive_setting_available field in client config»</a> before calling this method.
+/// 403 PREMIUM_ACCOUNT_REQUIRED A premium account is required to execute this action.
 /// See <a href="https://corefork.telegram.org/method/account.setGlobalPrivacySettings" />
 ///</summary>
-internal sealed class SetGlobalPrivacySettingsHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestSetGlobalPrivacySettings, MyTelegram.Schema.IGlobalPrivacySettings>,
-    Account.ISetGlobalPrivacySettingsHandler
+internal sealed class SetGlobalPrivacySettingsHandler(ICommandBus commandBus)
+    : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestSetGlobalPrivacySettings,
+            MyTelegram.Schema.IGlobalPrivacySettings>,
+        Account.ISetGlobalPrivacySettingsHandler
 {
-    private readonly ICommandBus _commandBus;
-
-    public SetGlobalPrivacySettingsHandler(ICommandBus commandBus)
-    {
-        _commandBus = commandBus;
-    }
-
     protected override async Task<IGlobalPrivacySettings> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestSetGlobalPrivacySettings obj)
     {
@@ -27,9 +21,11 @@ internal sealed class SetGlobalPrivacySettingsHandler : RpcResultObjectHandler<M
                 obj.Settings.KeepArchivedUnmuted,
                 obj.Settings.KeepArchivedFolders,
                 obj.Settings.HideReadMarks,
-                obj.Settings.NewNoncontactPeersRequirePremium)
+                obj.Settings.NewNoncontactPeersRequirePremium,
+                obj.Settings.NoncontactPeersPaidStars
+                )
         );
-        await _commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command);
 
         return new TGlobalPrivacySettings
         {
@@ -37,7 +33,8 @@ internal sealed class SetGlobalPrivacySettingsHandler : RpcResultObjectHandler<M
             HideReadMarks = obj.Settings.HideReadMarks,
             KeepArchivedFolders = obj.Settings.KeepArchivedFolders,
             KeepArchivedUnmuted = obj.Settings.KeepArchivedUnmuted,
-            NewNoncontactPeersRequirePremium = obj.Settings.NewNoncontactPeersRequirePremium
+            NewNoncontactPeersRequirePremium = obj.Settings.NewNoncontactPeersRequirePremium,
+            NoncontactPeersPaidStars = obj.Settings.NoncontactPeersPaidStars
         };
     }
 }

@@ -1,8 +1,10 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Smsjobs;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Smsjobs;
 
 ///<summary>
+/// Update SMS job settings (official clients only).
+/// <para>Possible errors</para>
+/// Code Type Description
+/// 400 NOT_JOINED The current user hasn't joined the Peer-to-Peer Login Program.
 /// See <a href="https://corefork.telegram.org/method/smsjobs.updateSettings" />
 ///</summary>
 internal sealed class UpdateSettingsHandler : RpcResultObjectHandler<MyTelegram.Schema.Smsjobs.RequestUpdateSettings, IBool>,

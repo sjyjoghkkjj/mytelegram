@@ -6,6 +6,9 @@
         <RootNamespace>MyTelegram</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
+      <ProjectReference Include="..\MyTelegram.Schema\MyTelegram.Schema.csproj" />
+    </ItemGroup>
+    <ItemGroup>
       <PackageReference Update="Fody">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

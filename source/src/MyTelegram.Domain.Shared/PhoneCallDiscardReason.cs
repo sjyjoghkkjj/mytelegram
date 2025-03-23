@@ -6,5 +6,6 @@ public enum PhoneCallDiscardReason
     Busy,
     Disconnected,
     Hangup,
-    Missed
+    Missed,
+    AllowGroupCall
 }

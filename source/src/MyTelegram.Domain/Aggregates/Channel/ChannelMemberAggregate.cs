@@ -17,8 +17,8 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
         int date,
         bool isBot,
         long? chatInviteId,
-        bool isBroadcast,
-        ChatJoinType chatJoinType
+        ChatJoinType chatJoinType,
+        bool isBroadcast
         )
     {
         // Kicked user can not join channel by invite link
@@ -44,8 +44,8 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
             _state.BannedRights,
             isBot,
             chatInviteId,
-            isBroadcast,
-            chatJoinType
+            chatJoinType,
+            isBroadcast
             ));
     }
 
@@ -53,7 +53,8 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
         long channelId,
         long userId,
         int date,
-        bool isBroadcast)
+        bool isBroadcast
+        )
     {
         Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new ChannelCreatorCreatedEvent(requestInfo,
@@ -61,8 +62,7 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
             userId,
             userId,
             date,
-            isBroadcast
-            ));
+            isBroadcast));
     }
 
     public void EditBanned(RequestInfo requestInfo,
@@ -120,43 +120,18 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
             bannedRights));
     }
 
-    public void Join(RequestInfo requestInfo,
-        long channelId,
-        long memberUserId)
-    {
-        if (_state.KickedBy != 0)
-        {
-            RpcErrors.RpcErrors400.ChannelPrivate.ThrowRpcError();
-        }
-
-        if (!IsNew && !_state.Kicked)
-        {
-            RpcErrors.RpcErrors400.UserAlreadyParticipant.ThrowRpcError();
-        }
-
-        var isBot = memberUserId >= MyTelegramServerDomainConsts.BotUserInitId;
-
-        Emit(new ChannelMemberJoinedEvent(requestInfo,
-            channelId,
-            memberUserId,
-            DateTime.UtcNow.ToTimestamp(),
-            !IsNew,
-            isBot
-            ));
-    }
-
     public void LeaveChannel(RequestInfo requestInfo,
         long channelId,
         long memberUserId)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        Emit(new ChannelMemberLeftEvent(requestInfo, channelId, memberUserId, _state.IsBot));
+        Emit(new ChannelMemberLeftEvent(requestInfo, channelId, memberUserId, _state.IsBot, _state.Broadcast));
     }
 
     protected override Task<ChannelMemberSnapshot> CreateSnapshotAsync(CancellationToken cancellationToken)
     {
         return Task.FromResult(new ChannelMemberSnapshot(_state.Banned, _state.BannedRights, _state.Kicked,
-            _state.KickedBy, _state.Left, _state.IsBot));
+            _state.KickedBy, _state.Left, _state.IsBot, _state.Broadcast));
     }
 
     protected override Task LoadSnapshotAsync(ChannelMemberSnapshot snapshot, ISnapshotMetadata metadata, CancellationToken cancellationToken)

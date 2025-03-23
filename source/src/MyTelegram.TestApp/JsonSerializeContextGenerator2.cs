@@ -1,6 +1,4 @@
 ﻿using EventFlow.Aggregates;
-using MyTelegram.Domain.Aggregates.Messaging;
-using MyTelegram.Domain.ValueObjects;
 using System.Text;
 
 namespace MyTelegram.TestApp;
@@ -45,9 +43,9 @@ public class JsonSerializeContextGenerator2
         }
 
         sb.AppendLine();
-        sb.AppendLine("[JsonSerializable(typeof(UserReaction))]");
-        sb.AppendLine("[JsonSerializable(typeof(List<UserReaction>))]");
-        sb.AppendLine("[JsonSerializable(typeof(List<MyTelegram.Domain.ValueObjects.TimeZoneItem>))]");
+        sb.AppendLine("[JsonSerializable(typeof(UserReactionItem))]");
+        sb.AppendLine("[JsonSerializable(typeof(List<UserReactionItem>))]");
+        sb.AppendLine("[JsonSerializable(typeof(List<MyTelegram.TimeZoneItem>))]");
         sb.AppendLine("[JsonSerializable(typeof(Reaction))]");
         sb.AppendLine("[JsonSerializable(typeof(ReactionCount))]");
         //sb.AppendLine("[JsonSerializable(typeof(MyTelegram.Messenger.Handlers.Impl.CachedFutureSalt))]");
@@ -65,6 +63,8 @@ public class JsonSerializeContextGenerator2
         var destPath = $@"../../../../MyTelegram.Messenger/NativeAot/{fileName}";
         File.Copy(fileName, destPath, true);
         Console.WriteLine($"Generate {fileName} successfully.");
+        var destPath2 = $@"../../../../MyTelegram.DataSeeder/{fileName}";
+        File.Copy(fileName, destPath2, true);
     }
 
     private static Dictionary<string, IEnumerable<Type>> GetTypes()
@@ -118,7 +118,7 @@ public class JsonSerializeContextGenerator2
 
         var names4 = new List<string>
         {
-            nameof(UserReaction),
+            nameof(UserReactionItem),
             nameof(TimeZoneItem)
         };
         var types4 = new List<Type>();

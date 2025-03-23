@@ -21,6 +21,11 @@ public class PhotoAppService(IQueryProcessor queryProcessor, IReadModelCacheHelp
             photoIds.Add(userReadModel.FallbackPhotoId.Value);
         }
 
+        if (userReadModel.PersonalPhotoId.HasValue)
+        {
+            photoIds.Add(userReadModel.PersonalPhotoId.Value);
+        }
+
         if (contactReadModel?.PhotoId.HasValue ?? false)
         {
             photoIds.Add(contactReadModel.PhotoId.Value);
@@ -29,7 +34,10 @@ public class PhotoAppService(IQueryProcessor queryProcessor, IReadModelCacheHelp
         return GetListAsync(photoIds);
     }
 
-    public Task<IReadOnlyCollection<IPhotoReadModel>> GetPhotosAsync(IReadOnlyCollection<IUserReadModel> userReadModels, IReadOnlyCollection<IContactReadModel>? contactReadModels = null)
+    public Task<IReadOnlyCollection<IPhotoReadModel>> GetPhotosAsync(IReadOnlyCollection<IUserReadModel> userReadModels,
+        IReadOnlyCollection<IContactReadModel>? contactReadModels = null,
+        IReadOnlyCollection<IChannelReadModel>? channelReadModels = null
+        )
     {
         var photoIds = new List<long>();
         foreach (var userReadModel in userReadModels)
@@ -42,6 +50,11 @@ public class PhotoAppService(IQueryProcessor queryProcessor, IReadModelCacheHelp
             if (userReadModel.FallbackPhotoId.HasValue)
             {
                 photoIds.Add(userReadModel.FallbackPhotoId.Value);
+            }
+
+            if (userReadModel.PersonalPhotoId.HasValue)
+            {
+                photoIds.Add(userReadModel.PersonalPhotoId.Value);
             }
         }
 
@@ -56,7 +69,15 @@ public class PhotoAppService(IQueryProcessor queryProcessor, IReadModelCacheHelp
             }
         }
 
-        return GetListAsync(photoIds);
+        foreach (var channelReadModel in channelReadModels ?? [])
+        {
+            if (channelReadModel.PhotoId.HasValue)
+            {
+                photoIds.Add(channelReadModel.PhotoId.Value);
+            }
+        }
+
+        return GetListAsync(photoIds.Distinct().ToList());
     }
 
     public Task<IReadOnlyCollection<IPhotoReadModel>> GetPhotosAsync(IReadOnlyCollection<IChannelReadModel> channelReadModels)

@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Get all saved <a href="https://corefork.telegram.org/passport">Telegram Passport</a> documents, <a href="https://corefork.telegram.org/passport/encryption#encryption">for more info see the passport docs »</a>
@@ -12,6 +10,6 @@ internal sealed class GetAllSecureValuesHandler : RpcResultObjectHandler<MyTeleg
     protected override Task<TVector<MyTelegram.Schema.ISecureValue>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetAllSecureValues obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<TVector<MyTelegram.Schema.ISecureValue>>([]);
     }
 }

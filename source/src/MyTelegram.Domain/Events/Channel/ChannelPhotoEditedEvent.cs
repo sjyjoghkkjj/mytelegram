@@ -5,19 +5,15 @@ public class ChannelPhotoEditedEvent(
     long channelId,
     bool broadcast,
     long? photoId,
-    string messageActionData,
+    IMessageAction messageAction,
+    long? linkedChannelId,
     long randomId)
     : RequestAggregateEvent2<ChannelAggregate, ChannelId>(requestInfo)
 {
-    //byte[] photo,
-    //Photo = photo;
-
     public long ChannelId { get; } = channelId;
     public bool Broadcast { get; } = broadcast;
     public long? PhotoId { get; } = photoId;
-
-    public string MessageActionData { get; } = messageActionData;
-
-    //public byte[] Photo { get; }
+    public IMessageAction MessageAction { get; } = messageAction;
+    public long? LinkedChannelId { get; } = linkedChannelId;
     public long RandomId { get; } = randomId;
 }

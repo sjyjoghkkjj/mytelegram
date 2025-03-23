@@ -24,6 +24,13 @@ public class MongoDbQueryOnlyReadModelStore<TReadModel, TDbContext>(
     where TDbContext : IMongoDbContext
 {
     //private readonly IQueryResultFactory _queryResultFactory;
+    public IQueryable<TReadModel> GetAll()
+    {
+        var readModelDescription = readModelDescriptionProvider.GetReadModelDescription<TReadModel>();
+        var collection = GetDatabase().GetCollection<TReadModel>(readModelDescription.RootCollectionName.Value);
+
+        return collection.AsQueryable();
+    }
 
     public Task<IReadOnlyCollection<TReadModel>> FindAsync(Expression<Func<TReadModel, bool>> filter, int skip = 0,
         int limit = 0,

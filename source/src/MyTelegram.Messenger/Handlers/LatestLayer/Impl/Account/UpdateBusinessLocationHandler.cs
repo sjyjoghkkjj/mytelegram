@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Handlers.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/account.updateBusinessLocation" />
@@ -11,6 +9,6 @@ internal sealed class UpdateBusinessLocationHandler : RpcResultObjectHandler<MyT
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestUpdateBusinessLocation obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

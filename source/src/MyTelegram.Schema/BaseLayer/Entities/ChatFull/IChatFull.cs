@@ -36,17 +36,8 @@ public interface IChatFull : IObject
     ///</summary>
     int? FolderId { get; set; }
 
+    ///<summary>
+    /// Info about bots in the channel/supergroup
+    ///</summary>
     TVector<MyTelegram.Schema.IBotInfo> BotInfo { get; set; }
-
-    ///<summary>
-    /// Group call information
-    /// See <a href="https://corefork.telegram.org/type/InputGroupCall" />
-    ///</summary>
-    MyTelegram.Schema.IInputGroupCall? Call { get; set; }
-
-    ///<summary>
-    /// When using <a href="https://corefork.telegram.org/method/phone.getGroupCallJoinAs">phone.getGroupCallJoinAs</a> to get a list of peers that can be used to join a group call, this field indicates the peer that should be selected by default.
-    /// See <a href="https://corefork.telegram.org/type/Peer" />
-    ///</summary>
-    MyTelegram.Schema.IPeer? GroupcallDefaultJoinAs { get; set; }
 }

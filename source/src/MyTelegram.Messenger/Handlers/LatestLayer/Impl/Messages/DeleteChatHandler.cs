@@ -1,6 +1,6 @@
 ﻿// ReSharper disable All
 
-namespace MyTelegram.Handlers.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Delete a <a href="https://corefork.telegram.org/api/channel">chat</a>
@@ -24,9 +24,6 @@ internal sealed class DeleteChatHandler : RpcResultObjectHandler<MyTelegram.Sche
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestDeleteChat obj)
     {
-        var command = new DeleteChatCommand(ChatId.Create(obj.ChatId), input.ToRequestInfo());
-        await _commandBus.PublishAsync(command, default);
-
         return new TBoolTrue();
     }
 }

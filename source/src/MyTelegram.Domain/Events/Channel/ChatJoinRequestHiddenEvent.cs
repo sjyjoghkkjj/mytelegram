@@ -3,6 +3,7 @@
 public class ChatJoinRequestHiddenEvent(
     RequestInfo requestInfo,
     long channelId,
+    bool isBroadcast,
     long userId,
     bool approved,
     int requestsPending,
@@ -10,6 +11,7 @@ public class ChatJoinRequestHiddenEvent(
     : RequestAggregateEvent2<ChannelAggregate, ChannelId>(requestInfo)
 {
     public long ChannelId { get; } = channelId;
+    public bool IsBroadcast { get; } = isBroadcast;
     public long UserId { get; } = userId;
     public bool Approved { get; } = approved;
     public int RequestsPending { get; } = requestsPending;

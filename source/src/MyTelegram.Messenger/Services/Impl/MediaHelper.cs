@@ -5,6 +5,9 @@ namespace MyTelegram.Messenger.Services.Impl;
 public class MediaHelper(
     IOptionsMonitor<MyTelegramMessengerServerOptions> options,
     ICacheManager<UserCacheItem> cacheManager,
+    IQueryProcessor queryProcessor,
+    IPeerHelper peerHelper,
+    IObjectMapper objectMapper,
     ILogger<MediaHelper> logger)
     : IMediaHelper, ITransientDependency
 {
@@ -171,7 +174,7 @@ public class MediaHelper(
         };
     }
 
-    private async Task<IMessageMedia?> CreateMediaOnFileServerAsync(IInputMedia media)
+    private async Task<IMessageMedia> CreateMediaOnFileServerAsync(IInputMedia media)
     {
         try
         {
