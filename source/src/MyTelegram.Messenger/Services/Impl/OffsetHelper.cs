@@ -35,6 +35,7 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
 
             case LoadType.AroundMessage:
                 fromId = offsetId + addOffset;
+                newMaxId = offsetId + addOffset + limit;
                 //maxId = input.OffsetId + input.AddOffset + input.Limit;
                 break;
 

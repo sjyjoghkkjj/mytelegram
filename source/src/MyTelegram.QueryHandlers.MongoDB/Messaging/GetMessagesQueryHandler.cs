@@ -33,8 +33,11 @@ public class
                 .WhereIf(query.MessageType == MessageType.Pinned, p => p.Pinned)
                 .WhereIf(query.MessageIdList?.Count > 0, p => query.MessageIdList!.Contains(p.MessageId))
                 .WhereIf(query.ChannelHistoryMinId > 0, p => p.MessageId > query.ChannelHistoryMinId)
+                //.WhereIf(query.Offset?.LoadType == LoadType.Forward, p => p.MessageId > query.Offset!.FromId)
+                //.WhereIf(query.Offset?.MaxId > 0, p => p.MessageId < query.Offset!.MaxId)
+                .WhereIf(query.Offset is { LoadType: LoadType.Backward, MaxId: > 0 }, p => p.MessageId < query.Offset!.MaxId)
+                .WhereIf(query.Offset is { LoadType: LoadType.AroundMessage, MaxId: > 0 }, p => p.MessageId < query.Offset!.MaxId)
                 .WhereIf(query.Offset?.LoadType == LoadType.Forward, p => p.MessageId > query.Offset!.FromId)
-                .WhereIf(query.Offset?.MaxId > 0, p => p.MessageId < query.Offset!.MaxId)
                 .WhereIf(query.Pts > 0, p => p.Pts > query.Pts)
                 .WhereIf(query.Peer != null && query.Peer.PeerType != PeerType.Empty,
                     p => p.ToPeerType == query.Peer!.PeerType && p.ToPeerId == query.Peer.PeerId)
@@ -44,10 +47,12 @@ public class
                 .WhereIf(query.UsersOnly, p => p.ToPeerType == PeerType.User)
             ;
 
+        var sortOptions = new SortOptions<MessageReadModel>(p => p.MessageId, SortType.Descending);
+
         return await store.FindAsync(predicate,
                0,
                query.Limit,
-               sort: new SortOptions<MessageReadModel>(p => p.MessageId, SortType.Descending),
+               sort: sortOptions,
                cancellationToken: cancellationToken);
     }
 }
