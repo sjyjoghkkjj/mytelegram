@@ -10,8 +10,7 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
 
     public OffsetInfo GetOffsetInfo(int addOffset, int offsetId, int limit, int minId, int maxId, int minDate, int maxDate)
     {
-        var loadType = GetOffsetLoadType(limit, addOffset, maxId);
-        //var offsetId = 20;
+        var loadType = GetOffsetLoadType(limit, addOffset);
         var newMaxId = 0;
         var fromId = 0;
         switch (loadType)
@@ -20,14 +19,13 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
                 if (offsetId > 0)
                 {
                     fromId = offsetId - limit;
-                    newMaxId = offsetId;
+                    newMaxId = offsetId + addOffset;
                 }
 
                 break;
 
             case LoadType.Forward:
                 fromId = offsetId;
-                //maxId = input.OffsetId + input.Limit;
                 break;
 
             case LoadType.FirstUnread:
@@ -36,7 +34,6 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
             case LoadType.AroundMessage:
                 fromId = offsetId + addOffset;
                 newMaxId = offsetId + addOffset + limit;
-                //maxId = input.OffsetId + input.AddOffset + input.Limit;
                 break;
 
             case LoadType.AroundDate:
@@ -46,6 +43,8 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
 
                 break;
 
+            case LoadType.FromUnread:
+                break;
             default:
                 throw new ArgumentOutOfRangeException($"Unsuporrted load type: {loadType}");
         }
@@ -53,58 +52,33 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
         return new OffsetInfo { MaxId = newMaxId, FromId = fromId, LoadType = loadType };
     }
 
-    private static LoadType GetOffsetLoadType(int limit, int addOffset, int maxId)
+    private static LoadType GetOffsetLoadType(int limit, int addOffset)
     {
-        if (limit == 1)
+        switch (addOffset)
         {
-            //return LoadType.LimitIs1;
-            return LoadType.Backward;
+            case 0:
+            case -1:
+                return LoadType.Backward;
+
+            //case -1:
+            case var _ when addOffset == -limit:
+            case var _ when addOffset == -limit - 1:
+                return LoadType.Forward;
+
+            case var _ when addOffset == -limit / 2:
+            case var _ when addOffset == -(limit / 2 + 1):
+                return LoadType.AroundMessage;
+
+            case var _ when addOffset == -limit + 5:
+                return LoadType.AroundDate;
+
+            case var _ when addOffset == -limit + 10:
+            case var _ when addOffset == -limit + 6:
+                return LoadType.FromUnread;
+
+            default:
+                return LoadType.Forward;
         }
 
-        if (addOffset == -1)
-        {
-            return LoadType.Backward;
-        }
-
-        //if (input.AddOffset == 0 && input.OffsetId > 0)
-        //{
-        //    return LoadType.Forward;
-        //}
-
-        if (addOffset == 0)
-        {
-            return LoadType.Backward;
-        }
-
-        if (addOffset == -limit + 5)
-        {
-            return LoadType.AroundDate;
-        }
-
-        if (addOffset == -limit / 2)
-        {
-            return LoadType.AroundMessage;
-        }
-
-        // WebZ:LoadMoreDirection.Around: 
-        // addOffset = -(Math.round(MESSAGE_LIST_SLICE / 2) + 1);
-        if (addOffset == -(limit / 2 + 1))
-        {
-            return LoadType.AroundMessage;
-        }
-
-        // WebZ:LoadMoreDirection.Forwards:
-        //  addOffset = -(MESSAGE_LIST_SLICE + 1);
-        if (addOffset == -(limit + 1))
-        {
-            return LoadType.Backward;
-        }
-
-        if (addOffset == -limit + 6 && maxId != 0)
-        {
-            return LoadType.AroundDate;
-        }
-
-        return LoadType.Forward;
     }
 }

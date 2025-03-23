@@ -48,11 +48,17 @@ public class
             ;
 
         var sortOptions = new SortOptions<MessageReadModel>(p => p.MessageId, SortType.Descending);
+        if (query.Offset?.LoadType == LoadType.Forward)
+        {
+            sortOptions = new(p => p.MessageId, SortType.Ascending);
+        }
 
-        return await store.FindAsync(predicate,
+        var result= await store.FindAsync(predicate,
                0,
                query.Limit,
                sort: sortOptions,
                cancellationToken: cancellationToken);
+
+        return result.OrderByDescending(p => p.MessageId).ToList();
     }
 }
