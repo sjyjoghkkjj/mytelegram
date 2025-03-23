@@ -46,6 +46,7 @@ internal sealed class GetSendAsHandler(
                     }
                 }
 
+                channelReadModels = channelReadModels.DistinctBy(p => p.ChannelId).ToList();
                 var channelMemberReadModels = await queryProcessor.ProcessAsync(
                     new GetChannelMemberListByChannelIdListQuery(input.UserId,
                         [.. channelReadModels.Select(p => p.ChannelId)]));
