@@ -9,7 +9,7 @@ public class OffsetInfo
     public int FromId { get; set; }
     public LoadType LoadType { get; set; }
 
-    //public int OffsetId { get; set; }
+    public int OffsetId { get; set; }
     public int StartOffsetId { get; set; }
 
     public int AddOffset { get; set; }

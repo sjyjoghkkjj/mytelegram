@@ -47,6 +47,32 @@ public class
                 .WhereIf(query.UsersOnly, p => p.ToPeerType == PeerType.User)
             ;
 
+        // Since the message IDs are not continuous, for example (1,2,3,100,101,102,1001,1002), it is unable to get the correct min/max message ID here.
+        // We need to query twice to get the correct data.
+        if (query.Offset?.LoadType == LoadType.AroundMessage)
+        {
+            var aroundMessageId = query.Offset.OffsetId;
+            var predicate1 = predicate.And(p => p.MessageId <= aroundMessageId);
+            var sortOptions1 = new SortOptions<MessageReadModel>(p => p.MessageId, SortType.Descending);
+            var predicate2 = predicate.And(p => p.MessageId > aroundMessageId);
+            var sortOptions2 = new SortOptions<MessageReadModel>(p => p.MessageId, SortType.Ascending);
+            var limit = query.Limit / 2;
+
+            var part1Result = await store.FindAsync(predicate1,
+                0,
+                limit,
+                sort: sortOptions1,
+                cancellationToken: cancellationToken);
+
+            var part2Result = await store.FindAsync(predicate2,
+                0,
+                limit,
+                sort: sortOptions2,
+                cancellationToken: cancellationToken);
+
+            return part1Result.Concat(part2Result).OrderByDescending(p => p.MessageId).ToList();
+        }
+
         var sortOptions = new SortOptions<MessageReadModel>(p => p.MessageId, SortType.Descending);
         if (query.Offset?.LoadType == LoadType.Forward)
         {
