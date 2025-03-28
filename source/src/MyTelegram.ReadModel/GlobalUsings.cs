@@ -27,6 +27,7 @@ global using MyTelegram.Domain.Events.Device;
 global using MyTelegram.Domain.Events.Dialog;
 global using MyTelegram.Domain.Events.Messaging;
 global using MyTelegram.Domain.Events.PeerNotifySettings;
+global using MyTelegram.Domain.Events.Photo;
 global using MyTelegram.Domain.Events.Poll;
 global using MyTelegram.Domain.Events.Pts;
 global using MyTelegram.Domain.Events.PushDevice;

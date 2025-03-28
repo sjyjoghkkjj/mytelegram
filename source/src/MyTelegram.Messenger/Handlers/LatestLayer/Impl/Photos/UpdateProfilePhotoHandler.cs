@@ -1,4 +1,7 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
+﻿using MyTelegram.Domain.Aggregates.Photo;
+using MyTelegram.Domain.Commands.Photo;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 
 ///<summary>
 /// Installs a previously uploaded photo as a profile photo.
@@ -29,7 +32,7 @@ internal sealed class UpdateProfilePhotoHandler(ICommandBus commandBus, IAccessH
                 break;
         }
         var command = new UpdateProfilePhotoCommand(UserId.Create(input.UserId), input.ToRequestInfo(), photoId, obj.Fallback);
-        await commandBus.PublishAsync(command, default);
+        await commandBus.PublishAsync(command);
 
         return null!;
     }

@@ -638,3 +638,4 @@ public record GetLeftChannelCountQuery(long UserId) : IQuery<int>;
 public record GetLeftChannelIdsQuery(long UserId, List<long>? ChannelIds = null, int OffsetChannelId = 0, int Limit = 500) : IQuery<IReadOnlyCollection<long>>;
 public record GetBotMembersByChannelIdQuery(long ChannelId) : IQuery<IReadOnlyCollection<IChannelMemberReadModel>>;
 public record GetJoinRequestQuery(long ChannelId, long UserId) : IQuery<IJoinChannelRequestReadModel?>;
+public record GetPhotoListQuery(long UserId, List<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;

@@ -1,4 +1,5 @@
 ﻿using EventFlow.Sagas;
+using MyTelegram.Domain.Sagas;
 
 namespace MyTelegram.Messenger.NativeAot;
 
@@ -58,6 +59,9 @@ public class MySagaAggregateStore(
                 break;
             case UpdateMessageReplySagaId updateMessageReplySagaId:
                 domainEvents = await aggregateStore.UpdateAsync<UpdateMessageReplySaga, UpdateMessageReplySagaId>(updateMessageReplySagaId, sourceId, updateSaga, cancellationToken);
+                break;
+            case UploadProfilePhotoSagaId uploadProfilePhotoSagaId:
+                domainEvents = await aggregateStore.UpdateAsync<UploadProfilePhotoSaga, UploadProfilePhotoSagaId>(uploadProfilePhotoSagaId, sourceId, updateSaga, cancellationToken);
                 break;
 
             case DeleteChannelMessagesSagaId deleteChannelMessagesSagaId:
