@@ -177,9 +177,10 @@ public class MessageAppService(
             await queryProcessor.ProcessAsync(new GetChannelMemberByUserIdQuery(channelReadModel.ChannelId,
                 input.SenderUserId));
 
+
         if (channelMemberReadModel == null)
         {
-            if (channelReadModel is { Broadcast: false, LinkedChatId: not null, JoinToSend: true })
+            if (channelReadModel is { Broadcast: false, LinkedChatId: not null, JoinToSend: false })
             {
 
             }
@@ -189,7 +190,7 @@ public class MessageAppService(
             }
         }
 
-        if (channelMemberReadModel!.BannedRights != 0)
+        if (channelMemberReadModel != null && channelMemberReadModel.BannedRights != 0)
         {
             var memberBannedRights =
                 ChatBannedRights.FromValue(channelMemberReadModel.BannedRights, channelMemberReadModel.UntilDate);
@@ -209,6 +210,11 @@ public class MessageAppService(
                 }
             }
         }
+
+        //if (channelReadModel.SlowModeEnabled)
+        //{
+
+        //}
 
         return channelReadModel;
     }
@@ -454,60 +460,18 @@ public class MessageAppService(
         IReadOnlyCollection<long>? chats = null)
     {
         var messageList = await queryProcessor.ProcessAsync(query);
-        var channelIdList = messageList.Where(p => p.ToPeerType == PeerType.Channel).Select(p => p.ToPeerId).ToList();
-        var userIdList = messageList.Where(p => p.ToPeerType == PeerType.User).Select(p => p.ToPeerId).ToList();
-        var chatIdList = messageList.Where(p => p.ToPeerType == PeerType.Chat).Select(p => p.ToPeerId).ToList();
+        HashSet<long> userIds = users?.ToHashSet() ?? [];
+        HashSet<long> channelIds = chats?.ToHashSet() ?? [];
+        userIds.Add(query.SelfUserId);
 
-        var extraChatUserIdList = new List<long>();
-        if (users?.Count > 0)
-        {
-            extraChatUserIdList.AddRange(users);
-        }
-
-        foreach (var messageReadModel in messageList)
-        {
-            switch (messageReadModel.MessageAction)
-            {
-                case TMessageActionChatAddUser messageActionChatAddUser:
-                    extraChatUserIdList.AddRange(messageActionChatAddUser.Users);
-                    break;
-
-                case TMessageActionChatJoinedByLink messageActionChatJoinedByLink:
-                    extraChatUserIdList.Add(messageActionChatJoinedByLink.InviterId);
-                    break;
-
-                case TMessageActionChatJoinedByRequest:
-
-                    break;
-                case TMessageActionChatDeleteUser messageActionChatDeleteUser:
-                    extraChatUserIdList.Add(messageActionChatDeleteUser.UserId);
-                    break;
-            }
-
-            var fwd = messageReadModel.FwdHeader;
-            AddPeerIdIfNeed(fwd?.FromId, userIdList, channelIdList);
-            AddPeerIdIfNeed(fwd?.SavedFromId, userIdList, channelIdList);
-            AddPeerIdIfNeed(fwd?.SavedFromPeer, userIdList, channelIdList);
-            AddPeerIdIfNeed(messageReadModel.SendAs, userIdList, channelIdList);
-
-            extraChatUserIdList.Add(messageReadModel.SenderPeerId);
-        }
-
-        var chatOrChannelPeers = chats?.Count > 0 ? chats.Select(peerHelper.GetPeer).ToList() : [];
-
-        userIdList.Add(query.SelfUserId);
-        userIdList.AddRange(extraChatUserIdList);
-
-        if (chatOrChannelPeers.Count > 0)
-        {
-            chatIdList.AddRange(chatOrChannelPeers.Where(p => p.PeerType == PeerType.Chat).Select(p => p.PeerId));
-            channelIdList.AddRange(chatOrChannelPeers.Where(p => p.PeerType == PeerType.Channel).Select(p => p.PeerId));
-        }
+        AddExtraPeerIds(messageList, userIds, channelIds);
+        var userIdList = userIds.ToList();
 
         var userList = await userAppService.GetListAsync(userIdList);
-        var channelList = channelIdList.Count == 0
-            ? new List<IChannelReadModel>()
-            : await channelAppService.GetListAsync(channelIdList);
+
+        var channelList = channelIds.Count == 0
+            ? []
+            : await channelAppService.GetListAsync(channelIds);
 
         var contactList = await queryProcessor
             .ProcessAsync(new GetContactListQuery(query.SelfUserId, userIdList));
@@ -523,10 +487,10 @@ public class MessageAppService(
         var photoList = await photoAppService.GetListAsync(photoIds);
 
         IReadOnlyCollection<long> joinedChannelIdList = new List<long>();
-        if (channelIdList.Count > 0)
+        if (channelIds.Count > 0)
         {
             joinedChannelIdList = await queryProcessor
-                .ProcessAsync(new GetJoinedChannelIdListQuery(query.SelfUserId, channelIdList));
+                .ProcessAsync(new GetJoinedChannelIdListQuery(query.SelfUserId, [.. channelIds]));
         }
 
         var privacyList = await privacyAppService.GetPrivacyListAsync(userIdList);
@@ -576,16 +540,67 @@ public class MessageAppService(
         );
     }
 
-    private void AddPeerIdIfNeed(Peer? peer, List<long> userIds, List<long> channelIds)
+    private void AddExtraPeerIds(IReadOnlyCollection<IMessageReadModel> messageReadModels, HashSet<long> userIds, HashSet<long> channelIds)
     {
-        switch (peer?.PeerType)
+        void AddPeerIdIfNeed(Peer? peer)
         {
-            case PeerType.Channel:
-                channelIds.Add(peer.PeerId);
-                break;
-            case PeerType.User:
-                userIds.Add(peer.PeerId);
-                break;
+            switch (peer?.PeerType)
+            {
+                case PeerType.Channel:
+                    channelIds.Add(peer.PeerId);
+                    break;
+
+                case PeerType.User:
+                    userIds.Add(peer.PeerId);
+                    break;
+            }
+        }
+
+        foreach (var messageReadModel in messageReadModels)
+        {
+            AddPeerIdIfNeed(messageReadModel.SendAs);
+            AddPeerIdIfNeed(messageReadModel.FwdHeader?.SavedFromPeer);
+
+            var fwd = messageReadModel.FwdHeader;
+            AddPeerIdIfNeed(fwd?.FromId);
+            AddPeerIdIfNeed(fwd?.SavedFromId);
+            AddPeerIdIfNeed(fwd?.SavedFromPeer);
+            AddPeerIdIfNeed(messageReadModel.SendAs);
+            var senderPeer = peerHelper.GetPeer(messageReadModel.SenderPeerId);
+            AddPeerIdIfNeed(senderPeer);
+
+            switch (messageReadModel.ToPeerType)
+            {
+                case PeerType.Channel:
+                    channelIds.Add(messageReadModel.ToPeerId);
+                    break;
+
+                case PeerType.User:
+                    userIds.Add(messageReadModel.ToPeerId);
+                    break;
+            }
+
+            switch (messageReadModel.MessageAction)
+            {
+                case TMessageActionChatAddUser messageActionChatAddUser:
+                    foreach (var userId in messageActionChatAddUser.Users)
+                    {
+                        userIds.Add(userId);
+                    }
+                    break;
+
+                case TMessageActionChatJoinedByLink messageActionChatJoinedByLink:
+                    userIds.Add(messageActionChatJoinedByLink.InviterId);
+                    break;
+
+                case TMessageActionChatJoinedByRequest:
+
+                    break;
+
+                case TMessageActionChatDeleteUser messageActionChatDeleteUser:
+                    userIds.Add(messageActionChatDeleteUser.UserId);
+                    break;
+            }
         }
     }
 }
