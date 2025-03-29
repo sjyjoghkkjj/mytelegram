@@ -542,7 +542,7 @@ public class MessageAppService(
 
     private void AddExtraPeerIds(IReadOnlyCollection<IMessageReadModel> messageReadModels, HashSet<long> userIds, HashSet<long> channelIds)
     {
-        void AddPeerIdIfNeed(Peer? peer)
+        void AddPeerIdIfNeeded(Peer? peer)
         {
             switch (peer?.PeerType)
             {
@@ -558,16 +558,16 @@ public class MessageAppService(
 
         foreach (var messageReadModel in messageReadModels)
         {
-            AddPeerIdIfNeed(messageReadModel.SendAs);
-            AddPeerIdIfNeed(messageReadModel.FwdHeader?.SavedFromPeer);
+            AddPeerIdIfNeeded(messageReadModel.SendAs);
+            AddPeerIdIfNeeded(messageReadModel.FwdHeader?.SavedFromPeer);
 
             var fwd = messageReadModel.FwdHeader;
-            AddPeerIdIfNeed(fwd?.FromId);
-            AddPeerIdIfNeed(fwd?.SavedFromId);
-            AddPeerIdIfNeed(fwd?.SavedFromPeer);
-            AddPeerIdIfNeed(messageReadModel.SendAs);
+            AddPeerIdIfNeeded(fwd?.FromId);
+            AddPeerIdIfNeeded(fwd?.SavedFromId);
+            AddPeerIdIfNeeded(fwd?.SavedFromPeer);
+            AddPeerIdIfNeeded(messageReadModel.SendAs);
             var senderPeer = peerHelper.GetPeer(messageReadModel.SenderPeerId);
-            AddPeerIdIfNeed(senderPeer);
+            AddPeerIdIfNeeded(senderPeer);
 
             switch (messageReadModel.ToPeerType)
             {
