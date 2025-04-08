@@ -1,7 +1,4 @@
-﻿using MyTelegram.Domain.Aggregates.Photo;
-using MyTelegram.Domain.Commands.Photo;
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Photos;
 
 ///<summary>
 /// Installs a previously uploaded photo as a profile photo.
