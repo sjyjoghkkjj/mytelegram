@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
+﻿using MyTelegram.Messenger.Services.Interfaces;
+
+namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
 
 public class UserDomainEventHandler(
     IObjectMessageSender objectMessageSender,
@@ -7,6 +9,8 @@ public class UserDomainEventHandler(
     IAckCacheService ackCacheService,
     IEventBus eventBus,
     ILogger<UserDomainEventHandler> logger,
+    IPhotoAppService  photoAppService,
+    ILayeredService<IPhotoConverter> photoLayeredConverter,
     ILayeredService<IAuthorizationConverter> layeredAuthorizationService,
     IUserConverterService userConverterService)
     : DomainEventHandlerBase(objectMessageSender,
@@ -56,10 +60,17 @@ public class UserDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserProfilePhotoChangedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.UserId,
-            domainEvent.AggregateEvent.UserId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
+        var userId = domainEvent.AggregateEvent.RequestInfo.UserId;
+        var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
+        var photoReadModel = await photoAppService.GetAsync(domainEvent.AggregateEvent.PhotoId);
 
-        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, user);
+        var photo = new MyTelegram.Schema.Photos.TPhoto
+        {
+            Photo = photoLayeredConverter.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).ToPhoto(photoReadModel),
+            Users = [user]
+        };
+
+        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, photo);
     }
 
     public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserProfilePhotoUploadedEvent> domainEvent,
@@ -67,8 +78,15 @@ public class UserDomainEventHandler(
     {
         var userId = domainEvent.AggregateEvent.RequestInfo.UserId;
         var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
+        var photoReadModel = await photoAppService.GetAsync(domainEvent.AggregateEvent.PhotoId);
 
-        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, user);
+        var photo = new MyTelegram.Schema.Photos.TPhoto
+        {
+            Photo = photoLayeredConverter.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer).ToPhoto(photoReadModel),
+            Users = [user]
+        };
+
+        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, photo);
     }
 
     public async Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserProfileUpdatedEvent> domainEvent,
