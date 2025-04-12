@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace MyTelegram.Messenger.NativeAot;
 
+#if !DEBUG
+
 // MyTelegram.Domain
 [JsonSerializable(typeof(MyTelegram.Domain.Aggregates.AppCode.AppCodeSnapshot))]
 [JsonSerializable(typeof(MyTelegram.Domain.Aggregates.Channel.ChannelMemberSnapshot))]
@@ -329,6 +331,7 @@ namespace MyTelegram.Messenger.NativeAot;
 [JsonSerializable(typeof(ReactionCount))]
 [JsonSerializable(typeof(global::EventFlow.MongoDB.ValueObjects.MongoDbEventDataModel))]
 [JsonSerializable(typeof(global::EventFlow.MongoDB.ValueObjects.MongoDbCounterDataModel))]
+#endif
 [JsonSerializable(typeof(global::EventFlow.MongoDB.ValueObjects.MongoDbSnapshotDataModel))]
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]

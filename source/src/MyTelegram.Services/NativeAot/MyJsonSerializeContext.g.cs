@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace MyTelegram.Services.NativeAot;
 
+#if !DEBUG
+
 // Count:73
 // MyTelegram.Core
 [JsonSerializable(typeof(MyTelegram.Core.AcksDataReceivedEvent))]
@@ -90,6 +92,7 @@ namespace MyTelegram.Services.NativeAot;
 [JsonSerializable(typeof(System.Collections.Generic.List<PhotoSize>))]
 [JsonSerializable(typeof(System.Collections.Generic.List<VideoSize>))]
 [JsonSerializable(typeof(System.Collections.Generic.List<FutureAuthTokenCacheItem>))]
+#endif
 [JsonSerializable(typeof(System.Collections.Generic.List<FutureSaltCacheItem>))]
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]

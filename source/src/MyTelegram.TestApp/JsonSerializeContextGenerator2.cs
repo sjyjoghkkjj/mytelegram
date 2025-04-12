@@ -27,6 +27,8 @@ public class JsonSerializeContextGenerator2
         sb.AppendLine();
         sb.AppendLine("namespace MyTelegram.Messenger.NativeAot;");
         sb.AppendLine();
+        sb.AppendLine("#if !DEBUG");
+        sb.AppendLine();
 
         foreach (var kv in allTypes)
         {
@@ -51,6 +53,7 @@ public class JsonSerializeContextGenerator2
         //sb.AppendLine("[JsonSerializable(typeof(MyTelegram.Messenger.Handlers.Impl.CachedFutureSalt))]");
         sb.AppendLine("[JsonSerializable(typeof(global::EventFlow.MongoDB.ValueObjects.MongoDbEventDataModel))]");
         sb.AppendLine("[JsonSerializable(typeof(global::EventFlow.MongoDB.ValueObjects.MongoDbCounterDataModel))]");
+        sb.AppendLine("#endif");
         sb.AppendLine("[JsonSerializable(typeof(global::EventFlow.MongoDB.ValueObjects.MongoDbSnapshotDataModel))]");
         sb.AppendLine();
         sb.AppendLine("[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]");

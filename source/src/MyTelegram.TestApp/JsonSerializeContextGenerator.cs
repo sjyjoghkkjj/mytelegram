@@ -31,6 +31,8 @@ public class JsonSerializeContextGenerator
         sb.AppendLine();
         sb.AppendLine("namespace MyTelegram.Services.NativeAot;");
         sb.AppendLine();
+        sb.AppendLine("#if !DEBUG");
+        sb.AppendLine();
 
         sb.AppendLine($"// Count:{allTypes.Sum(x => x.Value.Count())}");
 
@@ -57,6 +59,7 @@ public class JsonSerializeContextGenerator
         sb.AppendLine($"[JsonSerializable(typeof(System.Collections.Generic.List<PhotoSize>))]");
         sb.AppendLine($"[JsonSerializable(typeof(System.Collections.Generic.List<VideoSize>))]");
         sb.AppendLine($"[JsonSerializable(typeof(System.Collections.Generic.List<FutureAuthTokenCacheItem>))]");
+        sb.AppendLine("#endif");
         sb.AppendLine($"[JsonSerializable(typeof(System.Collections.Generic.List<FutureSaltCacheItem>))]");
         //sb.AppendLine("[JsonSerializable(typeof(global::EventFlow.MongoDB.ValueObjects.MongoDbEventDataModel))]");
         //sb.AppendLine("[JsonSerializable(typeof(global::EventFlow.MongoDB.ValueObjects.MongoDbCounterDataModel))]");
