@@ -18,7 +18,7 @@ public class SendAsPeerConverter : ISendAsPeerConverter, ITransientDependency
                     ChannelId = p.Id
                 }
             })),
-            Chats = [],
+            Chats = [.. channels],
             Users = []
         };
 
