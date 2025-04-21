@@ -59,7 +59,7 @@ public class ChatConverterService(
             photos.TryGetValue(channelReadModel.PhotoId ?? 0, out var photoReadModel);
             channelMembers.TryGetValue(channelReadModel.ChannelId, out var channelMemberReadModel);
 
-            var channel = ToChannelCore(selfUserId, channelReadModel, photoReadModel, channelMemberReadModel, false,
+            var channel = ToChannelCore(selfUserId, channelReadModel, photoReadModel, channelMemberReadModel, null,
                 layer);
 
             channels.Add(channel);
