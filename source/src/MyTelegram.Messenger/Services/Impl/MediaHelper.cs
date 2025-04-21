@@ -116,6 +116,10 @@ public class MediaHelper(
             case "🎰": // Slot machine, value: 0-65
                 value = Random.Shared.Next(0, 65);
                 break;
+            case "⚽️":
+            case "🏀":
+                value = Random.Shared.Next(1, 6);
+                break;
             default:// dice value: 1-6
                 value = Random.Shared.Next(1, 7);
                 break;
