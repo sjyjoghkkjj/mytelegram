@@ -9,12 +9,13 @@ public record MessengerQueryDataReceivedEvent(
     int SeqNumber,
     long AuthKeyId,
     long PermAuthKeyId,
-    //ReadOnlyMemory<byte> Data,
-    byte[] Data,
+    ReadOnlyMemory<byte> Data,
+    //byte[] Data,
     int Layer,
     long Date,
     DeviceType DeviceType,
-    string ClientIp
+    string ClientIp,
+    long SessionId
 ) : DataReceivedEvent(
     ConnectionId,
     RequestId,
@@ -28,5 +29,14 @@ public record MessengerQueryDataReceivedEvent(
     Layer,
     Date,
     DeviceType,
-    ClientIp
-);
+    ClientIp,
+    SessionId
+)
+{
+    public static MessengerQueryDataReceivedEvent Create()
+    {
+        return new MessengerQueryDataReceivedEvent(string.Empty, Guid.Empty, 0, 0, 0, 0, 0,
+            0, default, 0,
+            0, DeviceType.Unknown, string.Empty, 0);
+    }
+}

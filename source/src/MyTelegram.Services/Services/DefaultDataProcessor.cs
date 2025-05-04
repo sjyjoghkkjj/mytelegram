@@ -19,13 +19,6 @@ public class DefaultDataProcessor<TData>(
             var sw = Stopwatch.StartNew();
             if (handlerHelper.TryGetHandler(obj.ObjectId, out var handler))
             {
-                //if (rpcResultCacheAppService.TryGetRpcResult(obj.UserId, obj.ReqMsgId, out var rpcResult))
-                //{
-                //    sw.Stop();
-                //    await SendMessageToPeerAsync(GetRequestInput(obj).ToRequestInfo(), rpcResult);
-                //    return;
-                //}
-
                 IObject? data = null;
                 var req = GetRequestInput(obj);
                 try
@@ -33,17 +26,17 @@ public class DefaultDataProcessor<TData>(
                     data = GetData(obj);
 
                     bool needToCheckRequest = handler is IDistinctObjectHandler ||
-                                              ObjectIdConsts.CommandObjectIdToNames.ContainsKey(req.ObjectId);
+                                              ObjectIdConsts.CommandServerHandlers.ContainsKey(req.ObjectId);
 
                     if (!needToCheckRequest && data is IHasSubQuery subQuery)
                     {
                         needToCheckRequest =
-                            ObjectIdConsts.CommandObjectIdToNames.ContainsKey(subQuery.Query.ConstructorId);
+                            ObjectIdConsts.CommandServerHandlers.ContainsKey(subQuery.Query.ConstructorId);
 
                         if (!needToCheckRequest && subQuery.Query is IHasSubQuery subQuery2)
                         {
                             needToCheckRequest =
-                                ObjectIdConsts.CommandObjectIdToNames.ContainsKey(subQuery2.Query.ConstructorId);
+                                ObjectIdConsts.CommandServerHandlers.ContainsKey(subQuery2.Query.ConstructorId);
                         }
                     }
 

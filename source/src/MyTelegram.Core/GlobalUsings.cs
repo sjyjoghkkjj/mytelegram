@@ -4,3 +4,4 @@ global using System.Diagnostics.CodeAnalysis;
 global using Microsoft.Extensions.DependencyInjection;
 global using System.Collections;
 global using System.Text.RegularExpressions;
+global using System.Collections.Frozen;
