@@ -157,7 +157,7 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
         if (!string.IsNullOrEmpty(fromName))
         {
             fwdFromId = null;
-            savedPeerId = MyTelegramServerDomainConsts.AnonymousUserId.ToUserPeer();
+            savedPeerId = MyTelegramConsts.AnonymousUserId.ToUserPeer();
         }
 
         var fwdHeader = new MessageFwdHeader(

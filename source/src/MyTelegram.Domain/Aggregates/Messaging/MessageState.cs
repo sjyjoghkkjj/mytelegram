@@ -188,9 +188,9 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
         SenderMessageId = snapshot.SenderMessageId;
         Pinned = snapshot.Pinned;
         EditDate = snapshot.EditDate;
-        //EditHide = snapshot.EditHide;
         Edited = snapshot.Edited;
         Pts = snapshot.Pts;
+        IsDeleted = snapshot.IsDeleted;
     }
 
     public void Apply(OutboxMessageEditedEventV2 aggregateEvent)

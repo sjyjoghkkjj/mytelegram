@@ -4,9 +4,10 @@ public class MessageSnapshot(MessageItem messageItem,
         List<InboxItem> inboxItems,
         int senderMessageId,
         bool pinned,
-        int editDate, bool edited,
-        int pts
-        )
+        int editDate,
+        bool edited,
+        int pts,
+        bool isDeleted)
     : ISnapshot
 {
     //bool editHide,
@@ -21,5 +22,6 @@ public class MessageSnapshot(MessageItem messageItem,
     public MessageItem MessageItem { get; } = messageItem;
     public bool Pinned { get; } = pinned;
     public int Pts { get; } = pts;
+    public bool IsDeleted { get; } = isDeleted;
     public int SenderMessageId { get; } = senderMessageId;
 }

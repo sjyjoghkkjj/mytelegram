@@ -16,8 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />-->
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.Async" />
@@ -27,7 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyTelegram.Core\MyTelegram.Core.csproj" />
-    <!--<ProjectReference Include="..\MyTelegram.EventBus.RabbitMQ\MyTelegram.EventBus.RabbitMQ.csproj" />-->
     <ProjectReference Include="..\MyTelegram.EventBus.Rebus\MyTelegram.EventBus.Rebus.csproj" />
     <ProjectReference Include="..\MyTelegram.MTProto\MyTelegram.MTProto.csproj" />
   </ItemGroup>

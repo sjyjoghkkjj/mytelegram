@@ -52,6 +52,10 @@ public class UserDomainEventHandler(
         CancellationToken cancellationToken)
     {
         var userId = domainEvent.AggregateEvent.RequestInfo.UserId;
+        if (userId == 0)
+        {
+            return;
+        }
         var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
 
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, user);

@@ -1,12 +1,14 @@
 ﻿namespace MyTelegram.Core;
 
-public record PushData(
-    string LocKey,
-    string[] LocArgs,
-    long UserId,
-    PushNotificationCustomData? Custom = null,
-    string? Sound = null);
-
+/// <summary>
+/// 
+/// </summary>
+/// <param name="LocKey">Notification type: a string literal in the form /[A-Z_0-9]+/, which summarizes the notification. For example, CHAT_MESSAGE_TEXT</param>
+/// <param name="LocArgs">Notification placeholder arguments: a list or arguments which, when inserted into a template, produce a readable notification</param>
+/// <param name="UserId">ID of the account to which the PUSH notification should be delivered, in case of clients with multiple accounts active and running</param>
+/// <param name="Custom">Custom parameters to be passed into the application when a notification is opened</param>
+/// <param name="Sound">The name of an audio file to be played</param>
+public record PushData(string LocKey, string[] LocArgs, long UserId, PushNotificationCustomData? Custom, string? Sound);
 public record PushNotificationCreatedEvent(PushData Data);
 
 public class PushNotificationCustomData

@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.ReadModel.ReadModelLocators;
 
-public class ChannelFullReadModelLocator : IChannelFullReadModelLocator
+public class ChannelFullReadModelLocator : IChannelFullReadModelLocator, ITransientDependency
 {
     public IEnumerable<string> GetReadModelIds(IDomainEvent domainEvent)
     {

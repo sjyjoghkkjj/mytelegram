@@ -17,10 +17,27 @@ public class ChatInviteLinkHelper : IChatInviteLinkHelper
     public string GetHashFromLink(string link)
     {
         var index = link.LastIndexOf("/", StringComparison.OrdinalIgnoreCase);
-        return link[(index + 2)..];
+
+        var newLink = link[(index + 1)..];
+        if (newLink.StartsWith("+"))
+        {
+            return newLink[1..];
+        }
+
+        return newLink;
+    }
+
+    public string GetChatlistFullLink(string domain, string link)
+    {
+        return GetFullLinkCore(domain, "addlist/", link);
     }
 
     public string GetFullLink(string domain, string link)
+    {
+        return GetFullLinkCore(domain, "+", link);
+    }
+
+    private string GetFullLinkCore(string domain, string type, string link)
     {
         var newDomain = domain;
         if (!newDomain.EndsWith("/"))
@@ -28,6 +45,6 @@ public class ChatInviteLinkHelper : IChatInviteLinkHelper
             newDomain = $"{domain}/";
         }
 
-        return $"{newDomain}+{link}";
+        return $"{newDomain}{type}{link}";
     }
 }

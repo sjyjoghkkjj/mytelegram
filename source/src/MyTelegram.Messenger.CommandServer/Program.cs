@@ -1,10 +1,7 @@
-﻿using EventFlow.MongoDB.Extensions;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using MyTelegram;
 using MyTelegram.Caching.Redis;
 using MyTelegram.Domain.Aggregates.Device;
-using MyTelegram.Domain.Aggregates.Pts;
 using MyTelegram.Messenger;
 using MyTelegram.Messenger.CommandServer.BackgroundServices;
 using MyTelegram.Messenger.CommandServer.Extensions;
@@ -12,8 +9,9 @@ using MyTelegram.Messenger.NativeAot;
 using MyTelegram.Services.NativeAot;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using MyTelegramConsts = MyTelegram.MyTelegramConsts;
 
-Console.Title = $"MyTelegram messenger command server (layer {MyTelegramServerDomainConsts.Layer})";
+Console.Title = $"MyTelegram messenger command server (layer {MyTelegramConsts.Layer})";
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
@@ -24,15 +22,15 @@ Log.Logger = new LoggerConfiguration()
 Log.Information("{Info} {Version}", "MyTelegram messenger command server", typeof(Program).Assembly.GetName().Version);
 Log.Information("{Description} {Url}",
     "For more information, please visit",
-    MyTelegramServerDomainConsts.RepositoryUrl);
+    MyTelegramConsts.RepositoryUrl);
 
 Log.Information("MyTelegram messenger command server(API layer={Layer}) starting...",
-    MyTelegramServerDomainConsts.Layer);
+    MyTelegramConsts.Layer);
 
 AppDomain.CurrentDomain.UnhandledException += (_,
     e) =>
 {
-    Log.Error(e.ExceptionObject.ToString() ?? string.Empty);
+    Log.Error(e.ExceptionObject.ToString() ?? "UnhandledException");
 };
 TaskScheduler.UnobservedTaskException += (_,
     e) =>
@@ -66,6 +64,8 @@ builder.ConfigureServices((ctx,
         .ValidateDataAnnotations()
         .ValidateOnStart()
         ;
+    var appConfig = ctx.Configuration.GetRequiredSection("App").Get<MyTelegramMessengerServerOptions>();
+
     services.Configure<EventBusRabbitMqOptions>(ctx.Configuration.GetRequiredSection("RabbitMQ:EventBus"));
     services.Configure<RabbitMqOptions>(ctx.Configuration.GetRequiredSection("RabbitMQ:Connections:Default"));
 
@@ -91,24 +91,16 @@ builder.ConfigureServices((ctx,
         });
     });
 
-    services.AddMyTelegramMessengerServer(options =>
+    services.AddMyTelegramMessengerCommandServer(options =>
     {
         options.AddDefaults(Assembly.GetEntryAssembly());
-        options.ConfigureMongoDb(ctx.Configuration.GetConnectionString("Default"),
-            ctx.Configuration["App:DatabaseName"]);
     });
 
     services.AddMyTelegramStackExchangeRedisCache(options =>
     {
         options.Configuration = ctx.Configuration.GetValue<string>("Redis:Configuration");
     });
-    services.AddCacheJsonSerializer(options =>
-    {
-        options.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
-        options.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
-    });
 
-    services.AddMyTelegramMessengerCommandServer();
     services.AddHostedService<MyTelegramCommandServerBackgroundService>();
     services.AddHostedService<MyTelegramInvokeAfterMsgProcessorBackgroundService>();
 

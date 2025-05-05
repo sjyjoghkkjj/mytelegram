@@ -2,7 +2,7 @@
 
 public interface IMediaHelper
 {
-    MessageType GeMessageType(IMessageMedia media);
+    MessageType GeMessageType(IMessageMedia? media);
 
     Task<IEncryptedFile> SaveEncryptedFileAsync(long reqMsgId,
         IInputEncryptedFile encryptedFile);
@@ -17,6 +17,7 @@ public interface IMediaHelper
         int parts,
         string? name,
         string? md5,
-        IVideoSize? videoEmojiMarkup = null
+        IVideoSize? videoEmojiMarkup = null,
+        bool isProfilePhoto = false
     );
 }

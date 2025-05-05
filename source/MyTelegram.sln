@@ -85,6 +85,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyTelegram.Converters", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyTelegram.DataSeeder", "src\MyTelegram.DataSeeder\MyTelegram.DataSeeder.csproj", "{AE915013-50A2-6610-F705-53059D40139B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyTelegram.Abstractions", "src\MyTelegram.Abstractions\MyTelegram.Abstractions.csproj", "{81E53953-EFD5-F7BE-C844-FEC29CA7B3F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -231,6 +233,10 @@ Global
 		{AE915013-50A2-6610-F705-53059D40139B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE915013-50A2-6610-F705-53059D40139B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE915013-50A2-6610-F705-53059D40139B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81E53953-EFD5-F7BE-C844-FEC29CA7B3F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81E53953-EFD5-F7BE-C844-FEC29CA7B3F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81E53953-EFD5-F7BE-C844-FEC29CA7B3F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81E53953-EFD5-F7BE-C844-FEC29CA7B3F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -275,6 +281,7 @@ Global
 		{710834A8-C271-4853-7B3D-1661A2535D9C} = {3BF8F0CE-05C3-4386-B960-C56F6719D294}
 		{2970172B-D8E3-F5AC-ABE1-F96E39F15A80} = {DB4DF262-E785-497F-B465-440175026F97}
 		{AE915013-50A2-6610-F705-53059D40139B} = {DB4DF262-E785-497F-B465-440175026F97}
+		{81E53953-EFD5-F7BE-C844-FEC29CA7B3F7} = {5F3FB626-5C24-4663-9B74-C9257417305E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A8E7A112-1B80-4DCC-9884-5069D0E3B651}

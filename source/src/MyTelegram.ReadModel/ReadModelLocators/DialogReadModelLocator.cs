@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.ReadModel.ReadModelLocators;
 
-public class DialogReadModelLocator : IDialogReadModelLocator
+public class DialogReadModelLocator : IDialogReadModelLocator, ITransientDependency
 {
     public IEnumerable<string> GetReadModelIds(IDomainEvent domainEvent)
     {

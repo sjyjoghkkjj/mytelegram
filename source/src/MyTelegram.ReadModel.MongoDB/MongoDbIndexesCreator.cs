@@ -6,7 +6,7 @@ public class MongoDbIndexesCreator(
     IMongoDbEventPersistenceInitializer eventPersistenceInitializer)
     : MongoDbIndexesCreatorBase(database,
         descriptionProvider,
-        eventPersistenceInitializer)
+        eventPersistenceInitializer), ITransientDependency
 {
     protected override async Task CreateAllIndexesCoreAsync()
     {

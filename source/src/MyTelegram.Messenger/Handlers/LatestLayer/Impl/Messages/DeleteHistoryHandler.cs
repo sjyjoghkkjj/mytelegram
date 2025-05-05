@@ -30,7 +30,7 @@ internal sealed class DeleteHistoryHandler(
         MyTelegram.Schema.Messages.RequestDeleteHistory obj)
     {
         var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
-        var pageSize = MyTelegramServerDomainConsts.ClearHistoryDefaultPageSize;
+        var pageSize = MyTelegramConsts.ClearHistoryDefaultPageSize;
         var maxId = obj.MaxId;
         if (maxId > 0)
         {

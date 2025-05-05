@@ -1,6 +1,4 @@
-﻿using MyTelegram.Domain.Events.Poll;
-
-namespace MyTelegram.Domain.Aggregates.Poll;
+﻿namespace MyTelegram.Domain.Aggregates.Poll;
 
 public class PollAggregate : AggregateRoot<PollAggregate, PollId>
 {
@@ -105,7 +103,7 @@ public class PollAggregate : AggregateRoot<PollAggregate, PollId>
         )
     {
         Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
-        if (answers.Count > MyTelegramServerDomainConsts.MaxVoteOptions)
+        if (answers.Count > MyTelegramConsts.MaxVoteOptions)
         {
             RpcErrors.RpcErrors400.OptionsTooMuch.ThrowRpcError();
         }

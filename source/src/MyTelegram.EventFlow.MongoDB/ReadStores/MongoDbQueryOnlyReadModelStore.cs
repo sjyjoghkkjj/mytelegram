@@ -9,21 +9,20 @@ namespace MyTelegram.EventFlow.MongoDB.ReadStores;
 
 public class MongoDbQueryOnlyReadModelStore<TReadModel>(
     IQueryOnlyReadModelDescriptionProvider readModelDescriptionProvider,
-    IMongoDbContextFactory<IMongoDbContext> dbContextFactory,
+    IMongoDbContext dbContext,
     ILogger<MongoDbQueryOnlyReadModelStore<TReadModel, IMongoDbContext>> logger)
-    : MongoDbQueryOnlyReadModelStore<TReadModel, IMongoDbContext>(readModelDescriptionProvider, dbContextFactory,
+    : MongoDbQueryOnlyReadModelStore<TReadModel, IMongoDbContext>(readModelDescriptionProvider, dbContext,
         logger)
     where TReadModel : class, IReadModel;
 
 public class MongoDbQueryOnlyReadModelStore<TReadModel, TDbContext>(
         IQueryOnlyReadModelDescriptionProvider readModelDescriptionProvider,
-        IMongoDbContextFactory<TDbContext> dbContextFactory,
+        TDbContext dbContext,
         ILogger<MongoDbQueryOnlyReadModelStore<TReadModel, TDbContext>> logger)
     : IQueryOnlyReadModelStore<TReadModel>
     where TReadModel : class, IReadModel
     where TDbContext : IMongoDbContext
 {
-    //private readonly IQueryResultFactory _queryResultFactory;
     public IQueryable<TReadModel> GetAll()
     {
         var readModelDescription = readModelDescriptionProvider.GetReadModelDescription<TReadModel>();
@@ -126,6 +125,6 @@ public class MongoDbQueryOnlyReadModelStore<TReadModel, TDbContext>(
 
     private IMongoDatabase GetDatabase()
     {
-        return dbContextFactory.CreateContext().GetDatabase();
+        return dbContext.GetDatabase();
     }
 }

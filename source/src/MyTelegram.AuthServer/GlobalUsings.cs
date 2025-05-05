@@ -23,3 +23,4 @@ global using MyTelegram.Services.NativeAot;
 global using MyTelegram.Services.Services;
 global using Serilog;
 global using Serilog.Sinks.SystemConsole.Themes;
+global using MyTelegram.Abstractions;

@@ -1,9 +1,14 @@
-﻿using MyTelegram.Caching.Redis;
+﻿using EventFlow.Core.Caching;
+using EventFlow.MongoDB.Extensions;
+using MyTelegram.Caching.Redis;
 using MyTelegram.EventFlow;
+using MyTelegram.EventFlow.MongoDB.Extensions;
 using MyTelegram.Messenger.CommandServer.BackgroundServices;
 using MyTelegram.Messenger.CommandServer.EventHandlers;
 using MyTelegram.Messenger.NativeAot;
 using MyTelegram.Messenger.Services.Impl;
+using MyTelegram.QueryHandlers.MongoDB;
+using MyTelegram.ReadModel.MongoDB;
 using MyTelegram.Services.Extensions;
 using MyTelegram.Services.NativeAot;
 
@@ -26,22 +31,30 @@ public static class MyTelegramMessengerCommandServerExtensions
     public static void AddMyTelegramMessengerCommandServer(this IServiceCollection services,
         Action<IEventFlowOptions>? configure = null)
     {
-        services.AddTransient<IChatInviteLinkHelper, ChatInviteLinkHelper>();
-        services.AddTransient<IDataProcessor<IDomainEvent>, DomainEventDataProcessor>();
         services.RegisterServices();
-        services.AddTransient<MessengerEventHandler>();
-        services.AddTransient<IDataProcessor<NewDeviceCreatedEvent>, NewDeviceCreatedEventDataProcessor>();
+        services.AddMyTelegramMessengerServices();
 
-        services.AddCacheJsonSerializer(jsonOptions =>
+        services.AddEventFlow(options =>
         {
-            jsonOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
-            jsonOptions.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
+            options.AddDefaults(typeof(MyTelegramMessengerServerExtensions).Assembly);
+            options.AddDefaults(typeof(MyTelegram.Domain.Specs).Assembly);
+            options.Configure(c => { c.IsAsynchronousSubscribersEnabled = true; });
+
+            options.UseMongoDbEventStore();
+            options.UseMongoDbSnapshotStore();
+
+            options.AddMyTelegramMongoDbReadModel();
+            options.AddMongoDbQueryHandlers();
+
+            options.AddSystemTextJson(jsonSerializerOptions =>
+            {
+                jsonSerializerOptions.AddSingleValueObjects(
+                    new EventFlow.SystemTextJsonSingleValueObjectConverter<CacheKey>());
+                jsonSerializerOptions.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
+            });
+            configure?.Invoke(options);
         });
-        services.AddSystemTextJson(options =>
-        {
-            //options.AddSingleValueObjects();
-            //options.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
-            options.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
-        });
+		services.AddEventStoreMongoDbContext();
+        services.AddReadModelMongoDbContext();
     }
 }

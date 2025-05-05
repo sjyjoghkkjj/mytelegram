@@ -59,7 +59,7 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     public bool IsFirstChatInviteCreated { get; private set; }
     public int? RequestsPending { get; private set; }
     public List<long>? RecentRequesters { get; private set; } =
-        new(MyTelegramServerDomainConsts.ChatInviteRecentRequesterMaxCount);
+        new(MyTelegramConsts.ChatInviteRecentRequesterMaxCount);
     public bool SignatureEnabled { get; private set; }
     public int ParticipantCount { get; private set; }
     public PeerColor? Color { get; private set; }
@@ -237,7 +237,7 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     {
         foreach (var memberUid in aggregateEvent.MemberUidList)
         {
-            if (memberUid > MyTelegramServerDomainConsts.BotUserInitId)
+            if (memberUid > MyTelegramConsts.BotUserInitId)
             {
                 if (!BotUserIdList.Contains(memberUid))
                 {

@@ -159,7 +159,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         CheckAdminRights(requestInfo, r => r.ChangeInfo);
         CheckBannedRights(requestInfo, _state.GetDefaultBannedRights().ChangeInfo);
 
-        if (about?.Length > MyTelegramServerDomainConsts.ChatAboutMaxLength)
+        if (about?.Length > MyTelegramConsts.ChatAboutMaxLength)
         {
             RpcErrors.RpcErrors400.ChatAboutTooLong.ThrowRpcError();
         }
@@ -179,7 +179,7 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
     )
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        if (_state.ChatAdmins.Count > MyTelegramServerDomainConsts.ChannelAdminMaxCount)
+        if (_state.ChatAdmins.Count > MyTelegramConsts.ChannelAdminMaxCount)
         {
             RpcErrors.RpcErrors400.AdminsTooMuch.ThrowRpcError();
         }

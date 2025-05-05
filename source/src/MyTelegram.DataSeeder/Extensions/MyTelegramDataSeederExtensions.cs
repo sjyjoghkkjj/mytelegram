@@ -1,4 +1,5 @@
-﻿using MyTelegram.Domain.Extensions;
+﻿using MyTelegram.EventFlow.MongoDB.Extensions;
+using MyTelegram.Messenger.NativeAot;
 using MyTelegram.QueryHandlers.MongoDB.User;
 
 namespace MyTelegram.DataSeeder.Extensions;
@@ -9,19 +10,18 @@ public static class MyTelegramDataSeederExtensions
         Action<IEventFlowOptions>? configure = null)
     {
         services.RegisterMongoDbSerializer();
-        services.AddMyEventFlow();
         services.AddEventFlow(options =>
         {
-            options.AddDefaults(typeof(EventFlowExtensions).Assembly);
-            options.Configure(c => { c.IsAsynchronousSubscribersEnabled = true; });
+            options.AddDefaults(typeof(Domain.Specs).Assembly);
             options.UseMongoDbEventStore();
-            options.AddMessengerMongoDbReadModel();
-            options.AddMyMongoDbReadModel();
+			
+			options.UseMongoDbSnapshotStore();
+			options.AddMyTelegramMongoDbReadModel();
             options.AddQueryHandlers(typeof(GetUserByIdQueryHandler));
             options.AddSystemTextJson(jsonSerializerOptions =>
             {
-                //jsonSerializerOptions.AddSingleValueObjects(
-                //    new SystemTextJsonSingleValueObjectConverter<CacheKey>());
+                jsonSerializerOptions.AddSingleValueObjects(
+                    new SystemTextJsonSingleValueObjectConverter<CacheKey>());
                 jsonSerializerOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
                 jsonSerializerOptions.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
             });
@@ -30,5 +30,7 @@ public static class MyTelegramDataSeederExtensions
 
         services.AddTransient(typeof(IDataSeeder<>), typeof(DataSeeder<>));
         services.RegisterServices();
+        services.AddReadModelMongoDbContext();
+        services.AddEventStoreMongoDbContext();
     }
 }

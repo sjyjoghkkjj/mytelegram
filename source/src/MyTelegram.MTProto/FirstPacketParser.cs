@@ -3,7 +3,7 @@
 public class FirstPacketParser(
     ILogger<FirstPacketParser> logger,
     IAesHelper aesHelper)
-    : IFirstPacketParser
+    : IFirstPacketParser, ITransientDependency
 {
     private const byte AbridgedFlag = 0xef;
     private const byte IntermediateFlag = 0xee;
@@ -70,7 +70,7 @@ public class FirstPacketParser(
                     data.ProtocolType = ProtocolType.Intermediate;
                     break;
                 default:
-                    logger.LogWarning("Unknown protocol:{nonce56:x} {nonce57:x} {nonce58:x} {nonce59:x}",
+                    logger.LogWarning("Unknown protocol: {nonce56:x} {nonce57:x} {nonce58:x} {nonce59:x}",
                         protocolBytes[0],
                         protocolBytes[1],
                         protocolBytes[2],
@@ -81,7 +81,7 @@ public class FirstPacketParser(
             if (data.ProtocolType != ProtocolType.Unknown)
             {
                 var dcId = BitConverter.ToInt16(encryptedNonce, 60);
-                logger.LogInformation("[{ProtocolType}] Protocol detected,dcId:{DcId}", data.ProtocolType, dcId);
+                logger.LogInformation("[{ProtocolType}] Protocol detected, dcId: {DcId} bytes: {Bytes}", data.ProtocolType, dcId,firstPacket.Length);
                 data.SendKey = sendKey;
                 data.ReceiveState = new CtrState
                 {
@@ -117,7 +117,7 @@ public class FirstPacketParser(
                 protocolType = ProtocolType.Intermediate;
                 break;
             default:
-                logger.LogWarning("UnKnown protocol:{Protocol}", firstPacket[0]);
+                logger.LogWarning("UnKnown protocol: {Protocol}", firstPacket[0]);
                 break;
         }
 

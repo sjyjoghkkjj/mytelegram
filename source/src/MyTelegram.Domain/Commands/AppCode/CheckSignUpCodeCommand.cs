@@ -8,7 +8,8 @@ public class CheckSignUpCodeCommand(
     long accessHash,
     string phoneNumber,
     string firstName,
-    string? lastName)
+    string? lastName
+    )
     : RequestCommand2<AppCodeAggregate, AppCodeId, IExecutionResult>(aggregateId, requestInfo)
 {
     //string phoneNumber,
@@ -19,7 +20,6 @@ public class CheckSignUpCodeCommand(
     public long AccessHash { get; } = accessHash;
     public string FirstName { get; } = firstName;
     public string? LastName { get; } = lastName;
-
     public string PhoneNumber { get; } = phoneNumber;
 
     //public string PhoneNumber { get; }

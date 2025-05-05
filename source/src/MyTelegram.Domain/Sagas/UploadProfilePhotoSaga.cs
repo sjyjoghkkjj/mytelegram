@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyTelegram.Schema.Messages;
-
-namespace MyTelegram.Domain.Sagas;
+﻿namespace MyTelegram.Domain.Sagas;
 
 public class UploadProfilePhotoSagaId(string value) : SingleValueObject<string>(value), ISagaId;
 
@@ -22,8 +15,8 @@ public class UploadProfilePhotoSaga(UploadProfilePhotoSagaId id, IEventStore eve
 {
     public Task HandleAsync(IDomainEvent<UserAggregate, UserId, UserProfilePhotoUploadedEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
     {
-        var command = new SetAsProfilePhotoCommand(PhotoId.Create(domainEvent.AggregateEvent.PhotoId));
-        Publish(command);
+        //var command = new SetAsProfilePhotoCommand(PhotoId.Create(domainEvent.AggregateEvent.PhotoId));
+        //Publish(command);
 
         return CompleteAsync(cancellationToken);
     }

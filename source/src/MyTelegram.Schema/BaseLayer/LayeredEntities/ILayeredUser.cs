@@ -20,4 +20,10 @@ public interface ILayeredUser : IUser
 
     string? BotInlinePlaceholder { get; set; }
     MyTelegram.Schema.IEmojiStatus? EmojiStatus { get; set; }
+    
+    ///<summary>
+    /// Whether the account of this user was deleted. <br>Changes to this flag should invalidate the local <a href="https://corefork.telegram.org/constructor/userFull">userFull</a> cache for this user ID, see <a href="https://corefork.telegram.org/api/peers#full-info-database">here »</a> for more info.
+    /// See <a href="https://corefork.telegram.org/type/true" />
+    ///</summary>
+    bool Deleted { get; set; }
 }

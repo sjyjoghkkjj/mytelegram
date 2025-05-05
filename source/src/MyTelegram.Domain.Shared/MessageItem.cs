@@ -51,7 +51,9 @@ public record MessageItem
     int? TtlPeriod = null,
     bool IsTtlFromDefaultSetting = false,
     bool Pinned = false,
-    bool InvertMedia = false
-    //int? DefaultHistoryTtl = null,
-    //int? Ttl = null
+    bool InvertMedia = false,
+    bool PublicPosts = false,
+    List<string>? Hashtags = null
+//int? DefaultHistoryTtl = null,
+//int? Ttl = null
 );

@@ -115,7 +115,7 @@ public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, User
     }
 
     public void UpdateProfilePhoto(RequestInfo requestInfo,
-            long photoId,
+            long? photoId,
             bool fallback)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);

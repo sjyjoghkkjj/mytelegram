@@ -14,7 +14,7 @@ public class PtsHelper(IQueryProcessor queryProcessor) : IPtsHelper, ISingletonD
             return cacheItem.Pts;
         }
 
-        return MyTelegramServerDomainConsts.PtsInitId;
+        return MyTelegramConsts.PtsInitId;
     }
 
     public async Task<PtsCacheItem> GetPtsForUserAsync(long userId)

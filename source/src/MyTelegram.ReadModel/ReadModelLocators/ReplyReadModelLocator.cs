@@ -13,7 +13,7 @@ public class ReplyId(string value) : Identity<ReplyId>(value)
     }
 }
 
-public class ReplyReadModelLocator : IReplyReadModelLocator
+public class ReplyReadModelLocator : IReplyReadModelLocator, ITransientDependency
 {
     public IEnumerable<string> GetReadModelIds(IDomainEvent domainEvent)
     {

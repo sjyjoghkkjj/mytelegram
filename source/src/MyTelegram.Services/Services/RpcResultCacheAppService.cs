@@ -8,7 +8,7 @@ public class RpcResultCacheAppService(ILogger<RpcResultCacheAppService> logger, 
     : IRpcResultCacheAppService, ISingletonDependency
 {
     private readonly TimeSpan _cacheExpireTimeSpan =
-        TimeSpan.FromSeconds(MyTelegramServerDomainConsts.MaxTimeDiffSeconds);
+        TimeSpan.FromSeconds(MyTelegramConsts.MaxTimeDiffSeconds);
 
     private readonly int _maxRpcResultCacheCount = 200000;
     private readonly ConcurrentDictionary<long, IObject> _rpcResults = new();

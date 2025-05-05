@@ -61,7 +61,7 @@ internal sealed class InviteToChannelHandler(
             var inviterUserId = input.UserId;
             if (channelReadModel!.Broadcast || channelReadModel.HasLink)
             {
-                inviterUserId = MyTelegramServerDomainConsts.GroupAnonymousBotUserId;
+                inviterUserId = MyTelegramConsts.GroupAnonymousBotUserId;
             }
 
             var command = new StartInviteToChannelCommand(

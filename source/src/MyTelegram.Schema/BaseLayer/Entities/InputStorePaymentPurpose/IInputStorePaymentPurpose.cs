@@ -13,6 +13,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TInputStorePaymentStarsTopup), nameof(TInputStorePaymentStarsTopup))]
 [JsonDerivedType(typeof(TInputStorePaymentStarsGift), nameof(TInputStorePaymentStarsGift))]
 [JsonDerivedType(typeof(TInputStorePaymentStarsGiveaway), nameof(TInputStorePaymentStarsGiveaway))]
+[JsonDerivedType(typeof(TInputStorePaymentAuthCode), nameof(TInputStorePaymentAuthCode))]
 public interface IInputStorePaymentPurpose : IObject
 {
 

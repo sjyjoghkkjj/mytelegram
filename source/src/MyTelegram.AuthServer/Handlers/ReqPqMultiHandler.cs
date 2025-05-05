@@ -18,9 +18,9 @@ public class ReqPqMultiHandler(
         await cacheManager.SetAsync(
             key,
             authCacheItem,
-            MyTelegramServerDomainConsts.AuthKeyExpireSeconds
+            MyTelegramConsts.AuthKeyExpireSeconds
         );
-        logger.LogTrace(
+        logger.LogDebug(
             "[Step1] ReqPqMulti created, connectionId={ConnectionId}, reqMsgId: {ReqMsgId}, authKeyId: {AuthKeyId}",
             input.ConnectionId,
             input.ReqMsgId,

@@ -1,5 +1,4 @@
 ﻿using EventFlow.Aggregates.ExecutionResults;
-using EventFlow.Core;
 using Microsoft.Extensions.Hosting;
 
 namespace MyTelegram.Messenger.CommandServer.BackgroundServices;

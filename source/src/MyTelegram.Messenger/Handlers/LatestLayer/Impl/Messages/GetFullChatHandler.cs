@@ -34,7 +34,7 @@ internal sealed class GetFullChatHandler(
                         .ProcessAsync(
                             new GetPeerNotifySettingsByIdQuery(PeerNotifySettingsId.Create(input.UserId,
                                 PeerType.Channel,
-                                obj.ChatId)),
+                                obj.ChatId).Value),
                             CancellationToken.None);
                     var photoReadModel = await photoAppService.GetAsync(channel.PhotoId);
                     return chatConverterService.ToChannelFull(

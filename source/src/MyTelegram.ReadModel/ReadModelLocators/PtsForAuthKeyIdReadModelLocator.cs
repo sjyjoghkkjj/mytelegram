@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.ReadModel.ReadModelLocators;
 
-public class PtsForAuthKeyIdReadModelLocator : IPtsForAuthKeyIdReadModelLocator
+public class PtsForAuthKeyIdReadModelLocator : IPtsForAuthKeyIdReadModelLocator, ITransientDependency
 {
     public IEnumerable<string> GetReadModelIds(IDomainEvent domainEvent)
     {

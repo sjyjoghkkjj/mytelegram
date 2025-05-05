@@ -5,6 +5,6 @@ public class UnencryptedDataProcessorBackgroundService(IMessageQueueProcessor<Un
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return messageQueueProcessor.ProcessAsync();
+        return messageQueueProcessor.ProcessAsync(stoppingToken);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace MyTelegram.Services.Services.IdGenerator;
 
-public class HiLoValueGeneratorCache(IHiLoStateBlockSizeHelper stateBlockSizeHelper) : IHiLoValueGeneratorCache
+public class HiLoValueGeneratorCache(IHiLoStateBlockSizeHelper stateBlockSizeHelper) : IHiLoValueGeneratorCache, ISingletonDependency
 {
     private readonly ConcurrentDictionary<IdType, ConcurrentDictionary<long, HiLoValueGeneratorState>> _states = new();
     //private readonly int DefaultBlockSize = 10000;

@@ -7,16 +7,10 @@ namespace MyTelegram.Schema.Messages;
 /// Report a <a href="https://corefork.telegram.org/api/sponsored-messages">sponsored message »</a>, see <a href="https://corefork.telegram.org/api/sponsored-messages#reporting-sponsored-messages">here »</a> for more info on the full flow.
 /// See <a href="https://corefork.telegram.org/method/messages.reportSponsoredMessage" />
 ///</summary>
-[TlObject(0x1af3dbb8)]
+[TlObject(0x12cbf0c4)]
 public sealed class RequestReportSponsoredMessage : IRequest<MyTelegram.Schema.Channels.ISponsoredMessageReportResult>
 {
-    public uint ConstructorId => 0x1af3dbb8;
-    ///<summary>
-    /// The channel/bot where the ad is located
-    /// See <a href="https://corefork.telegram.org/type/InputPeer" />
-    ///</summary>
-    public MyTelegram.Schema.IInputPeer Peer { get; set; }
-
+    public uint ConstructorId => 0x12cbf0c4;
     ///<summary>
     /// The ad's unique ID.
     ///</summary>
@@ -36,14 +30,12 @@ public sealed class RequestReportSponsoredMessage : IRequest<MyTelegram.Schema.C
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(Peer);
         writer.Write(RandomId);
         writer.Write(Option);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         RandomId = reader.ReadBytes();
         Option = reader.ReadBytes();
     }

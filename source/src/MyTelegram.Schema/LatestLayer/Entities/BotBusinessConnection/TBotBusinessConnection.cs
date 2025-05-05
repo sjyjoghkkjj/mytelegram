@@ -7,20 +7,14 @@ namespace MyTelegram.Schema;
 /// Contains info about a <a href="https://corefork.telegram.org/api/business#connected-bots">bot business connection</a>.
 /// See <a href="https://corefork.telegram.org/constructor/botBusinessConnection" />
 ///</summary>
-[TlObject(0x896433b4)]
+[TlObject(0x8f34b2f5)]
 public sealed class TBotBusinessConnection : IBotBusinessConnection
 {
-    public uint ConstructorId => 0x896433b4;
+    public uint ConstructorId => 0x8f34b2f5;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
     public BitArray Flags { get; set; } = new BitArray(32);
-
-    ///<summary>
-    /// Whether the bot can reply on behalf of the user to messages it receives through the business connection
-    /// See <a href="https://corefork.telegram.org/type/true" />
-    ///</summary>
-    public bool CanReply { get; set; }
 
     ///<summary>
     /// Whether this business connection is currently disabled
@@ -47,12 +41,12 @@ public sealed class TBotBusinessConnection : IBotBusinessConnection
     /// When was the connection created.
     ///</summary>
     public int Date { get; set; }
+    public MyTelegram.Schema.IBusinessBotRights? Rights { get; set; }
 
     public void ComputeFlag()
     {
-        if (CanReply) { Flags[0] = true; }
         if (Disabled) { Flags[1] = true; }
-
+        if (Rights != null) { Flags[2] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -64,16 +58,17 @@ public sealed class TBotBusinessConnection : IBotBusinessConnection
         writer.Write(UserId);
         writer.Write(DcId);
         writer.Write(Date);
+        if (Flags[2]) { writer.Write(Rights); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Flags = reader.ReadBitArray();
-        if (Flags[0]) { CanReply = true; }
         if (Flags[1]) { Disabled = true; }
         ConnectionId = reader.ReadString();
         UserId = reader.ReadInt64();
         DcId = reader.ReadInt32();
         Date = reader.ReadInt32();
+        if (Flags[2]) { Rights = reader.Read<MyTelegram.Schema.IBusinessBotRights>(); }
     }
 }

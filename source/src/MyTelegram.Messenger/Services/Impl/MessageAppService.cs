@@ -540,7 +540,18 @@ public class MessageAppService(
         );
     }
 
-    private void AddExtraPeerIds(IReadOnlyCollection<IMessageReadModel> messageReadModels, HashSet<long> userIds, HashSet<long> channelIds)
+    public (HashSet<long> userIds, HashSet<long> channelIds) GetExtraPeerIds(
+        IReadOnlyCollection<IMessageReadModel> messageReadModels)
+    {
+        var userIds = new HashSet<long>();
+        var channelIds = new HashSet<long>();
+        AddExtraPeerIds(messageReadModels, userIds, channelIds);
+
+        return (userIds, channelIds);
+    }
+
+    private void AddExtraPeerIds(IReadOnlyCollection<IMessageReadModel> messageReadModels, HashSet<long> userIds,
+        HashSet<long> channelIds)
     {
         void AddPeerIdIfNeeded(Peer? peer)
         {

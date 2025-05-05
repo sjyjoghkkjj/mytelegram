@@ -17,6 +17,6 @@ public record DialogFilter
     int? Color,
     IList<InputPeer> PinnedPeers,
     IList<InputPeer> IncludePeers,
-    IList<InputPeer> ExcludePeers
-//ITextWithEntities Title2
+    IList<InputPeer> ExcludePeers,
+    bool IsChatlist
 );

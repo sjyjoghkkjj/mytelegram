@@ -7,20 +7,14 @@ namespace MyTelegram.Schema;
 /// Contains info about a <a href="https://corefork.telegram.org/api/business#connected-bots">connected business bot »</a>.
 /// See <a href="https://corefork.telegram.org/constructor/connectedBot" />
 ///</summary>
-[TlObject(0xbd068601)]
+[TlObject(0xcd64636c)]
 public sealed class TConnectedBot : IConnectedBot
 {
-    public uint ConstructorId => 0xbd068601;
+    public uint ConstructorId => 0xcd64636c;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
     public BitArray Flags { get; set; } = new BitArray(32);
-
-    ///<summary>
-    /// Whether the the bot can reply to messages it receives through the connection
-    /// See <a href="https://corefork.telegram.org/type/true" />
-    ///</summary>
-    public bool CanReply { get; set; }
 
     ///<summary>
     /// ID of the connected bot
@@ -32,10 +26,10 @@ public sealed class TConnectedBot : IConnectedBot
     /// See <a href="https://corefork.telegram.org/type/BusinessBotRecipients" />
     ///</summary>
     public MyTelegram.Schema.IBusinessBotRecipients Recipients { get; set; }
+    public MyTelegram.Schema.IBusinessBotRights Rights { get; set; }
 
     public void ComputeFlag()
     {
-        if (CanReply) { Flags[0] = true; }
 
     }
 
@@ -46,13 +40,14 @@ public sealed class TConnectedBot : IConnectedBot
         writer.Write(Flags);
         writer.Write(BotId);
         writer.Write(Recipients);
+        writer.Write(Rights);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Flags = reader.ReadBitArray();
-        if (Flags[0]) { CanReply = true; }
         BotId = reader.ReadInt64();
         Recipients = reader.Read<MyTelegram.Schema.IBusinessBotRecipients>();
+        Rights = reader.Read<MyTelegram.Schema.IBusinessBotRights>();
     }
 }

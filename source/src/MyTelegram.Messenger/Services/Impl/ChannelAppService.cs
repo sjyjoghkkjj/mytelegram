@@ -18,6 +18,10 @@ public class ChannelAppService(IQueryProcessor queryProcessor,
     protected override string GetReadModelId(IChannelReadModel readModel) => readModel.Id;
 
     protected override long GetReadModelInt64Id(IChannelReadModel readModel) => readModel.ChannelId;
+    protected override Task<IChannelReadModel?> CreateNonExistsReadModelAsync(long id)
+    {
+        return Task.FromResult<IChannelReadModel?>(null);
+    }
 
     protected override Task<IReadOnlyCollection<IChannelReadModel>> GetReadModelListAsync(List<long> ids)
     {

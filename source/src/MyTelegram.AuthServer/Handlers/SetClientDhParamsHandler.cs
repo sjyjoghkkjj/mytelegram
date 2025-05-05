@@ -13,7 +13,7 @@ public class SetClientDhParamsHandler(
     )
     {
         var dto = await step3ServerHelper.SetClientDhParamsAnswerAsync(obj);
-        logger.LogDebug(
+        logger.LogInformation(
             "[Step3] [{IsPerm}] authKey created successfully, connectionId: {ConnectionId}, authKeyId: {AuthKeyId:x2}, reqMsgId: {ReqMsgId}",
             input.ConnectionId,
             dto.IsPermanent ? "Perm" : "Temp",

@@ -22,7 +22,7 @@ public class DocumentReadModel : IDocumentReadModel,
     public int? Fingerprint { get; private set; }
     public string Id { get; private set; } = null!;
     public string? Md5CheckSum { get; private set; }
-    public string? MimeType { get; private set; }
+    public string MimeType { get; private set; } = string.Empty;
     public string? Name { get; private set; }
     public long Size { get; private set; }
     //public byte[]? Stickers { get; private set; }

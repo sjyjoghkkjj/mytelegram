@@ -1,6 +1,4 @@
-﻿using MyTelegram.Domain.Aggregates.Pts;
-using MyTelegram.Domain.Commands.Pts;
-using MyTelegram.Schema.Extensions;
+﻿using MyTelegram.Schema.Extensions;
 
 namespace MyTelegram.Messenger.CommandServer.EventHandlers;
 

@@ -7,11 +7,12 @@ public class ClientDataSender(
     IMtpMessageEncoder messageEncoder)
     : IClientDataSender, ITransientDependency
 {
-    public Task SendAsync(MTProto.UnencryptedMessageResponse data)
+    public Task SendAsync(UnencryptedMessageResponse data)
     {
         if (!clientManager.TryGetClientData(data.ConnectionId, out var d))
         {
-            logger.LogWarning("[0] Cannot find cached client info, skip sending message, connectionId: {ConnectionId}", data.ConnectionId);
+            logger.LogWarning("[0] Cannot find cached client info, skip sending message, connectionId: {ConnectionId}",
+                data.ConnectionId);
             return Task.CompletedTask;
         }
 
@@ -28,7 +29,7 @@ public class ClientDataSender(
         }
     }
 
-    public Task SendAsync(MTProto.EncryptedMessageResponse data)
+    public Task SendAsync(EncryptedMessageResponse data)
     {
         if (!clientManager.TryGetClientData(data.ConnectionId, out var d))
         {
@@ -44,13 +45,23 @@ public class ClientDataSender(
             }
         }
 
-        d.ResponseQueue.Writer.TryWrite(data);
+        d?.ResponseQueue.Writer.TryWrite(data);
 
         return Task.CompletedTask;
     }
 
-    public int EncodeData(MTProto.EncryptedMessageResponse data, ClientData d, byte[] encodedBytes)
+    public int EncodeData(EncryptedMessageResponse data, ClientData d, byte[] encodedBytes)
     {
+        //if (d.AuthKeyId == 0)
+        //{
+        //    d.AuthKeyId = data.AuthKeyId;
+        //}
+
+        //if (!clientManager.ContainsAuthKey(data.AuthKeyId))
+        //{
+        //    clientManager.UpdateAuthKeyId(data.AuthKeyId,data.ConnectionId);
+        //}
+
         return messageEncoder.Encode(d, data, encodedBytes);
     }
 

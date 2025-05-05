@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Phone call
 /// See <a href="https://corefork.telegram.org/constructor/phoneCall" />
 ///</summary>
-[TlObject(0x3ba5940c)]
+[TlObject(0x30535af5)]
 public sealed class TPhoneCall : IPhoneCall
 {
-    public uint ConstructorId => 0x3ba5940c;
+    public uint ConstructorId => 0x30535af5;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -27,6 +27,7 @@ public sealed class TPhoneCall : IPhoneCall
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool Video { get; set; }
+    public bool ConferenceSupported { get; set; }
 
     ///<summary>
     /// Call ID
@@ -84,14 +85,13 @@ public sealed class TPhoneCall : IPhoneCall
     /// See <a href="https://corefork.telegram.org/type/DataJSON" />
     ///</summary>
     public MyTelegram.Schema.IDataJSON? CustomParameters { get; set; }
-    public MyTelegram.Schema.IInputGroupCall? ConferenceCall { get; set; }
 
     public void ComputeFlag()
     {
         if (P2pAllowed) { Flags[5] = true; }
         if (Video) { Flags[6] = true; }
+        if (ConferenceSupported) { Flags[8] = true; }
         if (CustomParameters != null) { Flags[7] = true; }
-        if (ConferenceCall != null) { Flags[8] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -110,7 +110,6 @@ public sealed class TPhoneCall : IPhoneCall
         writer.Write(Connections);
         writer.Write(StartDate);
         if (Flags[7]) { writer.Write(CustomParameters); }
-        if (Flags[8]) { writer.Write(ConferenceCall); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -118,6 +117,7 @@ public sealed class TPhoneCall : IPhoneCall
         Flags = reader.ReadBitArray();
         if (Flags[5]) { P2pAllowed = true; }
         if (Flags[6]) { Video = true; }
+        if (Flags[8]) { ConferenceSupported = true; }
         Id = reader.ReadInt64();
         AccessHash = reader.ReadInt64();
         Date = reader.ReadInt32();
@@ -129,6 +129,5 @@ public sealed class TPhoneCall : IPhoneCall
         Connections = reader.Read<TVector<MyTelegram.Schema.IPhoneConnection>>();
         StartDate = reader.ReadInt32();
         if (Flags[7]) { CustomParameters = reader.Read<MyTelegram.Schema.IDataJSON>(); }
-        if (Flags[8]) { ConferenceCall = reader.Read<MyTelegram.Schema.IInputGroupCall>(); }
     }
 }

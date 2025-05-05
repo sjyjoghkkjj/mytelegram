@@ -49,7 +49,7 @@ internal sealed class GetHistoryHandler(
         //if (peer.PeerType == PeerType.Channel || peer.PeerType == PeerType.Chat)
         {
             var dialogReadModel = await queryProcessor
-                .ProcessAsync(new GetDialogByIdQuery(DialogId.Create(input.UserId, peer)));
+                .ProcessAsync(new GetDialogByIdQuery(DialogId.Create(input.UserId, peer).Value));
             channelHistoryMinId = dialogReadModel?.ChannelHistoryMinId ?? 0;
         }
 

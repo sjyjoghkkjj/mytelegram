@@ -36,7 +36,7 @@ internal sealed class DeleteParticipantHistoryHandler(
             var messageIds = (await queryProcessor
                 .ProcessAsync(new GetMessageIdListByUserIdQuery(inputChannel.ChannelId,
                     peer.PeerId,
-                    MyTelegramServerDomainConsts.ClearHistoryDefaultPageSize))).ToList();
+                    MyTelegramConsts.ClearHistoryDefaultPageSize))).ToList();
 
             if (messageIds.Count > 0)
             {

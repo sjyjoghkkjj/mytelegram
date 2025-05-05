@@ -123,6 +123,7 @@ public class MtpConnectionHandler(
                 {
                     clientManager.UpdateAuthKeyId(clientData, response.AuthKeyId, clientData.ConnectionId);
                     var totalCount = clientDataSender.EncodeData(response, clientData, encodedBytes);
+
                     await connectionContext.Transport.Output.WriteAsync(encodedBytes.AsMemory()[..totalCount]);
                     await connectionContext.Transport.Output.FlushAsync();
                 }
@@ -141,7 +142,7 @@ public class MtpConnectionHandler(
         {
             mtpMessage.ConnectionId = clientData.ConnectionId;
             mtpMessage.ClientIp = clientData.ClientIp;
-            mtpMessage.ConnectionType = (int)clientData.ConnectionType;
+            mtpMessage.ConnectionType = clientData.ConnectionType;
             //mtpMessage.ClientIp = (clientData.ConnectionContext!.RemoteEndPoint as IPEndPoint)?.Address.ToString() ?? string.Empty;
             return messageDispatcher.DispatchAsync(mtpMessage);
         }

@@ -3,7 +3,7 @@
 public class MtpMessageDispatcher(
     IMessageQueueProcessor<UnencryptedMessage> unencryptedMessageQueueProcessor,
     IMessageQueueProcessor<EncryptedMessage> encryptedMessageQueueProcessor)
-    : IMtpMessageDispatcher
+    : IMtpMessageDispatcher, ITransientDependency
 {
     public Task DispatchAsync(IMtpMessage message)
     {

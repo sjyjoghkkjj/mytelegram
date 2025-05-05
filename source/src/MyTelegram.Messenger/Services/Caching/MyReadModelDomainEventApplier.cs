@@ -2,7 +2,7 @@
 
 namespace MyTelegram.Messenger.Services.Caching;
 
-public class MyReadModelDomainEventApplier : IReadModelDomainEventApplier
+public class MyReadModelDomainEventApplier : IReadModelDomainEventApplier, ISingletonDependency
 {
     private const string ApplyMethodName = "ApplyAsync";
 

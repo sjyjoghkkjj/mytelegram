@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Extended user infoWhen updating the <a href="https://corefork.telegram.org/api/peers">local peer database »</a>, all fields from the newly received constructor take priority over the old constructor cached locally (including by removing fields that aren't set in the new constructor).
 /// See <a href="https://corefork.telegram.org/constructor/userFull" />
 ///</summary>
-[TlObject(0xd2234ea0)]
+[TlObject(0x99e78045)]
 public sealed class TUserFull : IUserFull
 {
-    public uint ConstructorId => 0xd2234ea0;
+    public uint ConstructorId => 0x99e78045;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -116,6 +116,7 @@ public sealed class TUserFull : IUserFull
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool BotCanManageEmojiStatus { get; set; }
+    public bool DisplayGiftsButton { get; set; }
 
     ///<summary>
     /// User ID
@@ -275,6 +276,7 @@ public sealed class TUserFull : IUserFull
     public MyTelegram.Schema.IStarRefProgram? StarrefProgram { get; set; }
     public MyTelegram.Schema.IBotVerification? BotVerification { get; set; }
     public long? SendPaidMessagesStars { get; set; }
+    public MyTelegram.Schema.IDisallowedGiftsSettings? DisallowedGifts { get; set; }
 
     public void ComputeFlag()
     {
@@ -294,6 +296,7 @@ public sealed class TUserFull : IUserFull
         if (SponsoredEnabled) { Flags2[7] = true; }
         if (CanViewRevenue) { Flags2[9] = true; }
         if (BotCanManageEmojiStatus) { Flags2[10] = true; }
+        if (DisplayGiftsButton) { Flags2[16] = true; }
         if (About != null) { Flags[1] = true; }
         if (PersonalPhoto != null) { Flags[21] = true; }
         if (ProfilePhoto != null) { Flags[2] = true; }
@@ -320,6 +323,7 @@ public sealed class TUserFull : IUserFull
         if (StarrefProgram != null) { Flags2[11] = true; }
         if (BotVerification != null) { Flags2[12] = true; }
         if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2[14] = true; }
+        if (DisallowedGifts != null) { Flags2[15] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -358,6 +362,7 @@ public sealed class TUserFull : IUserFull
         if (Flags2[11]) { writer.Write(StarrefProgram); }
         if (Flags2[12]) { writer.Write(BotVerification); }
         if (Flags2[14]) { writer.Write(SendPaidMessagesStars.Value); }
+        if (Flags2[15]) { writer.Write(DisallowedGifts); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -380,6 +385,7 @@ public sealed class TUserFull : IUserFull
         if (Flags2[7]) { SponsoredEnabled = true; }
         if (Flags2[9]) { CanViewRevenue = true; }
         if (Flags2[10]) { BotCanManageEmojiStatus = true; }
+        if (Flags2[16]) { DisplayGiftsButton = true; }
         Id = reader.ReadInt64();
         if (Flags[1]) { About = reader.ReadString(); }
         Settings = reader.Read<MyTelegram.Schema.IPeerSettings>();
@@ -410,5 +416,6 @@ public sealed class TUserFull : IUserFull
         if (Flags2[11]) { StarrefProgram = reader.Read<MyTelegram.Schema.IStarRefProgram>(); }
         if (Flags2[12]) { BotVerification = reader.Read<MyTelegram.Schema.IBotVerification>(); }
         if (Flags2[14]) { SendPaidMessagesStars = reader.ReadInt64(); }
+        if (Flags2[15]) { DisallowedGifts = reader.Read<MyTelegram.Schema.IDisallowedGiftsSettings>(); }
     }
 }

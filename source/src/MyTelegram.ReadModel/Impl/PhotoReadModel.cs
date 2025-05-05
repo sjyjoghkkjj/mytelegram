@@ -3,7 +3,7 @@
 public partial class PhotoReadModel : IPhotoReadModel,
     IAmReadModelFor<PhotoAggregate, PhotoId, PhotoCreatedEvent>,
     IAmReadModelFor<PhotoAggregate, PhotoId, PhotoDeletedEvent>,
-    IAmReadModelFor<PhotoAggregate,PhotoId,SetAsProfilePhotoCompletedEvent>
+    IAmReadModelFor<PhotoAggregate, PhotoId, SetAsProfilePhotoCompletedEvent>
 {
     public long AccessHash { get; private set; }
     public int Date { get; private set; }
@@ -20,6 +20,8 @@ public partial class PhotoReadModel : IPhotoReadModel,
 
     public List<VideoSize>? VideoSizes { get; private set; }
     public bool IsProfilePhoto { get; private set; }
+    public List<IPhotoSize>? Sizes2 { get; private set; }
+    public List<IVideoSize>? VideoSizes2 { get; private set; }
 
     public Task ApplyAsync(IReadModelContext context,
             IDomainEvent<PhotoAggregate, PhotoId, PhotoCreatedEvent> domainEvent,
@@ -39,6 +41,9 @@ public partial class PhotoReadModel : IPhotoReadModel,
         HasStickers = photo.HasStickers;
         Sizes = photo.Sizes;
         VideoSizes = photo.VideoSizes;
+        IsProfilePhoto = photo.IsProfilePhoto;
+        Sizes2 = photo.Sizes2;
+        VideoSizes2 = photo.VideoSizes2;
 
         return Task.CompletedTask;
     }

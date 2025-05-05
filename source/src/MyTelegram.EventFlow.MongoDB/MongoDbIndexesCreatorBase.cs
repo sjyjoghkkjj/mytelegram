@@ -1,7 +1,6 @@
 ﻿using EventFlow.MongoDB.EventStore;
 using EventFlow.MongoDB.ReadStores;
 using EventFlow.MongoDB.ValueObjects;
-using EventFlow.MongoDB;
 using MongoDB.Driver;
 using System.Linq.Expressions;
 
@@ -17,12 +16,9 @@ public abstract class MongoDbIndexesCreatorBase(
     {
         eventPersistenceInitializer.Initialize();
         var snapShotCollectionName = "snapShots";
-        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateId, snapShotCollectionName)
-     ;
-        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateName, snapShotCollectionName)
-     ;
-        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateSequenceNumber, snapShotCollectionName)
-     ;
+        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateId, snapShotCollectionName);
+        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateName, snapShotCollectionName);
+        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateSequenceNumber, snapShotCollectionName);
 
         await CreateAllIndexesCoreAsync();
     }

@@ -11,7 +11,7 @@ public class PhotoAggregate : AggregateRoot<PhotoAggregate, PhotoId>
 
     public void SetAsProfilePhoto()
     {
-        Specs.AggregateIsCreated.ThrowFirstDomainErrorIfNotSatisfied(this);
+        //Specs.AggregateIsCreated.ThrowFirstDomainErrorIfNotSatisfied(this);
         Emit(new SetAsProfilePhotoCompletedEvent(_state.Photo.Id));
     }
 

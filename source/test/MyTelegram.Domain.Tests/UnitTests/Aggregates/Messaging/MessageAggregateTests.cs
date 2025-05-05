@@ -35,7 +35,7 @@ public class MessageAggregateTests : TestsFor<MessageAggregate>
     public void Edit_Out_Of_Date_Message_Throws_Exception()
     {
         var newMessage = "new message";
-        var creationTime = DateTime.UtcNow.ToTimestamp() - MyTelegramServerDomainConsts.EditTimeLimit - 1000;
+        var creationTime = DateTime.UtcNow.ToTimestamp() - MyTelegramConsts.EditTimeLimit - 1000;
         CreateMessage(creationTime);
 
         var exception = Assert.Throws<RpcException>(() =>

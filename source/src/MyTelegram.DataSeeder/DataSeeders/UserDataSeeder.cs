@@ -14,7 +14,7 @@ public class UserDataSeeder(
         //await CreateBotFatherUserAsync();
         //await CreateGroupAnonymousBotUserAsync();
         await CreateAnonymousUserAsync();
-        var initUserId = MyTelegramServerDomainConsts.UserIdInitId;
+        var initUserId = MyTelegramConsts.UserIdInitId;
         var testUserCount = 30;
         for (var i = 1; i < testUserCount; i++)
         {
@@ -53,7 +53,7 @@ public class UserDataSeeder(
                 );
             await commandBus.PublishAsync(createUserCommand );
 
-            if (userId != MyTelegramServerDomainConsts.OfficialUserId)
+            if (userId != MyTelegramConsts.OfficialUserId)
             {
                 var command = new UpdateUserPremiumStatusCommand(u.Id, true);
                 await commandBus.PublishAsync(command);
@@ -69,9 +69,9 @@ public class UserDataSeeder(
 
     private async Task CreateDefaultSupportUserAsync()
     {
-        var userId = MyTelegramServerDomainConsts.DefaultSupportUserId;
+        var userId = MyTelegramConsts.DefaultSupportUserId;
         var created = await CreateUserIfNeedAsync(userId,
-            MyTelegramServerDomainConsts.DefaultSupportUserId.ToString(),
+            MyTelegramConsts.DefaultSupportUserId.ToString(),
             "MyTelegram Support",
             null,
             null,
@@ -90,14 +90,14 @@ public class UserDataSeeder(
 
     private async Task CreateAnonymousUserAsync()
     {
-        var userId = MyTelegramServerDomainConsts.AnonymousUserId;
+        var userId = MyTelegramConsts.AnonymousUserId;
         var firstName= "Anonymous User";
         await CreateUserIfNeedAsync(userId, string.Empty, firstName, null, null, false);
     }
 
     private async Task CreateOfficialUserAsync()
     {
-        var userId = MyTelegramServerDomainConsts.OfficialUserId;
+        var userId = MyTelegramConsts.OfficialUserId;
         var created = await CreateUserIfNeedAsync(userId,
             "42777",
             "MyTelegram",

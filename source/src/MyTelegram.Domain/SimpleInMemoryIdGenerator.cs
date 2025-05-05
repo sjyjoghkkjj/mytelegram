@@ -37,11 +37,11 @@ public class SimpleInMemoryIdGenerator : IIdGenerator
     {
         return idType switch
         {
-            IdType.ChannelId => MyTelegramServerDomainConsts.ChannelInitId,
-            IdType.UserId => MyTelegramServerDomainConsts.UserIdInitId + 10000,// The first 10000 users is reserved for testing
-            IdType.BotUserId => MyTelegramServerDomainConsts.BotUserInitId,
-            IdType.ChatId => MyTelegramServerDomainConsts.ChatIdInitId,
-            IdType.Pts => MyTelegramServerDomainConsts.PtsInitId,
+            IdType.ChannelId => MyTelegramConsts.ChannelInitId,
+            IdType.UserId => MyTelegramConsts.UserIdInitId + 10000,// The first 10000 users is reserved for testing
+            IdType.BotUserId => MyTelegramConsts.BotUserInitId,
+            IdType.ChatId => MyTelegramConsts.ChatIdInitId,
+            IdType.Pts => MyTelegramConsts.PtsInitId,
             _ => 0,
         };
     }

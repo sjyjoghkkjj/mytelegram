@@ -47,7 +47,8 @@ internal sealed class GetHistoryConverterService(IUserConverterService userConve
                 Pts = channelPts,
                 Count = messages.Count,
                 OffsetIdOffset = offsetId,
-                Topics = []
+                Topics = [],
+                Inexact = false
             };
         }
 

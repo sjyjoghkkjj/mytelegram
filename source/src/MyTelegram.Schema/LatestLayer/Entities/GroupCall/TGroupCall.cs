@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Info about a group call or livestream
 /// See <a href="https://corefork.telegram.org/constructor/groupCall" />
 ///</summary>
-[TlObject(0xcdf8d3e3)]
+[TlObject(0x553b0ba1)]
 public sealed class TGroupCall : IGroupCall
 {
-    public uint ConstructorId => 0xcdf8d3e3;
+    public uint ConstructorId => 0x553b0ba1;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -63,6 +63,8 @@ public sealed class TGroupCall : IGroupCall
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool ListenersHidden { get; set; }
+    public bool Conference { get; set; }
+    public bool Creator { get; set; }
 
     ///<summary>
     /// Group call ID
@@ -113,7 +115,7 @@ public sealed class TGroupCall : IGroupCall
     /// Version
     ///</summary>
     public int Version { get; set; }
-    public long? ConferenceFromCall { get; set; }
+    public string? InviteLink { get; set; }
 
     public void ComputeFlag()
     {
@@ -125,12 +127,14 @@ public sealed class TGroupCall : IGroupCall
         if (RecordVideoActive) { Flags[11] = true; }
         if (RtmpStream) { Flags[12] = true; }
         if (ListenersHidden) { Flags[13] = true; }
+        if (Conference) { Flags[14] = true; }
+        if (Creator) { Flags[15] = true; }
         if (Title != null) { Flags[3] = true; }
         if (/*StreamDcId != 0 && */StreamDcId.HasValue) { Flags[4] = true; }
         if (/*RecordStartDate != 0 && */RecordStartDate.HasValue) { Flags[5] = true; }
         if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[7] = true; }
         if (/*UnmutedVideoCount != 0 && */UnmutedVideoCount.HasValue) { Flags[10] = true; }
-        if (/*ConferenceFromCall != 0 &&*/ ConferenceFromCall.HasValue) { Flags[14] = true; }
+        if (InviteLink != null) { Flags[16] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -148,7 +152,7 @@ public sealed class TGroupCall : IGroupCall
         if (Flags[10]) { writer.Write(UnmutedVideoCount.Value); }
         writer.Write(UnmutedVideoLimit);
         writer.Write(Version);
-        if (Flags[14]) { writer.Write(ConferenceFromCall.Value); }
+        if (Flags[16]) { writer.Write(InviteLink); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -162,6 +166,8 @@ public sealed class TGroupCall : IGroupCall
         if (Flags[11]) { RecordVideoActive = true; }
         if (Flags[12]) { RtmpStream = true; }
         if (Flags[13]) { ListenersHidden = true; }
+        if (Flags[14]) { Conference = true; }
+        if (Flags[15]) { Creator = true; }
         Id = reader.ReadInt64();
         AccessHash = reader.ReadInt64();
         ParticipantsCount = reader.ReadInt32();
@@ -172,6 +178,6 @@ public sealed class TGroupCall : IGroupCall
         if (Flags[10]) { UnmutedVideoCount = reader.ReadInt32(); }
         UnmutedVideoLimit = reader.ReadInt32();
         Version = reader.ReadInt32();
-        if (Flags[14]) { ConferenceFromCall = reader.ReadInt64(); }
+        if (Flags[16]) { InviteLink = reader.ReadString(); }
     }
 }

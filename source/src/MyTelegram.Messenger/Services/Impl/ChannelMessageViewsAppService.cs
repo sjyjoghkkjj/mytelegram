@@ -28,7 +28,7 @@ public class ChannelMessageViewsAppService(
         long channelId,
         int messageId) =>
         Encoding.UTF8.GetBytes(
-            $"{MyTelegramServerDomainConsts.ChannelMessageViewsBloomFilterKey}_{selfUserId}_{authKeyId}_{channelId}_{messageId}");
+            $"{MyTelegramConsts.ChannelMessageViewsBloomFilterKey}_{selfUserId}_{authKeyId}_{channelId}_{messageId}");
 
     public async Task<IList<IMessageViews>> GetMessageViewsAsync(long selfUserId,
         long authKeyId,

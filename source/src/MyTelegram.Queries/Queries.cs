@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Queries;
+﻿using MyTelegram.Schema;
+
+namespace MyTelegram.Queries;
 
 public record GetPagedListQuery(int Skip, int Limit);
 
@@ -57,6 +59,10 @@ public record GetChannelPushUpdatesBySeqNoQuery(
     long SeqNo,
     int Limit) : IQuery<IReadOnlyCollection<IPushUpdatesReadModel>>;
 
+public record GetChatByChatIdListQuery(IList<long> ChatIdList) : IQuery<IReadOnlyCollection<IChatReadModel>>;
+
+public record GetChatByChatIdQuery(long ChatId) : IQuery<IChatReadModel?>;
+
 public record GetChatInvitesQuery(
     bool Revoked,
     long PeerId,
@@ -89,13 +95,15 @@ public record GetContactUserIdListByTargetUserIdListQuery(long SelfUserId, List<
 public record GetContactsByPhonesQuery(long SelfUserId, List<string> Phones)
     : IQuery<IReadOnlyCollection<IContactReadModel>>;
 
-public record GetDeviceByAuthKeyIdQuery(long AuthKeyId) : IQuery<IDeviceReadModel?>;
+//public record GetDeviceByAuthKeyIdQuery(long AuthKeyId) : IQuery<IDeviceReadModel?>;
 
-public record GetDeviceByHashQuery(long UserId, long Hash) : IQuery<IDeviceReadModel?>;
-public record GetDeviceByUserIdQuery(long UserId) : IQuery<IReadOnlyCollection<IDeviceReadModel>>;
+//public record GetDeviceByHashQuery(long UserId, long Hash) : IQuery<IDeviceReadModel?>;
 
-public record GetDialogByIdQuery(DialogId Id) : IQuery<IDialogReadModel?>;
+//public record GetDeviceByUserIdQuery(long UserId) : IQuery<IReadOnlyCollection<IDeviceReadModel>>;
 
+public record GetDialogByIdQuery(string Id) : IQuery<IDialogReadModel?>;
+
+public record GetDialogFilterByIdQuery(long OwnerUserId, int FolderId) : IQuery<IDialogFilterReadModel?>;
 public record GetDialogFiltersQuery(long OwnerUserId) : IQuery<IReadOnlyCollection<IDialogFilterReadModel>>;
 
 public record GetDialogsQuery(
@@ -125,9 +133,7 @@ public record GetEncryptedPushUpdatesByQtsQuery(
     int Limit)
     : IQuery<IReadOnlyCollection<IEncryptedPushUpdatesReadModel>>;
 
-public record GetFileQuery(
-    long FileId,
-    Guid FileReference) : IQuery<IFileReadModel?>;
+public record GetFileQuery(long FileId) : IQuery<IFileReadModel?>;
 
 public record GetJoinedChannelIdListQuery(
     long MemberUserId,
@@ -213,10 +219,10 @@ public record GetMessageViewsQuery(
     long ChannelId,
     List<int> MessageIdList) : IQuery<IReadOnlyCollection<MessageView>>;
 
-public record GetPeerNotifySettingsByIdQuery(PeerNotifySettingsId Id) : IQuery<IPeerNotifySettingsReadModel>;
+public record GetPeerNotifySettingsByIdQuery(string Id) : IQuery<IPeerNotifySettingsReadModel>;
 
-public record GetPeerNotifySettingsListQuery(IReadOnlyList<PeerNotifySettingsId> PeerNotifySettingsIdList)
-    : IQuery<IReadOnlyCollection<IPeerNotifySettingsReadModel>>;
+//public record GetPeerNotifySettingsListQuery(IReadOnlyList<PeerNotifySettingsId> PeerNotifySettingsIdList)
+//    : IQuery<IReadOnlyCollection<IPeerNotifySettingsReadModel>>;
 
 public record GetPhoneCallConfigQuery(long UserId) : IQuery<IPhoneCallConfigReadModel?>;
 
@@ -318,7 +324,7 @@ public record GetForumTopicsByIdsQuery(
 
 public record GetForumTopicByIdQuery(long ChannelId, int TopicId) : IQuery<IForumTopicReadModel?>;
 
-public record GetAccessHashQueryByIdQuery(long Id) : IQuery<IAccessHashReadModel?>;
+//public record GetAccessHashQueryByIdQuery(long Id) : IQuery<IAccessHashReadModel?>;
 
 public record GetMessageReadParticipantsQuery(long SelfUserId, long TargetPeerId, long MessageId)
     : IQuery<IReadOnlyCollection<IReadingHistoryReadModel>>;
@@ -329,9 +335,9 @@ public record GetPhotosByUserIdQuery(long UserId, IList<long> PhotoIds) : IQuery
 
 public record GetUserProfilePhotosQuery(long UserId) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
 
-public record GetPhotosByPhotoIdLisQuery(IList<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
+//public record GetPhotosByPhotoIdLisQuery(IList<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
 
-public record GetPhotoByIdQuery(long PhotoId) : IQuery<IPhotoReadModel?>;
+//public record GetPhotoByIdQuery(long PhotoId) : IQuery<IPhotoReadModel?>;
 
 public record GetUsersByPhoneNumberListQuery(List<string> PhoneNumbers) : IQuery<IReadOnlyCollection<IUserReadModel>>;
 
@@ -403,7 +409,7 @@ public record GetMaxUserIdQuery : IQuery<long>;
 
 public record GetUnreadCountQuery(long OwnerUserId, long ToPeerId, int MaxMessageId) : IQuery<int>;
 
-public record GetDocumentByIdQuery(long Id) : IQuery<IDocumentReadModel?>;
+//public record GetDocumentByIdQuery(long Id) : IQuery<IDocumentReadModel?>;
 
 public record GetWallPapersQuery(long UserId) : IQuery<IReadOnlyCollection<IWallPaperReadModel>>;
 
@@ -411,7 +417,7 @@ public record GetWallPaperQuery(long WallPaperId) : IQuery<IWallPaperReadModel?>
 
 public record GetWallPaperBySlugQuery(string Slug) : IQuery<IWallPaperReadModel?>;
 
-public record GetDocumentsByIdsQuery(IList<long> Ids) : IQuery<IReadOnlyCollection<IDocumentReadModel>>;
+//public record GetDocumentsByIdsQuery(IList<long> Ids) : IQuery<IReadOnlyCollection<IDocumentReadModel>>;
 
 public record GetGlobalPrivacySettingsQuery(long UserId) : IQuery<GlobalPrivacySettings?>;
 
@@ -639,3 +645,29 @@ public record GetLeftChannelIdsQuery(long UserId, List<long>? ChannelIds = null,
 public record GetBotMembersByChannelIdQuery(long ChannelId) : IQuery<IReadOnlyCollection<IChannelMemberReadModel>>;
 public record GetJoinRequestQuery(long ChannelId, long UserId) : IQuery<IJoinChannelRequestReadModel?>;
 public record GetPhotoListQuery(long UserId, List<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
+public record GetChatlistInvitesCountQuery(long UserId, int FolderId) : IQuery<int>;
+public record GetShareableFolderCountQuery(long UserId) : IQuery<int>;
+public record GetMaxFolderIdQuery(long UserId) : IQuery<int>;
+public record GetAllDialogFiltersQuery(int Skip, int Limit) : IQuery<IReadOnlyCollection<IDialogFilterReadModel>>;
+public record GetImportedDialogFolderQuery(long UserId, string Slug) : IQuery<IDialogFilterReadModel?>;
+public record SearchPostsQuery(string Hashtag, int OffsetRate, long OffsetPeerId, int OffsetId, int Limit) : IQuery<IReadOnlyCollection<IMessageReadModel>>;
+public record GetPostsCountQuery(string Hashtag, int OffsetRate, int OffsetId) : IQuery<int>;
+
+public record GetFilesQuery(List<long> FileIds) : IQuery<IReadOnlyCollection<IFileReadModel>>;
+public record GetAuthKeyByAuthKeyIdQuery(long AuthKeyId) : IQuery<IAuthKeyReadModel?>;
+public record GetDeviceByUserIdQuery(long UserId) : IQuery<IReadOnlyCollection<IDeviceReadModel>>;
+public record GetDeviceByAuthKeyIdQuery(long AuthKeyId) : IQuery<IDeviceReadModel?>;
+public record GetDeviceByHashQuery(long UserId, long Hash) : IQuery<IDeviceReadModel?>;
+public record GetAccessHashQueryByIdQuery(long Id) : IQuery<IAccessHashReadModel?>;
+
+public record GetDocumentByIdQuery(long Id) : IQuery<IDocumentReadModel?>;
+
+public record GetDocumentIdByMd5Query(string Md5) : IQuery<long?>;
+
+public record GetDocumentsByIdListQuery(List<long> Ids) : IQuery<IReadOnlyCollection<IDocumentReadModel>>;
+
+public record GetDocumentsByIdsQuery(IList<long> Ids) : IQuery<IReadOnlyCollection<IDocumentReadModel>>;
+
+public record GetPhotoByIdQuery(long PhotoId) : IQuery<IPhotoReadModel?>;
+
+public record GetPhotosByPhotoIdLisQuery(IList<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;

@@ -15,11 +15,6 @@ public interface IConnectedBot : IObject
     BitArray Flags { get; set; }
 
     ///<summary>
-    /// Whether the the bot can reply to messages it receives through the connection
-    ///</summary>
-    bool CanReply { get; set; }
-
-    ///<summary>
     /// ID of the connected bot
     ///</summary>
     long BotId { get; set; }
@@ -29,4 +24,5 @@ public interface IConnectedBot : IObject
     /// See <a href="https://corefork.telegram.org/type/BusinessBotRecipients" />
     ///</summary>
     MyTelegram.Schema.IBusinessBotRecipients Recipients { get; set; }
+    MyTelegram.Schema.IBusinessBotRights Rights { get; set; }
 }

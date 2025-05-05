@@ -8,7 +8,7 @@ public class PtsUpdatedEvent(
     long globalSeqNo,
     int changedUnreadCount,
     int? messageId
-)
+    )
     : AggregateEvent<PtsAggregate, PtsId>
 {
     public int NewPts { get; } = newPts;

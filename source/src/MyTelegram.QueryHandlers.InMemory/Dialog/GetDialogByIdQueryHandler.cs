@@ -6,6 +6,6 @@ public class GetDialogByIdQueryHandler(IQueryOnlyReadModelStore<DialogReadModel>
     public async Task<IDialogReadModel?> ExecuteQueryAsync(GetDialogByIdQuery query,
         CancellationToken cancellationToken)
     {
-        return await store.FirstOrDefaultAsync(p => p.Id == query.Id.Value, cancellationToken);
+        return await store.FirstOrDefaultAsync(p => p.Id == query.Id, cancellationToken);
     }
 }

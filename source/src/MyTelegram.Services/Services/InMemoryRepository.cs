@@ -16,6 +16,11 @@ public class
     {
         return _entities.TryRemove(id, out entity);
     }
+	
+	public IEnumerable<TEntity> GetAll()
+    {
+        return _entities.Values;
+    }
 
     public TEntity? Find(TPrimaryKey id)
     {

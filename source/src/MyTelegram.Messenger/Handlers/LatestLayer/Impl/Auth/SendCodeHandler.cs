@@ -47,7 +47,7 @@ internal sealed class SendCodeHandler(
         if (userReadModel != null)
         {
             if (peerHelper.IsBotUser(userReadModel.UserId) ||
-                userReadModel.UserId == MyTelegramServerDomainConsts.OfficialUserId)
+                userReadModel.UserId == MyTelegramConsts.OfficialUserId)
             {
                 RpcErrors.RpcErrors400.PhoneNumberInvalid.ThrowRpcError();
             }

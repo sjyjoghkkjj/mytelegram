@@ -4,7 +4,9 @@ using MyTelegram.Domain.Commands.Device;
 
 namespace MyTelegram.Messenger.CommandServer.BackgroundServices;
 
-public class NewDeviceCreatedEventDataProcessor(IQueuedCommandExecutor<DeviceAggregate, DeviceId, IExecutionResult> queuedCommandExecutor) : IDataProcessor<NewDeviceCreatedEvent>
+public class NewDeviceCreatedEventDataProcessor(
+    IQueuedCommandExecutor<DeviceAggregate, DeviceId, IExecutionResult> queuedCommandExecutor)
+    : IDataProcessor<NewDeviceCreatedEvent>, ITransientDependency
 {
     public Task ProcessAsync(NewDeviceCreatedEvent eventData)
     {
@@ -26,7 +28,8 @@ public class NewDeviceCreatedEventDataProcessor(IQueuedCommandExecutor<DeviceAgg
             eventData.LangPack,
             eventData.LangCode,
             eventData.Ip,
-            eventData.Layer
+            eventData.Layer,
+            eventData.Parameters
         );
         //await commandBus.PublishAsync(createDeviceCommand, default);
         queuedCommandExecutor.Enqueue(createDeviceCommand);

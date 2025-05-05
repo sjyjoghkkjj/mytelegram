@@ -1,6 +1,4 @@
-﻿using MyTelegram.Core;
-
-namespace MyTelegram.Services.Services;
+﻿namespace MyTelegram.Services.Services;
 
 public class SessionMessageDataProcessor(IEventBus eventBus) : IDataProcessor<ISessionMessage>
 {

@@ -1,11 +1,13 @@
-﻿using MyTelegram.Services.Services.IdGenerator;
+﻿using EventFlow.MongoDB.EventStore;
+using MyTelegram.Services.Services.IdGenerator;
 
 namespace MyTelegram.Messenger.Services.Impl;
 
-public class MongoDbHighValueGenerator(IMongoDbIdGenerator idGenerator) : IHiLoHighValueGenerator, ITransientDependency
+public class MongoDbHighValueGenerator(IMongoDbEventSequenceStore eventSequenceStore) : IHiLoHighValueGenerator, ITransientDependency
 {
     public Task<long> GetNewHighValueAsync(IdType idType, long key, CancellationToken cancellationToken = default)
     {
-        return idGenerator.NextLongIdAsync(idType, key, cancellationToken: cancellationToken);
+        var nextId=eventSequenceStore.GetNextSequence($"{idType}-{key}");
+        return Task.FromResult(nextId);
     }
 }

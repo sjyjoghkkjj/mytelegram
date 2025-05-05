@@ -19,6 +19,7 @@ public class DefaultDataProcessor<TData>(
             var sw = Stopwatch.StartNew();
             if (handlerHelper.TryGetHandler(obj.ObjectId, out var handler))
             {
+
                 IObject? data = null;
                 var req = GetRequestInput(obj);
                 try
@@ -48,7 +49,7 @@ public class DefaultDataProcessor<TData>(
                         }
                     }
 
-                   
+
                     var handlerName = handler.GetType().Name;
 
                     if (data is IHasSubQuery)
@@ -114,13 +115,15 @@ public class DefaultDataProcessor<TData>(
             obj.RequestId,
             obj.ObjectId,
             obj.ReqMsgId,
+            obj.SeqNumber,
             obj.UserId,
             obj.AuthKeyId,
             obj.PermAuthKeyId,
             obj.Layer,
             obj.Date,
             obj.DeviceType,
-            obj.ClientIp
+            obj.ClientIp,
+            obj.SessionId
         );
 
         return req;

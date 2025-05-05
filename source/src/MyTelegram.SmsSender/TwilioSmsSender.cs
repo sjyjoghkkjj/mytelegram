@@ -8,23 +8,23 @@ namespace MyTelegram.SmsSender;
 public class TwilioSmsSender : ISmsSender, ITransientDependency
 {
     private readonly ILogger<TwilioSmsSender> _logger;
-    private readonly IOptionsSnapshot<TwilioSmsOptions> _optionsSnapshot;
+    private readonly IOptionsMonitor<TwilioSmsOptions> _options;
     private readonly SemaphoreSlim _semaphore = new(1);
     private bool _isTwilioClientInited;
 
-    public TwilioSmsSender(IOptionsSnapshot<TwilioSmsOptions> optionsSnapshot,
+    public TwilioSmsSender(IOptionsMonitor<TwilioSmsOptions> optionsSnapshot,
         ILogger<TwilioSmsSender> logger)
     {
-        _optionsSnapshot = optionsSnapshot;
+        _options = optionsSnapshot;
         _logger = logger;
         InitTwilioClientIfNeed();
     }
 
-    public bool Enabled => _optionsSnapshot.Value.Enabled;
+    public bool Enabled => _options.CurrentValue.Enabled;
 
     public async Task SendAsync(SmsMessage smsMessage)
     {
-        if (!_optionsSnapshot.Value.Enabled)
+        if (!_options.CurrentValue.Enabled)
         {
             _logger.LogWarning("Twilio sms sender disabled, the code will not be sent. PhoneNumber: {To} Text: {Text}",
                 smsMessage.PhoneNumber, smsMessage.Text);
@@ -44,12 +44,12 @@ public class TwilioSmsSender : ISmsSender, ITransientDependency
         }
 
         var resource =
-                string.IsNullOrEmpty(_optionsSnapshot.Value.MessagingServiceSId)
+                string.IsNullOrEmpty(_options.CurrentValue.MessagingServiceSId)
                     ? await MessageResource.CreateAsync(new PhoneNumber(phoneNumber),
-                        from: new PhoneNumber(_optionsSnapshot.Value.FromNumber),
+                        from: new PhoneNumber(_options.CurrentValue.FromNumber),
                         body: smsMessage.Text)
                     : await MessageResource.CreateAsync(new PhoneNumber(phoneNumber),
-                        messagingServiceSid: _optionsSnapshot.Value.MessagingServiceSId,
+                        messagingServiceSid: _options.CurrentValue.MessagingServiceSId,
                         body: smsMessage.Text)
             ;
 
@@ -66,7 +66,7 @@ public class TwilioSmsSender : ISmsSender, ITransientDependency
     //private async Task InitTwilioClientIfNeedAsync()
     private void InitTwilioClientIfNeed()
     {
-        if (!_optionsSnapshot.Value.Enabled)
+        if (!_options.CurrentValue.Enabled)
         {
             return;
         }
@@ -86,25 +86,25 @@ public class TwilioSmsSender : ISmsSender, ITransientDependency
                 return;
             }
 
-            if (string.IsNullOrEmpty(_optionsSnapshot.Value.AccountSId))
+            if (string.IsNullOrEmpty(_options.CurrentValue.AccountSId))
             {
                 // _logger.LogWarning("AccountSId option was not configured!");
-                throw new ArgumentException("AccountSId can not be null", nameof(_optionsSnapshot.Value.AccountSId));
+                throw new ArgumentException("AccountSId can not be null", nameof(_options.CurrentValue.AccountSId));
             }
 
-            if (string.IsNullOrEmpty(_optionsSnapshot.Value.AuthToken))
+            if (string.IsNullOrEmpty(_options.CurrentValue.AuthToken))
             {
                 // _logger.LogWarning("AuthToken option was not configured!");
-                throw new ArgumentException("AuthToken can not be null", nameof(_optionsSnapshot.Value.AuthToken));
+                throw new ArgumentException("AuthToken can not be null", nameof(_options.CurrentValue.AuthToken));
             }
 
-            if (string.IsNullOrEmpty(_optionsSnapshot.Value.FromNumber))
+            if (string.IsNullOrEmpty(_options.CurrentValue.FromNumber))
             {
                 // _logger.LogWarning("FromNumber option was not configured!");
-                throw new ArgumentException("FromNumber can not be null", nameof(_optionsSnapshot.Value.FromNumber));
+                throw new ArgumentException("FromNumber can not be null", nameof(_options.CurrentValue.FromNumber));
             }
 
-            TwilioClient.Init(_optionsSnapshot.Value.AccountSId, _optionsSnapshot.Value.AuthToken);
+            TwilioClient.Init(_options.CurrentValue.AccountSId, _options.CurrentValue.AuthToken);
             _isTwilioClientInited = true;
         }
         finally

@@ -6,6 +6,12 @@ public class ClientData : IClientData
     public WebSocket? WebSocket { get; set; }
     public ClientType ClientType { get; set; }
     public string ClientIp { get; set; } = null!;
+    public long Seq { get; set; }
+
+    public Channel<EncryptedMessageResponse> ResponseQueue { get; set; } =
+        Channel.CreateUnbounded<EncryptedMessageResponse>();
+
+    public ConnectionType ConnectionType { get; set; }
     public ProtocolType MtProtoType { get; set; }
     public bool IsFirstPacketParsed { get; set; }
     public byte[] SendKey { get; set; } = null!;
@@ -17,7 +23,4 @@ public class ClientData : IClientData
     public bool ObfuscationEnabled { get; set; }
     public int CurrentPacketLength { get; set; }
     public int SkipCount { get; set; }
-    public long Seq { get; set; }
-    public Channel<MyTelegram.MTProto.EncryptedMessageResponse> ResponseQueue { get; set; } = Channel.CreateUnbounded<MyTelegram.MTProto.EncryptedMessageResponse>();
-    public ConnectionType ConnectionType { get; set; }
 }

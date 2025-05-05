@@ -30,7 +30,7 @@ internal sealed class GetPeerSettingsHandler(
         await accessHashHelper.CheckAccessHashAsync(obj.Peer);
         var userId = input.UserId;
         var peer = peerHelper.GetPeer(obj.Peer, userId);
-        if (peer.PeerId == MyTelegramServerDomainConsts.OfficialUserId || peer.PeerType == PeerType.Self)
+        if (peer.PeerId == MyTelegramConsts.OfficialUserId || peer.PeerType == PeerType.Self)
         {
             return new MyTelegram.Schema.Messages.TPeerSettings
             {

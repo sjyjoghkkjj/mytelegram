@@ -11,18 +11,11 @@ public class SendMessageSagaState : AggregateState<SendMessageSaga, SendMessageS
     IApply<SendOutboxMessageCompletedSagaEvent>,
     IApply<InboxMessageCreatedSagaEvent>
 {
-    public RequestInfo RequestInfo { get; set; } = default!;
-    //public MessageItem MessageItem { get; set; } = default!;
+    public RequestInfo RequestInfo { get; set; } = null!;
     public List<long>? MentionedUserIds { get; private set; }
-    //public int GroupItemCount { get; set; }
     public long? LinkedChannelId { get; set; }
     public List<long>? ChatMembers { get; private set; } = new();
-    //public List<InboxItem> InboxItems { get; private set; } = new();
-
     public Dictionary<Guid, List<InboxItem>> UserInboxItems { get; set; } = new();
-
-    //public Dictionary<long, int> ReplyToMsgItems { get; private set; } = new();
-
     public List<SendMessageItem> SendMessageItems { get; private set; } = [];
     public bool IsSendQuickReplyMessages { get; private set; }
     public bool IsSendGroupedMessages { get; private set; }
@@ -33,28 +26,11 @@ public class SendMessageSagaState : AggregateState<SendMessageSaga, SendMessageS
 
     public int TotalCount { get; private set; }
 
-    public SendMessageItem FirstMessageItem { get; private set; }
+    public SendMessageItem FirstMessageItem { get; private set; } = null!;
 
     public List<MessageItem> InboxMessageItems { get; private set; } = [];
 
     public bool IsSendOutboxMessageCompleted => SentCount == SendMessageItems.Count;
-
-
-    //public void Apply(SendMessageSagaStartedEvent aggregateEvent)
-    //{
-    //    RequestInfo = aggregateEvent.RequestInfo;
-    //    MessageItem = aggregateEvent.MessageItem;
-    //    MentionedUserIds = aggregateEvent.MentionedUserIds;
-    //    GroupItemCount = aggregateEvent.GroupItemCount;
-    //    LinkedChannelId = aggregateEvent.LinkedChannelId;
-    //    ChatMembers = aggregateEvent.ChatMembers;
-
-    //    if (aggregateEvent.ReplyToMsgItems?.Count > 0)
-    //    {
-    //        ReplyToMsgItems = aggregateEvent.ReplyToMsgItems.ToDictionary(k => k.UserId, v => v.MessageId);
-    //    }
-    //}
-
 
     public void Apply(SendMessageStartedSagaEvent aggregateEvent)
     {

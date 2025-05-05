@@ -8,6 +8,5 @@ public static class MyTelegramDataConverterExtensions
     {
         var assembly = typeof(MyTelegramDataConverterExtensions).Assembly;
         services.RegisterServices(assembly);
-        services.RegisterHandlers(assembly);
     }
 }

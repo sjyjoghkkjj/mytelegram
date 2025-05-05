@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.ReadModel.ReadModelLocators;
 
-public class PtsReadModelLocator : IPtsReadModelLocator
+public class PtsReadModelLocator : IPtsReadModelLocator, ITransientDependency
 {
     public IEnumerable<string> GetReadModelIds(IDomainEvent domainEvent)
     {
@@ -8,9 +8,9 @@ public class PtsReadModelLocator : IPtsReadModelLocator
         var aggregateEvent = domainEvent.GetAggregateEvent();
         switch (aggregateEvent)
         {
-            case TempPtsIncrementedEvent tempPtsIncrementedEvent:
-                ownerPeerId = tempPtsIncrementedEvent.OwnerPeerId;
-                break;
+            //case TempPtsIncrementedEvent tempPtsIncrementedEvent:
+            //    ownerPeerId = tempPtsIncrementedEvent.OwnerPeerId;
+            //    break;
 
             case PtsGlobalSeqNoUpdatedEvent ptsGlobalSeqNoUpdatedEvent:
                 ownerPeerId = ptsGlobalSeqNoUpdatedEvent.PeerId;

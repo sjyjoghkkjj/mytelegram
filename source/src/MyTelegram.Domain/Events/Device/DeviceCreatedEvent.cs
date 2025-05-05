@@ -19,13 +19,16 @@ public class DeviceCreatedEvent(
     string langCode,
     string ip,
     int layer,
-    int date)
+    int date,
+    Dictionary<string,string>? parameters
+    )
     : AggregateEvent<DeviceAggregate, DeviceId>
 {
     public int ApiId { get; } = apiId;
     public string AppName { get; } = appName;
     public string AppVersion { get; } = appVersion;
     public int Date { get; } = date;
+    public Dictionary<string, string>? Parameters { get; } = parameters;
     public string DeviceModel { get; } = deviceModel;
     public long Hash { get; } = hash;
     public string Ip { get; } = ip;

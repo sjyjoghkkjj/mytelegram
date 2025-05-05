@@ -59,7 +59,7 @@ internal sealed class GetFullUserHandler(
 
         var peerNotifySettingsId = PeerNotifySettingsId.Create(selfUserId, targetPeer.PeerType, targetPeer.PeerId);
         var peerNotifySettingReadModel =
-            await queryProcessor.ProcessAsync(new GetPeerNotifySettingsByIdQuery(peerNotifySettingsId));
+            await queryProcessor.ProcessAsync(new GetPeerNotifySettingsByIdQuery(peerNotifySettingsId.Value));
         var peerSettingReadModel = await peerSettingsAppService.GetPeerSettingsAsync(input.UserId, targetPeer.PeerId);
         var contactType = contactHelper.GetContactType(myContactReadModel, targetUserContactReadModel);// await contactAppService.GetContactTypeAsync(input.UserId, targetPeer.PeerId);
         var peerSettings = peerSettingsLayeredService.GetConverter(input.Layer).ToPeerSettings(input.UserId,

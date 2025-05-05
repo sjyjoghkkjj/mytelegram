@@ -47,7 +47,7 @@
 //        var senderPeerId = 1;
 //        var recipientPeerId = 2L;
 //        var message = A<string>();
-//        var chatId = MyTelegramServerDomainConsts.ChatIdInitId + 1;
+//        var chatId = MyTelegramConsts.ChatIdInitId + 1;
 //        await CreateUserAsync(senderPeerId);
 //        await CreateUserAsync(recipientPeerId);
 //        await CreateChatAsync(chatId, senderPeerId, new[] { recipientPeerId });
@@ -73,7 +73,7 @@
 //        var senderPeerId = 1;
 //        var recipientPeerId = 2;
 //        var message = A<string>();
-//        var channelId = MyTelegramServerDomainConsts.ChannelInitId + 1;
+//        var channelId = MyTelegramConsts.ChannelInitId + 1;
 //        await CreateUserAsync(senderPeerId);
 //        await CreateUserAsync(recipientPeerId);
 //        await CreateChannelAsync(channelId, senderPeerId);

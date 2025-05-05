@@ -13,19 +13,19 @@ internal sealed class GetSupportHandler(
     protected override async Task<MyTelegram.Schema.Help.ISupport> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Help.RequestGetSupport obj)
     {
-        var supportUserId = MyTelegramServerDomainConsts.DefaultSupportUserId;
+        var supportUserId = MyTelegramConsts.DefaultSupportUserId;
         if (!string.IsNullOrEmpty(options.CurrentValue.SupportUserId))
         {
             if (!long.TryParse(options.CurrentValue.SupportUserId, out supportUserId))
             {
-                supportUserId = MyTelegramServerDomainConsts.DefaultSupportUserId;
+                supportUserId = MyTelegramConsts.DefaultSupportUserId;
             }
         }
         var userReadModel = await userAppService.GetAsync(supportUserId);
 
         if (userReadModel == null)
         {
-            supportUserId = MyTelegramServerDomainConsts.DefaultSupportUserId;
+            supportUserId = MyTelegramConsts.DefaultSupportUserId;
             userReadModel = await userAppService.GetAsync(supportUserId);
         }
 

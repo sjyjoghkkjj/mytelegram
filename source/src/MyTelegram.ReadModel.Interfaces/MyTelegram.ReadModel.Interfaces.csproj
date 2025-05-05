@@ -11,4 +11,10 @@
     <ProjectReference Include="..\MyTelegram.Domain.Shared\MyTelegram.Domain.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="Fody">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

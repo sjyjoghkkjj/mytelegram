@@ -12,26 +12,21 @@ namespace MyTelegram.Schema.Account;
 /// 403 PREMIUM_ACCOUNT_REQUIRED A premium account is required to execute this action.
 /// See <a href="https://corefork.telegram.org/method/account.updateConnectedBot" />
 ///</summary>
-[TlObject(0x43d8521d)]
+[TlObject(0x66a08c7e)]
 public sealed class RequestUpdateConnectedBot : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0x43d8521d;
+    public uint ConstructorId => 0x66a08c7e;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
     public BitArray Flags { get; set; } = new BitArray(32);
 
     ///<summary>
-    /// Whether the bot can reply to messages it receives from us, on behalf of us using the <a href="https://corefork.telegram.org/api/business#connected-bots">business connection</a>.
-    /// See <a href="https://corefork.telegram.org/type/true" />
-    ///</summary>
-    public bool CanReply { get; set; }
-
-    ///<summary>
     /// Whether to fully disconnect the bot from the current account.
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool Deleted { get; set; }
+    public MyTelegram.Schema.IBusinessBotRights? Rights { get; set; }
 
     ///<summary>
     /// The bot to connect or disconnect
@@ -47,8 +42,8 @@ public sealed class RequestUpdateConnectedBot : IRequest<MyTelegram.Schema.IUpda
 
     public void ComputeFlag()
     {
-        if (CanReply) { Flags[0] = true; }
         if (Deleted) { Flags[1] = true; }
+        if (Rights != null) { Flags[0] = true; }
 
     }
 
@@ -57,6 +52,7 @@ public sealed class RequestUpdateConnectedBot : IRequest<MyTelegram.Schema.IUpda
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
+        if (Flags[0]) { writer.Write(Rights); }
         writer.Write(Bot);
         writer.Write(Recipients);
     }
@@ -64,8 +60,8 @@ public sealed class RequestUpdateConnectedBot : IRequest<MyTelegram.Schema.IUpda
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Flags = reader.ReadBitArray();
-        if (Flags[0]) { CanReply = true; }
         if (Flags[1]) { Deleted = true; }
+        if (Flags[0]) { Rights = reader.Read<MyTelegram.Schema.IBusinessBotRights>(); }
         Bot = reader.Read<MyTelegram.Schema.IInputUser>();
         Recipients = reader.Read<MyTelegram.Schema.IInputBusinessBotRecipients>();
     }

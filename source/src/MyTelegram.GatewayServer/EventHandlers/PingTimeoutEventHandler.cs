@@ -8,7 +8,7 @@ public class PingTimeoutEventHandler(IClientManager clientManager)
         if (clientManager.TryGetClientData(eventData.ConnectionId, out var clientData))
         {
             clientData.ConnectionContext?.DisposeAsync();
-            clientData.WebSocket?.CloseAsync(WebSocketCloseStatus.Empty, null, default);
+            clientData.WebSocket?.CloseAsync(WebSocketCloseStatus.Empty, null, CancellationToken.None);
         }
 
         return Task.CompletedTask;

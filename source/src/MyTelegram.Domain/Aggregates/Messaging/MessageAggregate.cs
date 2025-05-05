@@ -197,7 +197,7 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
     )
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        if (_state.MessageItem.Date + MyTelegramServerDomainConsts.EditTimeLimit < DateTime.UtcNow.ToTimestamp())
+        if (_state.MessageItem.Date + MyTelegramConsts.EditTimeLimit < DateTime.UtcNow.ToTimestamp())
         {
             RpcErrors.RpcErrors400.MessageEditTimeExpired.ThrowRpcError();
         }
@@ -280,9 +280,9 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
             recentRepliers.Remove(peer);
         }
 
-        if (recentRepliers.Count > MyTelegramServerDomainConsts.MaxRecentRepliersCount)
+        if (recentRepliers.Count > MyTelegramConsts.MaxRecentRepliersCount)
         {
-            recentRepliers.RemoveAt(MyTelegramServerDomainConsts.MaxRecentRepliersCount - 1);
+            recentRepliers.RemoveAt(MyTelegramConsts.MaxRecentRepliersCount - 1);
         }
 
         recentRepliers.Insert(0, replierPeer);
@@ -325,8 +325,9 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new MessageReplyUpdatedEvent(_state.MessageItem.OwnerPeer.PeerId,
-            MyTelegramServerDomainConsts.DeletedChannelIdForChannelPost, _state.MessageItem.MessageId, pts));
+            MyTelegramConsts.DeletedChannelIdForChannelPost, _state.MessageItem.MessageId, pts));
     }
+
     public void UpdateOutboxMessagePinned(
         RequestInfo requestInfo,
         bool pinned,
@@ -360,14 +361,16 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
             _state.SenderMessageId,
             _state.Pinned,
             _state.EditDate,
+            //_state.EditHide,
             _state.Edited,
-            _state.Pts
+            _state.Pts,
+            _state.IsDeleted
         ));
     }
 
     protected override Task LoadSnapshotAsync(MessageSnapshot snapshot,
-        ISnapshotMetadata metadata,
-        CancellationToken cancellationToken)
+      ISnapshotMetadata metadata,
+      CancellationToken cancellationToken)
     {
         _state.LoadSnapshot(snapshot);
         return Task.CompletedTask;

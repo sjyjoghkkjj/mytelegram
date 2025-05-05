@@ -7,10 +7,10 @@ namespace MyTelegram.Schema.Messages;
 /// Informs the server that the user has interacted with a sponsored message in <a href="https://corefork.telegram.org/api/sponsored-messages#clicking-on-sponsored-messages">one of the ways listed here »</a>.
 /// See <a href="https://corefork.telegram.org/method/messages.clickSponsoredMessage" />
 ///</summary>
-[TlObject(0xf093465)]
+[TlObject(0x8235057e)]
 public sealed class RequestClickSponsoredMessage : IRequest<IBool>
 {
-    public uint ConstructorId => 0xf093465;
+    public uint ConstructorId => 0x8235057e;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -29,12 +29,6 @@ public sealed class RequestClickSponsoredMessage : IRequest<IBool>
     public bool Fullscreen { get; set; }
 
     ///<summary>
-    /// The channel/bot where the ad is located
-    /// See <a href="https://corefork.telegram.org/type/InputPeer" />
-    ///</summary>
-    public MyTelegram.Schema.IInputPeer Peer { get; set; }
-
-    ///<summary>
     /// The ad's unique ID.
     ///</summary>
     public byte[] RandomId { get; set; }
@@ -51,7 +45,6 @@ public sealed class RequestClickSponsoredMessage : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        writer.Write(Peer);
         writer.Write(RandomId);
     }
 
@@ -60,7 +53,6 @@ public sealed class RequestClickSponsoredMessage : IRequest<IBool>
         Flags = reader.ReadBitArray();
         if (Flags[0]) { Media = true; }
         if (Flags[1]) { Fullscreen = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         RandomId = reader.ReadBytes();
     }
 }

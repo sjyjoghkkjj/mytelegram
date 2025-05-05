@@ -46,7 +46,7 @@ internal sealed class ReadHistoryHandler(
         }
 
         var selfDialogId = DialogId.Create(input.UserId, peer);
-        var dialogReadModel = await queryProcessor.ProcessAsync(new GetDialogByIdQuery(selfDialogId));
+        var dialogReadModel = await queryProcessor.ProcessAsync(new GetDialogByIdQuery(selfDialogId.Value));
         if (dialogReadModel == null || dialogReadModel.ReadInboxMaxId >= obj.MaxId)
         {
             return new TAffectedMessages

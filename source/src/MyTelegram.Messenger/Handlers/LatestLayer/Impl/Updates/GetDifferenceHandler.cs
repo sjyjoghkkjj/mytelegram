@@ -54,8 +54,8 @@ internal sealed class GetDifferenceHandler(
         var joinedChannelIdList = await queryProcessor
             .ProcessAsync(new GetChannelIdListByMemberUserIdQuery(input.UserId));
 
-        var limit = obj.PtsTotalLimit ?? MyTelegramServerDomainConsts.DefaultPtsTotalLimit;
-        limit = Math.Min(limit, MyTelegramServerDomainConsts.DefaultPtsTotalLimit);
+        var limit = obj.PtsTotalLimit ?? MyTelegramConsts.DefaultPtsTotalLimit;
+        limit = Math.Min(limit, MyTelegramConsts.DefaultPtsTotalLimit);
 
         var updatesReadModels =
             await queryProcessor.ProcessAsync(

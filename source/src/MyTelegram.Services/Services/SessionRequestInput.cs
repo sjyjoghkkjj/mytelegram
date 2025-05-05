@@ -23,11 +23,13 @@ public record SessionRequestInput(
     RequestId,
     ObjectId,
     ReqMsgId,
+    SeqNumber,
     UserId,
     AuthKeyId,
     PermAuthKeyId,
     Layer,
     Date,
     DeviceType,
-    ClientIp
+    ClientIp,
+    RequestSessionId
 );

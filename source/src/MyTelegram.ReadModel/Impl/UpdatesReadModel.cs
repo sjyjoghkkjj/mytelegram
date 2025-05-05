@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.ReadModel.Impl;
+﻿using MyTelegram.Domain.Aggregates.Updates;
+
+namespace MyTelegram.ReadModel.Impl;
 
 public class UpdatesReadModel : IUpdatesReadModel,
     IAmReadModelFor<UpdatesAggregate, UpdatesId, UpdatesCreatedEvent>
@@ -31,7 +33,7 @@ public class UpdatesReadModel : IUpdatesReadModel,
         Id = domainEvent.AggregateIdentity.Value;
 
         OwnerPeerId = domainEvent.AggregateEvent.OwnerPeerId;
-        if (OwnerPeerId > MyTelegramServerDomainConsts.ChannelInitId)
+        if (OwnerPeerId > MyTelegramConsts.ChannelInitId)
         {
             ChannelId = OwnerPeerId;
         }

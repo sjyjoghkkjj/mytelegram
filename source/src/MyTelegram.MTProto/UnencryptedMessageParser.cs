@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.MTProto;
 
-public class UnencryptedMessageParser : IUnencryptedMessageParser
+public class UnencryptedMessageParser : IUnencryptedMessageParser, ITransientDependency
 {
     public UnencryptedMessage Parse(ReadOnlySpan<byte> data)
     {

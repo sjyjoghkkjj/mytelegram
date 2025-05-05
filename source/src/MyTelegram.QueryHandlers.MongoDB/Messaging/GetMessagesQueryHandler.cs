@@ -36,7 +36,7 @@ public class
                 //.WhereIf(query.Offset?.LoadType == LoadType.Forward, p => p.MessageId > query.Offset!.FromId)
                 //.WhereIf(query.Offset?.MaxId > 0, p => p.MessageId < query.Offset!.MaxId)
                 .WhereIf(query.Offset is { LoadType: LoadType.Backward, MaxId: > 0 }, p => p.MessageId < query.Offset!.MaxId)
-                .WhereIf(query.Offset is { LoadType: LoadType.AroundMessage, MaxId: > 0 }, p => p.MessageId < query.Offset!.MaxId)
+                //.WhereIf(query.Offset is { LoadType: LoadType.AroundMessage, MaxId: > 0 }, p => p.MessageId < query.Offset!.MaxId)
                 .WhereIf(query.Offset?.LoadType == LoadType.Forward, p => p.MessageId > query.Offset!.FromId)
                 .WhereIf(query.Pts > 0, p => p.Pts > query.Pts)
                 .WhereIf(query.Peer != null && query.Peer.PeerType != PeerType.Empty,
@@ -79,7 +79,7 @@ public class
             sortOptions = new(p => p.MessageId, SortType.Ascending);
         }
 
-        var result= await store.FindAsync(predicate,
+        var result = await store.FindAsync(predicate,
                0,
                query.Limit,
                sort: sortOptions,

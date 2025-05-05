@@ -43,6 +43,7 @@ message SavePhotoRequest{
 	string md5=7;
 	optional bytes videoEmojiMarkup=8;
 	int64 userId=9;
+	bool isProfilePhoto=10;
 }
 
 message SavePhotoResponse{
@@ -54,7 +55,7 @@ message SavePhotoResponse{
 	//int32 width=6;
 	bytes photo=1;
 	int64 photoId=2;
-
+	int64 size=3;
 }
 
 message SaveMediaRequest{

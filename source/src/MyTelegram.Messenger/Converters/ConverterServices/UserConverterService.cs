@@ -1,4 +1,5 @@
 ﻿using MyTelegram.Messenger.Services.Impl;
+using TPeerSettings = MyTelegram.Schema.TPeerSettings;
 
 namespace MyTelegram.Messenger.Converters.ConverterServices;
 
@@ -25,8 +26,6 @@ public class UserConverterService(
             throw new RpcException(RpcErrors.RpcErrors400.UserIdInvalid);
         }
 
-        var photoReadModels = (await photoAppService.GetPhotosAsync(userReadModel)).ToDictionary(k => k.PhotoId);
-
         //IReadOnlyCollection<IContactReadModel>? contactReadModels = null;
         IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels = null;
         IContactReadModel? myContactReadModel = null;
@@ -40,6 +39,7 @@ public class UserConverterService(
             targetUserContactReadModel =
                 contactReadModels?.FirstOrDefault(p => p.SelfUserId == userId && p.TargetUserId == selfUserId);
         }
+        var photoReadModels = (await photoAppService.GetPhotosAsync(userReadModel, myContactReadModel)).ToDictionary(k => k.PhotoId);
 
         if (!skipCheckPrivacy)
         {
@@ -78,12 +78,28 @@ public class UserConverterService(
         IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels, int layer = 0)
     {
         var userId = userReadModel.UserId;
-        var isOfficialUserId = userId == MyTelegramServerDomainConsts.OfficialUserId;
+        var isOfficialUserId = userId == MyTelegramConsts.OfficialUserId;
         var phoneCallAvailable = !isOfficialUserId &&
                                  !userReadModel.Bot &&
                                  userId != selfUserId;
         var userFull = userFullLayeredService.GetConverter(layer).ToUserFull(userReadModel);
         userFull.CanPinMessage = !isOfficialUserId;
+
+        if (userReadModel.IsDeleted == true)
+        {
+            //userFull.Settings = new TPeerSettings
+            //{
+            //    NeedContactsException = true
+            //};
+            userFull.Settings = new TPeerSettings
+            {
+                NeedContactsException = true
+            };
+            userFull.NotifySettings = new TPeerNotifySettings();
+
+            return userFull;
+        }
+
         userFull.PhoneCallsAvailable = phoneCallAvailable;
         userFull.VideoCallsAvailable = phoneCallAvailable;
         userFull.PhoneCallsPrivate = isOfficialUserId;
@@ -105,6 +121,9 @@ public class UserConverterService(
             if (photos.TryGetValue(userReadModel.FallbackPhotoId.Value, out var fallbackPhotoReadModel))
             {
                 userFull.FallbackPhoto = photoLayeredService.GetConverter(layer).ToPhoto(fallbackPhotoReadModel);
+                var profilePhotoId = userReadModel.ProfilePhotoId;
+
+                userFull.ProfilePhoto = profilePhotoId is null or 0 ? null : new TPhotoEmpty { Id = profilePhotoId.Value };
             }
         }
 
@@ -117,6 +136,15 @@ public class UserConverterService(
             var contactType = contactHelper.GetContactType(myContactReadModel, targetUserContactReadModel);
 
             ApplyPrivacyToUserFull(selfUserId, userFull, privacyReadModels, contactType);
+
+            if (myContactReadModel is { PhotoId: not null })
+            {
+                if (photos.TryGetValue(myContactReadModel.PhotoId.Value, out var photoReadModel))
+                {
+                    userFull.PersonalPhoto = photoLayeredService.GetConverter(layer).ToPhoto(photoReadModel);
+                    userFull.ProfilePhoto ??= userFull.PersonalPhoto;
+                }
+            }
         }
 
         return userFull;
@@ -126,14 +154,17 @@ public class UserConverterService(
     {
         var userReadModel = await userAppService.GetAsync(userId);
         //var isBlocked = await blockCacheAppService.IsBlockedAsync(selfUserId, userId);
-        var photoReadModels = await photoAppService.GetPhotosAsync(userReadModel);
         var privacyReadModels = await privacyAppService.GetPrivacyListAsync(userId);
         IReadOnlyCollection<IContactReadModel>? contactReadModels = null;
+        IContactReadModel? myContactReadModel = null;
         if (selfUserId != userId)
         {
             contactReadModels =
               await queryProcessor.ProcessAsync(new GetContactListBySelfIdAndTargetUserIdQuery(selfUserId, userId));
+            myContactReadModel =
+                contactReadModels?.FirstOrDefault(p => p.SelfUserId == selfUserId && p.TargetUserId == userId);
         }
+        var photoReadModels = await photoAppService.GetPhotosAsync(userReadModel, myContactReadModel);
 
         return ToUserFull(selfUserId, userReadModel, photoReadModels, contactReadModels, privacyReadModels, layer);
     }
@@ -188,6 +219,14 @@ public class UserConverterService(
         IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels = null, int layer = 0)
     {
         var user = userLayeredService.GetConverter(layer).ToUser(userReadModel);
+        if (userReadModel.IsDeleted == true)
+        {
+            user.Deleted = true;
+            user.Photo = null;
+
+            return user;
+        }
+
         if (selfUserId == userReadModel.UserId)
         {
             user.Self = true;

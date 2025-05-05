@@ -48,8 +48,8 @@ internal sealed class UpdateDialogFilterHandler(
                     f.Color,
                     pinnedPeers,
                     includePeers,
-                    excludePeers);
-                var command = new UpdateDialogFilterCommand(DialogFilterId.Create(input.UserId, obj.Id), input.ToRequestInfo(), input.UserId, filter);
+                    excludePeers, false);
+                var command = new UpdateDialogFilterCommand(DialogFilterId.Create(input.UserId, obj.Id), input.ToRequestInfo(), input.UserId, filter.Id, filter);
                 await commandBus.PublishAsync(command, default);
             }
             else

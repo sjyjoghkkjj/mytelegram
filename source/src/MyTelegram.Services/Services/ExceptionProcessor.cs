@@ -1,5 +1,6 @@
 ﻿using EventFlow.Exceptions;
 using MyTelegram.Schema;
+using MyTelegram.Services.Extensions;
 
 namespace MyTelegram.Services.Services;
 
@@ -18,22 +19,21 @@ public class ExceptionProcessor(
             input,
             requestData
         );
-        return ProcessExceptionCoreAsync(ex, input);
+        return ProcessExceptionCoreAsync(ex, input.UserId, input);
     }
 
-    private async Task ProcessExceptionCoreAsync(Exception ex, IRequestInput input)
+    private async Task ProcessExceptionCoreAsync(Exception ex, long userId, IRequestInput input)
     {
         string errorMessage;
         int errorCode;
         switch (ex)
         {
             case DuplicateOperationException:
-                var eventData = new DuplicateCommandEvent(input.PermAuthKeyId, input.UserId, input.ReqMsgId);
+                var eventData = new DuplicateCommandEvent(input.PermAuthKeyId, userId, input.ReqMsgId);
                 await eventBus.PublishAsync(eventData);
                 return;
-            //break;
             case NotImplementedException:
-                errorCode = MyTelegramServerDomainConsts.InternalErrorCode;
+                errorCode = MyTelegramConsts.InternalErrorCode;
                 errorMessage = "API NotImplemented";
                 break;
 
@@ -43,7 +43,7 @@ public class ExceptionProcessor(
                 break;
 
             case DomainError domainError:
-                errorCode = MyTelegramServerDomainConsts.InternalErrorCode;
+                errorCode = MyTelegramConsts.InternalErrorCode;
                 errorMessage = domainError.Message;
                 break;
 
@@ -53,19 +53,20 @@ public class ExceptionProcessor(
                 {
                     CommandException { InnerException: RpcException subInnerException } => subInnerException
                         .Message,
-                    _ => MyTelegramServerDomainConsts.InternalErrorMessage
+                    _ => MyTelegramConsts.InternalErrorMessage
                 };
-                errorCode = MyTelegramServerDomainConsts.BadRequestErrorCode;
+                errorCode = MyTelegramConsts.BadRequestErrorCode;
                 break;
 
             default:
-                errorCode = MyTelegramServerDomainConsts.InternalErrorCode;
-                errorMessage = MyTelegramServerDomainConsts.InternalErrorMessage;
+                errorCode = MyTelegramConsts.InternalErrorCode;
+                errorMessage = MyTelegramConsts.InternalErrorMessage;
                 break;
         }
 
         var rpcError = new TRpcError { ErrorCode = errorCode, ErrorMessage = errorMessage };
         var rpcResult = new TRpcResult { ReqMsgId = input.ReqMsgId, Result = rpcError };
+
         await objectMessageSender.SendMessageToPeerAsync(input.ToRequestInfo(), rpcResult);
     }
 }
