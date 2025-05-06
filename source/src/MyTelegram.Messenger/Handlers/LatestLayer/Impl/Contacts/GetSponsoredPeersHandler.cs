@@ -11,6 +11,11 @@ internal sealed class GetSponsoredPeersHandler : RpcResultObjectHandler<MyTelegr
     protected override Task<MyTelegram.Schema.Contacts.ISponsoredPeers> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Contacts.RequestGetSponsoredPeers obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<ISponsoredPeers>(new TSponsoredPeers
+        {
+            Chats = [],
+            Peers = [],
+            Users = []
+        });
     }
 }
