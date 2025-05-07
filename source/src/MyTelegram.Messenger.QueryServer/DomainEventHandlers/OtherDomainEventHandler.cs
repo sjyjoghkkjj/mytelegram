@@ -1,5 +1,6 @@
 ﻿using MyTelegram.Domain.Aggregates.PeerNotifySetting;
 using MyTelegram.Domain.Events.PeerNotifySettings;
+using MyTelegram.Messenger.Extensions;
 using MyTelegram.Messenger.Services.Interfaces;
 
 namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
@@ -10,6 +11,8 @@ public class OtherDomainEventHandler(
     IIdGenerator idGenerator,
     IAckCacheService ackCacheService,
     IEventBus eventBus,
+    IQueryProcessor queryProcessor,
+    IUserAppService userAppService,
     IUpdatesConverterService updatesConverterService,
     IUserConverterService userConverterService,
     ILayeredService<IAuthorizationConverter> layeredAuthorizationService,
@@ -51,10 +54,6 @@ public class OtherDomainEventHandler(
             .ToDeleteMessagesUpdates(domainEvent.AggregateEvent.ToPeerType,
                 domainEvent.AggregateEvent.DeletedBoxItem,
                 date);
-        //var layeredData = layeredUpdatesService.GetLayeredData(c =>
-        //    c.ToDeleteMessagesUpdates(domainEvent.AggregateEvent.ToPeerType,
-        //        domainEvent.AggregateEvent.DeletedBoxItem,
-        //        date));
         await PushUpdatesToPeerAsync(
             new Peer(PeerType.User, domainEvent.AggregateEvent.DeletedBoxItem.OwnerPeerId),
             updates,
@@ -86,10 +85,6 @@ public class OtherDomainEventHandler(
             new DeletedBoxItem(domainEvent.AggregateEvent.UserId, domainEvent.AggregateEvent.Pts,
                 domainEvent.AggregateEvent.PtsCount, domainEvent.AggregateEvent.MessageIds),
             DateTime.UtcNow.ToTimestamp());
-        //var layeredUpdates = layeredUpdatesService.GetLayeredData(c => c.ToDeleteMessagesUpdates(PeerType.User,
-        //    new DeletedBoxItem(domainEvent.AggregateEvent.UserId, domainEvent.AggregateEvent.Pts,
-        //        domainEvent.AggregateEvent.PtsCount, domainEvent.AggregateEvent.MessageIds),
-        //    DateTime.UtcNow.ToTimestamp()));
 
         return PushUpdatesToPeerAsync(domainEvent.AggregateEvent.UserId.ToUserPeer(), updates,
             pts: domainEvent.AggregateEvent.Pts);
@@ -107,6 +102,7 @@ public class OtherDomainEventHandler(
                 domainEvent.AggregateEvent.PermAuthKeyId,
                 domainEvent.AggregateEvent.UserId,
                 domainEvent.AggregateEvent.HasPassword ? PasswordState.WaitingForVerify : PasswordState.None));
+        await NotifyNewAuthorizationAsync(domainEvent.AggregateEvent);
 
         if (domainEvent.AggregateEvent.HasPassword)
         {
@@ -114,9 +110,6 @@ public class OtherDomainEventHandler(
             return;
         }
 
-        //var userReadModel = await userAppService.GetAsync(userId);
-        //var user = layeredUserService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
-        //    .ToUser(userId, userReadModel);
         var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
         var r = layeredAuthorizationService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
             .CreateAuthorization(user);
@@ -258,5 +251,73 @@ public class OtherDomainEventHandler(
         await PushUpdatesToPeerAsync(domainEvent.AggregateEvent.RequestInfo.UserId.ToUserPeer(), updates,
             domainEvent.AggregateEvent.RequestInfo.PermAuthKeyId, pts: domainEvent.AggregateEvent.Pts);
 
+    }
+
+    private async Task NotifyNewAuthorizationAsync(SignInSuccessSagaEvent aggregateEvent)
+    {
+        var deviceReadModel =
+            await queryProcessor.ProcessAsync(new GetDeviceByAuthKeyIdQuery(aggregateEvent.PermAuthKeyId));
+        var minDate = DateTime.UtcNow.AddMinutes(-5).ToTimestamp();
+        if (deviceReadModel != null && deviceReadModel.DateCreated > minDate)
+        {
+            var userReadModel = await userAppService.GetAsync(aggregateEvent.UserId);
+            var date = DateTimeOffset.FromUnixTimeSeconds(deviceReadModel.DateCreated).DateTime;
+            var now = DateTime.UtcNow.ToTimestamp();
+            var updateNewAuthorization = new TUpdateNewAuthorization
+            {
+                Unconfirmed = true,
+                Hash = deviceReadModel.Hash,
+                Date = deviceReadModel.DateCreated,
+                Device = $"{deviceReadModel.LangPack}, {deviceReadModel.AppVersion}, {deviceReadModel.DeviceModel}, {deviceReadModel.SystemVersion}",
+                Location = "-",// TODO: new device location
+            };
+
+            var message = $$"""
+                            New login. Dear {{userReadModel.FirstName}} {{userReadModel.LastName}}, we detected a login into your account from a new device on {{date:d}} at {{date:HH:mm:ss}} UTC.
+                            
+                            Device: {{deviceReadModel.LangPack}}, {{deviceReadModel.AppName}}, {{deviceReadModel.DeviceModel}}, {{aggregateEvent.RequestInfo.DeviceType}}, {{deviceReadModel.SystemVersion}}
+                            Location: -
+                            
+                            If this wasn't you, you can terminate that session in Settings > Devices (or Privacy & Security > Active Sessions).
+                            
+                            If you think that somebody logged in to your account against your will, you can enable Two-Step Verification in Privacy and Security settings."
+                            """;
+            var entities = new List<IMessageEntity>();
+            var bold1 = message.CreateMessageEntityBold("New login.");
+            var bold2 = message.CreateMessageEntityBold("Settings > Devices");
+            var bold3 = message.CreateMessageEntityBold("Privacy & Security > Active Sessions");
+            var bold4 = message.CreateMessageEntityBold("Two-Step Verification");
+
+            void AddEntity(IMessageEntity? messageEntity)
+            {
+                if (messageEntity != null)
+                {
+                    entities.Add(messageEntity);
+                }
+            }
+
+            AddEntity(bold1);
+            AddEntity(bold2);
+            AddEntity(bold3);
+            AddEntity(bold4);
+
+            var updateServiceNotification = new TUpdateServiceNotification
+            {
+                InboxDate = now,
+                Type = "NewAuthorization",
+                Message = message,
+                Media = new TMessageMediaEmpty(),
+                Entities = [.. entities]
+            };
+
+            var updates = new TUpdates
+            {
+                Updates = [updateNewAuthorization, updateServiceNotification],
+                Chats = [],
+                Users = [],
+                Date = now,
+            };
+            await PushUpdatesToPeerAsync(aggregateEvent.UserId.ToUserPeer(), updates, excludeAuthKeyId: aggregateEvent.PermAuthKeyId);
+        }
     }
 }
