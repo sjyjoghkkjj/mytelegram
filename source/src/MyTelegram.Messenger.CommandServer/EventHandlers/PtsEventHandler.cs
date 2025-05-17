@@ -31,7 +31,7 @@ public class PtsEventHandler(
                         ackCacheItem.ToPeer,
                         ackCacheItem.IsFromGetDifference
                     );
-                    await commandBus.PublishAsync(command, default);
+                    await commandBus.PublishAsync(command);
                 }
                 else
                 {
@@ -44,7 +44,7 @@ public class PtsEventHandler(
                         ackCacheItem.ToPeer,
                         ackCacheItem.IsFromGetDifference
                     );
-                    await commandBus.PublishAsync(command, default);
+                    await commandBus.PublishAsync(command);
                 }
             }
             else
@@ -60,7 +60,7 @@ public class PtsEventHandler(
                         ackCacheItem.ToPeer,
                         ackCacheItem.IsFromGetDifference
                     );
-                    await commandBus.PublishAsync(command, default);
+                    await commandBus.PublishAsync(command);
                 }
             }
         }
