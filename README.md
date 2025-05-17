@@ -1,14 +1,14 @@
 # MyTelegram
 
-[![API Layer](https://img.shields.io/badge/API_Layer-200-blueviolet)](https://corefork.telegram.org/methods)
+[![API Layer](https://img.shields.io/badge/API_Layer-202-blueviolet)](https://corefork.telegram.org/methods)
 [![MTProto](https://img.shields.io/badge/MTProto_Protocol-2.0-green)](https://corefork.telegram.org/mtproto/)
-[![Support Chat](https://img.shields.io/badge/Chat_with_us-on_Telegram-0088cc)](https://t.me/+S-aNBoRvCRpPyXrR)
-
-MyTelegram is telegram server side api implementation written in c#,support private deployment
+[![MyTelegram Channel](https://img.shields.io/badge/Subscribe-_MyTelegram_Channel-0088cc)](https://t.me/+9wMJrMqLTIoyYzM8)
+[![MyTelegram Discussion Group](https://img.shields.io/badge/Join_-MyTelegram_Discussion_Group-0088cc)](https://t.me/+S-aNBoRvCRpPyXrR)
+MyTelegram is telegram server side api implementation written in c#, support private deployment
 
 ## Features
 
-- API Layer: **`200`**
+- API Layer: **`202`**
 - [MTProto transports](https://corefork.telegram.org/mtproto/mtproto-transports): **`Abridged`**,**`Intermediate`**
 - Private chat
 - Group chat
@@ -21,7 +21,7 @@ MyTelegram is telegram server side api implementation written in c#,support priv
 - Stickers(Pro version)
 - Reactions(Pro version)
 - ForumTopics(Pro version)
-- Themes/Wallpapers/Auto-Delete Messages/Scheduled Messages/Telegram Business/Stories/Email Login/Email Sender/Push Server(Firebase) (Pro version)
+- Themes/Wallpapers/Auto-Delete Messages/Scheduled Messages/Chatlist/Telegram Business/Stories/Email Login/Email Sender/Push Server(Firebase) (Pro version)
 
 ## Build MyTelegram Server
 
@@ -82,4 +82,7 @@ Love MyTelegram? Please give a star to this repository ⭐
 ## Feedback
 
 Contact author: [https://t.me/mytelegram666](https://t.me/mytelegram666)  
-Join telegram group: [https://t.me/+S-aNBoRvCRpPyXrR](https://t.me/+S-aNBoRvCRpPyXrR)
+
+MyTelegram channel: [https://t.me/+9wMJrMqLTIoyYzM8](https://t.me/+9wMJrMqLTIoyYzM8)
+
+Mytelegram discussion group: [https://t.me/+S-aNBoRvCRpPyXrR](https://t.me/+S-aNBoRvCRpPyXrR)
