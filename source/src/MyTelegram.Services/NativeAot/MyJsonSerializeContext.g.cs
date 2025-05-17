@@ -6,7 +6,7 @@ namespace MyTelegram.Services.NativeAot;
 
 #if !DEBUG
 
-// Count:73
+// Count:68
 // MyTelegram.Core
 [JsonSerializable(typeof(MyTelegram.Core.AcksDataReceivedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.AppCodeCreatedIntegrationEvent))]
@@ -30,8 +30,6 @@ namespace MyTelegram.Services.NativeAot;
 [JsonSerializable(typeof(MyTelegram.Core.DomainEventMessage))]
 [JsonSerializable(typeof(MyTelegram.Core.DownloadDataReceivedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.DuplicateCommandEvent))]
-[JsonSerializable(typeof(MyTelegram.Core.EncryptedMessage))]
-[JsonSerializable(typeof(MyTelegram.Core.EncryptedMessageResponse))]
 [JsonSerializable(typeof(MyTelegram.Core.FileDataResultResponseReceivedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.FutureAuthTokenCacheItem))]
 [JsonSerializable(typeof(MyTelegram.Core.FutureSaltCacheItem))]
@@ -59,9 +57,6 @@ namespace MyTelegram.Services.NativeAot;
 [JsonSerializable(typeof(MyTelegram.Core.TakeoutCacheItem))]
 [JsonSerializable(typeof(MyTelegram.Core.TransportErrorEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.UnRegisterAuthKeyEvent))]
-[JsonSerializable(typeof(MyTelegram.Core.UnencryptedMessage))]
-[JsonSerializable(typeof(MyTelegram.Core.UnencryptedMessageResponse))]
-[JsonSerializable(typeof(MyTelegram.Core.UpdateSelfPtsEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.UpdatesDataReceivedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.UploadDataReceivedEvent))]
 [JsonSerializable(typeof(MyTelegram.Core.UserCacheItem))]
