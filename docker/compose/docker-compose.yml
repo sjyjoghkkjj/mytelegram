@@ -82,6 +82,7 @@ services:
       Serilog__MinimumLevel__Default: ${Serilog__MinimumLevel__Default}
       ConnectionStrings__Default: ${ConnectionStrings__Default}
       App__DatabaseName: ${App__DatabaseName}
+      App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
       # App__LoadAllStickersIntoMemory: ${App__LoadAllStickersIntoMemory}
       RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
       # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
@@ -235,6 +236,7 @@ services:
       # App__ThisDcId: ${App__ThisDcId}
       # App__MediaOnly: ${App__MediaOnly}
       App__DatabaseName: ${App__DatabaseName}
+      App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
       # App__IdGeneratorGrpcServiceUrl: ${App__IdGeneratorGrpcServiceUrl}
       App__MessengerServerGrpcServiceUrl: ${App__MessengerServerGrpcServiceUrl}
       # App__DispatchUnknownObjectToMessengerServer: ${App__DispatchUnknownObjectToMessengerServer}
@@ -283,6 +285,7 @@ services:
       Serilog__MinimumLevel__Default: ${Serilog__MinimumLevel__Default}
       ConnectionStrings__Default: ${ConnectionStrings__Default}
       App__DatabaseName: ${App__DatabaseName}
+      App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
       # App__ThisDcId: ${App__ThisDcId}
       # App__MediaDcId: ${App__MediaDcId}
       # App__UploadRootPath: ${App__UploadRootPath}
@@ -311,10 +314,8 @@ services:
     environment:
       Serilog__MinimumLevel__Default: ${Serilog__MinimumLevel__Default}
       ConnectionStrings__Default: ${ConnectionStrings__Default}
-      App__QueryServerEventStoreDatabaseName: ${App__QueryServerEventStoreDatabaseName}
-      App__QueryServerReadModelDatabaseName: ${App__QueryServerReadModelDatabaseName}
       App__DatabaseName: ${App__DatabaseName}
-      App__BotDatabaseName: ${App__BotDatabaseName}
+      App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
       App__FileServerGrpcServiceUrl: ${App__FileServerGrpcServiceUrl}
       App__FixedVerifyCode: ${App__FixedVerifyCode}
       App__VerificationCodeLength: ${App__VerificationCodeLength}
@@ -403,10 +404,8 @@ services:
     environment:
       Serilog__MinimumLevel__Default: ${Serilog__MinimumLevel__Default}
       ConnectionStrings__Default: ${ConnectionStrings__Default}
-      App__QueryServerEventStoreDatabaseName: ${App__QueryServerEventStoreDatabaseName}
-      App__QueryServerReadModelDatabaseName: ${App__QueryServerReadModelDatabaseName}
       App__DatabaseName: ${App__DatabaseName}
-      App__BotDatabaseName: ${App__BotDatabaseName}
+      App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
       App__FileServerGrpcServiceUrl: ${App__FileServerGrpcServiceUrl}
       App__FixedVerifyCode: ${App__FixedVerifyCode}
       App__VerificationCodeLength: ${App__VerificationCodeLength}
