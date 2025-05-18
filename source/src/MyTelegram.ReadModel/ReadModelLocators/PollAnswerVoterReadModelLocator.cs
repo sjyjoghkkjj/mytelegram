@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.ReadModel.ReadModelLocators;
 
-public class PollAnswerVoterReadModelLocator : IPollAnswerVoterReadModelLocator
+public class PollAnswerVoterReadModelLocator : IPollAnswerVoterReadModelLocator, ITransientDependency
 {
     public IEnumerable<string> GetReadModelIds(IDomainEvent domainEvent)
     {

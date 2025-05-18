@@ -10,6 +10,7 @@ public class ProxyProtocolParser : IProxyProtocolParser, ITransientDependency
     private const int Ipv4Length = 4;
     private const int Ipv6Length = 16;
     private const int SignatureLength = 16;
+
     // The proxy protocol marker.
     private static ReadOnlySpan<byte> Preamble =>
         [0x0D, 0x0A, 0x0D, 0x0A, 0x00, 0x0D, 0x0A, 0x51, 0x55, 0x49, 0x54, 0x0A];
@@ -74,6 +75,7 @@ public class ProxyProtocolParser : IProxyProtocolParser, ITransientDependency
 
         return ExtractProxyProtocolV2Data(ref buffer, proxyProtocolHeaderLength);
     }
+
     private static ProxyProtocolFeature ExtractProxyProtocolV2Data(ref ReadOnlySequence<byte> buffer,
         int proxyHeaderLength)
     {
@@ -157,6 +159,7 @@ public class ProxyProtocolParser : IProxyProtocolParser, ITransientDependency
     {
         return new IPAddress(span.Slice(SignatureLength, Ipv4Length));
     }
+
     private static IPAddress GetSourceAddressIpv6(ReadOnlySpan<byte> span)
     {
         return new IPAddress(span.Slice(SignatureLength, Ipv6Length));
@@ -166,6 +169,7 @@ public class ProxyProtocolParser : IProxyProtocolParser, ITransientDependency
     {
         return BinaryPrimitives.ReadInt16BigEndian(span.Slice(SignatureLength + 2 * Ipv4Length, 2));
     }
+
     private static int GetSourcePortIpv6(ReadOnlySpan<byte> span)
     {
         return BinaryPrimitives.ReadInt16BigEndian(span.Slice(SignatureLength + 2 * Ipv6Length, 2));

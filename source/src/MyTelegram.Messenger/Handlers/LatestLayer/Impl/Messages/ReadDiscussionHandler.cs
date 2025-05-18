@@ -33,7 +33,7 @@ internal sealed class ReadDiscussionHandler(
         }
 
         var dialogReadModel = await queryProcessor.ProcessAsync(
-            new GetDialogByIdQuery(DialogId.Create(input.UserId, peer)));
+            new GetDialogByIdQuery(DialogId.Create(input.UserId, peer).Value));
         if (dialogReadModel == null)
         {
             return new TBoolTrue();

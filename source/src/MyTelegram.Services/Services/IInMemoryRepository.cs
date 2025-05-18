@@ -24,4 +24,6 @@ public interface IInMemoryRepository<TEntity, TPrimaryKey>
     //void Delete(TEntity entity);
 
     //void Delete(Expression<Func<TEntity, bool>> predicate);
+
+    IEnumerable<TEntity> GetAll();
 }

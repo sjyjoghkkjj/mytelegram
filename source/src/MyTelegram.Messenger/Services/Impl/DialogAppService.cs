@@ -62,24 +62,6 @@ public class DialogAppService(
         var photoReadModels =
             await photoAppService.GetPhotosAsync(userReadModels, contactReadModels, channelReadModels);
 
-        var userReactionIds = new List<string>();
-        foreach (var messageReadModel in messageReadModels)
-        {
-            if (messageReadModel.Reactions?.Count > 0)
-            {
-                foreach (var reactionCount in messageReadModel.Reactions)
-                {
-                    userReactionIds.Add(UserReactionId.Create(input.OwnerId, messageReadModel.ToPeerId,
-                        messageReadModel.MessageId, reactionCount.GetReactionId()).Value);
-                }
-            }
-        }
-
-        var userReactionReadModels =
-            userReactionIds.Count > 0
-                ? await queryProcessor.ProcessAsync(new GetAllMessageReactionListQuery(userReactionIds))
-                : [];
-
         await SetDialogTtlPeriodAsync(dialogReadModels);
 
         return new GetDialogOutput(input.OwnerId,
@@ -94,7 +76,7 @@ public class DialogAppService(
             channelMemberList,
             pollReadModels,
             chosenOptions,
-            userReactionReadModels,
+            [],
             input.Limit
         );
     }
@@ -117,7 +99,7 @@ public class DialogAppService(
         HashSet<long> userIds,
         HashSet<long> channelIds)
     {
-        void AddPeerIdIfNeed(Peer? peer)
+        void AddPeerIdIfNeeded(Peer? peer)
         {
             switch (peer?.PeerType)
             {
@@ -162,14 +144,14 @@ public class DialogAppService(
 
         foreach (var messageReadModel in messageReadModels)
         {
-            AddPeerIdIfNeed(messageReadModel.SendAs);
-            AddPeerIdIfNeed(messageReadModel.FwdHeader?.SavedFromPeer);
+            AddPeerIdIfNeeded(messageReadModel.SendAs);
+            AddPeerIdIfNeeded(messageReadModel.FwdHeader?.SavedFromPeer);
 
             var fwd = messageReadModel.FwdHeader;
-            AddPeerIdIfNeed(fwd?.FromId);
-            AddPeerIdIfNeed(fwd?.SavedFromId);
-            AddPeerIdIfNeed(fwd?.SavedFromPeer);
-            AddPeerIdIfNeed(messageReadModel.SendAs);
+            AddPeerIdIfNeeded(fwd?.FromId);
+            AddPeerIdIfNeeded(fwd?.SavedFromId);
+            AddPeerIdIfNeeded(fwd?.SavedFromPeer);
+            AddPeerIdIfNeeded(messageReadModel.SendAs);
 
             switch (messageReadModel.ToPeerType)
             {
@@ -216,7 +198,7 @@ public class DialogAppService(
         if (input.OffsetPeer != null && input.OffsetPeer.PeerType != PeerType.Empty)
         {
             var dialogId = DialogId.Create(input.OwnerId, input.OffsetPeer.PeerType, input.OffsetPeer.PeerId);
-            var dialog = await queryProcessor.ProcessAsync(new GetDialogByIdQuery(dialogId));
+            var dialog = await queryProcessor.ProcessAsync(new GetDialogByIdQuery(dialogId.Value));
             offsetDate = dialog?.CreationTime;
         }
 

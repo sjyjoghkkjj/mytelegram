@@ -49,8 +49,8 @@ internal sealed class GetChannelDifferenceHandler(
                 RpcErrors.RpcErrors403.ChannelPublicGroupNa.ThrowRpcError();
             }
 
-            var limit = obj.Limit == 0 ? MyTelegramServerDomainConsts.DefaultPtsTotalLimit : obj.Limit;
-            limit = Math.Min(limit, MyTelegramServerDomainConsts.DefaultPtsTotalLimit);
+            var limit = obj.Limit == 0 ? MyTelegramConsts.DefaultPtsTotalLimit : obj.Limit;
+            limit = Math.Min(limit, MyTelegramConsts.DefaultPtsTotalLimit);
             var pts = obj.Pts;
             //if (pts == 1)
             //{

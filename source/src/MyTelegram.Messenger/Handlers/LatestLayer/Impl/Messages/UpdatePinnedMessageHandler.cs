@@ -45,7 +45,7 @@ internal sealed class UpdatePinnedMessageHandler(
         }
 
         var messageItems = await queryProcessor.ProcessAsync(
-            new GetSimpleMessageListQuery(input.UserId, peer, [obj.Id], null, !obj.PmOneside, MyTelegramServerDomainConsts.UnPinAllMessagesDefaultPageSize));
+            new GetSimpleMessageListQuery(input.UserId, peer, [obj.Id], null, !obj.PmOneside, MyTelegramConsts.UnPinAllMessagesDefaultPageSize));
 
         if (messageItems.Count == 0)
         {

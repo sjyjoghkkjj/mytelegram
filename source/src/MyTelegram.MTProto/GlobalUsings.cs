@@ -8,3 +8,5 @@ global using System.Collections.Concurrent;
 global using System.Threading.Channels;
 global using System.Diagnostics.CodeAnalysis;
 global using MyTelegram.MTProto;
+global using MyTelegram.Abstractions;
+global using Microsoft.Extensions.DependencyInjection;

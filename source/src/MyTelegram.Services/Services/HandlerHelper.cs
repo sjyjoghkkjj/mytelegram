@@ -1,9 +1,8 @@
-﻿using MyTelegram.Schema;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace MyTelegram.Services.Services;
 

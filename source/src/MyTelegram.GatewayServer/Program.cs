@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using MyTelegram;
 using MyTelegram.GatewayServer.NativeAot;
 
 Console.Title = "MyTelegram gateway server";
@@ -23,10 +24,8 @@ builder.Host.UseSerilog((context,
 });
 builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
-//builder.Services.AddMyTelegramRabbitMqEventBus();
 
 builder.Services.AddMyTelegramGatewayServer();
-//services.AddSingleton<IEventBus, MyEventBusRabbitMq>();
 
 builder.Services.Configure<EventBusRabbitMqOptions>(builder.Configuration.GetRequiredSection("RabbitMQ:EventBus"));
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetRequiredSection("RabbitMQ:Connections:Default"));
@@ -34,14 +33,26 @@ builder.Services.Configure<MyTelegramGatewayServerOption>(builder.Configuration.
 
 var eventBusOptions = builder.Configuration.GetRequiredSection("RabbitMQ:EventBus").Get<EventBusRabbitMqOptions>();
 var rabbitMqOptions = builder.Configuration.GetRequiredSection("RabbitMQ:Connections:Default").Get<RabbitMqOptions>();
+if (rabbitMqOptions == null)
+{
+    Log.Error("RabbitMQ:Connections:Default is null");
+    return;
+}
+
+if (eventBusOptions == null)
+{
+    Log.Error("RabbitMQ:EventBus is null");
+
+    return;
+}
 
 builder.Services.AddRebusEventBus(options =>
 {
     options.Transport(t =>
     {
         t.UseRabbitMq(
-                $"amqp://{rabbitMqOptions!.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
-                eventBusOptions!.ClientName)
+                $"amqp://{rabbitMqOptions.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
+                eventBusOptions.ClientName)
             .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
             ;
     });
@@ -153,7 +164,9 @@ builder.WebHost.ConfigureKestrel(options =>
                         break;
                 }
 
-                Log.Information("{ServerType} server started at:{Address},ssl:{Ssl},enableProxyProtocolV2:{ProxyProtocol},mediaOnly:{MediaOnly}", item.ServerType, iep, item.Ssl, item.EnableProxyProtocolV2, item.MediaOnly);
+                Log.Information(
+                    "{ServerType} server started at:{Address},ssl:{Ssl},enableProxyProtocolV2:{ProxyProtocol},mediaOnly:{MediaOnly}",
+                    item.ServerType, iep, item.Ssl, item.EnableProxyProtocolV2, item.MediaOnly);
             }
         }
     }
@@ -171,6 +184,5 @@ app.MapGet("/", () => "Only websocket requests are supported.");
 
 var eventBus = app.Services.GetRequiredService<IEventBus>();
 eventBus.ConfigureEventBus();
-//app.Services.StartRebus();
 
 await app.RunAsync();

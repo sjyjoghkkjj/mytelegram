@@ -1,4 +1,7 @@
 ﻿using Google.Protobuf;
+using MyTelegram.Domain.Aggregates.Photo;
+using MyTelegram.Domain.Commands.Photo;
+using TWebPage = MyTelegram.Schema.TWebPage;
 
 namespace MyTelegram.Messenger.Services.Impl;
 
@@ -8,6 +11,7 @@ public class MediaHelper(
     IQueryProcessor queryProcessor,
     IPeerHelper peerHelper,
     IObjectMapper objectMapper,
+    ICommandBus commandBus,
     ILogger<MediaHelper> logger)
     : IMediaHelper, ITransientDependency
 {
@@ -63,6 +67,63 @@ public class MediaHelper(
         return SaveMediaCoreAsync(media);
     }
 
+    private async Task CreatePhotoAsync(long userId, IPhoto photo, bool hasVideo, int size, bool isProfilePhoto)
+    {
+
+        switch (photo)
+        {
+            case TPhoto photo1:
+                var command = new CreatePhotoCommand(PhotoId.Create(photo1.Id),
+                    userId,
+                    new PhotoItem(photo1.Id, photo1.AccessHash, photo1.FileReference, photo1.Date,
+                        photo1.DcId,
+                        size,
+                        false,
+                        hasVideo,
+                        IsProfilePhoto: isProfilePhoto,
+                        Sizes2: [.. photo1.Sizes],
+                        VideoSizes2: photo1.VideoSizes?.ToList()
+                    )
+                );
+                await commandBus.PublishAsync(command);
+                break;
+        }
+    }
+
+    private List<PhotoSize>? ToPhotoSize(TVector<IPhotoSize> photoSizes)
+    {
+        List<PhotoSize>? sizes = null;
+        foreach (var photoSize in photoSizes)
+        {
+            switch (photoSize)
+            {
+                case TPhotoSize photoSize1:
+                    sizes ??= [];
+                    sizes.Add(new PhotoSize(photoSize1.W, photoSize1.H, photoSize1.Size, photoSize1.Type));
+                    break;
+            }
+        }
+
+        return sizes;
+    }
+
+    private List<VideoSize>? ToVideoSizes(TVector<IVideoSize>? videoSizes)
+    {
+        List<VideoSize>? sizes = null;
+        foreach (var videoSize in videoSizes ?? [])
+        {
+            switch (videoSize)
+            {
+                case TVideoSize videoSize1:
+                    sizes ??= [];
+                    sizes.Add(new VideoSize(videoSize1.W, videoSize1.H, videoSize1.Size, videoSize1.Type, videoSize1.VideoStartTs ?? 0));
+                    break;
+            }
+        }
+
+        return sizes;
+    }
+
     public async Task<SavePhotoResult> SavePhotoAsync(long reqMsgId,
             long userId,
         long fileId,
@@ -71,7 +132,8 @@ public class MediaHelper(
         int parts,
         string? name,
         string? md5,
-        IVideoSize? videoEmojiMarkup = null
+        IVideoSize? videoEmojiMarkup = null,
+        bool isProfilePhoto = false
         )
     {
         var client = GrpcClientFactory.CreateMediaServiceClient(options.CurrentValue.FileServerGrpcServiceUrl);
@@ -86,9 +148,13 @@ public class MediaHelper(
             Parts = parts,
             ReqMsgId = reqMsgId,
             VideoStartTs = videoStartTs ?? 0,
-            VideoEmojiMarkup = videoEmojiMarkup == null ? ByteString.Empty : ByteString.CopyFrom(videoEmojiMarkup.ToBytes())
+            VideoEmojiMarkup = videoEmojiMarkup == null ? ByteString.Empty : ByteString.CopyFrom(videoEmojiMarkup.ToBytes()),
+            IsProfilePhoto = isProfilePhoto
 
         }).ResponseAsync;
+
+        var photo = r.Photo.Memory.ToTObject<IPhoto>();
+        await CreatePhotoAsync(userId, photo, hasVideo, (int)r.Size, isProfilePhoto);
 
         return new SavePhotoResult(r.PhotoId, r.Photo.Memory.ToTObject<IPhoto>());
     }

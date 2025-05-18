@@ -1,7 +1,4 @@
-﻿// ReSharper disable All
-
-using MyTelegram.Messenger.Converters.ConverterServices;
-using MyTelegram.Schema.Updates;
+﻿using MyTelegram.Schema.Updates;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
@@ -20,15 +17,12 @@ internal sealed class GetPeerDialogsHandler(
     IPeerHelper peerHelper,
     IPtsHelper ptsHelper,
     IAccessHashHelper accessHashHelper,
-    ILogger<GetPeerDialogsHandler> logger,
     IQueryProcessor queryProcessor,
     IUserConverterService userConverterService,
     IDialogConverterService dialogConverterService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetPeerDialogs, MyTelegram.Schema.Messages.IPeerDialogs>,
-        Messages.IGetPeerDialogsHandler
+    : RpcResultObjectHandler<RequestGetPeerDialogs, IPeerDialogs>,
+        IGetPeerDialogsHandler
 {
-    private readonly ILogger<GetPeerDialogsHandler> _logger = logger;
-
     protected override async Task<IPeerDialogs> HandleCoreAsync(IRequestInput input,
         RequestGetPeerDialogs obj)
     {
@@ -48,12 +42,21 @@ internal sealed class GetPeerDialogsHandler(
                             continue;
                         }
 
-                        await accessHashHelper.CheckAccessHashAsync(dialogPeer.Peer);
+                        var shouldCheckAccessHash = true;
+                        switch (dialogPeer.Peer)
+                        {
+                            case TInputPeerUser inputPeerUser:
+                                if (inputPeerUser.UserId != input.UserId)
+                                {
+                                    shouldCheckAccessHash = false;
+                                }
+                                break;
+                        }
 
-                        //if (peer.PeerId != userId)
-                        //{
-                        //    peerList.Add(peer);
-                        //}
+                        if (shouldCheckAccessHash)
+                        {
+                            await accessHashHelper.CheckAccessHashAsync(dialogPeer.Peer);
+                        }
 
                         peerList.Add(peer);
                         break;
@@ -87,7 +90,7 @@ internal sealed class GetPeerDialogsHandler(
         {
             switch (dialog)
             {
-                case Schema.TDialog d:
+                case TDialog d:
                     var m = output.MessageList.FirstOrDefault(p => p.MessageId == d.TopMessage);
                     break;
                 case TDialogFolder dialogFolder:

@@ -1,6 +1,12 @@
-﻿namespace MyTelegram.ReadModel.InMemory;
+﻿using MyTelegram.EventFlow.ReadStores;
 
-public interface IMyInMemoryReadStore<TReadModel> : IInMemoryReadStore<TReadModel> where TReadModel : class, IReadModel
+namespace MyTelegram.ReadModel.InMemory;
+
+public interface IMyInMemoryReadStore<TReadModel> : IInMemoryReadStore<TReadModel>,
+    IQueryOnlyReadModelStore<TReadModel>
+    where TReadModel : class, IReadModel
 {
     Task<IQueryable<TReadModel>> AsQueryable(CancellationToken cancellationToken = default);
+
+    //void Add(string id, TReadModel readModel, long? version);
 }

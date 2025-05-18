@@ -33,7 +33,7 @@ internal sealed class ReadHistoryHandler(
             }
 
             var dialogReadModel = await queryProcessor.ProcessAsync(
-                new GetDialogByIdQuery(DialogId.Create(input.UserId, inputChannel.ChannelId.ToChannelPeer())));
+                new GetDialogByIdQuery(DialogId.Create(input.UserId, inputChannel.ChannelId.ToChannelPeer()).Value));
             if (dialogReadModel == null)
             {
                 return new TBoolTrue();

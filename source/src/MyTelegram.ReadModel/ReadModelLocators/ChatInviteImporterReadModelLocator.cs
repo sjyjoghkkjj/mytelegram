@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.ReadModel.ReadModelLocators;
 
-public class ChatInviteImporterReadModelLocator : IChatInviteImporterReadModelLocator
+public class ChatInviteImporterReadModelLocator : IChatInviteImporterReadModelLocator, ITransientDependency
 {
     public IEnumerable<string> GetReadModelIds(IDomainEvent domainEvent)
     {

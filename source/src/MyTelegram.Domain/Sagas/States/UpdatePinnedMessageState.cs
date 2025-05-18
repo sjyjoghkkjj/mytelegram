@@ -29,7 +29,7 @@ public class UpdatePinnedMessageState :
     public long SenderPeerId { get; private set; }
     public bool Silent { get; private set; }
     public long StartUpdatePinnedOwnerPeerId { get; private set; }
-    public Peer? ToPeer { get; private set; }
+    public Peer ToPeer { get; private set; } = null!;
     public int UpdatedInboxCount { get; private set; }
     public bool Post { get; private set; }
     public void Apply(UpdateInboxPinnedCompletedSagaEvent aggregateEvent)

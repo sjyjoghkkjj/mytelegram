@@ -53,7 +53,7 @@ internal sealed class GetFullChannelHandler(
             }
 
             var dialogReadModel = await queryProcessor.ProcessAsync(
-                new GetDialogByIdQuery(DialogId.Create(input.UserId, PeerType.Channel, channelId)));
+                new GetDialogByIdQuery(DialogId.Create(input.UserId, PeerType.Channel, channelId).Value));
             if (dialogReadModel == null)
             {
                 logger.LogWarning("Dialog not exists, userId: {UserId}, toPeer: {ToPeer}", input.UserId, new Peer(PeerType.Channel, channelId));
@@ -74,7 +74,7 @@ internal sealed class GetFullChannelHandler(
                 .ProcessAsync(
                     new GetPeerNotifySettingsByIdQuery(PeerNotifySettingsId.Create(input.UserId,
                         PeerType.Channel,
-                        channelId)));
+                        channelId).Value));
             var photoReadModel = await photoAppService.GetAsync(channelReadModel!.PhotoId);
             IChatInviteReadModel? chatInviteReadModel = null;
             if (channelReadModel.AdminList.Any(p => p.UserId == input.UserId))

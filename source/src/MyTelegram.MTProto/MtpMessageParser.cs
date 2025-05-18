@@ -6,7 +6,7 @@ public class MtpMessageParser(
     IEncryptedMessageParser encryptedMessageParser,
     IFirstPacketParser firstPacketParser,
     IAesHelper aesHelper)
-    : IMtpMessageParser
+    : IMtpMessageParser, ITransientDependency
 {
     private const int ConnectionStartPrefixSize = 64;
     private const int MaxPacketLength = 1024 * 1024 * 10;

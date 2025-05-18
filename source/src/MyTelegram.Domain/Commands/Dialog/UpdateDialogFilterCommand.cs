@@ -4,9 +4,12 @@ public class UpdateDialogFilterCommand(
     DialogFilterId aggregateId,
     RequestInfo requestInfo,
     long ownerUserId,
-    DialogFilter filter)
+    int folderId,
+    DialogFilter filter
+    )
     : RequestCommand2<DialogFilterAggregate, DialogFilterId, IExecutionResult>(aggregateId, requestInfo)
 {
     public long OwnerUserId { get; } = ownerUserId;
+    public int FolderId { get; } = folderId;
     public DialogFilter Filter { get; } = filter;
 }

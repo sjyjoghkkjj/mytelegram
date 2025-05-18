@@ -84,7 +84,22 @@ public class ContactDomainEventHandler(
             false,
             domainEvent.AggregateEvent.RequestInfo.Layer
         );
-        var photoReadModel = await photoAppService.GetAsync(domainEvent.AggregateEvent.PhotoId);
+        var newPhotoId= domainEvent.AggregateEvent.PhotoId;
+        if (newPhotoId == 0)
+        {
+            switch (user.Photo)
+            {
+                case TUserProfilePhoto userProfilePhoto:
+                    newPhotoId = userProfilePhoto.PhotoId;
+                    break;
+            }
+        }
+
+        IPhotoReadModel? photoReadModel = null;
+        if (newPhotoId != 0)
+        {
+            await photoAppService.GetAsync(newPhotoId);
+        }
         var photo = photoLayeredService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
             .ToPhoto(photoReadModel);
         var r = new TPhoto

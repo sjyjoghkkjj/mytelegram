@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.MTProto;
 
-public class AesHelper : IAesHelper
+public class AesHelper : IAesHelper, ITransientDependency
 {
     public void Ctr128Encrypt(Span<byte> data,
         byte[] key,

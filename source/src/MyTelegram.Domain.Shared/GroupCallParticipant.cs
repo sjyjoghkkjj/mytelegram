@@ -1,4 +1,5 @@
-﻿namespace MyTelegram;
+﻿#pragma warning disable
+namespace MyTelegram;
 
 public class GroupCallParticipant
 {

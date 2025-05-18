@@ -1,6 +1,4 @@
-﻿using MyTelegram.Schema;
-
-namespace MyTelegram.Services.Services;
+﻿namespace MyTelegram.Services.Services;
 
 public abstract class RpcResultObjectHandler<TInput, TOutput> : BaseObjectHandler<TInput, TOutput>
     where TInput : IRequest<TOutput>

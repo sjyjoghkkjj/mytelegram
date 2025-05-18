@@ -1,6 +1,4 @@
-﻿using MyTelegram.Domain.Aggregates.Pts;
-using MyTelegram.Domain.Commands.Pts;
-using MyTelegram.Schema.Extensions;
+﻿using MyTelegram.Schema.Extensions;
 
 namespace MyTelegram.Messenger.CommandServer.EventHandlers;
 
@@ -33,7 +31,7 @@ public class PtsEventHandler(
                         ackCacheItem.ToPeer,
                         ackCacheItem.IsFromGetDifference
                     );
-                    await commandBus.PublishAsync(command, default);
+                    await commandBus.PublishAsync(command);
                 }
                 else
                 {
@@ -46,7 +44,7 @@ public class PtsEventHandler(
                         ackCacheItem.ToPeer,
                         ackCacheItem.IsFromGetDifference
                     );
-                    await commandBus.PublishAsync(command, default);
+                    await commandBus.PublishAsync(command);
                 }
             }
             else
@@ -62,7 +60,7 @@ public class PtsEventHandler(
                         ackCacheItem.ToPeer,
                         ackCacheItem.IsFromGetDifference
                     );
-                    await commandBus.PublishAsync(command, default);
+                    await commandBus.PublishAsync(command);
                 }
             }
         }

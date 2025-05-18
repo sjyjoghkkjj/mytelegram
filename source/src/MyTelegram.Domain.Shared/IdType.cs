@@ -30,4 +30,5 @@ public enum IdType
     QuickReplyMessageId = 23,
     ScheduleMessageId = 24,
     StoryId = 25,
+    FolderId = 26,
 }

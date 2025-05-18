@@ -1,5 +1,6 @@
 ﻿namespace MyTelegram.Core;
 
+//[MemoryPackable]
 public record DataReceivedEvent(
     string ConnectionId,
     Guid RequestId,
@@ -9,10 +10,11 @@ public record DataReceivedEvent(
     int SeqNumber,
     long AuthKeyId,
     long PermAuthKeyId,
-    byte[] Data,
+    ReadOnlyMemory<byte> Data,
     //byte[] Data,
     int Layer,
     long Date,
     DeviceType DeviceType,
-    string ClientIp
+    string ClientIp,
+    long SessionId
 );

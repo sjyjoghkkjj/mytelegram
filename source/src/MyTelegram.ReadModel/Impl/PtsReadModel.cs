@@ -13,6 +13,7 @@ public class PtsReadModel : IPtsReadModel,
     public virtual int Qts { get; private set; }
     public virtual int UnreadCount { get; private set; }
     public virtual long? Version { get; set; }
+
     public virtual int MaxMessageId { get; set; }
 
     public Task ApplyAsync(IReadModelContext context,

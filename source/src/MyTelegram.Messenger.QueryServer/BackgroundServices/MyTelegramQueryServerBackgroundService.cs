@@ -7,15 +7,13 @@ public class MyTelegramQueryServerBackgroundService(
     ILogger<MyTelegramQueryServerBackgroundService> logger,
     //IHandlerHelper handlerHelper,
     IInMemoryCacheLoader inMemoryCacheLoader,
-    ILanguageCacheService languageCacheService,
-    IMongoDbIndexesCreator mongoDbIndexesCreator)
+    ILanguageCacheService languageCacheService)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Query server starting...");
         //handlerHelper.InitAllHandlers();
-        await mongoDbIndexesCreator.CreateAllIndexesAsync();
         await inMemoryCacheLoader.LoadAsync();
         await languageCacheService.LoadAllLanguagesAsync();
         await languageCacheService.LoadAllLanguageTextAsync();

@@ -101,3 +101,4 @@ global using MyTelegram.Messenger.Converters.ConverterServices;
 global using MyTelegram.Messenger.Converters.ConverterServices.Channels;
 global using MyTelegram.Messenger.Converters.ConverterServices.Contacts;
 global using MyTelegram.Messenger.Converters.ConverterServices.Messages;
+global using MyTelegram.Abstractions;

@@ -18,4 +18,5 @@ public record NewDeviceCreatedEvent(
     string LangPack,
     string LangCode,
     string Ip,
-    int Layer);
+    int Layer,
+    Dictionary<string, string>? Parameters);

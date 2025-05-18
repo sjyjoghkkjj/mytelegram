@@ -12,9 +12,9 @@ public class UserReadModel : IUserReadModel,
     IAmReadModelFor<UserAggregate, UserId, UserVerifiedHasSetEvent>,
     IAmReadModelFor<UserAggregate, UserId, UserNameUpdatedEvent>,
     IAmReadModelFor<UserAggregate, UserId, UserProfilePhotoChangedEvent>,
-    IAmReadModelFor<UserAggregate,UserId, UserProfilePhotoUploadedEvent>,
-    IAmReadModelFor<UserAggregate,UserId,UserColorUpdatedEvent>,
-    IAmReadModelFor<UserAggregate,UserId,UserGlobalPrivacySettingsChangedEvent>,
+    IAmReadModelFor<UserAggregate, UserId, UserProfilePhotoUploadedEvent>,
+    IAmReadModelFor<UserAggregate, UserId, UserColorUpdatedEvent>,
+    IAmReadModelFor<UserAggregate, UserId, UserGlobalPrivacySettingsChangedEvent>,
     IAmReadModelFor<UserAggregate, UserId, UserPremiumStatusChangedEvent>,
     IAmReadModelFor<UserAggregate, UserId, PersonalChannelUpdatedEvent>,
     IAmReadModelFor<UserAggregate, UserId, BirthdayUpdatedEvent>,
@@ -38,7 +38,7 @@ public class UserReadModel : IUserReadModel,
     public virtual string FirstName { get; private set; } = null!;
     public GlobalPrivacySettings? GlobalPrivacySettings { get; private set; }
     public virtual bool HasPassword { get; private set; }
-    public virtual string Id { get; private set; } = null!;
+    public virtual string Id { get; set; } = null!;
     public virtual bool IsOnline { get; private set; }
     public virtual string? LastName { get; private set; }
     public virtual DateTime LastUpdateDate { get; private set; }
@@ -57,12 +57,13 @@ public class UserReadModel : IUserReadModel,
     public virtual bool SensitiveEnabled { get; private set; }
     public virtual bool ShowContactSignUpNotification { get; private set; }
     public virtual bool Support { get; private set; }
-    public virtual long UserId { get; private set; }
+    public virtual long UserId { get; set; }
     //public string UserId { get; private set; }
     public virtual string? UserName { get; private set; }
 
     public List<string>? Usernames { get; private set; }
     public int? UserNameUpdateDate { get; private set; }
+    public bool? IsDeleted { get; set; }
     public virtual bool Verified { get; private set; }
 
     //public int? Color { get; private set; }
@@ -143,6 +144,7 @@ public class UserReadModel : IUserReadModel,
             ProfilePhotoId = domainEvent.AggregateEvent.PhotoId;
         }
 
+        ProfilePhotoUpdateDate = domainEvent.AggregateEvent.Date;
         return Task.CompletedTask;
     }
 

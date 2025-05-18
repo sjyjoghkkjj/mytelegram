@@ -20,11 +20,11 @@ public class UserState : AggregateState<UserAggregate, UserId, UserState>,
     IApply<UserFirstNameUpdatedEvent>
 {
     public long AccessHash { get; private set; }
-    public string FirstName { get; private set; } = default!;
+    public string FirstName { get; private set; } = null!;
     public bool HasPassword { get; private set; }
     public bool IsOnline { get; private set; }
     public string? LastName { get; private set; }
-    public string PhoneNumber { get; private set; } = default!;
+    public string PhoneNumber { get; private set; } = string.Empty;
     public byte[]? Photo { get; private set; }
     public bool SensitiveEnabled { get; private set; }
     public bool Support { get; private set; }

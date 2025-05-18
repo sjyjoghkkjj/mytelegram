@@ -15,11 +15,6 @@ public interface IBotBusinessConnection : IObject
     BitArray Flags { get; set; }
 
     ///<summary>
-    /// Whether the bot can reply on behalf of the user to messages it receives through the business connection
-    ///</summary>
-    bool CanReply { get; set; }
-
-    ///<summary>
     /// Whether this business connection is currently disabled
     ///</summary>
     bool Disabled { get; set; }
@@ -43,4 +38,5 @@ public interface IBotBusinessConnection : IObject
     /// When was the connection created.
     ///</summary>
     int Date { get; set; }
+    MyTelegram.Schema.IBusinessBotRights? Rights { get; set; }
 }

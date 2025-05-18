@@ -1,3 +1,5 @@
+﻿using MyTelegram.Abstractions;
+
 namespace MyTelegram.MTProto.Tests;
 
 public class MtpMessageEncoderTest : TestsFor<MtpMessageEncoder>

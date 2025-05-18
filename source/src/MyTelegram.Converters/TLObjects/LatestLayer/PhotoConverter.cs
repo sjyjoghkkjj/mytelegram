@@ -37,6 +37,17 @@ public class PhotoConverter : IPhotoConverter, ITransientDependency
             FileReference = photoReadModel.FileReference
         };
 
+        if (photoReadModel.Sizes2 != null)
+        {
+            photo.Sizes = new TVector<IPhotoSize>(photoReadModel.Sizes2);
+        }
+
+        if (photoReadModel.VideoSizes2 != null)
+        {
+            photo.VideoSizes = new TVector<IVideoSize>(photoReadModel.VideoSizes2);
+        }
+
+        // Used for compatibility with old data, new data will only use Sizes2 and VideoSizes2
         if (photoReadModel.Sizes?.Count > 0)
         {
             photo.Sizes = new TVector<IPhotoSize>();

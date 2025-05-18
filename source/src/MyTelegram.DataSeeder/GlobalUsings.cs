@@ -30,3 +30,4 @@ global using MyTelegram.Services.NativeAot;
 global using Serilog;
 global using Serilog.Sinks.SystemConsole.Themes;
 global using System.Text.Json;
+global using MyTelegram.Abstractions;

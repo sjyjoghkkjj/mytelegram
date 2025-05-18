@@ -6,6 +6,7 @@
         <RootNamespace>MyTelegram</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
+      <ProjectReference Include="..\MyTelegram.Abstractions\MyTelegram.Abstractions.csproj" />
       <ProjectReference Include="..\MyTelegram.Schema\MyTelegram.Schema.csproj" />
     </ItemGroup>
     <ItemGroup>

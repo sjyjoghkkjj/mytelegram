@@ -42,3 +42,4 @@ global using MyTelegram.Domain.Sagas.Identities;
 global using MyTelegram.ReadModel.Interfaces;
 global using MyTelegram.ReadModel.ReadModelLocators;
 global using MyTelegram.Schema;
+global using MyTelegram.Abstractions;

@@ -22,17 +22,20 @@ builder.UseSerilog((context,
     configuration.ReadFrom.Configuration(context.Configuration);
 });
 
+builder.ConfigureHostOptions(options =>
+{
+    options.ServicesStartConcurrently = true;
+    options.ServicesStopConcurrently = true;
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
+
 builder.ConfigureServices((context,
     services) =>
 {
     services.Configure<MyTelegramDataSeederOptions>(context.Configuration.GetRequiredSection("App"));
+    // services.Configure<MinioOptions>(context.Configuration.GetRequiredSection("Minio"));
 
-    services.AddMyTelegramDataSeeder(options =>
-    {
-        options.ConfigureMongoDb(context.Configuration.GetConnectionString("Default"),
-            context.Configuration["App:DatabaseName"]
-        );
-    });
+    services.AddMyTelegramDataSeeder();
 
     services.AddHostedService<MyTelegramDataSeederBackgroundService>();
 });

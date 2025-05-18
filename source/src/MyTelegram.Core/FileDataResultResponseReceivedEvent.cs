@@ -2,4 +2,6 @@
 
 public record FileDataResultResponseReceivedEvent(
     long ReqMsgId,
-    byte[] Data) : ISessionMessage;
+    //ReadOnlyMemory<byte> Data
+    byte[] Data
+) : ISessionMessage;

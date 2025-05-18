@@ -1,8 +1,6 @@
-﻿using System.Collections.Frozen;
+﻿namespace MyTelegram.Core;
 
-namespace MyTelegram.Core;
-
-public class ObjectIdConsts
+public partial class ObjectIdConsts
 {
     public const uint BindTempAuthKey = 0xcdd42a05;
     public const uint GetFileObjectId = 0xb15a9afc;
@@ -14,22 +12,17 @@ public class ObjectIdConsts
     public const uint MsgContainer = 0x73f1f8dc;
     public const uint PingDelayId = 0xf3427b8c;
     public const uint PingId = 0x7abe77ec;
+    public const uint UpdateStatusId = 0x6628562c;
+    public const uint GetDifferenceId = 0x19c2f763;
+    public const uint GetDifferenceLayerNId = 0x25939651;
+    public const uint LogoutId = 0x3e72ba19;
 
-    public static readonly Dictionary<uint, string> NotNeedAckObjectIdToNames = new()
-    {
-        { 0xf3427b8c, "PingDelayDisconnectHandler" },
-        { 0x7abe77ec, "PingHandler" },
-        { 0x73f1f8dc, "MsgContainerHandler" },
-        { 0xcdd42a05, "BindTempAuthKeyHandler" },
-        { 0xf2f2330a, "GetLangPackHandler" },
-        { 0xcd984aa5, "Langpack.GetDifferenceHandler" },
-        { 0x6a596502, "GetLanguageHandler" },
-        { 0x42c6978f, "GetLanguagesHandler" },
-        { 0xefea3803, "GetStringsHandler" }
-    };
+    public const uint InitConnectionId = 0xc1cd5ea9;
+    //0x63c66506
+    public const uint MessagesGetMessagesId = 0x63c66506;
 
-    // CommandObjectIdToNames count=178
-    public static readonly FrozenDictionary<uint, string> CommandObjectIdToNames = new Dictionary<uint, string>
+    // CommandServerHandlers count=195
+    public static readonly FrozenDictionary<uint, string> CommandServerHandlers = new Dictionary<uint, string>
     {
       { 0x3bd2b4a0, "AcceptCallHandler"},
       { 0xf831a20f, "AcceptContactHandler"},
@@ -58,12 +51,14 @@ public class ObjectIdConsts
       { 0xa2185cab, "DeleteChatUserHandler"},
       { 0x096a0e00, "DeleteContactsHandler"},
       { 0xd464a42b, "DeleteExportedChatInviteHandler"},
+      { 0x719c5c5e, "DeleteExportedInviteHandler"},
       { 0xb08f922a, "DeleteHistoryHandler"},
       { 0x9baa9647, "DeleteHistoryHandler"},
       { 0xe58e95d2, "DeleteMessagesHandler"},
       { 0x84c1fd4e, "DeleteMessagesHandler"},
       { 0x367544db, "DeleteParticipantHistoryHandler"},
       { 0xf9cbe409, "DeletePhoneCallHistoryHandler"},
+      { 0x87cf7f2f, "DeletePhotosHandler"},
       { 0xe105e910, "DeleteQuickReplyMessagesHandler"},
       { 0x3cc04740, "DeleteQuickReplyShortcutHandler"},
       { 0x56987bd5, "DeleteRevokedExportedChatInvitesHandler"},
@@ -80,9 +75,12 @@ public class ObjectIdConsts
       { 0xa5866b41, "EditChatDefaultBannedRightsHandler"},
       { 0x35ddd674, "EditChatPhotoHandler"},
       { 0x73783ffd, "EditChatTitleHandler"},
+      { 0x8f38cd1f, "EditCreatorHandler"},
       { 0xbdca2f75, "EditExportedChatInviteHandler"},
+      { 0x653db63d, "EditExportedInviteHandler"},
       { 0xf4dfa185, "EditForumTopicHandler"},
       { 0xa5273abf, "EditGroupCallParticipantHandler"},
+      { 0x58e63f6d, "EditLocationHandler"},
       { 0xdfd14005, "EditMessageHandler"},
       { 0x6847d0ab, "EditPeerFoldersHandler"},
       { 0xf12e57c9, "EditPhotoHandler"},
@@ -90,8 +88,9 @@ public class ObjectIdConsts
       { 0xb583ba46, "EditStoryHandler"},
       { 0x566decd0, "EditTitleHandler"},
       { 0xa455de90, "ExportChatInviteHandler"},
+      { 0x8472478e, "ExportChatlistInviteHandler"},
       { 0xb7e085fe, "ExportLoginTokenHandler"},
-      { 0x6d74da08, "ForwardMessagesHandler"},
+      { 0xbb9fa475, "ForwardMessagesHandler"},
       { 0x26cf8950, "GetDhConfigHandler"},
       { 0x5784d3e1, "GetMessagesViewsHandler"},
       { 0xe085f4ea, "HideAllChatJoinRequestsHandler"},
@@ -105,9 +104,11 @@ public class ObjectIdConsts
       { 0xfeed5769, "InstallWallPaperHandler"},
       { 0xc9e33d54, "InviteToChannelHandler"},
       { 0x24b524c5, "JoinChannelHandler"},
-      { 0xd61e1df3, "JoinGroupCallHandler"},
+      { 0xa6b1e39a, "JoinChatlistInviteHandler"},
+      { 0x8fb53057, "JoinGroupCallHandler"},
       { 0xcbea6bc4, "JoinGroupCallPresentationHandler"},
       { 0xf836aa95, "LeaveChannelHandler"},
+      { 0x74fae13a, "LeaveChatlistHandler"},
       { 0x500377f9, "LeaveGroupCallHandler"},
       { 0x1c50d144, "LeaveGroupCallPresentationHandler"},
       { 0xc286d98f, "MarkDialogUnreadHandler"},
@@ -124,14 +125,17 @@ public class ObjectIdConsts
       { 0xec86017a, "RegisterDeviceHandler"},
       { 0x637ea878, "RegisterDeviceHandler"},
       { 0x3b1adf37, "ReorderPinnedDialogsHandler"},
-      { 0xa6c4600c, "RequestCallHandler"},
+      { 0x42ff96ed, "RequestCallHandler"},
       { 0xf64daf43, "RequestEncryptionHandler"},
       { 0xd897bc66, "RequestPasswordRecoveryHandler"},
       { 0x7a7f2a15, "ResendPasswordEmailHandler"},
       { 0xdf77f3bc, "ResetAuthorizationHandler"},
+      { 0x9fab0d1a, "ResetAuthorizationsHandler"},
       { 0x3d8de0f9, "ResetBotCommandsHandler"},
       { 0x7e960193, "ResetLoginEmailHandler"},
       { 0xbb3b9804, "ResetWallPapersHandler"},
+      { 0x2d01b9ef, "ResetWebAuthorizationHandler"},
+      { 0x682d2594, "ResetWebAuthorizationsHandler"},
       { 0xd372c5ce, "SaveDraftHandler"},
       { 0xf257106c, "SaveThemeHandler"},
       { 0x6c5a5b37, "SaveWallPaperHandler"},
@@ -141,9 +145,10 @@ public class ObjectIdConsts
       { 0x5559481d, "SendEncryptedFileHandler"},
       { 0x44fa7a15, "SendEncryptedHandler"},
       { 0x32d439a4, "SendEncryptedServiceHandler"},
-      { 0x7852834e, "SendMediaHandler"},
-      { 0x983f9745, "SendMessageHandler"},
-      { 0x37b74355, "SendMultiMediaHandler"},
+      { 0xa550cd78, "SendMediaHandler"},
+      { 0xfbf2340a, "SendMessageHandler"},
+      { 0x1bf89d74, "SendMultiMediaHandler"},
+      { 0x58bbcb50, "SendPaidReactionHandler"},
       { 0x6c750de1, "SendQuickReplyMessagesHandler"},
       { 0x7fd736b2, "SendReactionHandler"},
       { 0xd30d78d4, "SendReactionHandler"},
@@ -160,6 +165,7 @@ public class ObjectIdConsts
       { 0x8ffacae1, "SetChatWallPaperHandler"},
       { 0xb574b16b, "SetContentSettingsHandler"},
       { 0x9eb51445, "SetDefaultHistoryTTLHandler"},
+      { 0x4f47a016, "SetDefaultReactionHandler"},
       { 0x40582bb2, "SetDiscussionGroupHandler"},
       { 0x3cd930b7, "SetEmojiStickersHandler"},
       { 0x791451ed, "SetEncryptedTypingHandler"},
@@ -170,9 +176,13 @@ public class ObjectIdConsts
       { 0x8d52a951, "SignInHandler"},
       { 0xaac7b717, "SignUpHandler"},
       { 0x80eee427, "SignUpHandler"},
+      { 0xfd2dda49, "ToggleDialogFilterTagsHandler"},
       { 0xa731e257, "ToggleDialogPinHandler"},
       { 0xa4298b29, "ToggleForumHandler"},
+      { 0x4c2985b6, "ToggleJoinRequestHandler"},
+      { 0xe4cb9580, "ToggleJoinToSendHandler"},
       { 0xb11eafa2, "ToggleNoForwardsHandler"},
+      { 0x6a6e7854, "ToggleParticipantsHiddenHandler"},
       { 0x9a75a1ef, "TogglePinnedHandler"},
       { 0x0b297e9b, "TogglePinnedToTopHandler"},
       { 0xeabbb94c, "TogglePreHistoryHiddenHandler"},

@@ -52,6 +52,6 @@ internal sealed class EditChatDefaultBannedRightsHandler : RpcResultObjectHandle
 
     private ChatBannedRights GetChatBannedRights(IChatBannedRights chatBannedRights)
     {
-        return ChatBannedRights.FromValue(chatBannedRights.Flags.ToInt(), chatBannedRights.UntilDate);
+        return ChatBannedRights.FromValue(chatBannedRights.Flags.ToInt32(), chatBannedRights.UntilDate);
     }
 }

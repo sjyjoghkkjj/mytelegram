@@ -9,6 +9,7 @@ public static class MyTelegramCoreExtensions
         services.RegisterServices(typeof(MyTelegramCoreExtensions).Assembly);
         services.AddSingleton<IObjectMapper, DefaultObjectMapper>();
         services.AddSingleton(typeof(IObjectMapper<>), typeof(DefaultObjectMapper<>));
+        services.AddSingleton(typeof(IMessageQueueProcessor<>), typeof(MessageQueueProcessor<>));
 
         return services;
     }

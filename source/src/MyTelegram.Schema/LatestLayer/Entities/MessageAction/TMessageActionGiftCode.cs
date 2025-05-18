@@ -73,7 +73,7 @@ public sealed class TMessageActionGiftCode : IMessageAction
     public void ComputeFlag()
     {
         if (ViaGiveaway) { Flags[0] = true; }
-        if (Unclaimed) { Flags[2] = true; }
+        if (Unclaimed) { Flags[5] = true; }
         if (BoostPeer != null) { Flags[1] = true; }
         if (Currency != null) { Flags[2] = true; }
         if (/*Amount != 0 &&*/ Amount.HasValue) { Flags[2] = true; }
@@ -101,7 +101,7 @@ public sealed class TMessageActionGiftCode : IMessageAction
     {
         Flags = reader.ReadBitArray();
         if (Flags[0]) { ViaGiveaway = true; }
-        if (Flags[2]) { Unclaimed = true; }
+        if (Flags[5]) { Unclaimed = true; }
         if (Flags[1]) { BoostPeer = reader.Read<MyTelegram.Schema.IPeer>(); }
         Months = reader.ReadInt32();
         Slug = reader.ReadString();

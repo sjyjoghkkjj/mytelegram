@@ -7008,7 +7008,6 @@ public class RpcErrors
        { 0x6dfa0622, "Botcancelstarssubscriptionhandler" }, // payments.botcancelstarssubscriptionhandler
        { 0x1f040578, "Cancelcodehandler" }, // auth.cancelcodehandler
        { 0xc1cbd5b6, "Cancelpasswordemailhandler" }, // account.cancelpasswordemailhandler
-       { 0x9fc19eb6, "Canpurchasepremiumhandler" }, // payments.canpurchasepremiumhandler
        { 0x1359f4e6, "Cansendmessagehandler" }, // bots.cansendmessagehandler
        { 0xc7dfdfdd, "Cansendstoryhandler" }, // stories.cansendstoryhandler
        { 0x40f48462, "Changeauthorizationsettingshandler" }, // account.changeauthorizationsettingshandler
@@ -7032,7 +7031,7 @@ public class RpcErrors
        { 0x9dfeefb4, "Clearrecentreactionshandler" }, // messages.clearrecentreactionshandler
        { 0x8999602d, "Clearrecentstickershandler" }, // messages.clearrecentstickershandler
        { 0xd83d70c1, "Clearsavedinfohandler" }, // payments.clearsavedinfohandler
-       { 0xf093465, "Clicksponsoredmessagehandler" }, // messages.clicksponsoredmessagehandler
+       { 0x8235057e, "Clicksponsoredmessagehandler" }, // messages.clicksponsoredmessagehandler
        { 0x2efe1722, "Confirmcallhandler" }, // phone.confirmcallhandler
        { 0x8fdf1920, "Confirmpasswordemailhandler" }, // account.confirmpasswordemailhandler
        { 0x5f2178c3, "Confirmphonehandler" }, // account.confirmphonehandler
@@ -7337,7 +7336,7 @@ public class RpcErrors
        { 0x24b524c5, "Joinchannelhandler" }, // channels.joinchannelhandler
        { 0xa6b1e39a, "Joinchatlistinvitehandler" }, // chatlists.joinchatlistinvitehandler
        { 0xe089f8f5, "Joinchatlistupdateshandler" }, // chatlists.joinchatlistupdateshandler
-       { 0xd61e1df3, "Joingroupcallhandler" }, // phone.joingroupcallhandler
+       { 0x8fb53057, "Joingroupcallhandler" }, // phone.joingroupcallhandler
        { 0xcbea6bc4, "Joingroupcallpresentationhandler" }, // phone.joingroupcallpresentationhandler
        { 0x5ff58f20, "Launchprepaidgiveawayhandler" }, // payments.launchprepaidgiveawayhandler
        { 0x9898ad73, "Leavehandler" }, // smsjobs.leavehandler
@@ -7384,9 +7383,9 @@ public class RpcErrors
        { 0x3f64c076, "Reportreactionhandler" }, // messages.reportreactionhandler
        { 0xf44a8315, "Reportspamhandler" }, // channels.reportspamhandler
        { 0xcf1592db, "Reportspamhandler" }, // messages.reportspamhandler
-       { 0x1af3dbb8, "Reportsponsoredmessagehandler" }, // messages.reportsponsoredmessagehandler
+       { 0x12cbf0c4, "Reportsponsoredmessagehandler" }, // messages.reportsponsoredmessagehandler
        { 0x53618bce, "Requestappwebviewhandler" }, // messages.requestappwebviewhandler
-       { 0xa6c4600c, "Requestcallhandler" }, // phone.requestcallhandler
+       { 0x42ff96ed, "Requestcallhandler" }, // phone.requestcallhandler
        { 0xf64daf43, "Requestencryptionhandler" }, // messages.requestencryptionhandler
        { 0x8e39261e, "Requestfirebasesmshandler" }, // auth.requestfirebasesmshandler
        { 0xc9e01e7b, "Requestmainwebviewhandler" }, // messages.requestmainwebviewhandler
@@ -7526,7 +7525,7 @@ public class RpcErrors
        { 0x4b00e066, "Updatebusinessworkhourshandler" }, // account.updatebusinessworkhourshandler
        { 0x7cefa15d, "Updatecolorhandler" }, // account.updatecolorhandler
        { 0xd8aa3671, "Updatecolorhandler" }, // channels.updatecolorhandler
-       { 0x43d8521d, "Updateconnectedbothandler" }, // account.updateconnectedbothandler
+       { 0x66a08c7e, "Updateconnectedbothandler" }, // account.updateconnectedbothandler
        { 0x38df3532, "Updatedevicelockedhandler" }, // account.updatedevicelockedhandler
        { 0x1ad4a04a, "Updatedialogfilterhandler" }, // messages.updatedialogfilterhandler
        { 0xc563c1e4, "Updatedialogfiltersorderhandler" }, // messages.updatedialogfiltersorderhandler
@@ -7554,7 +7553,7 @@ public class RpcErrors
        { 0xb6c8f12b, "Validaterequestedinfohandler" }, // payments.validaterequestedinfohandler
        { 0x32da4cf, "Verifyemailhandler" }, // account.verifyemailhandler
        { 0x4dd3a7f6, "Verifyphonehandler" }, // account.verifyphonehandler
-       { 0x673ad8f1, "Viewsponsoredmessagehandler" }, // messages.viewsponsoredmessagehandler
+       { 0x269e3643, "Viewsponsoredmessagehandler" }, // messages.viewsponsoredmessagehandler
     }.ToFrozenDictionary();
 
     // Count: 23

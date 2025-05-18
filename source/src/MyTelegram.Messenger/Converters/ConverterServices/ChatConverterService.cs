@@ -330,7 +330,7 @@ public class ChatConverterService(
             }
         }
 
-        if (selfUserId == MyTelegramServerDomainConsts.LeftChannelUid)
+        if (selfUserId == MyTelegramConsts.LeftChannelUid)
         {
             channelFull.CanViewParticipants = false;
             channelFull.CanSetUsername = false;

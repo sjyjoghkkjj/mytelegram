@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Indicates a discarded phone call
 /// See <a href="https://corefork.telegram.org/constructor/phoneCallDiscarded" />
 ///</summary>
-[TlObject(0xf9d25503)]
+[TlObject(0x50ca4de1)]
 public sealed class TPhoneCallDiscarded : IPhoneCall
 {
-    public uint ConstructorId => 0xf9d25503;
+    public uint ConstructorId => 0x50ca4de1;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -49,7 +49,6 @@ public sealed class TPhoneCallDiscarded : IPhoneCall
     /// Duration of the phone call in seconds
     ///</summary>
     public int? Duration { get; set; }
-    public MyTelegram.Schema.IInputGroupCall? ConferenceCall { get; set; }
 
     public void ComputeFlag()
     {
@@ -58,7 +57,6 @@ public sealed class TPhoneCallDiscarded : IPhoneCall
         if (Video) { Flags[6] = true; }
         if (Reason != null) { Flags[0] = true; }
         if (/*Duration != 0 && */Duration.HasValue) { Flags[1] = true; }
-        if (ConferenceCall != null) { Flags[8] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -69,7 +67,6 @@ public sealed class TPhoneCallDiscarded : IPhoneCall
         writer.Write(Id);
         if (Flags[0]) { writer.Write(Reason); }
         if (Flags[1]) { writer.Write(Duration.Value); }
-        if (Flags[8]) { writer.Write(ConferenceCall); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -81,6 +78,5 @@ public sealed class TPhoneCallDiscarded : IPhoneCall
         Id = reader.ReadInt64();
         if (Flags[0]) { Reason = reader.Read<MyTelegram.Schema.IPhoneCallDiscardReason>(); }
         if (Flags[1]) { Duration = reader.ReadInt32(); }
-        if (Flags[8]) { ConferenceCall = reader.Read<MyTelegram.Schema.IInputGroupCall>(); }
     }
 }

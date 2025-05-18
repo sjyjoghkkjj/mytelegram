@@ -16,7 +16,7 @@ public class ReqPqHandler(
         await cacheManager.SetAsync(
             key,
             authCacheItem,
-            MyTelegramServerDomainConsts.AuthKeyExpireSeconds
+            MyTelegramConsts.AuthKeyExpireSeconds
         );
         logger.LogDebug(
             "[Step1] ResPQ created, connectionId: {ConnectionId}, reqMsgId: {ReqMsgId}",

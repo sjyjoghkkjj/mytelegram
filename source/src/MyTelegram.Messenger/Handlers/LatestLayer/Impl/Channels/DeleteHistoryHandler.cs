@@ -55,7 +55,7 @@ internal sealed class DeleteHistoryHandler(
     {
         var messageIds = (await queryProcessor
             .ProcessAsync(new GetMessageIdListByChannelIdQuery(channelId,
-                    MyTelegramServerDomainConsts.ClearHistoryDefaultPageSize),
+                    MyTelegramConsts.ClearHistoryDefaultPageSize),
                 default)).ToList();
         // keep first message(create channel message)
         messageIds.Remove(1);

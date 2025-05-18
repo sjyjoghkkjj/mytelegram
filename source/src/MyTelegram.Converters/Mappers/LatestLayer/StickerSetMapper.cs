@@ -64,6 +64,10 @@ internal sealed class StickerSetMapper
         destination.ThumbVersion = thumbVersion;
         destination.ThumbDocumentId = source.ThumbDocumentId;
         destination.Count = source.Count;
+        if (destination.Count == 0)
+        {
+            destination.Count = source.StickerDocumentIds.Count;
+        }
         //destination.Hash = source.Hash;
 
         return destination;

@@ -1,6 +1,4 @@
-﻿using EncryptedMessageResponse = MyTelegram.MTProto.EncryptedMessageResponse;
-
-namespace MyTelegram.GatewayServer.EventHandlers;
+﻿namespace MyTelegram.GatewayServer.EventHandlers;
 
 public class TransportErrorEventHandler(IClientDataSender clientDataSender)
     : IEventHandler<TransportErrorEvent>, ITransientDependency

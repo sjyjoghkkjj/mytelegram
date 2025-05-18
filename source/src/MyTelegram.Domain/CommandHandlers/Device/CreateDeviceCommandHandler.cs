@@ -21,7 +21,9 @@ public class CreateDeviceCommandHandler : CommandHandler<DeviceAggregate, Device
             command.LangPack,
             command.LangCode,
             command.Ip,
-            command.Layer);
+            command.Layer,
+            command.Parameters
+            );
         return Task.CompletedTask;
     }
 }

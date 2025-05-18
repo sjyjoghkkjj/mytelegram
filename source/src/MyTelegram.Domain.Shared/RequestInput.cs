@@ -7,11 +7,13 @@ public record RequestInput(
     Guid RequestId,
     uint ObjectId,
     long ReqMsgId,
+    int SeqNumber,
     long UserId,
     long AuthKeyId,
     long PermAuthKeyId,
     int Layer,
     long Date,
     DeviceType DeviceType,
-    string ClientIp
+    string ClientIp,
+    long SessionId
 ) : IRequestInput;

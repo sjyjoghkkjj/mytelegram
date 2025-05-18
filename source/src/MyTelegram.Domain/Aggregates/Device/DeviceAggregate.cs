@@ -1,10 +1,10 @@
 ﻿namespace MyTelegram.Domain.Aggregates.Device;
 
-public class DeviceAggregate : AggregateRoot<DeviceAggregate, DeviceId>
+public class DeviceAggregate : SnapshotAggregateRoot<DeviceAggregate, DeviceId, DeviceSnapshot>
 {
     private readonly DeviceState _state = new();
 
-    public DeviceAggregate(DeviceId id) : base(id)
+    public DeviceAggregate(DeviceId id) : base(id, SnapshotEveryFewVersionsStrategy.Default)
     {
         Register(_state);
     }
@@ -32,7 +32,8 @@ public class DeviceAggregate : AggregateRoot<DeviceAggregate, DeviceId>
         string langPack,
         string langCode,
         string ip,
-        int layer
+        int layer,
+        Dictionary<string, string>? parameters
     )
     {
         //Specs.AggregateIsNew.ThrowDomainErrorIfNotSatisfied(this);
@@ -41,7 +42,26 @@ public class DeviceAggregate : AggregateRoot<DeviceAggregate, DeviceId>
         {
             hash = Random.Shared.NextInt64();
         }
-        
+
+        var date = _state.DateCreated;
+        if (date == 0)
+        {
+            date = DateTime.UtcNow.ToTimestamp();
+        }
+
+        var newParameters = _state.Parameters;
+        if (newParameters != null)
+        {
+            if (parameters != null)
+            {
+                foreach (var kv in parameters)
+                {
+                    newParameters.Remove(kv.Key);
+                    newParameters.Add(kv.Key, kv.Value);
+                }
+            }
+        }
+
         Emit(new DeviceCreatedEvent(IsNew,
             permAuthKeyId,
             tempAuthKeyId,
@@ -60,7 +80,7 @@ public class DeviceAggregate : AggregateRoot<DeviceAggregate, DeviceId>
             langCode,
             ip,
             layer,
-            DateTime.UtcNow.ToTimestamp()));
+            date, newParameters));
     }
 
     public void UnRegisterDevice(long permAuthKeyId,
@@ -68,5 +88,36 @@ public class DeviceAggregate : AggregateRoot<DeviceAggregate, DeviceId>
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new DeviceAuthKeyUnRegisteredEvent(permAuthKeyId, tempAuthKeyId));
+    }
+
+    protected override Task<DeviceSnapshot> CreateSnapshotAsync(CancellationToken cancellationToken)
+    {
+        return Task.FromResult(new DeviceSnapshot(_state.PermAuthKeyId,
+            _state.TempAuthKeyId,
+            _state.UserId,
+            _state.ApiId,
+            _state.AppName,
+            _state.AppVersion,
+            _state.OfficialApp,
+            _state.PasswordPending,
+            _state.DeviceModel,
+            _state.Platform,
+            _state.SystemVersion,
+            _state.SystemLangCode,
+            _state.LangPack,
+            _state.LangCode,
+            _state.Ip,
+            _state.Layer,
+            _state.DateCreated,
+            _state.IsActive,
+            _state.Parameters,
+            _state.Hash));
+    }
+
+    protected override Task LoadSnapshotAsync(DeviceSnapshot snapshot, ISnapshotMetadata metadata, CancellationToken cancellationToken)
+    {
+        _state.LoadSnapshot(snapshot);
+
+        return Task.CompletedTask;
     }
 }

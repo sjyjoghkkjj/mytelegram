@@ -20,6 +20,8 @@ public class DeviceReadModel : IDeviceReadModel,
         UserId = domainEvent.AggregateEvent.UserId;
         DateActive = domainEvent.AggregateEvent.Date;
         IsActive = true;
+        PermAuthKeyId = domainEvent.AggregateEvent.PermAuthKeyId;
+
         return Task.CompletedTask;
     }
 
@@ -62,6 +64,9 @@ public class DeviceReadModel : IDeviceReadModel,
         DateActive = DateCreated;
 
         IsActive = true;
+        Parameters = domainEvent.AggregateEvent.Parameters;
+        //JsonParameters = domainEvent.AggregateEvent.JsonParameters;
+
         return Task.CompletedTask;
     }
 
@@ -70,6 +75,8 @@ public class DeviceReadModel : IDeviceReadModel,
     public virtual long PermAuthKeyId { get; private set; }
     public virtual long TempAuthKeyId { get; private set; }
     public virtual long UserId { get; private set; }
+    public string? JsonParameters { get; private set; }
+    public Dictionary<string, string>? Parameters { get; private set; } = [];
     public virtual int ApiId { get; private set; }
     public virtual string AppName { get; private set; } = null!;
     public virtual string AppVersion { get; private set; } = null!;

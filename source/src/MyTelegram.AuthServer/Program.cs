@@ -1,4 +1,5 @@
 ﻿using Rebus.Config;
+using MyTelegramConsts = MyTelegram.MyTelegramConsts;
 
 Console.Title = "MyTelegram auth server";
 Log.Logger = new LoggerConfiguration()
@@ -15,7 +16,7 @@ Log.Information(
 Log.Information(
     "{Description} {Url}",
     "For more information, please visit",
-    MyTelegramServerDomainConsts.RepositoryUrl
+    MyTelegramConsts.RepositoryUrl
 );
 
 Log.Information("MyTelegram authentication server starting...");

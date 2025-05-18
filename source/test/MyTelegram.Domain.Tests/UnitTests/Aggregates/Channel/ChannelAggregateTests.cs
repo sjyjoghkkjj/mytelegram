@@ -6,7 +6,7 @@ public class ChannelAggregateTests : TestsFor<ChannelAggregate>
 {
     public ChannelAggregateTests()
     {
-        Fixture.Customize<ChannelId>(x => x.FromFactory(() => ChannelId.Create(MyTelegramServerDomainConsts.ChannelInitId + 1)));
+        Fixture.Customize<ChannelId>(x => x.FromFactory(() => ChannelId.Create(MyTelegramConsts.ChannelInitId + 1)));
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class ChannelAggregateTests : TestsFor<ChannelAggregate>
     [Fact]
     public void EditAbout_With_Text_Length_GreaterThan_ChatAbout_Max_Length_Throws_Exception()
     {
-        var longAbout = string.Join("", Enumerable.Repeat("a", MyTelegramServerDomainConsts.ChatAboutMaxLength + 1));
+        var longAbout = string.Join("", Enumerable.Repeat("a", MyTelegramConsts.ChatAboutMaxLength + 1));
         var aggregateEvent = A<ChannelCreatedEvent>();
         var channelCreatedEvent = ADomainEvent<ChannelAggregate, ChannelId, ChannelCreatedEvent>(aggregateEvent, 1);
         Sut.ApplyEvents(new IDomainEvent[] { channelCreatedEvent });

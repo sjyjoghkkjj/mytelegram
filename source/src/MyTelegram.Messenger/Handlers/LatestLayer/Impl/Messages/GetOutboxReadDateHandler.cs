@@ -47,7 +47,7 @@ internal sealed class GetOutboxReadDateHandler(
 
         var date = await queryProcessor.ProcessAsync(new GetOutboxReadDateQuery(input.UserId, obj.MsgId, peer));
         var diff = CurrentDate - date;
-        if (diff > MyTelegramServerDomainConsts.ChatReadMarkExpirePeriod)
+        if (diff > MyTelegramConsts.ChatReadMarkExpirePeriod)
         {
             RpcErrors.RpcErrors400.MessageTooOld.ThrowRpcError();
         }

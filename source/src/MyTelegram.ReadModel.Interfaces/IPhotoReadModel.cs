@@ -15,4 +15,7 @@ public interface IPhotoReadModel : IReadModel
     long UserId { get; }
     List<VideoSize>? VideoSizes { get; }
     bool IsProfilePhoto { get; }
+
+    List<IPhotoSize>? Sizes2 { get; }
+    List<IVideoSize>? VideoSizes2 { get; }
 }

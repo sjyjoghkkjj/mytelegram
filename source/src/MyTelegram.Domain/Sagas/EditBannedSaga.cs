@@ -13,11 +13,6 @@ public class EditBannedSaga(
         // view message rights is banned,should remove from bots
         if (domainEvent.AggregateEvent.BannedRights.ViewMessages)
         {
-            //if (domainEvent.AggregateEvent.MemberUserId > MyTelegramServerDomainConsts.BotUserInitId)
-            //{
-            //    var command = new RemoveBotCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId),
-            //        domainEvent.AggregateEvent.MemberUserId);
-            //    Publish(command);
 
             var updateParticipantCountCommand = new UpdateParticipantCountCommand(ChannelId.Create(domainEvent.AggregateEvent.ChannelId), -1);
             Publish(updateParticipantCountCommand);

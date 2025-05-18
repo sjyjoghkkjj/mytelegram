@@ -12,18 +12,18 @@ public class MyMongoDbReadModelStore<TReadModel>(
     ILogger<MongoDbReadModelStore<TReadModel>> logger,
     IReadModelDescriptionProvider readModelDescriptionProvider,
     ITransientFaultHandler<IOptimisticConcurrencyRetryStrategy> transientFaultHandler,
-    IMongoDbContextFactory<IMongoDbContext> dbContextFactory)
+    IMongoDbContext mongoDbContext)
     :
         MyMongoDbReadModelStore<TReadModel, IMongoDbContext>(logger, readModelDescriptionProvider,
-            transientFaultHandler, dbContextFactory)
+            transientFaultHandler, mongoDbContext)
     where TReadModel : class, IMongoDbReadModel;
 
 public class MyMongoDbReadModelStore<TReadModel, TDbContext>(
     ILogger<MongoDbReadModelStore<TReadModel>> logger,
     IReadModelDescriptionProvider readModelDescriptionProvider,
     ITransientFaultHandler<IOptimisticConcurrencyRetryStrategy> transientFaultHandler,
-    IMongoDbContextFactory<TDbContext> dbContextFactory)
-    : MongoDbReadModelStore<TReadModel>(logger, dbContextFactory.CreateContext().GetDatabase(),
+    TDbContext dbContext)
+    : MongoDbReadModelStore<TReadModel>(logger, dbContext.GetDatabase(),
         readModelDescriptionProvider, transientFaultHandler), IMyMongoDbReadModelStore<TReadModel>
     where TReadModel : class, IMongoDbReadModel
     where TDbContext : IMongoDbContext
@@ -31,7 +31,7 @@ public class MyMongoDbReadModelStore<TReadModel, TDbContext>(
     private readonly ILogger<MongoDbReadModelStore<TReadModel>> _logger = logger;
     private readonly IReadModelDescriptionProvider _readModelDescriptionProvider = readModelDescriptionProvider;
 
-    private IMongoDatabase GetDatabase() => dbContextFactory.CreateContext().GetDatabase();
+    private IMongoDatabase GetDatabase() => dbContext.GetDatabase();
 
     public Task<IAggregateFluent<TResult>> AggregateAsync<TResult, TKey>(
         Expression<Func<TReadModel, bool>> filter,

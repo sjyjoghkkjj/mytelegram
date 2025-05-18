@@ -3,7 +3,7 @@
 public class MtpMessageEncoder(
     IAesHelper aesHelper,
     IMessageIdHelper messageIdHelper)
-    : IMtpMessageEncoder
+    : IMtpMessageEncoder, ITransientDependency
 {
     private static readonly byte[] DefaultAuthKeyIdBytes = new byte[8];
 
@@ -60,7 +60,7 @@ public class MtpMessageEncoder(
 
         if (d.ObfuscationEnabled)
         {
-        	aesHelper.Ctr128Encrypt(encodedBytes[..totalCount], d.ReceiveKey, d.ReceiveCtrState);
+            aesHelper.Ctr128Encrypt(encodedBytes[..totalCount], d.ReceiveKey, d.ReceiveCtrState);
         }
 
         return totalCount;
@@ -82,7 +82,7 @@ public class MtpMessageEncoder(
     }
 
     private int EncodeToProtocolAbridgedBytesCore(Span<byte> encodedBytes,
-        params byte[][] bufferList)
+        params ReadOnlyMemory<byte>[] bufferList)
     {
         // https://corefork.telegram.org/mtproto/mtproto-transports#abridged
         /*
@@ -106,7 +106,7 @@ public class MtpMessageEncoder(
 
         foreach (var bytes in bufferList)
         {
-            bytes.CopyTo(encodedBytes[offset..]);
+            bytes.Span.CopyTo(encodedBytes[offset..]);
             offset += bytes.Length;
         }
 
@@ -151,7 +151,7 @@ public class MtpMessageEncoder(
     }
 
     private int EncodeToProtocolIntermediateBytesCore(Span<byte> encodedBytes,
-        params byte[][] bufferList)
+        params ReadOnlyMemory<byte>[] bufferList)
     {
         // https://corefork.telegram.org/mtproto/mtproto-transports#intermediate
         /*
@@ -167,7 +167,7 @@ public class MtpMessageEncoder(
 
         foreach (var bytes in bufferList)
         {
-            bytes.CopyTo(encodedBytes[offset..]);
+            bytes.Span.CopyTo(encodedBytes[offset..]);
             offset += bytes.Length;
         }
 

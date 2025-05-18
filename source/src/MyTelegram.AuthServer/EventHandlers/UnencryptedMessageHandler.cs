@@ -41,12 +41,14 @@ public class UnencryptedMessageHandler(
                     eventData.ObjectId,
                     eventData.MessageId,
                     0,
+                    0,
                     eventData.AuthKeyId,
                     eventData.AuthKeyId,
                     0,
                     eventData.Date,
                     DeviceType.Unknown,
-                    eventData.ClientIp
+                    eventData.ClientIp,
+                    0
                 ),
                 obj
             );

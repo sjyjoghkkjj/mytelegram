@@ -30,14 +30,14 @@ public class SendAppCodeEventHandler(
 
             var sendMessageInput = new SendMessageInput(
                 new RequestInfo(0,
-                    MyTelegramServerDomainConsts.OfficialUserId,
+                    MyTelegramConsts.OfficialUserId,
                     0,
                     0,
                     Guid.NewGuid(),
-                    MyTelegramServerDomainConsts.Layer,
+                    MyTelegramConsts.Layer,
                     DateTime.UtcNow.ToTimestamp()
                 ),
-                MyTelegramServerDomainConsts.OfficialUserId,
+                MyTelegramConsts.OfficialUserId,
                 new Peer(PeerType.User, domainEvent.AggregateEvent.UserId),
                 message,
                 randomHelper.NextInt64(),

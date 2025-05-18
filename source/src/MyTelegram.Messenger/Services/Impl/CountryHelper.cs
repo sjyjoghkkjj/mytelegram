@@ -3315,6 +3315,11 @@ public class CountryHelper : ICountryHelper, ISingletonDependency
     public string GetCountryCodeByPhoneNumber(string phoneNumber)
     {
         InitAllCountries();
+
+        if (string.IsNullOrEmpty(phoneNumber))
+        {
+            return string.Empty;
+        }
         if (phoneNumber.StartsWith("+"))
         {
             phoneNumber = phoneNumber[1..];

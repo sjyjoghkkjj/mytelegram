@@ -1,17 +1,16 @@
-﻿using EventFlow.MongoDB.Extensions;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using MyTelegram;
 using MyTelegram.Caching.Redis;
 using MyTelegram.Messenger;
-using MyTelegram.Messenger.NativeAot;
 using MyTelegram.Messenger.QueryServer.BackgroundServices;
 using MyTelegram.Messenger.QueryServer.Extensions;
 using MyTelegram.Services.NativeAot;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using MyTelegramConsts = MyTelegram.MyTelegramConsts;
 
-Console.Title = "MyTelegram messenger query server";
+Console.Title = $"MyTelegram messenger query server (layer {MyTelegramConsts.Layer})";
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
@@ -22,15 +21,15 @@ Log.Logger = new LoggerConfiguration()
 Log.Information("{Info} {Version}", "MyTelegram messenger query server", typeof(Program).Assembly.GetName().Version);
 Log.Information("{Description} {Url}",
     "For more information, please visit",
-    MyTelegramServerDomainConsts.RepositoryUrl);
+    MyTelegramConsts.RepositoryUrl);
 
 Log.Information("MyTelegram messenger query server(API layer={Layer}) starting...",
-    MyTelegramServerDomainConsts.Layer);
+    MyTelegramConsts.Layer);
 
 AppDomain.CurrentDomain.UnhandledException += (_,
     e) =>
 {
-    Log.Error(e.ExceptionObject.ToString() ?? string.Empty);
+    Log.Error(e.ExceptionObject.ToString() ?? "UnhandledException");
 };
 TaskScheduler.UnobservedTaskException += (_,
     e) =>
@@ -38,7 +37,6 @@ TaskScheduler.UnobservedTaskException += (_,
     Log.Error(e.Exception.ToString());
 };
 var builder = Host.CreateDefaultBuilder(args);
-
 builder.UseSerilog((context,
     configuration) =>
 {
@@ -63,6 +61,7 @@ builder.ConfigureServices((ctx,
         .ValidateDataAnnotations()
         .ValidateOnStart()
         ;
+
     services.Configure<EventBusRabbitMqOptions>(ctx.Configuration.GetRequiredSection("RabbitMQ:EventBus"));
     services.Configure<RabbitMqOptions>(ctx.Configuration.GetRequiredSection("RabbitMQ:Connections:Default"));
 
@@ -85,24 +84,14 @@ builder.ConfigureServices((ctx,
         });
     });
 
-    services.AddMyTelegramMessengerQueryServer(options =>
-    {
-        ////options.AddDefaults(Assembly.GetEntryAssembly());
-        options.ConfigureMongoDb(ctx.Configuration.GetConnectionString("Default"),
-            ctx.Configuration["App:QueryServerEventStoreDatabaseName"]);
-
-    });
+    services.AddMyTelegramMessengerQueryServer();
 
     services.AddMyTelegramStackExchangeRedisCache(options =>
     {
         options.Configuration = ctx.Configuration.GetValue<string>("Redis:Configuration");
     });
-    services.AddCacheJsonSerializer(options =>
-    {
-        options.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
-        options.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
-    });
 
+    services.AddHostedService<MessageQueueDataProcessorBackgroundService<IDomainEvent>>();
     services.AddHostedService<MyTelegramQueryServerBackgroundService>();
     services.AddHostedService<DataProcessorBackgroundService>();
     services.AddHostedService<ObjectMessageSenderBackgroundService>();
@@ -116,6 +105,7 @@ builder.ConfigureServices((ctx,
 });
 
 var app = builder.Build();
+
 var handlerHelper = app.Services.GetRequiredService<IHandlerHelper>();
 handlerHelper.InitAllHandlers();
 var eventBus = app.Services.GetRequiredService<IEventBus>();

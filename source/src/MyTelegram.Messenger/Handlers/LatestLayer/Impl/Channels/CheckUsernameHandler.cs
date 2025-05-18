@@ -34,8 +34,8 @@ internal sealed class CheckUsernameHandler(
         }
 
         if (string.IsNullOrEmpty(obj.Username) ||
-            obj.Username.Length < MyTelegramServerDomainConsts.UsernameMinLength ||
-            obj.Username.Length > MyTelegramServerDomainConsts.UsernameMaxLength
+            obj.Username.Length < MyTelegramConsts.UsernameMinLength ||
+            obj.Username.Length > MyTelegramConsts.UsernameMaxLength
            )
         {
             RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();

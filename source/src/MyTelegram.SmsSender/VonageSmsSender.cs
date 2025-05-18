@@ -7,19 +7,19 @@ namespace MyTelegram.SmsSender;
 
 public class VonageSmsSender : ISmsSender, ITransientDependency
 {
-    private readonly IOptionsSnapshot<VonageSmsOptions> _optionsSnapshot;
+    private readonly IOptionsMonitor<VonageSmsOptions> _options;
     private readonly ILogger<VonageSmsSender> _logger;
-    public VonageSmsSender(IOptionsSnapshot<VonageSmsOptions> optionsSnapshot, ILogger<VonageSmsSender> logger)
+    public VonageSmsSender(IOptionsMonitor<VonageSmsOptions> optionsSnapshot, ILogger<VonageSmsSender> logger)
     {
-        _optionsSnapshot = optionsSnapshot;
+        _options = optionsSnapshot;
         _logger = logger;
     }
 
-    public bool Enabled => _optionsSnapshot.Value.Enabled;
+    public bool Enabled => _options.CurrentValue.Enabled;
 
     public async Task SendAsync(SmsMessage smsMessage)
     {
-        if (!_optionsSnapshot.Value.Enabled)
+        if (!_options.CurrentValue.Enabled)
         {
             _logger.LogWarning("Vonage sms sender disabled, the code will not be sent. PhoneNumber: {To} Text: {Text}", smsMessage.PhoneNumber, smsMessage.Text);
 
@@ -34,12 +34,12 @@ public class VonageSmsSender : ISmsSender, ITransientDependency
         }
 
         var credentials =
-            Credentials.FromApiKeyAndSecret(_optionsSnapshot.Value.ApiKey, _optionsSnapshot.Value.ApiSecret);
+            Credentials.FromApiKeyAndSecret(_options.CurrentValue.ApiKey, _options.CurrentValue.ApiSecret);
         var client = new VonageClient(credentials);
         var response = await client.SmsClient.SendAnSmsAsync(new SendSmsRequest
         {
             To = phoneNumber,
-            From = _optionsSnapshot.Value.BrandName,
+            From = _options.CurrentValue.BrandName,
             Text = smsMessage.Text,
         });
 

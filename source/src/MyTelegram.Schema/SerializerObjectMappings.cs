@@ -17,6 +17,7 @@ public static class SerializerObjectMappings
     public static void CreateConstructIdToTypeMappingsFromAssembly(Assembly tlObjectInThisAssembly)
     {
         var types = tlObjectInThisAssembly.GetTypes();
+
         foreach (var type in types)
         {
             var attr = type.GetCustomAttribute<TlObjectAttribute>();

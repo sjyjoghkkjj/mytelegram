@@ -39,4 +39,5 @@ public interface IRequestInput
     long Date { get; }
     DeviceType DeviceType { get; }
     string ClientIp { get; }
+    long SessionId { get; }
 }

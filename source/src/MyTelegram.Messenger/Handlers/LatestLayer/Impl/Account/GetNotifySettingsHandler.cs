@@ -73,7 +73,7 @@ internal sealed class GetNotifySettingsHandler(
 
         id = PeerNotifySettingsId.Create(userId, peerType, peerId);
         var peerNotifySettingsReadModel =
-            await queryProcessor.ProcessAsync(new GetPeerNotifySettingsByIdQuery(id), CancellationToken.None);
+            await queryProcessor.ProcessAsync(new GetPeerNotifySettingsByIdQuery(id.Value), CancellationToken.None);
 
         return layeredService.GetConverter(input.Layer).ToPeerNotifySettings(peerNotifySettingsReadModel);
     }

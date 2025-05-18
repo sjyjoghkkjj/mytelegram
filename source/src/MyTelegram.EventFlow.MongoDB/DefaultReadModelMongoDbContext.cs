@@ -3,7 +3,8 @@ using MongoDB.Driver;
 
 namespace MyTelegram.EventFlow.MongoDB;
 
-public class DefaultReadModelMongoDbContext(IConfiguration configuration) : IMongoDbContext
+public class 
+    DefaultReadModelMongoDbContext(IConfiguration configuration) : IMongoDbContext
 {
     private IMongoDatabase? _database;
 
@@ -14,8 +15,6 @@ public class DefaultReadModelMongoDbContext(IConfiguration configuration) : IMon
             var connectionString = configuration.GetConnectionString(GetConnectionStringName());
             var databaseName = configuration.GetValue<string>(GetKeyOfDatabaseNameInConfiguration());
             var client = new MongoClient(connectionString);
-            //client.Settings.MaxConnecting = 5000;
-            //client.Settings.MaxConnectionPoolSize = 5000;
             _database = client.GetDatabase(databaseName);
         }
 
@@ -23,5 +22,5 @@ public class DefaultReadModelMongoDbContext(IConfiguration configuration) : IMon
     }
 
     protected virtual string GetConnectionStringName() => "Default";
-    protected virtual string GetKeyOfDatabaseNameInConfiguration() => "App:DatabaseName";
+    protected virtual string GetKeyOfDatabaseNameInConfiguration() => "App:ReadModelDatabaseName";
 }

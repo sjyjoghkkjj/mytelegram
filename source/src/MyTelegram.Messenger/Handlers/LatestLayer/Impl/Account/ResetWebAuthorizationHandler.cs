@@ -1,4 +1,6 @@
-﻿// ReSharper disable All
+﻿using EventFlow;
+using MyTelegram.Domain.Aggregates.Device;
+using MyTelegram.Domain.Commands.Device;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
@@ -12,6 +14,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 internal sealed class ResetWebAuthorizationHandler(
     IQueryProcessor queryProcessor,
     ILogger<ResetAuthorizationHandler> logger,
+    ICommandBus commandBus,
     IEventBus eventBus) : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestResetWebAuthorization, IBool>,
     Account.IResetWebAuthorizationHandler
 {
@@ -22,7 +25,10 @@ internal sealed class ResetWebAuthorizationHandler(
             .ProcessAsync(new GetDeviceByHashQuery(input.UserId, obj.Hash));
         if (deviceReadModel != null)
         {
-            await eventBus.PublishAsync(new UnRegisterAuthKeyEvent(deviceReadModel.PermAuthKeyId));
+            await eventBus.PublishAsync(new UnRegisterAuthKeyEvent(deviceReadModel.PermAuthKeyId, deviceReadModel.UserId));
+            var command = new UnRegisterDeviceForAuthKeyCommand(DeviceId.Create(deviceReadModel.PermAuthKeyId),
+                deviceReadModel.PermAuthKeyId, deviceReadModel.TempAuthKeyId);
+            await commandBus.PublishAsync(command);
         }
         else
         {

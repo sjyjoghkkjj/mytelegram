@@ -3,13 +3,12 @@
 internal sealed class PeerSettingsConverter(IObjectMapper objectMapper, IPeerHelper peerHelper)
     : IPeerSettingsConverter, ITransientDependency
 {
-    
     public int Layer => Layers.LayerLatest;
 
     public IPeerSettings ToPeerSettings(long selfUserId, long targetUserId, IPeerSettingsReadModel? readModel,
         ContactType? contactType)
     {
-        if (targetUserId == MyTelegramServerDomainConsts.OfficialUserId || selfUserId == targetUserId ||
+        if (targetUserId == MyTelegramConsts.OfficialUserId || selfUserId == targetUserId ||
             peerHelper.IsBotUser(targetUserId))
         {
             return new TPeerSettings();

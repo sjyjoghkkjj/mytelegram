@@ -103,6 +103,26 @@ internal sealed class AccessHashHelper(
                     return accessHash == stickerSetReadModel.AccessHash;
                 }
                 break;
+            case AccessHashType.Document:
+                var documentReadModel = await queryProcessor.ProcessAsync(new GetDocumentByIdQuery(id));
+                if (documentReadModel != null)
+                {
+                    _accessHashCaches.TryAdd(documentReadModel.DocumentId, documentReadModel.AccessHash);
+                    return accessHash == documentReadModel.AccessHash;
+                }
+                break;
+            case AccessHashType.Photo:
+                var photoReadModel = await queryProcessor.ProcessAsync(new GetPhotoByIdQuery(id));
+                if (photoReadModel != null)
+                {
+                    _accessHashCaches.TryAdd(photoReadModel.PhotoId, photoReadModel.AccessHash);
+                    return accessHash == photoReadModel.AccessHash;
+                }
+                break;
+            //case AccessHashType.Sticker:
+            //    break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(accessHashType), accessHashType, null);
         }
 
         return false;

@@ -49,4 +49,5 @@ public interface IUserReadModel : IReadModel
     DateTime? CreationTime { get; }
     int? ProfilePhotoUpdateDate { get; }
     int? UserNameUpdateDate { get; }
+    bool? IsDeleted { get; }
 }

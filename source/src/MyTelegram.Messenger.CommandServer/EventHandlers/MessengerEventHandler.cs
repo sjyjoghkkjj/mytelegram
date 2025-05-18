@@ -12,7 +12,7 @@ public class MessengerEventHandler(
         IEventHandler<MessengerCommandDataReceivedEvent>,
         IEventHandler<NewDeviceCreatedEvent>,
         IEventHandler<BindUidToAuthKeyIntegrationEvent>,
-        IEventHandler<AuthKeyUnRegisteredIntegrationEvent>
+        IEventHandler<AuthKeyUnRegisteredIntegrationEvent>, ITransientDependency
 {
     public Task HandleEventAsync(AuthKeyUnRegisteredIntegrationEvent eventData)
     {

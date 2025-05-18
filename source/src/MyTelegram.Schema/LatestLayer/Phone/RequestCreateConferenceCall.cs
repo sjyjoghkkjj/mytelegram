@@ -6,29 +6,49 @@ namespace MyTelegram.Schema.Phone;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/phone.createConferenceCall" />
 ///</summary>
-[TlObject(0xdfc909ab)]
-public sealed class RequestCreateConferenceCall : IRequest<MyTelegram.Schema.Phone.IPhoneCall>
+[TlObject(0x7d0444bb)]
+public sealed class RequestCreateConferenceCall : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0xdfc909ab;
-    public MyTelegram.Schema.IInputPhoneCall Peer { get; set; }
-    public long KeyFingerprint { get; set; }
+    public uint ConstructorId => 0x7d0444bb;
+    public BitArray Flags { get; set; } = new BitArray(32);
+    public bool Muted { get; set; }
+    public bool VideoStopped { get; set; }
+    public bool Join { get; set; }
+    public int RandomId { get; set; }
+    public byte[]? PublicKey { get; set; }
+    public byte[]? Block { get; set; }
+    public MyTelegram.Schema.IDataJSON? Params { get; set; }
 
     public void ComputeFlag()
     {
-
+        if (Muted) { Flags[0] = true; }
+        if (VideoStopped) { Flags[2] = true; }
+        if (Join) { Flags[3] = true; }
+        if (PublicKey != null) { Flags[3] = true; }
+        if (Block != null) { Flags[3] = true; }
+        if (Params != null) { Flags[3] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(Peer);
-        writer.Write(KeyFingerprint);
+        writer.Write(Flags);
+        writer.Write(RandomId);
+        if (Flags[3]) { writer.Write(PublicKey); }
+        if (Flags[3]) { writer.Write(Block); }
+        if (Flags[3]) { writer.Write(Params); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPhoneCall>();
-        KeyFingerprint = reader.ReadInt64();
+        Flags = reader.ReadBitArray();
+        if (Flags[0]) { Muted = true; }
+        if (Flags[2]) { VideoStopped = true; }
+        if (Flags[3]) { Join = true; }
+        RandomId = reader.ReadInt32();
+        if (Flags[3]) { PublicKey = reader.ReadBytes(); }
+        if (Flags[3]) { Block = reader.ReadBytes(); }
+        if (Flags[3]) { Params = reader.Read<MyTelegram.Schema.IDataJSON>(); }
     }
 }

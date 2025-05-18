@@ -29,7 +29,7 @@ public class UserNameAggregate : SnapshotAggregateRoot<UserNameAggregate, UserNa
 
         var lowerUserName = userName.ToLower();
 
-        if (lowerUserName.Length > MyTelegramServerDomainConsts.UsernameMaxLength || lowerUserName.Length < MyTelegramServerDomainConsts.UsernameMinLength)
+        if (lowerUserName.Length > MyTelegramConsts.UsernameMaxLength || lowerUserName.Length < MyTelegramConsts.UsernameMinLength)
         {
             RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
         }

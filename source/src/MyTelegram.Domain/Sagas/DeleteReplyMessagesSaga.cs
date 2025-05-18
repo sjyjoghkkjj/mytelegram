@@ -46,8 +46,6 @@ public class DeleteReplyMessagesSagaState : AggregateState<DeleteReplyMessagesSa
     }
 }
 
-
-
 public class DeleteReplyMessagesSaga : MyInMemoryAggregateSaga<DeleteReplyMessagesSaga, DeleteReplyMessagesSagaId,
         DeleteReplyMessagesSagaLocator>,
     ISagaIsStartedBy<TempAggregate, TempId, DeleteReplyMessagesStartedEvent>,
@@ -117,7 +115,6 @@ public class DeleteReplyMessagesCompletedSagaEvent(long channelId, int pts, int 
     public int NewTopMessageId { get; } = newTopMessageId;
 }
 
-
 public class DeleteReplyMessagePtsIncrementedSagaEvent(long channelId, int pts) : AggregateEvent<DeleteReplyMessagesSaga, DeleteReplyMessagesSagaId>
 {
     public long ChannelId { get; } = channelId;
@@ -133,19 +130,6 @@ public class
     public List<int> MessageIds { get; } = messageIds;
     public int NewTopMessageId { get; } = newTopMessageId;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 [JsonConverter(typeof(SystemTextJsonSingleValueObjectConverter<DeleteChannelMessagesSagaId>))]

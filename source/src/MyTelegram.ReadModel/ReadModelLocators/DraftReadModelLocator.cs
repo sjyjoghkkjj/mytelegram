@@ -2,7 +2,7 @@
 
 namespace MyTelegram.ReadModel.ReadModelLocators;
 
-public class DraftReadModelLocator : IReadModelLocator
+public class DraftReadModelLocator : IReadModelLocator, ITransientDependency
 {
     public IEnumerable<string> GetReadModelIds(IDomainEvent domainEvent)
     {

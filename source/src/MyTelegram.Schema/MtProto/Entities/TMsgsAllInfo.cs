@@ -9,7 +9,7 @@ public sealed class TMsgsAllInfo : IObject
 {
     public uint ConstructorId => 0x8cc0d131;
     public TVector<long> MsgIds { get; set; }
-    public byte[] Info { get; set; }
+    public string Info { get; set; }
 
     public void ComputeFlag()
     {
@@ -27,6 +27,6 @@ public sealed class TMsgsAllInfo : IObject
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         MsgIds = reader.Read<TVector<long>>();
-        Info = reader.ReadBytes();
+        Info = reader.ReadString();
     }
 }

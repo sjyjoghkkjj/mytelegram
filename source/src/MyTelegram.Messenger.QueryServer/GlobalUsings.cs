@@ -50,6 +50,7 @@ global using Rebus.Config;
 global using System.Diagnostics;
 global using System.Reflection;
 global using System.Threading.Tasks;
+global using MyTelegram.Abstractions;
 global using PtsForAuthKeyIdReadModel = MyTelegram.ReadModel.MongoDB.PtsForAuthKeyIdReadModel;
 global using PtsReadModel = MyTelegram.ReadModel.MongoDB.PtsReadModel;
 global using RpcResultReadModel = MyTelegram.ReadModel.MongoDB.RpcResultReadModel;

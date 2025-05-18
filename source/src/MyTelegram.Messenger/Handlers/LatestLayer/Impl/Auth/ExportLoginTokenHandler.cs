@@ -40,7 +40,7 @@ internal sealed class ExportLoginTokenHandler(
 
         var token = new byte[32];
         randomHelper.NextBytes(token);
-        var expireDate = DateTime.UtcNow.AddSeconds(MyTelegramServerDomainConsts.QrCodeExpireSeconds).ToTimestamp();
+        var expireDate = DateTime.UtcNow.AddSeconds(MyTelegramConsts.QrCodeExpireSeconds).ToTimestamp();
         var qrCodeId = QrCodeId.Create(BitConverter.ToString(token));
         var command = new ExportLoginTokenCommand(qrCodeId,
             input.ToRequestInfo(),

@@ -6,11 +6,10 @@ public class WebSocketMiddleware(
     IClientManager clientManager,
     IClientDataSender clientDataSender,
     IMessageQueueProcessor<ClientDisconnectedEvent> messageQueueProcessor)
-    : IMiddleware
+    : IMiddleware, ITransientDependency
 {
-    private readonly string _subProtocol = "binary";
-
     private readonly string[] _allowedWsPaths = ["/apiws", "/apiws_premium", "/apiws_test"];
+    private readonly string _subProtocol = "binary";
     private bool _isWebSocketConnected;
 
     public async Task InvokeAsync(HttpContext context,
@@ -29,6 +28,7 @@ public class WebSocketMiddleware(
                 {
                     clientIp = proxyProtocolFeature.SourceIp.ToString();
                 }
+
                 var connectionTypeFeature = context.Features.Get<ConnectionTypeFeature>();
 
                 var clientData = new ClientData
@@ -83,12 +83,14 @@ public class WebSocketMiddleware(
         {
             while (queue.Reader.TryRead(out var response))
             {
-                var encodedBytes = ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
+                var encodedBytes =
+                    ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
                 try
                 {
                     clientManager.UpdateAuthKeyId(clientData, response.AuthKeyId, clientData.ConnectionId);
                     var totalCount = clientDataSender.EncodeData(response, clientData, encodedBytes);
-                    await clientData.WebSocket!.SendAsync(encodedBytes.AsMemory()[..totalCount], WebSocketMessageType.Binary, true, default);
+                    await clientData.WebSocket!.SendAsync(encodedBytes.AsMemory()[..totalCount],
+                        WebSocketMessageType.Binary, true, default);
                 }
                 finally
                 {

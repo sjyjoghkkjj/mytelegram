@@ -15,4 +15,6 @@ public interface IMessageAppService
     Task<GetMessageOutput> SearchAsync(SearchInput input);
     Task<GetMessageOutput> SearchGlobalAsync(SearchGlobalInput input);
     Task SendMessageAsync(List<SendMessageInput> inputs);
+    (HashSet<long> userIds, HashSet<long> channelIds) GetExtraPeerIds(
+        IReadOnlyCollection<IMessageReadModel> messageReadModels);
 }

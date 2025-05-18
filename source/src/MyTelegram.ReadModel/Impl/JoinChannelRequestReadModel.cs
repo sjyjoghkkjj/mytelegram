@@ -2,7 +2,7 @@
 
 public class JoinChannelRequestReadModel : IJoinChannelRequestReadModel,
     IAmReadModelFor<JoinChannelAggregate, JoinChannelId, JoinChannelRequestCreatedEvent>,
-    IAmReadModelFor<JoinChannelAggregate,JoinChannelId, JoinChannelRequestUpdatedEvent>
+    IAmReadModelFor<JoinChannelAggregate, JoinChannelId, JoinChannelRequestUpdatedEvent>
 {
     public long ChannelId { get; private set; }
     public int Date { get; private set; }

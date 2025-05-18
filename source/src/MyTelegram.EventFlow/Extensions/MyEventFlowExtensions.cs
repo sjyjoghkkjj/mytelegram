@@ -47,7 +47,6 @@ public class SystemTextJsonSerializer : ISystemTextJsonSerializer
     private readonly JsonSerializerOptions _optionsNotIndented = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-        //PropertyNamingPolicy =  JsonNamingPolicy.CamelCase
     };
 
     public SystemTextJsonSerializer(Action<JsonSerializerOptions>? options = default)
@@ -81,16 +80,6 @@ public class SystemTextJsonSerializer : ISystemTextJsonSerializer
         JsonSerializerContext context)
     {
         return JsonSerializer.Deserialize(json, typeofTValue, context);
-        //try
-        //{
-        //    return JsonSerializer.Deserialize(json, typeofTValue, context);
-        //}
-        //catch (Exception ex)
-        //{
-        //    Console.WriteLine(typeofTValue);
-        //    Console.WriteLine(json);
-        //    throw;
-        //}
     }
 
     public string Serialize(object obj,
@@ -118,15 +107,6 @@ public class SystemTextJsonSerializer : ISystemTextJsonSerializer
 
 public static class EventFlowOptionsSystemTextJsonExtensions
 {
-    //public static IEventFlowOptions AddMySystemTextJson(
-    //    this IEventFlowOptions eventFlowOptions,
-    //    Action<JsonSerializerOptions>? configure = null)
-    //{
-    //    eventFlowOptions.ServiceCollection.AddMySystemTextJson(configure);
-
-    //    return eventFlowOptions;
-    //}
-
     public static IServiceCollection AddMySystemTextJson(this IServiceCollection services,
         Action<JsonSerializerOptions>? configure = null)
     {

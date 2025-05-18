@@ -18,7 +18,7 @@ Log.Information("{Info} {Version}",
     typeof(Program).Assembly.GetName().Version);
 Log.Information("{Description} {Url}",
     "For more information, please visit",
-    MyTelegramServerDomainConsts.RepositoryUrl);
+    MyTelegramConsts.RepositoryUrl);
 
 Log.Information("MyTelegram messenger server rpc service starting...");
 

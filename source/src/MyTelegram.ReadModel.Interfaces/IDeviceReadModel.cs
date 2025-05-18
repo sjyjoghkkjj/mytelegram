@@ -24,4 +24,6 @@ public interface IDeviceReadModel : IReadModel
     string SystemVersion { get; }
     long TempAuthKeyId { get; }
     long UserId { get; }
+    //string? JsonParameters { get; }
+    Dictionary<string ,string>? Parameters { get; }
 }

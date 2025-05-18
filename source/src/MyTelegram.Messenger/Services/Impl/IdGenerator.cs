@@ -53,11 +53,12 @@ public class IdGenerator(
     {
         return idType switch
         {
-            IdType.ChannelId => MyTelegramServerDomainConsts.ChannelInitId,
-            IdType.UserId => MyTelegramServerDomainConsts.UserIdInitId + 10000, // First 10000 for testing
-            IdType.BotUserId => MyTelegramServerDomainConsts.BotUserInitId,
-            IdType.ChatId => MyTelegramServerDomainConsts.ChatIdInitId,
-            IdType.Pts => MyTelegramServerDomainConsts.PtsInitId,
+            IdType.ChannelId => MyTelegramConsts.ChannelInitId,
+            IdType.UserId => MyTelegramConsts.UserIdInitId + 10000, // First 10000 for testing
+            IdType.BotUserId => MyTelegramConsts.BotUserInitId,
+            IdType.ChatId => MyTelegramConsts.ChatIdInitId,
+            IdType.Pts => MyTelegramConsts.PtsInitId,
+            IdType.FolderId => MyTelegramConsts.FolderInitId,
             _ => 0
         };
     }

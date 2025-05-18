@@ -1,6 +1,5 @@
 ﻿namespace MyTelegram.Core;
 
-//[MemoryPackable]
 public record UserSignInSuccessEvent(
     //string ConnectionId,
     long ReqMsgId,

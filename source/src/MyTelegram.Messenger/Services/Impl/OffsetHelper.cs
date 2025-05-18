@@ -49,7 +49,7 @@ public class OffsetHelper : IOffsetHelper, ITransientDependency
                 throw new ArgumentOutOfRangeException($"Unsuporrted load type: {loadType}");
         }
 
-        return new OffsetInfo { AddOffset = addOffset, OffsetId = offsetId, MaxId = newMaxId, FromId = fromId, LoadType = loadType };
+        return new OffsetInfo { OffsetId = offsetId, MaxId = newMaxId, FromId = fromId, LoadType = loadType };
     }
 
     private static LoadType GetOffsetLoadType(int limit, int addOffset)

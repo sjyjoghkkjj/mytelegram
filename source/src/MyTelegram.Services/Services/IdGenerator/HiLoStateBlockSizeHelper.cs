@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.Services.Services.IdGenerator;
 
-public class HiLoStateBlockSizeHelper : IHiLoStateBlockSizeHelper
+public class HiLoStateBlockSizeHelper : IHiLoStateBlockSizeHelper, ITransientDependency
 {
     private const int BlockSize100 = 100;
     private const int BlockSize1000 = 1000;

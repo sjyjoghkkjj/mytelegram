@@ -51,7 +51,7 @@ internal sealed class GetDiscussionMessageHandler(
         }
 
         var dialogReadModel =
-            await queryProcessor.ProcessAsync(new GetDialogByIdQuery(DialogId.Create(input.UserId, PeerType.Channel, messageReadModel.ToPeerId)), default);
+            await queryProcessor.ProcessAsync(new GetDialogByIdQuery(DialogId.Create(input.UserId, PeerType.Channel, messageReadModel.ToPeerId).Value), default);
 
         List<long> channelIds = [peer.PeerId, messageReadModel.ToPeerId];
         var channelReadModels = await channelAppService.GetListAsync(channelIds);

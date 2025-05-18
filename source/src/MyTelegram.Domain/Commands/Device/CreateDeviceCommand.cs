@@ -19,7 +19,9 @@ public class CreateDeviceCommand(
     string langPack,
     string langCode,
     string ip,
-    int layer)
+    int layer,
+    Dictionary<string, string>? parameters
+    )
     : Command<DeviceAggregate, DeviceId, IExecutionResult>(aggregateId), IHasRequestInfo
 {
     public int ApiId { get; } = apiId;
@@ -31,6 +33,7 @@ public class CreateDeviceCommand(
     public string LangCode { get; } = langCode;
     public string LangPack { get; } = langPack;
     public int Layer { get; } = layer;
+    public Dictionary<string, string>? Parameters { get; } = parameters;
     public bool OfficialApp { get; } = officialApp;
     public bool PasswordPending { get; } = passwordPending;
     public long PermAuthKeyId { get; } = permAuthKeyId;

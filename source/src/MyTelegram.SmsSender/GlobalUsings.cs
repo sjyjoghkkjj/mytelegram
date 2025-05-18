@@ -5,3 +5,4 @@ global using MyTelegram.Core;
 global using MyTelegram.EventBus;
 global using Microsoft.Extensions.DependencyInjection;
 global using MyTelegram.SmsSender.EventHandlers;
+global using MyTelegram.Abstractions;

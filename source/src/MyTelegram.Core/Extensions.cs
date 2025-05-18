@@ -1,46 +1,31 @@
 ﻿using System.Buffers.Text;
 using System.Numerics;
-using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MyTelegram.Core;
 
 public static class Extensions
 {
-    public static void RegisterServices(this IServiceCollection services, Assembly? assembly = null)
+    public static bool IsUrl(this string url)
     {
-        assembly ??= Assembly.GetCallingAssembly();
-
-        var singletonBaseInterface = typeof(ISingletonDependency);
-        var transientBaseInterface = typeof(ITransientDependency);
-
-        var types = assembly.GetTypes()
-            .Where(p => p != singletonBaseInterface && p != transientBaseInterface && !p.IsAbstract)
-            .ToList()
-            ;
-        var singletonTypes = types.Where(singletonBaseInterface.IsAssignableFrom);
-        var transientTypes = types.Where(transientBaseInterface.IsAssignableFrom);
-
-        foreach (var type in singletonTypes)
+        if ((!url.StartsWith("http://") && !url.StartsWith("https://")) || !Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
-            var baseInterfaces = type.GetInterfaces();
-            foreach (var baseInterface in baseInterfaces)
-            {
-                services.AddSingleton(baseInterface, type);
-            }
-
-            services.AddSingleton(type);
+            return false;
         }
 
-        foreach (var type in transientTypes)
-        {
-            var baseInterfaces = type.GetInterfaces();
-            foreach (var baseInterface in baseInterfaces)
-            {
-                services.AddTransient(baseInterface, type);
-            }
+        return true;
+    }
 
-            services.AddTransient(type);
+    public static string ToDefaultIfNullOrEmpty(this string? text, string defaultValue)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return defaultValue;
         }
+
+        return text;
     }
 
     public static int ToInt32(this uint value)
@@ -81,36 +66,53 @@ public static class Extensions
         return Base64Url.EncodeToString(buffer);
     }
 
+
     public static string ToBase64Url(this byte[] buffer)
     {
         return Base64Url.EncodeToString(buffer);
     }
 
-    private static byte[] HexToBytes(string hex)
+    public static void Dump(this ReadOnlySpan<byte> buffer,
+        string? message = null, [CallerArgumentExpression(nameof(buffer))] string? caller = null)
     {
-        var text = hex.Replace(" ", string.Empty).Replace("\r\n", string.Empty).Replace("\n", string.Empty);
-        return StringToByteArray(text);
+        Dump(buffer.ToArray(), message, caller);
     }
 
-    public static byte[] StringToByteArray(string hex)
+    public static void Dump(this Span<byte> buffer,
+        string? message = null, [CallerArgumentExpression(nameof(buffer))] string? caller = null)
     {
-        return Enumerable.Range(0, hex.Length)
-            .Where(x => x % 2 == 0)
-            .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-            .ToArray();
+        Dump(buffer.ToArray(), message, caller);
     }
 
-    public static byte[] ToByteArray(this BitArray bitArray)
+    public static void Dump(this Memory<byte> buffer,
+        string? message = null, [CallerArgumentExpression(nameof(buffer))] string? caller = null)
     {
-        var bytes = new byte[(bitArray.Length - 1) / 8 + 1];
-        bitArray.CopyTo(bytes, 0);
-
-        return bytes;
+        Dump(buffer.ToArray(), message, caller);
     }
 
-    public static byte[] ToBytes(this string hex)
+    public static void Dump(this byte[] buffer,
+        string? message = null, [CallerArgumentExpression(nameof(buffer))] string? caller = null)
     {
-        return HexToBytes(hex);
+        Console.WriteLine(
+            $"[{caller}]{message}[{buffer.Length}] \n{Hex.Dump(buffer, 32, showAscii: false, showOffset: false)}");
+    }
+
+    public static bool IsNullOrEmpty(this string? value)
+    {
+        return string.IsNullOrEmpty(value);
+    }
+
+    public static string? MaskEmail(this string? email)
+    {
+        if (string.IsNullOrEmpty(email))
+        {
+            return null;
+        }
+
+        var pattern = @"(?<=[\w]{1})[\w-\._\+%]*(?=[\w]{1}@)";
+        var result = Regex.Replace(email, pattern, m => new string('*', m.Length));
+
+        return result;
     }
 
     public static string RemoveRsaKeyFormat(this string key)
@@ -123,15 +125,32 @@ public static class Extensions
             .Replace(Environment.NewLine, "");
     }
 
+    public static byte[] StringToByteArray(string hex)
+    {
+        return Enumerable.Range(0, hex.Length)
+            .Where(x => x % 2 == 0)
+            .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+            .ToArray();
+    }
+
+    public static byte[] ToBytes(this string hex)
+    {
+        var text = hex.Replace(" ", string.Empty)
+                .Replace("\r\n", string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace("-", string.Empty)
+            ;
+        return StringToByteArray(text);
+    }
+
+    public static DateTime ToDateTime(this int unixTimestampSeconds)
+    {
+        return DateTimeOffset.FromUnixTimeSeconds(unixTimestampSeconds).DateTime;
+    }
 
     public static string ToHexString(this byte[] buffer)
     {
         return BitConverter.ToString(buffer).Replace("-", string.Empty);
-    }
-
-    public static int ToInt(this BitArray bitArray)
-    {
-        return BitConverter.ToInt32(ToByteArray(bitArray));
     }
 
     public static string ToPhoneNumber(this string phoneNumber)
@@ -142,5 +161,20 @@ public static class Extensions
         }
 
         return phoneNumber.Replace("+", string.Empty).Replace(" ", string.Empty);
+    }
+
+    public static string ToPhoneNumberWithPlus(this string phoneNumber)
+    {
+        return phoneNumber.Replace(" ", string.Empty);
+    }
+
+    public static string? ToUtf8String(this byte[]? bytes)
+    {
+        if (bytes == null)
+        {
+            return null;
+        }
+
+        return Encoding.UTF8.GetString(bytes);
     }
 }

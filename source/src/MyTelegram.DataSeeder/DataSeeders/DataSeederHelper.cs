@@ -1,5 +1,4 @@
-﻿using BitArrayConverter = MyTelegram.EventFlow.Extensions.BitArrayConverter;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+﻿using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace MyTelegram.DataSeeder.DataSeeders;
 

@@ -6,11 +6,11 @@ public class SetChatWallPaperStartedEvent(
     bool revert,
     Peer peer,
     long? wallPaperId,
-    WallPaperSettings wallPaperSettings) : RequestAggregateEvent2<TempAggregate, TempId>(requestInfo)
+    WallPaperSettings? wallPaperSettings) : RequestAggregateEvent2<TempAggregate, TempId>(requestInfo)
 {
     public bool ForBoth { get; } = forBoth;
     public bool Revert { get; } = revert;
     public Peer Peer { get; } = peer;
     public long? WallPaperId { get; } = wallPaperId;
-    public WallPaperSettings WallPaperSettings { get; } = wallPaperSettings;
+    public WallPaperSettings? WallPaperSettings { get; } = wallPaperSettings;
 }

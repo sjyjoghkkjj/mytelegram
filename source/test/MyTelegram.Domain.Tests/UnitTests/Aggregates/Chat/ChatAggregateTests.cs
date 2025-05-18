@@ -4,14 +4,14 @@
 //{
 //    public ChatAggregateTests()
 //    {
-//        Fixture.Customize<ChatId>(x => x.FromFactory(() => ChatId.Create(MyTelegramServerDomainConsts.ChatIdInitId + 1)));
+//        Fixture.Customize<ChatId>(x => x.FromFactory(() => ChatId.Create(MyTelegramConsts.ChatIdInitId + 1)));
 //    }
 
 //    [Fact]
 //    public void CreateChat_With_TooMany_Members_Throws_Exception()
 //    {
-//        var members = Enumerable.Range(1, MyTelegramServerDomainConsts.ChatMemberMaxCount + 1).Select(p => (long)p).ToList();
-//        var creatorId = MyTelegramServerDomainConsts.ChatMemberMaxCount + 1;
+//        var members = Enumerable.Range(1, MyTelegramConsts.ChatMemberMaxCount + 1).Select(p => (long)p).ToList();
+//        var creatorId = MyTelegramConsts.ChatMemberMaxCount + 1;
 
 //        var exception = Assert.Throws<RpcException>(() => Sut.Create(A<RequestInfo>(),
 //            A<long>(),
@@ -71,7 +71,7 @@
 //        Sut.ApplyEvents(new IDomainEvent[] { domainEvent });
 //        var inviterId = aggregateEvent.CreatorUid;
 //        var requestInfo = A<RequestInfo>() with { UserId = aggregateEvent.CreatorUid };
-//        var members = Enumerable.Range((int)inviterId + 1, MyTelegramServerDomainConsts.ChatMemberMaxCount);
+//        var members = Enumerable.Range((int)inviterId + 1, MyTelegramConsts.ChatMemberMaxCount);
 //        var aggregateEvents = members.Select(p => new ChatMemberAddedEvent(
 //            requestInfo,
 //            aggregateEvent.ChatId,

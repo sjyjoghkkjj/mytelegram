@@ -1,5 +1,3 @@
 ﻿namespace MyTelegram.Core;
 
-public record SessionPasswordStateChangedEvent(
-    long AuthKeyId,
-    PasswordState PasswordState);
+public record SessionPasswordStateChangedEvent(long AuthKeyId, PasswordState PasswordState);

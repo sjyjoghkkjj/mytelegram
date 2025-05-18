@@ -29,7 +29,7 @@ internal sealed class UnpinAllMessagesHandler(ICommandBus commandBus, IPeerHelpe
             ownerPeerId = peer.PeerId;
         }
 
-        var messageItems = await queryProcessor.ProcessAsync(new GetSimpleMessageListQuery(ownerPeerId, peer, null, true, true, MyTelegramServerDomainConsts.UnPinAllMessagesDefaultPageSize));
+        var messageItems = await queryProcessor.ProcessAsync(new GetSimpleMessageListQuery(ownerPeerId, peer, null, true, true, MyTelegramConsts.UnPinAllMessagesDefaultPageSize));
 
         if (messageItems.Count == 0)
         {

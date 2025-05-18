@@ -1,4 +1,7 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿using MyTelegram.Domain.Aggregates.Device;
+using MyTelegram.Domain.Commands.Device;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Log out an active <a href="https://corefork.telegram.org/api/auth">authorized session</a> by its hash
@@ -18,11 +21,6 @@ internal sealed class ResetAuthorizationHandler(
         Account.IResetAuthorizationHandler
 
 {
-    private readonly ICommandBus _commandBus = commandBus;
-
-    //private readonly IMessageSender _messageSender;
-    private readonly IObjectMessageSender _messageSender = messageSender;
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestResetAuthorization obj)
     {
@@ -30,7 +28,10 @@ internal sealed class ResetAuthorizationHandler(
             .ProcessAsync(new GetDeviceByHashQuery(input.UserId, obj.Hash));
         if (deviceReadModel != null)
         {
-            await eventBus.PublishAsync(new UnRegisterAuthKeyEvent(deviceReadModel.PermAuthKeyId));
+            await eventBus.PublishAsync(new UnRegisterAuthKeyEvent(deviceReadModel.PermAuthKeyId, input.UserId));
+            var command = new UnRegisterDeviceForAuthKeyCommand(DeviceId.Create(deviceReadModel.PermAuthKeyId),
+                deviceReadModel.PermAuthKeyId, deviceReadModel.TempAuthKeyId);
+            await commandBus.PublishAsync(command);
         }
         else
         {

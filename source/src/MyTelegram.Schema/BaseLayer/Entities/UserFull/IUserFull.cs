@@ -98,6 +98,7 @@ public interface IUserFull : IObject
     /// &nbsp;
     ///</summary>
     bool BotCanManageEmojiStatus { get; set; }
+    bool DisplayGiftsButton { get; set; }
 
     ///<summary>
     /// User ID
@@ -257,4 +258,5 @@ public interface IUserFull : IObject
     MyTelegram.Schema.IStarRefProgram? StarrefProgram { get; set; }
     MyTelegram.Schema.IBotVerification? BotVerification { get; set; }
     long? SendPaidMessagesStars { get; set; }
+    MyTelegram.Schema.IDisallowedGiftsSettings? DisallowedGifts { get; set; }
 }

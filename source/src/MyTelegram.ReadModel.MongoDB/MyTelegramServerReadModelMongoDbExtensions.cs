@@ -8,6 +8,8 @@ using MyTelegram.Schema;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
+using MyTelegram.EventFlow.MongoDB.Extensions;
+using MyTelegram.ReadModel.Extensions;
 
 namespace MyTelegram.ReadModel.MongoDB;
 
@@ -60,32 +62,15 @@ public static class MyTelegramServerReadModelMongoDbExtensions
         }
     }
 
-    public static IEventFlowOptions AddMessengerMongoDbReadModel(this IEventFlowOptions options)
+    public static IEventFlowOptions AddMyTelegramMongoDbReadModel(this IEventFlowOptions options)
     {
-        //options.ServiceCollection.AddSingleton<IMongoDbIndexesCreator, MongoDbIndexesCreator>();
         var pack = new ConventionPack
         {
             new IgnoreExtraElementsConvention(true)
         };
         ConventionRegistry.Register("IgnoreExtraElements", pack, _ => true);
-        options.AddMyMongoDbReadModel();
-
-        options.ServiceCollection
-            .AddTransient<IDialogReadModelLocator, DialogReadModelLocator>()
-            .AddTransient<IMessageIdLocator, MessageIdLocator>()
-            .AddTransient<IPtsReadModelLocator, PtsReadModelLocator>()
-            .AddTransient<IReplyReadModelLocator, ReplyReadModelLocator>()
-            .AddTransient<IUserReadModelLocator, UserReadModelLocator>()
-            //.AddTransient<IDeviceReadModelLocator, DeviceReadModelLocator>()
-            .AddTransient<IChannelReadModelLocator, ChannelReadModelLocator>()
-            .AddTransient<IChannelFullReadModelLocator, ChannelFullReadModelLocator>()
-            .AddTransient<IPollAnswerVoterReadModelLocator, PollAnswerVoterReadModelLocator>()
-            .AddTransient<IAccessHashReadModelLocator, AccessHashReadModelLocator>()
-            .AddTransient<IChatAdminReadModelLocator, ChatAdminReadModelLocator>()
-            .AddTransient<IChatInviteImporterReadModelLocator, ChatInviteImporterReadModelLocator>()
-            .AddTransient<DraftReadModelLocator>()
-            ;
-
+        options.ServiceCollection.RegisterServices(typeof(MyTelegramServerReadModelMongoDbExtensions).Assembly);
+        options.ServiceCollection.AddMyTelegramReadModel();
 
         return options.AddDefaults(typeof(MyTelegramServerReadModelMongoDbExtensions).Assembly)
             .UseMongoDbReadModel<AppCodeAggregate, AppCodeId, AppCodeReadModel>()
