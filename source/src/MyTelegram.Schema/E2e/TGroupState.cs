@@ -20,13 +20,13 @@ public sealed class TGroupState : IGroupState
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(Participants);
+        writer.WriteVector(Participants);
         writer.Write(ExternalPermissions);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        Participants = reader.Read<TVector<MyTelegram.Schema.E2e.IGroupParticipant>>();
+        Participants = reader.ReadVector<MyTelegram.Schema.E2e.IGroupParticipant>();
         ExternalPermissions = reader.ReadInt32();
     }
 }

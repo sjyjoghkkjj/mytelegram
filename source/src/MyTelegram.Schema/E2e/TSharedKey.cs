@@ -24,15 +24,15 @@ public sealed class TSharedKey : ISharedKey
         writer.Write(ConstructorId);
         writer.WriteRawBytes(Ek);
         writer.Write(EncryptedSharedKey);
-        writer.Write(DestUserId);
-        writer.Write(DestHeader);
+        writer.WriteVector(DestUserId);
+        writer.WriteVector(DestHeader);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Ek = reader.ReadInt256();
         EncryptedSharedKey = reader.ReadString();
-        DestUserId = reader.Read<TVector<long>>();
-        DestHeader = reader.Read<TVector<byte[]>>();
+        DestUserId = reader.ReadVector<long>();
+        DestHeader = reader.ReadVector<byte[]>();
     }
 }

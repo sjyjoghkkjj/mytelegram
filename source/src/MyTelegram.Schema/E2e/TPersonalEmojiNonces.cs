@@ -25,16 +25,16 @@ public sealed class TPersonalEmojiNonces : IPersonal
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(SelfNonce); }
-        if (Flags[1]) { writer.Write(ContactNonceHash); }
-        if (Flags[2]) { writer.Write(ContactNonce); }
+        if (Flags[0]) { writer.WriteRawBytes(SelfNonce); }
+        if (Flags[1]) { writer.WriteRawBytes(ContactNonceHash); }
+        if (Flags[2]) { writer.WriteRawBytes(ContactNonce); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Flags = reader.ReadBitArray();
-        if (Flags[0]) { SelfNonce = reader.ReadBytes(); }
-        if (Flags[1]) { ContactNonceHash = reader.ReadBytes(); }
-        if (Flags[2]) { ContactNonce = reader.ReadBytes(); }
+        if (Flags[0]) { SelfNonce = reader.ReadInt256(); }
+        if (Flags[1]) { ContactNonceHash = reader.ReadInt256(); }
+        if (Flags[2]) { ContactNonce = reader.ReadInt256(); }
     }
 }

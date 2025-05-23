@@ -25,23 +25,23 @@ public sealed class TBlock : IBlock
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(Signature);
+        writer.WriteRawBytes(Signature);
         writer.Write(Flags);
         writer.WriteRawBytes(PrevBlockHash);
-        writer.Write(Changes);
+        writer.WriteVector(Changes);
         writer.Write(Height);
         writer.Write(StateProof);
-        if (Flags[0]) { writer.Write(SignaturePublicKey); }
+        if (Flags[0]) { writer.WriteRawBytes(SignaturePublicKey); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        Signature = reader.ReadBytes();
+        Signature = reader.ReadInt512();
         Flags = reader.ReadBitArray();
         PrevBlockHash = reader.ReadInt256();
-        Changes = reader.Read<TVector<MyTelegram.Schema.E2e.IChange>>();
+        Changes = reader.ReadVector<MyTelegram.Schema.E2e.IChange>();
         Height = reader.ReadInt32();
         StateProof = reader.Read<MyTelegram.Schema.E2e.IStateProof>();
-        if (Flags[0]) { SignaturePublicKey = reader.ReadBytes(); }
+        if (Flags[0]) { SignaturePublicKey = reader.ReadInt256(); }
     }
 }

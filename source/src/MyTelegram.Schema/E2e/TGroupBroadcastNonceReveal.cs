@@ -23,7 +23,7 @@ public sealed class TGroupBroadcastNonceReveal : IGroupBroadcast
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(Signature);
+        writer.WriteRawBytes(Signature);
         writer.Write(UserId);
         writer.Write(ChainHeight);
         writer.WriteRawBytes(ChainHash);
@@ -32,7 +32,7 @@ public sealed class TGroupBroadcastNonceReveal : IGroupBroadcast
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        Signature = reader.ReadBytes();
+        Signature = reader.ReadInt512();
         UserId = reader.ReadInt64();
         ChainHeight = reader.ReadInt32();
         ChainHash = reader.ReadInt256();

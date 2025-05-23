@@ -78,7 +78,7 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Call);
         writer.Write(JoinAs);
         if (Flags[1]) { writer.Write(InviteHash); }
-        if (Flags[3]) { writer.Write(PublicKey); }
+        if (Flags[3]) { writer.WriteRawBytes(PublicKey); }
         if (Flags[3]) { writer.Write(Block); }
         writer.Write(Params);
     }
@@ -91,7 +91,7 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
         Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
         JoinAs = reader.Read<MyTelegram.Schema.IInputPeer>();
         if (Flags[1]) { InviteHash = reader.ReadString(); }
-        if (Flags[3]) { PublicKey = reader.ReadBytes(); }
+        if (Flags[3]) { PublicKey = reader.ReadInt256(); }
         if (Flags[3]) { Block = reader.ReadBytes(); }
         Params = reader.Read<MyTelegram.Schema.IDataJSON>();
     }

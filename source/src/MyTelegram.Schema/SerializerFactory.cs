@@ -46,6 +46,11 @@ public class SerializerFactory
     //    return new ObjectSerializer<T>();
     //}
 
+    public static ISerializer<TVector<T>> CreateVectorSerializer<T>()
+    {
+        return new VectorSerializer<T>();
+    }
+
     public static ISerializer<T> CreateSerializer<T>()
     {
         var type = typeof(T);
@@ -74,33 +79,4 @@ public class SerializerFactory
 
         throw new NotImplementedException($"Not supported type:{type}");
     }
-
-    //public static ISerializer2<T> CreateSerializer2<T>()
-    //{
-    //    var type = typeof(T);
-    //    var typeName = type.Name;
-    //    switch (typeName)
-    //    {
-    //        case nameof(Int32):
-    //            return (ISerializer2<T>)Int32Serializer;
-    //        case nameof(UInt32):
-    //            return (ISerializer2<T>)UInt32Serializer;
-    //        case nameof(Int64):
-    //            return (ISerializer2<T>)Int64Serializer;
-    //        case nameof(Boolean):
-    //            return (ISerializer2<T>)BooleanSerializer;
-    //        case nameof(Double):
-    //            return (ISerializer2<T>)DoubleSerializer;
-    //        case nameof(BitArray):
-    //            return (ISerializer2<T>)BitArraySerializer;
-    //        case nameof(String):
-    //            return (ISerializer2<T>)StringSerializer;
-    //        case ByteArrayTypeName:
-    //            return (ISerializer2<T>)BytesSerializer;
-    //    }
-
-    //    if (typeof(IObject).IsAssignableFrom(type)) return new ObjectSerializer<T>();
-
-    //    throw new NotImplementedException($"Not supported type:{type}");
-    //}
 }

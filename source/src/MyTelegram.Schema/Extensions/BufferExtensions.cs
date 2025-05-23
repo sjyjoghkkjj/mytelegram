@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyTelegram.Schema.Serializer;
+﻿using MyTelegram.Schema.Serializer;
 
 namespace MyTelegram.Schema.Extensions;
 public static class BufferExtensions
@@ -18,6 +13,7 @@ public static class BufferExtensions
     private static readonly BitArraySerializer BitArraySerializer = new();
     private static readonly Int128Serializer Int128Serializer = new();
     private static readonly Int256Serializer Int256Serializer = new();
+    private static readonly Int512Serializer Int512Serializer = new();
 
     public static int ReadInt32(this ref SequenceReader<byte> reader)
     {
@@ -67,14 +63,23 @@ public static class BufferExtensions
         return Int128Serializer.Deserialize(ref reader);
     }
 
-
     public static byte[] ReadInt256(this ref SequenceReader<byte> reader)
     {
         return Int256Serializer.Deserialize(ref reader);
     }
 
+    public static byte[] ReadInt512(this ref SequenceReader<byte> reader)
+    {
+        return Int512Serializer.Deserialize(ref reader);
+    }
+
     public static T Read<T>(this ref SequenceReader<byte> reader) where T : IObject
     {
         return SerializerFactory.CreateSerializer<T>().Deserialize(ref reader);
+    }
+
+    public static TVector<T> ReadVector<T>(this ref SequenceReader<byte> reader)
+    {
+        return SerializerFactory.CreateVectorSerializer<T>().Deserialize(ref reader);
     }
 }

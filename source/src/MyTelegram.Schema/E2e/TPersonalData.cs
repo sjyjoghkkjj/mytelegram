@@ -21,12 +21,12 @@ public sealed class TPersonalData : IPersonalData
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.WriteRawBytes(PublicKey);
-        writer.Write(Data);
+        writer.WriteVector(Data);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         PublicKey = reader.ReadInt256();
-        Data = reader.Read<TVector<MyTelegram.Schema.E2e.IPersonalOnServer>>();
+        Data = reader.ReadVector<MyTelegram.Schema.E2e.IPersonalOnServer>();
     }
 }

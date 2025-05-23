@@ -19,11 +19,11 @@ public sealed class TValueContactByUserId : IValue
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(PublicKeys);
+        writer.WriteVector(PublicKeys);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        PublicKeys = reader.Read<TVector<byte[]>>();
+        PublicKeys = reader.ReadVector<byte[]>();
     }
 }

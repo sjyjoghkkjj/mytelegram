@@ -24,6 +24,11 @@ public static class BufferWriterExtensions
         value.Serialize(writer);
     }
 
+    public static void WriteVector<T>(this IBufferWriter<byte> writer, TVector<T> value)
+    {
+        new VectorSerializer<T>().Serialize(value, writer);
+    }
+
     public static void Write(this IBufferWriter<byte> writer, BitArray value)
     {
         var bytes = new byte[4];

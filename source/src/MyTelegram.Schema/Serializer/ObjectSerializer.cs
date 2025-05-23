@@ -13,7 +13,7 @@ public class ObjectSerializer<T> : ISerializer<T>
         }
         else
         {
-            throw new NotSupportedException($"Only support `IObject`,but input type is `{typeof(T).Name}` ");
+            throw new NotSupportedException($"Only support `IObject`, but input type is `{typeof(T).Name}` ");
         }
     }
 
@@ -39,18 +39,6 @@ public class ObjectSerializer<T> : ISerializer<T>
             // typeOfT=IObject,targetType=TVector<TObjectOrSubTypes>
             if (constructorId == VectorConstructorId)
             {
-                // Vector<T>.Serialize(IBufferWriter<byte> writer)
-                // public void Serialize(IBufferWriter<byte> writer)
-                // {
-                //     writer.Write(ConstructorId);
-                //     writer.Write(_list.Count);
-                //     var serializer = SerializerFactory.CreateSerializer<T>();
-                //     foreach (var item in _list)
-                //     {
-                //         serializer.Serialize(item, writer);
-                //     }
-                // }
-
                 // [0..4]=constructorId [4..8]=_list.Count [8..12]=constructorId of T (Vector<T>)
                 // Read 4 bytes from 8 to 12,the first 4 bytes already read by reader.ReadUInt32()
                 // So need to read 4 bytes from 4 to 8
@@ -80,7 +68,7 @@ public class ObjectSerializer<T> : ISerializer<T>
             }
 
             // All supported constructor ids are loaded in memory when first time access SerializerObjectMappings
-            // if can not find object type by constructorId,may be telegram client version is mismatch  
+            // if can not find object type by constructorId, may be telegram client version is mismatch  
             throw new NotSupportedException($"Unsupported constructorId:0x{constructorId:x2},type:{typeOfT.Namespace}.{typeOfT.Name}");
         }
 

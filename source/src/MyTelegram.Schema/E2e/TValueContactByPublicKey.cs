@@ -19,11 +19,11 @@ public sealed class TValueContactByPublicKey : IValue
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(Entries);
+        writer.WriteVector(Entries);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        Entries = reader.Read<TVector<MyTelegram.Schema.E2e.IPersonalOnClient>>();
+        Entries = reader.ReadVector<MyTelegram.Schema.E2e.IPersonalOnClient>();
     }
 }

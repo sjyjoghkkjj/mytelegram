@@ -21,14 +21,14 @@ public sealed class TPersonalOnServer : IPersonalOnServer
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        writer.Write(Signature);
+        writer.WriteRawBytes(Signature);
         writer.Write(SignedAt);
         writer.Write(Personal);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        Signature = reader.ReadBytes();
+        Signature = reader.ReadInt512();
         SignedAt = reader.ReadInt32();
         Personal = reader.Read<MyTelegram.Schema.E2e.IPersonal>();
     }

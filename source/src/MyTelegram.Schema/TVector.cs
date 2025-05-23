@@ -1,9 +1,7 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Schema;
+﻿namespace MyTelegram.Schema;
 
 [TlObject(0x1cb5c415)]
-public class TVector<T> : IObject, IList<T> //where T : IObject
+public class TVector<T> : IObject, IList<T>
 {
     private readonly List<T> _list;
 
@@ -36,7 +34,6 @@ public class TVector<T> : IObject, IList<T> //where T : IObject
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-        //throw new NotImplementedException();
         if (reader.TryReadLittleEndian(out int count))
         {
             if (count > 0)
@@ -50,33 +47,6 @@ public class TVector<T> : IObject, IList<T> //where T : IObject
             }
         }
     }
-
-    //public void Serialize(BinaryWriter bw)
-    //{
-    //    bw.Write(ConstructorId);
-    //    bw.Write(_list.Count);
-    //    var serializer = SerializerFactory.CreateSerializer<T>();
-
-    //    foreach (var item in _list)
-    //    {
-    //        serializer.Serialize(item, bw);
-    //    }
-    //}
-
-    //public void Deserialize(BinaryReader br)
-    //{
-    //    var count = br.ReadInt32();
-    //    if (count > 0)
-    //    {
-    //        var serializer = SerializerFactory.CreateSerializer<T>();
-
-    //        for (int i = 0; i < count; i++)
-    //        {
-    //            var item = serializer.Deserialize(br);
-    //            _list.Add(item);
-    //        }
-    //    }
-    //}
 
     public IEnumerator<T> GetEnumerator()
     {

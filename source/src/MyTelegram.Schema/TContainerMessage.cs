@@ -55,7 +55,7 @@ public class TGzipPacked : IRequest<IObject>
 public sealed class TContainerMessage : IObject
 {
     public uint ConstructorId => 0x73f1f8dc;
-   
+
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         MsgId = reader.ReadInt64();
@@ -64,24 +64,6 @@ public sealed class TContainerMessage : IObject
         Body = reader.Read<IObject>();
     }
 
-    //public void Serialize(BinaryWriter bw)
-    //{
-    //    //bw.Write(ConstructorId);
-
-    //    bw.Write(MsgId);
-    //    bw.Write(SeqNo);
-    //    bw.Write(Bytes);
-    //    Body.Serialize(bw);
-    //}
-
-    //public void Deserialize(BinaryReader br)
-    //{
-    //    MsgId = br.ReadInt64();
-    //    SeqNo = br.ReadInt32();
-    //    Bytes = br.ReadInt32();
-    //    var objectSerializer = SerializerFactory.CreateSerializer<IObject>();
-    //    Body = objectSerializer.Deserialize(br);
-    //}
 
     public void Serialize(IBufferWriter<byte> writer)
     {
@@ -91,13 +73,6 @@ public sealed class TContainerMessage : IObject
         Body.Serialize(writer);
     }
 
-    //public void Deserialize(ref ReadOnlySequence<byte> buffer)
-    //{
-    //    MsgId = buffer.Deserialize<long>();
-    //    SeqNo=buffer.Deserialize<int>();
-    //    Bytes=buffer.Deserialize<int>();
-    //    Body = buffer.Deserialize<IObject>();
-    //}
 
     public long MsgId { get; set; }
 
