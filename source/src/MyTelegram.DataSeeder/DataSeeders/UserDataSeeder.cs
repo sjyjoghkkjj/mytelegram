@@ -4,6 +4,7 @@ public class UserDataSeeder(
     ICommandBus commandBus,
     IEventStore eventStore,
     ILogger<UserDataSeeder> logger,
+    IOptionsMonitor<MyTelegramDataSeederOptions> options,
     ISnapshotStore snapshotStore)
     : IUserDataSeeder, ITransientDependency
 {
@@ -14,16 +15,20 @@ public class UserDataSeeder(
         //await CreateBotFatherUserAsync();
         //await CreateGroupAnonymousBotUserAsync();
         await CreateAnonymousUserAsync();
-        var initUserId = MyTelegramConsts.UserIdInitId;
-        var testUserCount = 30;
-        for (var i = 1; i < testUserCount; i++)
+
+        if (options.CurrentValue.CreateTestUsers)
         {
-            await CreateUserIfNeedAsync(initUserId + i,
-                $"1{i}",
-                $"{i}",
-                $"{i}",
-                $"user{i}",
-                false);
+            var initUserId = MyTelegramConsts.UserIdInitId;
+            var testUserCount = 30;
+            for (var i = 1; i < testUserCount; i++)
+            {
+                await CreateUserIfNeedAsync(initUserId + i,
+                    $"1{i}",
+                    $"{i}",
+                    $"{i}",
+                    $"user{i}",
+                    false);
+            }
         }
     }
 
@@ -51,7 +56,7 @@ public class UserDataSeeder(
                     userName,
                     bot
                 );
-            await commandBus.PublishAsync(createUserCommand );
+            await commandBus.PublishAsync(createUserCommand);
 
             if (userId != MyTelegramConsts.OfficialUserId)
             {
@@ -91,7 +96,7 @@ public class UserDataSeeder(
     private async Task CreateAnonymousUserAsync()
     {
         var userId = MyTelegramConsts.AnonymousUserId;
-        var firstName= "Anonymous User";
+        var firstName = "Anonymous User";
         await CreateUserIfNeedAsync(userId, string.Empty, firstName, null, null, false);
     }
 
