@@ -41,3 +41,4 @@ global using UpdatesReadModel = MyTelegram.ReadModel.MongoDB.UpdatesReadModel;
 global using UserNameReadModel = MyTelegram.ReadModel.MongoDB.UserNameReadModel;
 global using UserReadModel = MyTelegram.ReadModel.MongoDB.UserReadModel;
 global using JoinChannelRequestReadModel=MyTelegram.ReadModel.MongoDB.JoinChannelRequestReadModel;
+global using UserConfigReadModel = MyTelegram.ReadModel.MongoDB.UserConfigReadModel;

@@ -5,15 +5,13 @@ public class MessageAppService(
     ICommandBus commandBus,
     IObjectMapper objectMapper,
     IPeerHelper peerHelper,
-    IBlockCacheAppService blockCacheAppService,
     IPhotoAppService photoAppService,
     IChannelAppService channelAppService,
     IUserAppService userAppService,
     IPrivacyAppService privacyAppService,
     IContactAppService contactAppService,
     IOffsetHelper offsetHelper,
-    IIdGenerator idGenerator,
-    IReadModelCacheHelper<IUserReadModel> useReadModelCacheHelper)
+    IIdGenerator idGenerator)
     : BaseAppService, IMessageAppService, ITransientDependency
 {
     public void CheckBotPermission(long requestUserId, Peer toPeer)
@@ -24,50 +22,86 @@ public class MessageAppService(
         }
     }
 
-    public async Task CheckSendAsAsync(long requestUserId, Peer toPeer, Peer? sendAs)
+    public async Task<bool> CanSendAsPeerAsync(long channelId, long userId)
     {
-        if (sendAs != null)
+        var channelReadModel = await channelAppService.GetAsync(channelId);
+        var canSendAsPeer = false;
+
+        // Channel: signature: true and hasAdminRights: true and canWriteToChat: true
+        if (channelReadModel is { Broadcast: true, Signatures: true })
+        {
+            var channelAdmin = channelReadModel.AdminList.FirstOrDefault(p => p.UserId == userId);
+            if (channelReadModel.CreatorId == userId || (channelAdmin?.AdminRights.PostMessages ?? false))
+            {
+                canSendAsPeer = true;
+            }
+        }
+
+        if (!canSendAsPeer)
+        {
+            // Super group with linked channel/Public super group
+            if (channelReadModel.MegaGroup && (!string.IsNullOrEmpty(channelReadModel.UserName) ||
+                                               channelReadModel.LinkedChatId != null))
+            {
+                canSendAsPeer = true;
+            }
+        }
+
+        return canSendAsPeer;
+    }
+
+    private async Task<bool> IsValidSendAsPeerAsync(long requestUserId, Peer toPeer, Peer? sendAsPeer)
+    {
+        if (sendAsPeer != null)
         {
             if (toPeer.PeerType != PeerType.Channel)
             {
-                RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
+                return false;
             }
 
-            switch (sendAs.PeerType)
+            switch (sendAsPeer.PeerType)
             {
                 case PeerType.User:
                 case PeerType.Self:
-                    if (sendAs.PeerId != requestUserId)
+                    if (sendAsPeer.PeerId != requestUserId)
                     {
-                        RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
+                        return false;
                     }
 
                     break;
 
                 case PeerType.Channel:
-                    var sendToChannelReadModel = await channelAppService.GetAsync(toPeer.PeerId);
-                    // 1. Super group with linked channel
-                    // 2. Channel: signature: true 
-                    // 3. Linked private channel
-                    if (sendToChannelReadModel is not ({ MegaGroup: true, LinkedChatId: not null } or
-                        { Broadcast: true, Signatures: true }))
+                    var canSendAsPeer = await CanSendAsPeerAsync(toPeer.PeerId, requestUserId);
+                    if (!canSendAsPeer)
                     {
-                        RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
+                        return false;
                     }
 
-                    var sendAsChannelReadModel = await channelAppService.GetAsync(sendAs.PeerId);
+                    var sendAsChannelReadModel = await channelAppService.GetAsync(sendAsPeer.PeerId);
 
-                    // We can only use the public channels created by the current user as SendAs
+                    // We can only use the public channels created by the current user as SendAsPeer
                     if (sendAsChannelReadModel == null! ||
                         sendAsChannelReadModel.CreatorId != requestUserId ||
                         (string.IsNullOrEmpty(sendAsChannelReadModel.UserName) &&
-                         sendAsChannelReadModel.LinkedChatId != sendToChannelReadModel.ChannelId &&
+                         sendAsChannelReadModel.LinkedChatId != toPeer.PeerId &&
                          sendAsChannelReadModel.ChannelId != toPeer.PeerId))
                     {
-                        RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
+                        return false;
                     }
+
                     break;
             }
+        }
+
+        return true;
+    }
+
+    public async Task CheckSendAsAsync(long requestUserId, Peer toPeer, Peer? sendAsPeer)
+    {
+        var isValid = await IsValidSendAsPeerAsync(requestUserId, toPeer, sendAsPeer);
+        if (!isValid)
+        {
+            RpcErrors.RpcErrors400.SendAsPeerInvalid.ThrowRpcError();
         }
     }
 
@@ -219,15 +253,59 @@ public class MessageAppService(
         return channelReadModel;
     }
 
-    private Task CheckSendAsAsync(SendMessageInput input)
+    private async Task<Peer?> GetDefaultSendAsAsync(SendMessageInput input)
     {
-        return CheckSendAsAsync(input.RequestInfo.UserId, input.ToPeer, input.SendAs);
+        // Get the default SendAsPeer, follow the following rules
+        // 1.If the client passes sendAs, verify the client's sendAs, if valid, use the value passed by the client
+        // 2.If the client does not pass sendAs, query whether the user has set the default sendAsPeer, if set, use the set value
+        // 3.If the client does not pass a value, the default SendAsPeer is not set, and in the discussion group, use discussion group as SendAsPeer
+        if (input.SendAs != null)
+        {
+            if (await IsValidSendAsPeerAsync(input.RequestInfo.UserId, input.ToPeer, input.SendAs))
+            {
+                return input.SendAs;
+            }
+        }
+        else if (input.ToPeer.PeerType == PeerType.Channel)
+        {
+            if (!await CanSendAsPeerAsync(input.ToPeer.PeerId, input.RequestInfo.UserId))
+            {
+                return null;
+            }
+            Peer? sendAsPeer;
+
+            var userConfigReadModel = await queryProcessor.ProcessAsync(
+                new GetUserConfigByKeyQuery(input.RequestInfo.UserId, ((int)UserConfigType.SendAsPeer).ToString()));
+            if (userConfigReadModel != null)
+            {
+                if (long.TryParse(userConfigReadModel.Value, out var sendAsPeerId))
+                {
+                    sendAsPeer = sendAsPeerId.ToChannelPeer();
+                    if (await IsValidSendAsPeerAsync(input.RequestInfo.UserId, input.ToPeer, sendAsPeer))
+                    {
+                        return sendAsPeer;
+                    }
+                }
+            }
+
+            var channelReadModel = await channelAppService.GetAsync(input.ToPeer.PeerId);
+            if (channelReadModel is { MegaGroup: true, LinkedChatId: not null })
+            {
+                sendAsPeer = channelReadModel.ChannelId.ToChannelPeer();
+                if (await IsValidSendAsPeerAsync(input.RequestInfo.UserId, input.ToPeer, sendAsPeer))
+                {
+                    return sendAsPeer;
+                }
+            }
+        }
+
+        return null;
     }
 
     private async Task<SendMessageItem> CreateSendMessageItemAsync(SendMessageInput input)
     {
         //await CheckAccessHashAsync(input);
-        await CheckSendAsAsync(input);
+        //await CheckSendAsAsync(input);
         await CheckGlobalPrivacySettingsAsync(input);
         var channelReadModel = await CheckChannelBannedRightsAsync(input);
 
@@ -246,7 +324,7 @@ public class MessageAppService(
         var messageActionType = MessageActionType.None;
         var post = channelReadModel?.Broadcast ?? false;
         var linkedChannelId = channelReadModel?.Broadcast ?? false ? channelReadModel.LinkedChatId : null;
-        var sendAs = input.SendAs;
+        var sendAs = await GetDefaultSendAsAsync(input);
         string? postAuthor = null;
         if (channelReadModel is { Signatures: true, Broadcast: true })
         {

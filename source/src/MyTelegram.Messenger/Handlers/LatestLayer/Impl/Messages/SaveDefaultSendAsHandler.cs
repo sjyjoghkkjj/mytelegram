@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
+﻿using MyTelegram.Domain.Aggregates.UserConfig;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Messages;
 
 ///<summary>
 /// Change the default peer that should be used when sending messages, reactions, poll votes to a specific group
@@ -8,12 +10,23 @@
 /// 400 SEND_AS_PEER_INVALID You can't send messages as the specified peer.
 /// See <a href="https://corefork.telegram.org/method/messages.saveDefaultSendAs" />
 ///</summary>
-internal sealed class SaveDefaultSendAsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSaveDefaultSendAs, IBool>,
+internal sealed class SaveDefaultSendAsHandler(ICommandBus commandBus, IAccessHashHelper accessHashHelper, IPeerHelper peerHelper, IMessageAppService messageAppService) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSaveDefaultSendAs, IBool>,
     Messages.ISaveDefaultSendAsHandler
 {
-    protected override Task<IBool> HandleCoreAsync(IRequestInput input,
+    protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSaveDefaultSendAs obj)
     {
-        return Task.FromResult<IBool>(new TBoolTrue());
+        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(obj.SendAs);
+        var peer = peerHelper.GetPeer(obj.Peer);
+        var sendAsPeer = peerHelper.GetPeer(obj.SendAs);
+        await messageAppService.CheckSendAsAsync(input.UserId, peer, sendAsPeer);
+        var key = ((int)UserConfigType.SendAsPeer).ToString();
+        var command = new UpdateUserConfigCommand(
+            UserConfigId.Create(input.UserId, key), input.ToRequestInfo(),
+            input.UserId, key, sendAsPeer.PeerId.ToString());
+        await commandBus.PublishAsync(command);
+
+        return new TBoolTrue();
     }
 }

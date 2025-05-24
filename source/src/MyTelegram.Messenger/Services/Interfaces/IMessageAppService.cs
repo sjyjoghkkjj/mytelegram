@@ -17,4 +17,6 @@ public interface IMessageAppService
     Task SendMessageAsync(List<SendMessageInput> inputs);
     (HashSet<long> userIds, HashSet<long> channelIds) GetExtraPeerIds(
         IReadOnlyCollection<IMessageReadModel> messageReadModels);
+
+    Task<bool> CanSendAsPeerAsync(long channelId, long userId);
 }

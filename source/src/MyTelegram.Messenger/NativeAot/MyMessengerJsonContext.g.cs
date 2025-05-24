@@ -29,6 +29,8 @@ namespace MyTelegram.Messenger.NativeAot;
 [JsonSerializable(typeof(MyTelegram.Domain.Aggregates.RpcResult.RpcResultSnapshot))]
 [JsonSerializable(typeof(MyTelegram.Domain.Aggregates.Updates.UpdatesSnapshot))]
 [JsonSerializable(typeof(MyTelegram.Domain.Aggregates.User.UserSnapshot))]
+[JsonSerializable(typeof(MyTelegram.Domain.Aggregates.UserConfig.UserConfigChangedEvent))]
+[JsonSerializable(typeof(MyTelegram.Domain.Aggregates.UserConfig.UserConfigSnapshot))]
 [JsonSerializable(typeof(MyTelegram.Domain.Aggregates.UserName.UserNameSnapshot))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.AppCode.AppCodeCanceledEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.AppCode.AppCodeCheckFailedEvent))]

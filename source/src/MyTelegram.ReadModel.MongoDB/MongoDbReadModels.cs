@@ -216,3 +216,7 @@ public class JoinChannelRequestReadModel : Impl.JoinChannelRequestReadModel, IMo
 {
 
 }
+public class UserConfigReadModel : Impl.UserConfigReadModel, IMongoDbReadModel
+{
+
+}

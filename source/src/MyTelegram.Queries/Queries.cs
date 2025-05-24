@@ -671,3 +671,4 @@ public record GetDocumentsByIdsQuery(IList<long> Ids) : IQuery<IReadOnlyCollecti
 public record GetPhotoByIdQuery(long PhotoId) : IQuery<IPhotoReadModel?>;
 
 public record GetPhotosByPhotoIdLisQuery(IList<long> PhotoIds) : IQuery<IReadOnlyCollection<IPhotoReadModel>>;
+public record GetUserConfigByKeyQuery(long UserId, string Key) : IQuery<IUserConfigReadModel?>;

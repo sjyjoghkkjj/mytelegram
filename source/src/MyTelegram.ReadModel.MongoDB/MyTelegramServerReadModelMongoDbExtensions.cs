@@ -112,6 +112,7 @@ public static class MyTelegramServerReadModelMongoDbExtensions
             .UseMongoDbReadModel<LanguageTextAggregate, LanguageTextId, LanguageTextReadModel>()
             .UseMongoDbReadModel<JoinChannelAggregate, JoinChannelId, JoinChannelRequestReadModel>()
 
+            .UseMongoDbReadModel<UserConfigAggregate, UserConfigId, UserConfigReadModel>()
             ;
     }
 }

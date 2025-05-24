@@ -74,12 +74,12 @@ public class MongoDbIndexesCreator(
         await CreateIndexAsync<LanguageTextReadModel>(p => p.LanguageCode);
         await CreateIndexAsync<LanguageTextReadModel>(p => p.Platform);
 
+		await CreateIndexAsync<UserConfigReadModel>(p => p.UserId);
+        await CreateIndexAsync<UserConfigReadModel>(p => p.Key);
+		
         var snapShotCollectionName = "snapShots";
-        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateId, snapShotCollectionName)
-            ;
-        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateName, snapShotCollectionName)
-            ;
-        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateSequenceNumber, snapShotCollectionName)
-            ;
+        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateId, snapShotCollectionName);
+        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateName, snapShotCollectionName);
+        await CreateIndexAsync<MongoDbSnapshotDataModel>(p => p.AggregateSequenceNumber, snapShotCollectionName);
     }
 }
