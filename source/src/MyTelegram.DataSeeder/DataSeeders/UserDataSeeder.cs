@@ -14,16 +14,20 @@ public class UserDataSeeder(
         //await CreateBotFatherUserAsync();
         //await CreateGroupAnonymousBotUserAsync();
         await CreateAnonymousUserAsync();
-        var initUserId = MyTelegramConsts.UserIdInitId;
-        var testUserCount = 30;
-        for (var i = 1; i < testUserCount; i++)
+
+        if (options.CurrentValue.CreateTestUsers)
         {
-            await CreateUserIfNeedAsync(initUserId + i,
-                $"1{i}",
-                $"{i}",
-                $"{i}",
-                $"user{i}",
-                false);
+            var initUserId = MyTelegramConsts.UserIdInitId;
+            var testUserCount = 30;
+            for (var i = 1; i < testUserCount; i++)
+            {
+                await CreateUserIfNeedAsync(initUserId + i,
+                    $"1{i}",
+                    $"{i}",
+                    $"{i}",
+                    $"user{i}",
+                    false);
+            }
         }
     }
 

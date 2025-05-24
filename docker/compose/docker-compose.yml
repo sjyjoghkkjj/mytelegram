@@ -83,6 +83,7 @@ services:
       ConnectionStrings__Default: ${ConnectionStrings__Default}
       App__DatabaseName: ${App__DatabaseName}
       App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
+      App__CreateTestUsers: ${App__CreateTestUsers}
       # App__LoadAllStickersIntoMemory: ${App__LoadAllStickersIntoMemory}
       RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
       # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
