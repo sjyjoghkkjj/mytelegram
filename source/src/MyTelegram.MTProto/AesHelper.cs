@@ -1,44 +1,9 @@
-﻿namespace MyTelegram.MTProto;
+﻿using System.Numerics;
+
+namespace MyTelegram.MTProto;
 
 public class AesHelper : IAesHelper, ITransientDependency
 {
-    public void Ctr128Encrypt(Span<byte> data,
-        byte[] key,
-        CtrState ctrState)
-    {
-        var n = ctrState.Number;
-        var length = data.Length;
-        var iv = ctrState.Iv;
-        using var aes = Aes.Create();
-        aes.Key = key;
-        aes.Mode = CipherMode.ECB;
-        aes.Padding = PaddingMode.None;
-        var encryptor = aes.CreateEncryptor();
-        for (var i = 0; i < data.Length; i++)
-        {
-            if (n == 0)
-            {
-                encryptor.TransformBlock(ctrState.Iv,
-                    0,
-                    ctrState.Iv.Length,
-                    ctrState.ECounter,
-                    0);
-                for (var j = 15; j >= 0; j--)
-                {
-                    if (++iv[j] != 0)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            data[i] = (byte)(data[i] ^ ctrState.ECounter[n]);
-            n = (n + 1) % 16;
-        }
-
-        ctrState.Number = n;
-    }
-
     public void DecryptIge(ReadOnlySpan<byte> input,
         byte[] outputBytes,
         byte[] key,
@@ -109,132 +74,117 @@ public class AesHelper : IAesHelper, ITransientDependency
         }
     }
 
-    //public void Ctr128Encrypt(ReadOnlySpan<byte> data,
-    //    Span<byte> encryptedData, byte[] key, CtrState ctrState)
+    public void CtrEncrypt(ReadOnlySpan<byte> input, Span<byte> output, byte[] key, byte[] iv,
+        ulong offset = 0)
+    {
+        if (input.Length != output.Length)
+        {
+            throw new ArgumentException("Input and output must be the same length.");
+        }
+
+        using var aes = Aes.Create();
+        aes.Mode = CipherMode.ECB;
+        aes.Padding = PaddingMode.None;
+        aes.Key = key;
+        using var encryptor = aes.CreateEncryptor();
+
+        const int blockSize = 16;
+        const int blocksPerBatch = 32;
+        const int batchSize = blockSize * blocksPerBatch;
+
+        Span<byte> counter = stackalloc byte[blockSize];
+        iv.CopyTo(counter);
+        AddToCounter(counter, offset / blockSize);
+
+        var counterBatch = ArrayPool<byte>.Shared.Rent(batchSize);
+        var encryptedBytes = ArrayPool<byte>.Shared.Rent(batchSize);
+        var encryptedSpan = encryptedBytes.AsSpan();
+        var counterBatchSpan = counterBatch.AsSpan();
+
+        var inputOffset = 0;
+        var blockOffset = (int)(offset % blockSize);
+        var length = input.Length;
+
+        Span<byte> tempCounter = stackalloc byte[blockSize];
+        counter.CopyTo(tempCounter);
+        try
+        {
+            while (inputOffset < length)
+            {
+                var remaining = length - inputOffset;
+                var blocksToGen = Math.Min(blocksPerBatch, (remaining + blockOffset + blockSize - 1) / blockSize);
+                var bytesToXor = Math.Min(remaining, blocksToGen * blockSize - blockOffset);
+
+                for (var i = 0; i < blocksToGen; i++)
+                {
+                    tempCounter.CopyTo(counterBatchSpan.Slice(i * blockSize, blockSize));
+                    IncrementCounter(tempCounter);
+                }
+
+                encryptor.TransformBlock(counterBatch, 0, blocksToGen * blockSize, encryptedBytes, 0);
+
+                var keyStreamSpan = encryptedSpan.Slice(blockOffset, bytesToXor);
+                var inputSpan = input.Slice(inputOffset, bytesToXor);
+                var outputSpan = output.Slice(inputOffset, bytesToXor);
+
+                if (Vector.IsHardwareAccelerated && bytesToXor >= Vector<byte>.Count)
+                {
+                    var simdCount = bytesToXor - bytesToXor % Vector<byte>.Count;
+                    for (var i = 0; i < simdCount; i += Vector<byte>.Count)
+                    {
+                        var vInput = new Vector<byte>(inputSpan[i..]);
+                        var vKey = new Vector<byte>(keyStreamSpan[i..]);
+                        (vInput ^ vKey).CopyTo(outputSpan[i..]);
+                    }
+
+                    for (var i = simdCount; i < bytesToXor; i++)
+                    {
+                        outputSpan[i] = (byte)(inputSpan[i] ^ keyStreamSpan[i]);
+                    }
+                }
+                else
+                {
+                    for (var i = 0; i < bytesToXor; i++)
+                    {
+                        outputSpan[i] = (byte)(inputSpan[i] ^ keyStreamSpan[i]);
+                    }
+                }
+
+                inputOffset += bytesToXor;
+                blockOffset = 0;
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(counterBatch);
+            ArrayPool<byte>.Shared.Return(encryptedBytes);
+        }
+    }
+
+    //public void CtrEncrypt(ReadOnlyMemory<byte> input, Memory<byte> output, byte[] key, byte[] iv, long offset = 0)
     //{
-    //    var n = ctrState.Number;
-    //    var length = data.Length;
-    //    var iv = ctrState.Iv;
-    //    using var aes = Aes.Create();
-    //    aes.Key = key;
-    //    aes.Mode = CipherMode.ECB;
-    //    aes.Padding = PaddingMode.None;
-    //    var encryptor = aes.CreateEncryptor();
-    //    for (int i = 0; i < data.Length; i++)
-    //    {
-    //        if (n == 0)
-    //        {
-    //            encryptor.TransformBlock(ctrState.Iv,
-    //                0,
-    //                ctrState.Iv.Length,
-    //                ctrState.ECounter,
-    //                0);
-    //            for (int j = 15; j >= 0; j--)
-    //            {
-    //                if (++iv[j] != 0)
-    //                {
-    //                    break;
-    //                }
-    //            }
-    //        }
-
-    //        encryptedData[i] = (byte)(data[i] ^ ctrState.ECounter[n]);
-    //        n = (n + 1) % 16;
-    //    }
-
-    //    ctrState.Number = n;
+    //    CtrEncrypt(input.Span, output.Span, key, iv, offset);
     //}
 
-    //public void EncryptIge(ReadOnlySpan<byte> plainSpan, Span<byte> encryptedData,
-    //    ReadOnlySpan<byte> key,
-    //    ReadOnlySpan<byte> iv)
-    //{
-    //    var length = plainSpan.Length;
-    //    var restLength = plainSpan.Length % 16;
-    //    if (restLength % 16 != 0) length += 16 - restLength;
-    //    var aes = Aes.Create();
+    private static void IncrementCounter(Span<byte> counter)
+    {
+        for (var i = counter.Length - 1; i >= 0; i--)
+        {
+            if (++counter[i] != 0)
+            {
+                break;
+            }
+        }
+    }
 
-    //    aes.Key = key.ToArray();
-    //    aes.Mode = CipherMode.ECB;
-    //    aes.Padding = PaddingMode.None;
-    //    var blockSize = aes.BlockSize / 8;
-    //    using var encryptor = aes.CreateEncryptor();
-    //    var iv1 = iv[..blockSize];
-    //    var iv2 = iv[blockSize..];
-    //    var cipherTextBlock = ArrayPool<byte>.Shared.Rent(blockSize);
-    //    for (var i = 0; i < plainSpan.Length; i += blockSize)
-    //    {
-    //        var plainTextBlock = ArrayPool<byte>.Shared.Rent(blockSize);
-    //        plainSpan.Slice(i, blockSize).CopyTo(plainTextBlock);
-    //        Xor(plainTextBlock, iv1);
-    //        encryptor.TransformBlock(plainTextBlock,
-    //            0,
-    //            blockSize,
-    //            cipherTextBlock,
-    //            0);
-
-    //        ArrayPool<byte>.Shared.Return(plainTextBlock);
-
-    //        Xor(cipherTextBlock, iv2);
-
-    //        iv1 = cipherTextBlock;
-    //        iv2 = plainSpan.Slice(i, blockSize);
-    //        cipherTextBlock.CopyTo(encryptedData.Slice(i, blockSize));
-    //    }
-    //    ArrayPool<byte>.Shared.Return(cipherTextBlock, true);
-    //}
-
-    //public void DecryptIge(ReadOnlySpan<byte> encryptedSpan,
-    //    Span<byte> decryptedData,
-    //    ReadOnlySpan<byte> key,
-    //    ReadOnlySpan<byte> iv)
-    //{
-    //    using var aes = Aes.Create();
-    //    aes.Mode = CipherMode.ECB;
-    //    aes.Padding = PaddingMode.None;
-    //    aes.Key = key.ToArray();
-
-    //    var blockSize = aes.BlockSize / 8;
-
-    //    using var decryptor = aes.CreateDecryptor();
-
-    //    var iv1 = iv[..blockSize];
-    //    var iv2 = iv[blockSize..];
-
-    //    var plaintextBlock = ArrayPool<byte>.Shared.Rent(blockSize);
-
-    //    for (var i = 0; i < encryptedSpan.Length; i += blockSize)
-    //    {
-    //        var cipherTextBlock = ArrayPool<byte>.Shared.Rent(blockSize);
-    //        encryptedSpan.Slice(i, blockSize).CopyTo(cipherTextBlock);
-    //        Xor(cipherTextBlock, iv2);
-
-    //        decryptor.TransformBlock(cipherTextBlock,
-    //            0,
-    //            blockSize,
-    //            plaintextBlock,
-    //            0);
-    //        ArrayPool<byte>.Shared.Return(cipherTextBlock);
-
-    //        Xor(plaintextBlock, iv1);
-    //        iv1 = encryptedSpan[i..(i + blockSize)];
-    //        iv2 = plaintextBlock;
-
-    //        plaintextBlock.CopyTo(decryptedData[i..]);
-    //    }
-    //    ArrayPool<byte>.Shared.Return(plaintextBlock);
-    //}
-
-    //private static void Ctr128Inc(Span<byte> counter)
-    //{
-    //    var n = 16;
-    //    var c = 1;
-    //    do
-    //    {
-    //        --n;
-    //        c += counter[n];
-    //        counter[n] = (byte)c;
-    //        c >>= 8;
-    //    } while (n != 0);
-    //}
+    private static void AddToCounter(Span<byte> counter, ulong value)
+    {
+        for (var i = 0; i < 8; i++)
+        {
+            var index = counter.Length - 1 - i;
+            value += counter[index];
+            counter[index] = (byte)value;
+            value >>= 8;
+        }
+    }
 }

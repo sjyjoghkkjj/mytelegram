@@ -65,7 +65,8 @@ public class MtpMessageParser(
     {
         if (d.ObfuscationEnabled)
         {
-            aesHelper.Ctr128Encrypt(encryptedBytes, d.SendKey, d.SendCtrState);
+            aesHelper.CtrEncrypt(encryptedBytes, encryptedBytes, d.SendKey, d.SendIv, d.SendCount);
+            d.SendCount += (uint)encryptedBytes.Length;
         }
     }
 
@@ -198,10 +199,11 @@ public class MtpMessageParser(
         d.IsFirstPacketParsed = true;
         d.ObfuscationEnabled = data.ObfuscationEnabled;
         d.MtProtoType = data.ProtocolType;
-        d.SendCtrState = data.SendState;
         d.SendKey = data.SendKey;
         d.ReceiveKey = data.ReceiveKey;
-        d.ReceiveCtrState = data.ReceiveState;
+        d.SendCount = data.SendCount;
+        d.ReceiveIv = data.ReceiveIv;
+        d.SendIv = data.SendIv;
 
         return data;
     }

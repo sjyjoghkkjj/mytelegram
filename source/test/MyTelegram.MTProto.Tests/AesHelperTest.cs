@@ -21,8 +21,8 @@ D0 83 8A 45 D2 20 ED DB 5D EC 68 6A BD FC CA AB",
     55 2A EE 76 1E CD E2 5B 32 08 17 ED 48 94 1A 08
     F9 81 00 00 00 15 C4 B5 1C 01 00 00 00 A4 BD 15
     12 08 F5 27 CE",
-//        @"52 BF FD 82 77 DF 92 00 DE 7B DB F7 A3 05 1E AE
-//D0 83 8A 45 D2 20 ED DB 5D EC 68 6A BD FC CA AB",
+        //        @"52 BF FD 82 77 DF 92 00 DE 7B DB F7 A3 05 1E AE
+        //D0 83 8A 45 D2 20 ED DB 5D EC 68 6A BD FC CA AB",
         @"40 EF 69 0A 99 B9 33 56 D1 62 77 F0 40 5A 1D 94",
         @"2D 28 86 16 B1 BE 35 07 34 D2 56 5E 57 59 02 AB",
         @"5",
@@ -49,22 +49,12 @@ AE 58 32 96 D6 2C 57 B6 E7 AE 60 93 0E F4 72 1A
         string expectedData)
     {
         var span = buffer.ToBytes();
-        var s = new CtrState
-        {
-            ECounter=ecounter.ToBytes(),
-            Iv=receiveIv.ToBytes(),
-            Number=int.Parse(n)
-        };
-        var expectedBytes=expectedData.ToBytes();
+        var expectedBytes = expectedData.ToBytes();
         //var key = receiveKey.ToBytes();
+        var outputSpan = new byte[span.Length];
 
-        Sut.Ctr128Encrypt(span,receiveKey.ToBytes(),s);
-        //var d2 = new byte[span.Length];
-        //Sut.Ctr128Encrypt(span,d2,key,s);
+        Sut.CtrEncrypt(span, outputSpan, receiveKey.ToBytes(), receiveIv.ToBytes());
 
-        expectedBytes.ShouldBeEquivalentTo(span);
-        n2.ShouldBe(s.Number.ToString());
-        receiveIv2.ToBytes().ShouldBeEquivalentTo(s.Iv);
-        ecounter2.ToBytes().ShouldBeEquivalentTo(s.ECounter);
+        expectedBytes.ShouldBeEquivalentTo(outputSpan);
     }
 }

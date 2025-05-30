@@ -1,4 +1,4 @@
-global using Xunit;
+﻿global using Xunit;
 global using MyTelegram.TestBase;
 global using MyTelegram.MTProto;
 global using Shouldly;

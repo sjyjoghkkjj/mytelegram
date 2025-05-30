@@ -58,12 +58,19 @@ public class MtpMessageEncoder(
             messageDataLengthBytes,
             message.Data);
 
-        if (d.ObfuscationEnabled)
-        {
-            aesHelper.Ctr128Encrypt(encodedBytes[..totalCount], d.ReceiveKey, d.ReceiveCtrState);
-        }
+        CtrEncryptIfNeeded(encodedBytes, d, totalCount);
 
         return totalCount;
+    }
+
+    private void CtrEncryptIfNeeded(Span<byte> encodedBytes, IClientData d, int totalCount)
+    {
+        if (d.ObfuscationEnabled)
+        {
+            var source = encodedBytes[..totalCount];
+            aesHelper.CtrEncrypt(source, source, d.ReceiveKey, d.ReceiveIv, d.ReceiveCount);
+            d.ReceiveCount += (uint)totalCount;
+        }
     }
 
     private int EncodeToProtocolAbridgedBytes(IClientData d,
@@ -71,12 +78,7 @@ public class MtpMessageEncoder(
         Span<byte> encodedBytes)
     {
         var totalCount = EncodeToProtocolAbridgedBytesCore(encodedBytes, message.Data);
-        if (d.ObfuscationEnabled)
-        {
-            aesHelper.Ctr128Encrypt(encodedBytes[..totalCount], d.ReceiveKey, d.ReceiveCtrState);
-
-            return totalCount;
-        }
+        CtrEncryptIfNeeded(encodedBytes, d, totalCount);
 
         return totalCount;
     }
@@ -129,23 +131,18 @@ public class MtpMessageEncoder(
             messageDataLengthBytes,
             message.Data);
 
-        if (d.ObfuscationEnabled)
-        {
-            aesHelper.Ctr128Encrypt(encodedBytes[..totalCount], d.ReceiveKey, d.ReceiveCtrState);
-        }
+        CtrEncryptIfNeeded(encodedBytes, d, totalCount);
 
         return totalCount;
     }
+
 
     private int EncodeToProtocolIntermediateBytes(IClientData d,
         EncryptedMessageResponse message,
         Span<byte> encodedBytes)
     {
         var totalCount = EncodeToProtocolIntermediateBytesCore(encodedBytes, message.Data);
-        if (d.ObfuscationEnabled)
-        {
-            aesHelper.Ctr128Encrypt(encodedBytes[..totalCount], d.ReceiveKey, d.ReceiveCtrState);
-        }
+        CtrEncryptIfNeeded(encodedBytes, d, totalCount);
 
         return totalCount;
     }

@@ -10,11 +10,15 @@ public interface IClientData
     public bool IsFirstPacketParsed { get; set; }
     public ProtocolType MtProtoType { get; set; }
     public bool ObfuscationEnabled { get; set; }
-    public CtrState ReceiveCtrState { get; set; }
     public byte[] ReceiveKey { get; set; }
-    public CtrState SendCtrState { get; set; }
     public byte[] SendKey { get; set; }
     public int SkipCount { get; set; }
+
+    public byte[] SendIv { get; set; }
+    public byte[] ReceiveIv { get; set; }
+
+    public ulong ReceiveCount { get; set; }
+    public ulong SendCount { get; set; }
 }
 
 public interface IClientData<T> : IClientData

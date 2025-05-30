@@ -42,21 +42,17 @@ public class FirstPacketParser(
 
         var receiveKey = reversedBytes[..32].ToArray();
         var receiveIv = reversedBytes.Slice(32, 16).ToArray();
-        var sendCtrState = new CtrState
-        {
-            Iv = sendIv
-        };
 
         var encryptedNonce = ArrayPool<byte>.Shared.Rent(nonce.Length);
         try
         {
-            nonce.CopyTo(encryptedNonce);
-            aesHelper.Ctr128Encrypt(encryptedNonce, sendKey.ToArray(), sendCtrState);
+            aesHelper.CtrEncrypt(nonce, encryptedNonce, sendKey, sendIv, 0);
 
             var data = new FirstPacketData
             {
                 ObfuscationEnabled = true,
-                ProtocolBufferLength = ConnectionPrefixBytes
+                ProtocolBufferLength = ConnectionPrefixBytes,
+                SendCount = (uint)nonce.Length
             };
 
             var protocolBytes = encryptedNonce.AsSpan().Slice(56, 4);
@@ -81,14 +77,11 @@ public class FirstPacketParser(
             if (data.ProtocolType != ProtocolType.Unknown)
             {
                 var dcId = BitConverter.ToInt16(encryptedNonce, 60);
-                logger.LogInformation("[{ProtocolType}] Protocol detected, dcId: {DcId} bytes: {Bytes}", data.ProtocolType, dcId,firstPacket.Length);
+                logger.LogInformation("[{ProtocolType}] Protocol detected, dcId: {DcId} bytes: {Bytes}", data.ProtocolType, dcId, firstPacket.Length);
                 data.SendKey = sendKey;
-                data.ReceiveState = new CtrState
-                {
-                    Iv = receiveIv
-                };
+                data.SendIv = sendIv;
                 data.ReceiveKey = receiveKey;
-                data.SendState = sendCtrState;
+                data.ReceiveIv =receiveIv;
             }
 
             return data;
