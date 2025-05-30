@@ -214,6 +214,27 @@ public abstract class DomainEventHandlerBase(
                     chatIds.AddRange(updates1.Chats.Select(p => p.Id));
                 }
 
+                foreach (var update in updates1.Updates)
+                {
+                    if (update is TUpdateMessageID updateMessageId)
+                    {
+                        messageId = updateMessageId.Id;
+                        break;
+                    }
+
+                    if (update is TUpdateNewMessage updateNewMessage)
+                    {
+                        messageId = updateNewMessage.Message.Id;
+                        break;
+                    }
+
+                    if (update is TUpdateNewChannelMessage updateNewChannelMessage)
+                    {
+                        messageId = updateNewChannelMessage.Message.Id;
+                        break;
+                    }
+                }
+
                 break;
             case TUpdateShort updateShort:
                 date = updateShort.Date;
