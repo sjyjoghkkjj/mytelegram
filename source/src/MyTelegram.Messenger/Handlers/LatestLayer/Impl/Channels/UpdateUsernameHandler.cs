@@ -19,6 +19,7 @@
 internal sealed class UpdateUsernameHandler(
     ICommandBus commandBus,
     IQueryProcessor queryProcessor,
+    IUsernameHelper usernameHelper,
     IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestUpdateUsername, IBool>,
         Channels.IUpdateUsernameHandler
@@ -28,6 +29,11 @@ internal sealed class UpdateUsernameHandler(
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
+            if (usernameHelper.IsValidUsername(obj.Username))
+            {
+                RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
+            }
+
             await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
 
             var oldUserName = await queryProcessor.ProcessAsync(new GetChannelUserNameByChannelIdQuery(inputChannel.ChannelId));
