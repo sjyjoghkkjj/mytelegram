@@ -55,4 +55,7 @@ public interface IMessageReadModel : IReadModel, IReactionItem
     int? TtlPeriod { get; }
     int? ExpirationTime { get; }
     bool InvertMedia { get; }
+    bool PublicPosts { get; }
+    List<string> Hashtags { get; }
+    List<long>? MentionedUserIds { get; }
 }

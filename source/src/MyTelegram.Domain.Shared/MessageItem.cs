@@ -53,7 +53,8 @@ public record MessageItem
     bool Pinned = false,
     bool InvertMedia = false,
     bool PublicPosts = false,
-    List<string>? Hashtags = null
+    List<string>? Hashtags = null,
+    List<long>? MentionedUserIds = null
 //int? DefaultHistoryTtl = null,
 //int? Ttl = null
 );

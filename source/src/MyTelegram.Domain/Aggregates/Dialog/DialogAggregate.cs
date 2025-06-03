@@ -44,7 +44,7 @@ public class DialogAggregate : MyInMemorySnapshotAggregateRoot<DialogAggregate, 
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new HistoryClearedEvent(requestInfo,
             _state.OwnerId,
-            _state.TopMessage,
+            _state.TopMessageId,
             revoke,
             _state.ToPeer,
             messageActionData,
@@ -57,7 +57,7 @@ public class DialogAggregate : MyInMemorySnapshotAggregateRoot<DialogAggregate, 
     public void ClearParticipantHistory(RequestInfo requestInfo)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
-        Emit(new ParticipantHistoryClearedEvent(requestInfo, _state.OwnerId, _state.TopMessage));
+        Emit(new ParticipantHistoryClearedEvent(requestInfo, _state.OwnerId, _state.TopMessageId));
     }
 
     public void Create(
@@ -74,6 +74,11 @@ public class DialogAggregate : MyInMemorySnapshotAggregateRoot<DialogAggregate, 
             topMessageId,
             DateTime.UtcNow
         ));
+    }
+
+    public void CreateMention(int messageId)
+    {
+        Emit(new MentionCreatedEvent(_state.OwnerId, _state.ToPeer, messageId, _state.UnreadMentionsCount + 1));
     }
 
     public void MarkDialogAsUnread(bool unread)
@@ -149,6 +154,18 @@ public class DialogAggregate : MyInMemorySnapshotAggregateRoot<DialogAggregate, 
             readCount,
             unreadCount,
             toPeer, date));
+    }
+
+    public void ReadMention(int messageId)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        var unreadMentionsCount = _state.UnreadMentionsCount - 1;
+        if (unreadMentionsCount < 0)
+        {
+            unreadMentionsCount = 0;
+        }
+
+        Emit(new MentionReadEvent(_state.OwnerId, _state.ToPeer, messageId, unreadMentionsCount));
     }
 
     public void ReceiveInboxMessage(
@@ -247,7 +264,7 @@ public class DialogAggregate : MyInMemorySnapshotAggregateRoot<DialogAggregate, 
     {
         return Task.FromResult(new DialogSnapshot(
             _state.OwnerId,
-            _state.TopMessage,
+            _state.TopMessageId,
             _state.ReadInboxMaxId,
             _state.ReadOutboxMaxId,
             _state.UnreadCount,

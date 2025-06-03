@@ -420,18 +420,13 @@ public partial class MessageDomainEventHandler(
         // notify mentioned users
         if (aggregateEvent.MentionedUserIds?.Count > 0)
         {
-            //var mentionedUpdates = updatesLayeredService.GetConverter(aggregateEvent.RequestInfo.Layer)
-            //    .ToChannelMessageUpdates(aggregateEvent, true);
-            //var layeredMentionUpdates =
-            //    updatesLayeredService.GetLayeredData(c => c.ToChannelMessageUpdates(aggregateEvent, true));
-            //foreach (var mentionedUserId in aggregateEvent.MentionedUserIds)
-            //{
-            //    if (mentionedUserId != aggregateEvent.RequestInfo.UserId)
-            //    {
-            //        await PushUpdatesToPeerAsync(new Peer(PeerType.User, mentionedUserId), mentionedUpdates,
-            //            layeredData: layeredMentionUpdates);
-            //    }
-            //}
+            foreach (var mentionedUserId in aggregateEvent.MentionedUserIds)
+            {
+                var mentionedUpdates = updatesConverterService.ToChannelMessageUpdates(mentionedUserId, aggregateEvent, 0, true);
+                SetChannelInfo(mentionedUserId, mentionedUpdates, channelReadModel, photoReadModel, 0);
+                SetChannelInfo(mentionedUserId, mentionedUpdates, sendAsReadModel, sendAsPhotoReadModel, 0);
+                await PushUpdatesToPeerAsync(mentionedUserId.ToUserPeer(), mentionedUpdates);
+            }
         }
 
         var adminUserIds = channelReadModel.AdminList.Select(p => p.UserId).ToList();
@@ -440,6 +435,11 @@ public partial class MessageDomainEventHandler(
         foreach (var adminUserId in adminUserIds)
         {
             if (adminUserId == aggregateEvent.RequestInfo.UserId)
+            {
+                continue;
+            }
+
+            if (aggregateEvent.MentionedUserIds?.Contains(adminUserId) ?? false)
             {
                 continue;
             }
@@ -460,12 +460,13 @@ public partial class MessageDomainEventHandler(
         }
 
         await PushUpdatesToPeerAsync(item.ToPeer,
-            channelMemberUpdates,
-            aggregateEvent.RequestInfo.AuthKeyId,
-            updatesType: updatesType,
-            skipSaveUpdates: true
-        )
-        ;
+                channelMemberUpdates,
+                aggregateEvent.RequestInfo.AuthKeyId,
+                updatesType: updatesType,
+                skipSaveUpdates: true,
+                excludeUserIds: aggregateEvent.MentionedUserIds
+            )
+            ;
     }
 
     private Task HandleSendOutboxMessageCompletedAsync(SendOutboxMessageCompletedSagaEvent aggregateEvent)

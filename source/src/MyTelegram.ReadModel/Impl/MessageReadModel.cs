@@ -90,6 +90,9 @@ public class MessageReadModel : IMessageReadModel,
 
     public int? ExpirationTime { get; private set; }
     public bool InvertMedia { get; private set; }
+    public bool PublicPosts { get; private set; }
+    public List<string> Hashtags { get; private set; } = [];
+    public List<long>? MentionedUserIds { get; private set; }
 
     public Task ApplyAsync(IReadModelContext context,
         IDomainEvent<MessageAggregate, MessageId, OutboxMessageCreatedEvent> domainEvent,
@@ -159,6 +162,7 @@ public class MessageReadModel : IMessageReadModel,
         }
         Pinned = messageItem.Pinned;
         InvertMedia = messageItem.InvertMedia;
+        MentionedUserIds = messageItem.MentionedUserIds;
 
         return Task.CompletedTask;
     }

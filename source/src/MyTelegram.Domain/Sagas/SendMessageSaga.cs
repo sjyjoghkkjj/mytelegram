@@ -134,9 +134,9 @@ public class SendMessageSaga : MyInMemoryAggregateSaga<SendMessageSaga, SendMess
         {
             foreach (var mentionedUserId in mentionedUserIds)
             {
-                //var command = new CreateMentionCommand(DialogId.Create(mentionedUserId, _state.MessageItem.ToPeer),
-                //    mentionedUserId, /*_state.MessageItem.ToPeer.PeerId,*/ messageId);
-                //Publish(command);
+                var command = new CreateMentionCommand(DialogId.Create(mentionedUserId, _state.FirstMessageItem.MessageItem.ToPeer),
+                    mentionedUserId, /*_state.MessageItem.ToPeer.PeerId,*/ messageId);
+                Publish(command);
             }
         }
     }
@@ -216,7 +216,8 @@ public class SendMessageSaga : MyInMemoryAggregateSaga<SendMessageSaga, SendMess
         {
             Emit(new SendOutboxMessageCompletedSagaEvent(_state.RequestInfo,
                 _state.SendMessageItems.Select(p => p.MessageItem).ToList(),
-                _state.MentionedUserIds,
+                //_state.MentionedUserIds,
+                outboxMessageItem.MentionedUserIds,
                 _state.IsSendQuickReplyMessages,
                 _state.IsSendGroupedMessages,
                 []

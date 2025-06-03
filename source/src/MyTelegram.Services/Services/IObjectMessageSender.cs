@@ -1,6 +1,4 @@
-﻿using MyTelegram.Schema;
-
-namespace MyTelegram.Services.Services;
+﻿namespace MyTelegram.Services.Services;
 
 public interface IObjectMessageSender
 {
@@ -14,8 +12,8 @@ public interface IObjectMessageSender
         int? qts = null,
         long globalSeqNo = 0,
         LayeredData<TData>? layeredData = null,
-        PushData? pushData = null
-        ) where TData : IObject;
+        PushData? pushData = null,
+        List<long>? excludeUserIds = null) where TData : IObject;
 
     Task PushMessageToPeerAsync<TData, TExtraData>(Peer peer,
         TData data,
@@ -28,7 +26,8 @@ public interface IObjectMessageSender
         long globalSeqNo = 0,
         LayeredData<TData>? layeredData = null,
         TExtraData? extraData = default,
-        PushData? pushData = null
+        PushData? pushData = null,
+        List<long>? excludeUserIds = null
         ) where TData : IObject;
 
     Task PushSessionMessageToAuthKeyIdAsync<TData>(long authKeyId,
@@ -38,20 +37,6 @@ public interface IObjectMessageSender
         long globalSeqNo = 0,
         LayeredData<TData>? layeredData = null
     ) where TData : IObject;
-
-    ///// <summary>
-    /////     Push message to peer,receive server is session server(send from session server)
-    ///// </summary>
-    ///// <returns></returns>
-    //Task PushSessionMessageToPeerAsync<TData>(Peer peer,
-    //    TData data,
-    //    long? excludeAuthKeyId = null,
-    //    long? excludeUserId = null,
-    //    long? onlySendToUserId = null,
-    //    long? onlySendToThisAuthKeyId = null,
-    //    int pts = 0,
-    //    int? qts = null,
-    //    long globalSeqNo = 0, LayeredData<TData>? layeredData = null) where TData : IObject;
 
     Task SendFileDataToPeerAsync<TData>(RequestInfo requestInfo,
         TData data) where TData : IObject;

@@ -1,6 +1,4 @@
-﻿using MyTelegram.Schema;
-
-namespace MyTelegram.Services.Services;
+﻿namespace MyTelegram.Services.Services;
 
 public class QueuedObjectMessageSender(
     IMessageQueueProcessor<ISessionMessage> sessionMessageQueueProcessor,
@@ -35,8 +33,9 @@ public class QueuedObjectMessageSender(
         int? qts = null,
         long globalSeqNo = 0,
         LayeredData<TData>? layeredData = null,
-        PushData? pushData = null
-    ) where TData : IObject
+        PushData? pushData = null,
+        List<long>? excludeUserIds = null
+        ) where TData : IObject
     {
         sessionMessageQueueProcessor.Enqueue(new LayeredPushMessageCreatedIntegrationEvent((int)peer.PeerType,
                 peer.PeerId,
@@ -49,7 +48,8 @@ public class QueuedObjectMessageSender(
                 qts,
                 globalSeqNo,
                 new LayeredData<byte[]>(layeredData?.DataWithLayer?.ToDictionary(k => k.Key, v => v.Value.ToBytes())),
-                pushData
+                PushData: pushData,
+                excludeUserIds
             ),
             peer.PeerId);
 
@@ -67,8 +67,9 @@ public class QueuedObjectMessageSender(
         long globalSeqNo = 0,
         LayeredData<TData>? layeredData = null,
         TExtraData? extraData = default,
-        PushData? pushData = null
-    ) where TData : IObject
+        PushData? pushData = null,
+        List<long>? excludeUserIds = null
+        ) where TData : IObject
     {
         if (extraData == null)
         {
@@ -82,8 +83,9 @@ public class QueuedObjectMessageSender(
                 qts,
                 globalSeqNo,
                 layeredData,
-                pushData
-            );
+                pushData,
+                excludeUserIds
+                );
         }
 
         sessionMessageQueueProcessor.Enqueue(new LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
@@ -99,7 +101,8 @@ public class QueuedObjectMessageSender(
                 globalSeqNo,
                 new LayeredData<byte[]>(layeredData?.DataWithLayer?.ToDictionary(k => k.Key, v => v.Value.ToBytes())),
                 extraData,
-                pushData
+                pushData,
+                excludeUserIds
             ),
             peer.PeerId);
 

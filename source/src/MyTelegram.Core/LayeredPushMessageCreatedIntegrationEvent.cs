@@ -12,8 +12,8 @@ public record LayeredPushMessageCreatedIntegrationEvent(
     int? Qts,
     long GlobalSeqNo,
     LayeredData<byte[]>? LayeredData,
-    PushData? PushData
-    ) : ISessionMessage;
+    PushData? PushData,
+    List<long>? ExcludeUserIds) : ISessionMessage;
 
 public record LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
     int PeerType,
@@ -28,7 +28,8 @@ public record LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
     long GlobalSeqNo,
     LayeredData<byte[]>? LayeredData,
     TExtraData ExtraData,
-    PushData? PushData
+    PushData? PushData,
+    List<long>? ExcludeUserIds
     ) :
     LayeredPushMessageCreatedIntegrationEvent(PeerType,
         PeerId,
@@ -41,4 +42,4 @@ public record LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
         Qts,
         GlobalSeqNo,
         LayeredData,
-        PushData);
+        PushData, ExcludeUserIds);

@@ -119,7 +119,8 @@ public abstract class DomainEventHandlerBase(
         LayeredData<IUpdates>? layeredData = null,
         long? senderUserId = null,
         bool skipSaveUpdates = false,
-        PushData? pushData = null
+        PushData? pushData = null,
+        List<long>? excludeUserIds = null
     )
     {
         long globalSeqNo = 0;
@@ -164,7 +165,8 @@ public abstract class DomainEventHandlerBase(
             pts,
             globalSeqNo: globalSeqNo,
             layeredData: layeredData,
-            pushData: pushData
+            pushData: pushData,
+            excludeUserIds: excludeUserIds
         );
     }
 
@@ -296,7 +298,8 @@ public abstract class DomainEventHandlerBase(
         UpdatesType updatesType = UpdatesType.Updates,
         LayeredData<TData>? layeredData = null,
         long channelId = 0,
-        PushData? pushData = null
+        PushData? pushData = null,
+        List<long>? excludeUserIds = null
     )
         where TData : IObject
     {
@@ -323,7 +326,8 @@ public abstract class DomainEventHandlerBase(
             pts,
             globalSeqNo: globalSeqNo,
             layeredData: layeredData,
-            pushData: pushData
+            pushData: pushData,
+            excludeUserIds: excludeUserIds
         );
     }
 
@@ -338,7 +342,8 @@ public abstract class DomainEventHandlerBase(
         UpdatesType updatesType = UpdatesType.Updates,
         LayeredData<TData>? layeredData = null,
         TExtraData? extraData = default,
-        PushData? pushData = null
+        PushData? pushData = null,
+        List<long>? excludeUserIds = null
     )
         where TData : IObject
     {
@@ -370,7 +375,8 @@ public abstract class DomainEventHandlerBase(
             globalSeqNo: globalSeqNo,
             layeredData: layeredData,
             extraData: extraData,
-            pushData: pushData
+            pushData: pushData,
+            excludeUserIds: excludeUserIds
         );
     }
 
@@ -453,7 +459,7 @@ public abstract class DomainEventHandlerBase(
                 0,
                 globalSeqNo
             );
-            commandBus.PublishAsync(updateGlobalSeqNoCommand, default);
+            commandBus.PublishAsync(updateGlobalSeqNoCommand);
         });
 
         return Task.CompletedTask;

@@ -410,7 +410,8 @@ public class MessageAppService(
             ScheduleDate: scheduleDate,
             ScheduleMessageId: scheduleMessageId,
             Reply: reply,
-            InvertMedia: input.InvertMedia
+            InvertMedia: input.InvertMedia,
+            MentionedUserIds: item.mentionedUserIds
         );
 
         var sendMessageItem = new SendMessageItem(messageItem, input.ClearDraft, item.mentionedUserIds, []);
@@ -426,7 +427,7 @@ public class MessageAppService(
             if (globalPrivacySettings?.NewNoncontactPeersRequirePremium ?? false)
             {
                 var userReadModel = await userAppService.GetAsync(input.RequestInfo.UserId);
-                if (!userReadModel!.Premium)
+                if (userReadModel.UserId != MyTelegramConsts.OfficialUserId && !userReadModel.Premium)
                 {
                     var contactType =
                         await contactAppService.GetContactTypeAsync(input.RequestInfo.UserId, input.ToPeer.PeerId);

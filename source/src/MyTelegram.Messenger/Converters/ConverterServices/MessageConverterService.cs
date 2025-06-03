@@ -65,6 +65,12 @@ public class MessageConverterService(
                     m.FromId = fromId;
                     m.Out = readModel.SenderPeerId == selfUserId;
 
+                    if (readModel.MentionedUserIds?.Contains(selfUserId) ?? false)
+                    {
+                        m.Mentioned = true;
+                        m.MediaUnread = true;
+                    }
+
                     return m;
                 }
 
@@ -115,6 +121,12 @@ public class MessageConverterService(
                     if (pollMedia != null)
                     {
                         m.Media = pollMedia;
+                    }
+
+                    if (readModel.MentionedUserIds?.Contains(selfUserId) ?? false)
+                    {
+                        m.Mentioned = true;
+                        m.MediaUnread = true;
                     }
 
                     return m;
@@ -220,6 +232,8 @@ public class MessageConverterService(
 
                     m.Media = media;
                     m.Out = isOut;
+                    m.Mentioned = mentioned;
+                    m.MediaUnread = mentioned;
                     m.FromId = fromId;
 
                     if (item.FwdHeader != null)
