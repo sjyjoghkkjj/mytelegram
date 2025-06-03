@@ -29,9 +29,12 @@ internal sealed class UpdateUsernameHandler(
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            if (usernameHelper.IsValidUsername(obj.Username))
+            if (!string.IsNullOrEmpty(obj.Username))
             {
-                RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
+                if (usernameHelper.IsValidUsername(obj.Username))
+                {
+                    RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
+                }
             }
 
             await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);

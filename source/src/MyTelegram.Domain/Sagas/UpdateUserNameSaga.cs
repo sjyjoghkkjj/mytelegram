@@ -1,7 +1,7 @@
 ﻿namespace MyTelegram.Domain.Sagas;
 
-public class UpdateUserNameSaga(UpdateUserNameSagaId id)
-    : AggregateSaga<UpdateUserNameSaga, UpdateUserNameSagaId, UpdateUserNameSagaLocator>(id),
+public class UpdateUserNameSaga(UpdateUserNameSagaId id, IEventStore eventStore)
+    : MyInMemoryAggregateSaga<UpdateUserNameSaga, UpdateUserNameSagaId, UpdateUserNameSagaLocator>(id, eventStore),
         ISagaIsStartedBy<UserNameAggregate, UserNameId, UserNameChangedEvent>,
         ISagaHandles<UserAggregate, UserId, UserNameUpdatedEvent>,
         ISagaHandles<ChannelAggregate, ChannelId, ChannelUserNameChangedEvent>,
@@ -33,7 +33,7 @@ public class UpdateUserNameSaga(UpdateUserNameSagaId id)
     {
         if (!string.IsNullOrEmpty(domainEvent.AggregateEvent.OldUserName))
         {
-            var command = new DeleteUserNameCommand(UserNameId.Create(domainEvent.AggregateEvent.OldUserName));
+            var command = new DeleteUserNameCommand(UserNameId.Create(domainEvent.AggregateEvent.OldUserName.ToLower()));
             Publish(command);
         }
 
@@ -70,7 +70,7 @@ public class UpdateUserNameSaga(UpdateUserNameSagaId id)
 
         if (!string.IsNullOrEmpty(domainEvent.AggregateEvent.OldUserName))
         {
-            var command = new DeleteUserNameCommand(UserNameId.Create(domainEvent.AggregateEvent.OldUserName));
+            var command = new DeleteUserNameCommand(UserNameId.Create(domainEvent.AggregateEvent.OldUserName.ToLower()));
             Publish(command);
         }
 

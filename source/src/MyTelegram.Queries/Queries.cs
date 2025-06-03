@@ -10,7 +10,7 @@ public record GetAllDraftQuery(long OwnerPeerId) : IQuery<IReadOnlyCollection<ID
 
 public record GetAllUserNameQuery(
     int Skip,
-    int Limit) : IQuery<IReadOnlyCollection<string>>;
+    int Limit) : IQuery<IReadOnlyCollection<IUserNameReadModel>>;
 
 //public record GetAuthKeyByAuthKeyIdQuery(long AuthKeyId) : IQuery<IAuthKeyReadModel?>;
 

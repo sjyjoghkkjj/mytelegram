@@ -8,6 +8,11 @@ public class UserNameAggregate : SnapshotAggregateRoot<UserNameAggregate, UserNa
         Register(_state);
     }
 
+    public void Create(Peer peer, string userName, int date)
+    {
+        Emit(new UserNameCreatedEvent(peer, userName, date));
+    }
+
     public void Delete()
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
@@ -27,9 +32,7 @@ public class UserNameAggregate : SnapshotAggregateRoot<UserNameAggregate, UserNa
             return;
         }
 
-        var lowerUserName = userName.ToLower();
-
-        if (lowerUserName.Length > MyTelegramConsts.UsernameMaxLength || lowerUserName.Length < MyTelegramConsts.UsernameMinLength)
+        if (userName.Length > MyTelegramConsts.UsernameMaxLength || userName.Length < MyTelegramConsts.UsernameMinLength)
         {
             RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
         }

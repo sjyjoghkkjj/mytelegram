@@ -40,8 +40,8 @@ public class UserNameReadModel : IUserNameReadModel,
     {
         Id = domainEvent.AggregateIdentity.Value;
         UserName = domainEvent.AggregateEvent.UserName;
-        PeerId = domainEvent.AggregateEvent.UserId;
-        PeerType = PeerType.User;
+        PeerId = domainEvent.AggregateEvent.Peer.PeerId;
+        PeerType = domainEvent.AggregateEvent.Peer.PeerType;
         Date = domainEvent.AggregateEvent.Date;
 
         return Task.CompletedTask;

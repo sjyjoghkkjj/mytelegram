@@ -6,6 +6,7 @@ public class
     public async Task<IUserNameReadModel?> ExecuteQueryAsync(GetUserNameByNameQuery query,
         CancellationToken cancellationToken)
     {
-        return await store.FirstOrDefaultAsync(p => p.UserName == query.Name, cancellationToken);
+        var lowerUserName = query.Name.ToLower();
+        return await store.FirstOrDefaultAsync(p => p.UserName.ToLower() == lowerUserName, cancellationToken);
     }
 }

@@ -18,6 +18,7 @@ public class UserNameState : AggregateState<UserNameAggregate, UserNameId, UserN
     public void Apply(UserNameCreatedEvent aggregateEvent)
     {
         UserName = aggregateEvent.UserName;
+
         IsDeleted = false;
     }
 

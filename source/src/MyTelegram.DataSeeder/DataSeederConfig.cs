@@ -10,4 +10,7 @@ public record DataSeederConfig
     public List<long> CreatedStickerSetIds { get; set; } = [];
     public List<long> CreatedDocumentIds { get; set; } = [];
     public List<long> CreatedBotUserIds { get; set; } = [];
+    public bool IsDialogFilterMigrated { get; set; }
+
+    public bool IsUserNameIdMigrated { get; set; }
 }

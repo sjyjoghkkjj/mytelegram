@@ -1,8 +1,8 @@
 ﻿namespace MyTelegram.Domain.Events.UserName;
 
-public class UserNameCreatedEvent(long userId, string userName, int date) : AggregateEvent<UserNameAggregate, UserNameId>
+public class UserNameCreatedEvent(Peer peer, string userName, int date) : AggregateEvent<UserNameAggregate, UserNameId>
 {
-    public long UserId { get; } = userId;
+    public Peer Peer { get; } = peer;
     public string UserName { get; } = userName;
     public int Date { get; } = date;
 }

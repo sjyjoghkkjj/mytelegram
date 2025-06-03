@@ -21,18 +21,21 @@ internal sealed class UpdateUsernameHandler(
     protected override async Task<IUser> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestUpdateUsername obj)
     {
-        if (!usernameHelper.IsValidUsername(obj.Username))
+        if (!string.IsNullOrEmpty(obj.Username))
         {
-            RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
+            if (!usernameHelper.IsValidUsername(obj.Username))
+            {
+                RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
+            }
         }
 
         var oldUserName = await queryProcessor.ProcessAsync(new GetUserNameByUserIdQuery(input.UserId));
-        if (string.Equals(obj.Username, oldUserName))
+        if (string.Equals(obj.Username, oldUserName, StringComparison.OrdinalIgnoreCase))
         {
             RpcErrors.RpcErrors400.UsernameNotModified.ThrowRpcError();
         }
 
-        var command = new SetUserNameCommand(UserNameId.Create(obj.Username),
+        var command = new SetUserNameCommand(UserNameId.Create(obj.Username.ToLower()),
             input.ToRequestInfo(),
             input.UserId.ToUserPeer(),
             obj.Username,
