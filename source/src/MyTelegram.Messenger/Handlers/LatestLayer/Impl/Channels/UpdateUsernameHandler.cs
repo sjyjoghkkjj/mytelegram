@@ -31,7 +31,7 @@ internal sealed class UpdateUsernameHandler(
         {
             if (!string.IsNullOrEmpty(obj.Username))
             {
-                if (usernameHelper.IsValidUsername(obj.Username))
+                if (!usernameHelper.IsValidUsername(obj.Username))
                 {
                     RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
                 }
