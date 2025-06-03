@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
+﻿using EventFlow.Queries;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Change or remove the username of a supergroup/channel
@@ -19,6 +21,7 @@
 internal sealed class UpdateUsernameHandler(
     ICommandBus commandBus,
     IQueryProcessor queryProcessor,
+    IChannelAppService channelAppService,
     IUsernameHelper usernameHelper,
     IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestUpdateUsername, IBool>,
@@ -38,14 +41,14 @@ internal sealed class UpdateUsernameHandler(
             }
 
             await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
-
-            var oldUserName = await queryProcessor.ProcessAsync(new GetChannelUserNameByChannelIdQuery(inputChannel.ChannelId));
-            if (string.Equals(obj.Username, oldUserName))
+            var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
+            var oldUserName = channelReadModel.UserName;
+            if (string.Equals(obj.Username, oldUserName, StringComparison.OrdinalIgnoreCase))
             {
                 RpcErrors.RpcErrors400.UsernameNotModified.ThrowRpcError();
             }
 
-            var command = new SetUserNameCommand(UserNameId.Create(obj.Username),
+            var command = new SetUserNameCommand(UserNameId.Create(obj.Username.ToLower()),
                 input.ToRequestInfo(),
                 inputChannel.ChannelId.ToChannelPeer(),
                 obj.Username,

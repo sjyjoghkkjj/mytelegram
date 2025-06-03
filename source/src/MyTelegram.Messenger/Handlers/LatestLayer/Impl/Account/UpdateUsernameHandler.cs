@@ -13,6 +13,7 @@
 internal sealed class UpdateUsernameHandler(
     ICommandBus commandBus,
     IQueryProcessor queryProcessor,
+    IUserAppService userAppService,
     IUsernameHelper usernameHelper
     )
     : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestUpdateUsername, MyTelegram.Schema.IUser>,
@@ -29,7 +30,8 @@ internal sealed class UpdateUsernameHandler(
             }
         }
 
-        var oldUserName = await queryProcessor.ProcessAsync(new GetUserNameByUserIdQuery(input.UserId));
+        var userReadModel=await userAppService.GetAsync(input.UserId);
+        var oldUserName = userReadModel.UserName;
         if (string.Equals(obj.Username, oldUserName, StringComparison.OrdinalIgnoreCase))
         {
             RpcErrors.RpcErrors400.UsernameNotModified.ThrowRpcError();

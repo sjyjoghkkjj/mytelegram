@@ -17,6 +17,7 @@
 ///</summary>
 internal sealed class CheckUsernameHandler(
     IQueryProcessor queryProcessor,
+    IUsernameHelper usernameHelper,
     IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestCheckUsername, IBool>,
         Channels.ICheckUsernameHandler
@@ -24,6 +25,14 @@ internal sealed class CheckUsernameHandler(
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestCheckUsername obj)
     {
+        if (!string.IsNullOrEmpty(obj.Username))
+        {
+            if (!usernameHelper.IsValidUsername(obj.Username))
+            {
+                RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
+            }
+        }
+
         switch (obj.Channel)
         {
             case TInputChannel inputChannel1:
@@ -33,17 +42,8 @@ internal sealed class CheckUsernameHandler(
                 break;
         }
 
-        if (string.IsNullOrEmpty(obj.Username) ||
-            obj.Username.Length < MyTelegramConsts.UsernameMinLength ||
-            obj.Username.Length > MyTelegramConsts.UsernameMaxLength
-           )
-        {
-            RpcErrors.RpcErrors400.UsernameInvalid.ThrowRpcError();
-        }
-
-        var item = await queryProcessor
-            .ProcessAsync(new GetUserNameByIdQuery(obj.Username.ToLower()));
-        if (item == null)
+        var userNameReadModel = await queryProcessor.ProcessAsync(new GetUserNameByNameQuery(obj.Username.ToLower()));
+        if (userNameReadModel == null)
         {
             return new TBoolTrue();
         }

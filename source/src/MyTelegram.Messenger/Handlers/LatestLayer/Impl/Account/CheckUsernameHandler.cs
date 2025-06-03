@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Validates a username and checks availability.
@@ -11,13 +9,21 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 /// 400 USERNAME_PURCHASE_AVAILABLE The specified username can be purchased on <a href="https://fragment.com/">https://fragment.com</a>.
 /// See <a href="https://corefork.telegram.org/method/account.checkUsername" />
 ///</summary>
-internal sealed class CheckUsernameHandler(IQueryProcessor queryProcessor)
+internal sealed class CheckUsernameHandler(IQueryProcessor queryProcessor, IUsernameHelper usernameHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestCheckUsername, IBool>,
         Account.ICheckUsernameHandler
 {
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestCheckUsername obj)
     {
+        if (!string.IsNullOrEmpty(obj.Username))
+        {
+            if (!usernameHelper.IsValidUsername(obj.Username))
+            {
+                return new TBoolFalse();
+            }
+        }
+
         var userNameReadModel = await queryProcessor.ProcessAsync(new GetUserNameByNameQuery(obj.Username.ToLower()));
         if (userNameReadModel == null)
         {

@@ -274,8 +274,6 @@ public record RpcResultSimpleItem(long UserId, long ReqMsgId);
 
 public record GetUserByIdQuery(long UserId) : IQuery<IUserReadModel?>;
 
-public record GetUserNameByUserIdQuery(long UserId) : IQuery<string?>;
-
 public record GetUserByPhoneNumberQuery(string PhoneNumber) : IQuery<IUserReadModel?>;
 
 public record GetUserNameByIdQuery(string UserName) : IQuery<IUserNameReadModel?>;

@@ -5,6 +5,7 @@ public class GetUserNameByIdQueryHandler(IQueryOnlyReadModelStore<UserNameReadMo
     public async Task<IUserNameReadModel?> ExecuteQueryAsync(GetUserNameByIdQuery query,
         CancellationToken cancellationToken)
     {
-        return await store.FirstOrDefaultAsync(p => p.UserName == query.UserName, cancellationToken);
+        var lowerName = query.UserName.ToLower();
+        return await store.FirstOrDefaultAsync(p => p.UserName.ToLower() == lowerName, cancellationToken);
     }
 }
