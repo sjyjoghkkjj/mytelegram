@@ -108,6 +108,8 @@ namespace MyTelegram.Messenger.NativeAot;
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Dialog.DraftSavedEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Dialog.HistoryClearedEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Dialog.InboxMessageReceivedEvent))]
+[JsonSerializable(typeof(MyTelegram.Domain.Events.Dialog.MentionCreatedEvent))]
+[JsonSerializable(typeof(MyTelegram.Domain.Events.Dialog.MentionReadEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Dialog.OutboxAlreadyReadEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Dialog.OutboxMessageHasReadEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Dialog.ParticipantHistoryClearedEvent))]
