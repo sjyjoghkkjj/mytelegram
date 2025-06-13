@@ -13,7 +13,8 @@ public class EditOutboxMessageCommandHandler : CommandHandler<MessageAggregate, 
             command.Entities,
             command.Media,
             command.ReplyMarkup,
-            command.InvertMedia
+            command.InvertMedia,
+            command.Hashtags
             );
 
         return Task.CompletedTask;

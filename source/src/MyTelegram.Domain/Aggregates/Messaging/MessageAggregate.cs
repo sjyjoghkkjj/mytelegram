@@ -157,8 +157,8 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
         TVector<IMessageEntity>? entities,
         IMessageMedia? media,
         IReplyMarkup? replyMarkup,
-        bool invertMedia
-    )
+        bool invertMedia,
+        List<string>? hashtags)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
 
@@ -177,7 +177,8 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
             Media = media,
             ReplyMarkup = replyMarkup,
             EditDate = editDate,
-            InvertMedia = invertMedia
+            InvertMedia = invertMedia,
+            Hashtags = hashtags
         };
 
         Emit(new InboxMessageEditedEventV2(
@@ -193,8 +194,8 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
         TVector<IMessageEntity>? entities,
         IMessageMedia? media,
         IReplyMarkup? replyMarkup,
-        bool invertMedia
-    )
+        bool invertMedia,
+        List<string>? hashtags)
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         if (_state.MessageItem.Date + MyTelegramConsts.EditTimeLimit < DateTime.UtcNow.ToTimestamp())
@@ -222,7 +223,8 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
             Media = media,
             ReplyMarkup = replyMarkup,
             EditDate = editDate,
-            InvertMedia = invertMedia
+            InvertMedia = invertMedia,
+            Hashtags = hashtags
         };
 
         Emit(new OutboxMessageEditedEventV2(requestInfo,

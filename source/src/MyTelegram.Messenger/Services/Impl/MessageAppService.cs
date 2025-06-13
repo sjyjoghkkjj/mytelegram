@@ -14,6 +14,9 @@ public class MessageAppService(
     IIdGenerator idGenerator)
     : BaseAppService, IMessageAppService, ITransientDependency
 {
+    private const string HashtagPattern = "#(\\w+)";
+    private const string UrlPattern = @"(?:^|\s)(https?://[^\s]+)(?=\s|$)";
+
     public void CheckBotPermission(long requestUserId, Peer toPeer)
     {
         if (peerHelper.IsBotUser(requestUserId) && peerHelper.IsBotUser(toPeer.PeerId))
@@ -184,6 +187,26 @@ public class MessageAppService(
         await commandBus.PublishAsync(command);
     }
 
+    public async Task<SearchPostsResult> SearchPostsAsync(long selfUserId, SearchPostsQuery searchPostsQuery)
+    {
+        var messageReadModels = await queryProcessor.ProcessAsync(searchPostsQuery);
+        HashSet<long> userIds = [];
+        HashSet<long> channelIds = [];
+        AddExtraPeerIds(messageReadModels, userIds, channelIds);
+        var userIdList = userIds.ToList();
+        var userReadModels = await userAppService.GetListAsync(userIdList);
+        var channelReadModels = channelIds.Count == 0
+            ? []
+            : await channelAppService.GetListAsync(channelIds);
+        var channelMemberReadModels = channelReadModels.Count == 0
+            ? []
+            : await queryProcessor.ProcessAsync(
+                new GetChannelMemberListByChannelIdListQuery(selfUserId, channelIds.ToList()));
+        var photoReadModels = await photoAppService.GetPhotosAsync(channelReadModels);
+
+        return new SearchPostsResult(messageReadModels, channelReadModels, channelMemberReadModels, photoReadModels, userReadModels);
+    }
+
     private async Task<IChannelReadModel?> CheckChannelBannedRightsAsync(SendMessageInput input)
     {
         if (input.ToPeer.PeerType != PeerType.Channel)
@@ -309,7 +332,12 @@ public class MessageAppService(
         await CheckGlobalPrivacySettingsAsync(input);
         var channelReadModel = await CheckChannelBannedRightsAsync(input);
 
-        var item = await GetMessageEntitiesAsync(input);
+        var entities = input.Entities ?? [];
+        var mentionedUserIds = await ProcessMessageEntitiesAsync(input.Message, entities);
+        if (entities.Count == 0)
+        {
+            entities = null;
+        }
         var ownerPeerId = input.ToPeer.PeerType == PeerType.Channel ? input.ToPeer.PeerId : input.SenderUserId;
         var replyToMsgId = input.InputReplyTo.ToReplyToMsgId();
 
@@ -326,12 +354,13 @@ public class MessageAppService(
         var linkedChannelId = channelReadModel?.Broadcast ?? false ? channelReadModel.LinkedChatId : null;
         var sendAs = await GetDefaultSendAsAsync(input);
         string? postAuthor = null;
+        var isPublicPost = channelReadModel is { Broadcast: true, UserName: not null };
         if (channelReadModel is { Signatures: true, Broadcast: true })
         {
             if (sendAs?.PeerType == PeerType.Channel)
             {
-                var sendAsChannelReadModel = await channelAppService.GetAsync(sendAs?.PeerId);
-                postAuthor = sendAsChannelReadModel?.Title;
+                var sendAsChannelReadModel = await channelAppService.GetAsync(sendAs.PeerId);
+                postAuthor = sendAsChannelReadModel.Title;
             }
             else
             {
@@ -376,6 +405,7 @@ public class MessageAppService(
         }
 
         var date = CurrentDate;
+        var hashtags = GetHashtags(input.Message);
         var messageItem = new MessageItem(
             input.ToPeer with { PeerId = ownerPeerId /*, AccessHash = 0 */ },
             input.ToPeer,
@@ -393,7 +423,7 @@ public class MessageAppService(
             //input.MessageActionData,
             input.MessageAction,
             messageActionType,
-            item.entities,
+            entities,
             input.Media,
             input.GroupId,
             PollId: input.PollId,
@@ -411,12 +441,41 @@ public class MessageAppService(
             ScheduleMessageId: scheduleMessageId,
             Reply: reply,
             InvertMedia: input.InvertMedia,
-            MentionedUserIds: item.mentionedUserIds
+            PublicPosts: isPublicPost,
+            Hashtags: hashtags,
+            MentionedUserIds: mentionedUserIds
         );
 
-        var sendMessageItem = new SendMessageItem(messageItem, input.ClearDraft, item.mentionedUserIds, []);
+        var sendMessageItem = new SendMessageItem(messageItem, input.ClearDraft, mentionedUserIds, []);
 
         return sendMessageItem;
+    }
+
+    public List<string> GetHashtags(string? message)
+    {
+        if (string.IsNullOrEmpty(message))
+        {
+            return [];
+        }
+
+        var matches = Regex.Matches(message, HashtagPattern);
+        var hashtags = new List<string>();
+        const int maxHashtags = 10;
+        foreach (Match match in matches)
+        {
+            if (hashtags.Count > maxHashtags)
+            {
+                break;
+            }
+
+            var hashtag = match.Groups[1].Value;
+            if (!hashtags.Contains(hashtag))
+            {
+                hashtags.Add(hashtag);
+            }
+        }
+
+        return hashtags;
     }
 
     private async Task CheckGlobalPrivacySettingsAsync(SendMessageInput input)
@@ -438,6 +497,62 @@ public class MessageAppService(
                 }
             }
         }
+    }
+
+    public Task<List<long>> ProcessMessageEntitiesAsync(string? message, IList<IMessageEntity>? entities)
+    {
+        if (string.IsNullOrEmpty(message))
+        {
+            return Task.FromResult<List<long>>([]);
+        }
+
+        ProcessMessageEntityHashtag(message, entities);
+        ProcessMessageEntityUrlList(message, entities);
+        return ProcessMessageEntityMentionAsync(message, entities);
+    }
+
+    private async Task<List<long>> ProcessMessageEntityMentionAsync(string message, IList<IMessageEntity>? entities)
+    {
+        var mentionsAndUserNames = GetMentions(message);
+        var mentions = mentionsAndUserNames.mentions;
+        var mentionedUserNames = mentionsAndUserNames.userNameList;
+        var mentionedUserIds = new List<long>();
+
+        if (entities?.Count > 0)
+        {
+            foreach (var messageEntity in entities)
+            {
+                switch (messageEntity)
+                {
+                    case TInputMessageEntityMentionName inputMessageEntityMentionName:
+                        var userPeer = peerHelper.GetPeer(inputMessageEntityMentionName.UserId);
+                        mentionedUserIds.Add(userPeer.PeerId);
+                        break;
+                    case TMessageEntityMention messageEntityMention:
+                        mentionedUserNames.Add(message.Substring(messageEntityMention.Offset + 1,
+                            messageEntityMention.Length - 1));
+                        break;
+                    case TMessageEntityMentionName messageEntityMentionName:
+                        mentionedUserIds.Add(messageEntityMentionName.UserId);
+                        break;
+                }
+            }
+        }
+
+        if (mentionedUserNames.Count > 0)
+        {
+            var mentionedUsers =
+                await queryProcessor.ProcessAsync(new GetUserNameListByNamesQuery(mentionedUserNames, PeerType.User));
+            mentionedUserIds.AddRange(mentionedUsers.Select(p => p.PeerId).Distinct().ToList());
+
+            entities ??= [];
+            foreach (var messageEntityMention in mentions)
+            {
+                entities.Add(messageEntityMention);
+            }
+        }
+
+        return mentionedUserIds;
     }
 
     private (List<TMessageEntityMention> mentions, List<string> userNameList) GetMentions(string message)
@@ -462,51 +577,9 @@ public class MessageAppService(
         return (mentions, userNameList);
     }
 
-    private async Task<(List<long> mentionedUserIds, TVector<IMessageEntity>? entities)> GetMessageEntitiesAsync(
-        SendMessageInput input)
+    private void ProcessMessageEntityUrlList(string message, IList<IMessageEntity>? entities)
     {
-        var mentionsAndUserNames = GetMentions(input.Message);
-        var mentions = mentionsAndUserNames.mentions;
-        var mentionedUserNames = mentionsAndUserNames.userNameList;
-        var entities = input.Entities == null ? null : new TVector<IMessageEntity>(input.Entities);
-        var mentionedUserIds = new List<long>();
-
-        if (input.Entities?.Count > 0)
-        {
-            foreach (var messageEntity in input.Entities)
-            {
-                switch (messageEntity)
-                {
-                    case TInputMessageEntityMentionName inputMessageEntityMentionName:
-                        var userPeer = peerHelper.GetPeer(inputMessageEntityMentionName.UserId);
-                        mentionedUserIds.Add(userPeer.PeerId);
-                        break;
-                    case TMessageEntityMention messageEntityMention:
-                        mentionedUserNames.Add(input.Message.Substring(messageEntityMention.Offset + 1,
-                            messageEntityMention.Length - 1));
-                        break;
-                    case TMessageEntityMentionName messageEntityMentionName:
-                        mentionedUserIds.Add(messageEntityMentionName.UserId);
-                        break;
-                }
-            }
-        }
-
-        if (mentionedUserNames.Count > 0)
-        {
-            var mentionedUsers =
-                await queryProcessor.ProcessAsync(new GetUserNameListByNamesQuery(mentionedUserNames, PeerType.User));
-            mentionedUserIds.AddRange(mentionedUsers.Select(p => p.PeerId).Distinct().ToList());
-
-            entities ??= [];
-            foreach (var messageEntityMention in mentions)
-            {
-                entities.Add(messageEntityMention);
-            }
-        }
-
-        var pattern = @"(?:^|\s)(https?://[^\s]+)(?=\s|$)";
-        var matches = Regex.Matches(input.Message, pattern);
+        var matches = Regex.Matches(message, UrlPattern);
         foreach (Match match in matches)
         {
             if (match.Success)
@@ -514,14 +587,30 @@ public class MessageAppService(
                 var entity = new TMessageEntityUrl
                 {
                     Offset = match.Index,
-                    Length = match.Length,
+                    Length = match.Length
                 };
                 entities ??= [];
                 entities.Add(entity);
             }
         }
+    }
 
-        return (mentionedUserIds, entities);
+    private void ProcessMessageEntityHashtag(string message, IList<IMessageEntity>? entities)
+    {
+        var hashtagMatches = Regex.Matches(message, HashtagPattern);
+        foreach (Match match in hashtagMatches)
+        {
+            if (match.Success)
+            {
+                var entity = new TMessageEntityHashtag
+                {
+                    Offset = match.Index,
+                    Length = match.Length
+                };
+                entities ??= [];
+                entities.Add(entity);
+            }
+        }
     }
 
     private Task<GetMessageOutput> GetMessagesCoreAsync<TRequest>(TRequest input)

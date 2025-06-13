@@ -8,7 +8,7 @@ public record SendMessageInput
         string message,
         long randomId,
         //byte[]? entities = null,
-        IList<IMessageEntity>? entities = null,
+        TVector<IMessageEntity>? entities = null,
         //int? replyToMsgId = null,
         //IReplyTo? replyTo = null,
         IInputReplyTo? inputReplyTo = null,
@@ -69,7 +69,7 @@ public record SendMessageInput
     }
 
     public bool ClearDraft { get; }
-    public IList<IMessageEntity>? Entities { get; }
+    public TVector<IMessageEntity>? Entities { get; }
     public IInputReplyTo? InputReplyTo { get; }
     //public IReplyTo? ReplyTo { get; }
     public long? GroupId { get; }
