@@ -8,12 +8,12 @@ public class Int128SerializerTests
         var value = "C0CC11F66E1111B8529BB89742D77959".ToBytes();
         //var stream = new MemoryStream();
         //var bw = new BinaryWriter(stream);
-        using var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
         var serializer = CreateSerializer();
 
-        serializer.Serialize(value, writer.Writer);
+        serializer.Serialize(value, writer);
 
-        writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(value);
+        writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(value);
     }
 
     [Fact]

@@ -11,12 +11,12 @@ public class DoubleSerializerTests
         var bytes = BitConverter.GetBytes(a);
         //var stream = new MemoryStream();
         //var bw = new BinaryWriter(stream);
-        using var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
         var serializer = CreateSerializer();
 
-        serializer.Serialize(a, writer.Writer);
+        serializer.Serialize(a, writer);
 
-        var actualBytes = writer.Writer.WrittenSpan.ToArray();
+        var actualBytes = writer.WrittenSpan.ToArray();
         actualBytes.ShouldBeEquivalentTo(bytes);
     }
 

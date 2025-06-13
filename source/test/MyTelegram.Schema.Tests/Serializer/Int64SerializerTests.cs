@@ -8,12 +8,12 @@ public class Int64SerializerTests
         var expectedBytes = "6300000000000000".ToBytes();
         //var stream = new MemoryStream();
         //var bw = new BinaryWriter(stream);
-        using var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
         var serializer = CreateSerializer();
 
-        serializer.Serialize(99L, writer.Writer);
+        serializer.Serialize(99L, writer);
 
-        writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedBytes);
+        writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedBytes);
     }
 
     [Fact]

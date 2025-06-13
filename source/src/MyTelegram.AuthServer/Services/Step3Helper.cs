@@ -27,11 +27,17 @@ public class Step3Helper(
 
         CheckRequestData(cachedAuthKey.Nonce, req.Nonce, "Nonce");
         CheckRequestData(cachedAuthKey.ServerNonce, req.ServerNonce, "ServerNonce");
-        var tempAesKeyData = mtpHelper.CalcTempAesKeyData(
-            cachedAuthKey.NewNonce,
-            cachedAuthKey.ServerNonce
-        );
-        var dhInnerData = DeserializeRequest(req, tempAesKeyData);
+
+        var aesKey = new byte[32];
+        Span<byte> aesIv = stackalloc byte[32];
+        mtpHelper.CalcTempAesKeyData(
+           cachedAuthKey.NewNonce,
+           cachedAuthKey.ServerNonce,
+           aesKey,
+           aesIv
+       );
+        var dhInnerData = DeserializeRequest(req, aesKey, aesIv);
+
         CheckRequestData(cachedAuthKey.Nonce, dhInnerData.Nonce, "Nonce");
         CheckRequestData(cachedAuthKey.ServerNonce, dhInnerData.ServerNonce, "ServerNonce");
         var a = cachedAuthKey.A;
@@ -56,35 +62,43 @@ public class Step3Helper(
 
     private TClientDHInnerData DeserializeRequest(
         RequestSetClientDHParams serverDhParams,
-        AesKeyData aesKeyData
+        byte[] key,
+        ReadOnlySpan<byte> iv
     )
     {
-        var answerWithHash = aesHelper.DecryptIge(
-            serverDhParams.EncryptedData,
-            aesKeyData.Key,
-            aesKeyData.Iv
-        );
-        var hash = answerWithHash[..20];
-        var answer = answerWithHash[20..];
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(answer));
-        var obj = reader.Read<TClientDHInnerData>();
-        var paddingCount = (int)(answer.Length - reader.Consumed);
-        var data = answer[..^paddingCount];
-        var calcHash = hashHelper.Sha1(data);
-        if (!hash.SequenceEqual(calcHash))
+        var tempBytes = ArrayPool<byte>.Shared.Rent(serverDhParams.EncryptedData.Length + 20);
+        var tempSpan = tempBytes.AsSpan(0, serverDhParams.EncryptedData.Length + 20);
+        var answerWithHash = tempSpan.Slice(0, serverDhParams.EncryptedData.Length);
+        try
         {
-            logger.LogWarning(
-                "Answer sha1 hash mismatch, client hash: {RequestHash}, server calculated hash: {ServerCalculatedHash}",
-                hash.ToHexString(),
-                calcHash.ToHexString()
+            aesHelper.DecryptIge(
+                serverDhParams.EncryptedData,
+                key,
+                iv,
+                answerWithHash
             );
 
-            throw new ArgumentException(
-                $"Answer sha1 hash mismatch, client hash: {hash.ToHexString()}, server calculated hash: {calcHash.ToHexString()}"
-            );
+            var hash = answerWithHash[..20];
+            var answer = answerWithHash[20..];
+            var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(tempBytes, 20, answerWithHash.Length - 20));
+            var obj = reader.Read<TClientDHInnerData>();
+            var paddingCount = (int)(answer.Length - reader.Consumed);
+            var data = answer[..^paddingCount];
+            var calcHash = tempSpan[^20..];
+            SHA1.HashData(data, calcHash);
+            if (!hash.SequenceEqual(calcHash))
+            {
+                logger.LogWarning("Answer sha1 hash mismatch.");
+
+                throw new ArgumentException($"Answer sha1 hash mismatch.");
+            }
+
+            return obj;
         }
-
-        return obj;
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(tempBytes);
+        }
     }
 
     private TDhGenOk CreateDhGenOkAnswer(
@@ -124,7 +138,6 @@ public class Step3Helper(
         // response dh_gen_ok into dh_gen_retry.
 
         var authKeyAuxHash = SHA1.HashData(authKey).AsSpan(0, 8);
-        // 256+1+8
         Span<byte> newNonceWithAuxHashBytes = stackalloc byte[newNonce.Length + 1 + 8];
         newNonce.CopyTo(newNonceWithAuxHashBytes);
         newNonceWithAuxHashBytes[newNonce.Length] = n;

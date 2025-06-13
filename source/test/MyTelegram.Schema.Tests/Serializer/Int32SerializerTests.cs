@@ -8,12 +8,12 @@ public class Int32SerializerTests
         var expectedValue = new byte[] { 01, 0, 0, 0 };
         //var stream = new MemoryStream();
         //var bw = new BinaryWriter(stream);
-        using var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
         var serializer = CreateSerializer();
 
-        serializer.Serialize(1, writer.Writer);
+        serializer.Serialize(1, writer);
 
-        writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
     }
 
     [Fact]

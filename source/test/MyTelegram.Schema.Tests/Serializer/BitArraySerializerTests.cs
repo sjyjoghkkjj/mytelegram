@@ -9,12 +9,12 @@ public class BitArraySerializerTests
         var expectedValue = "01000000".ToBytes();
         //var stream = new MemoryStream();
         //var bw = new BinaryWriter(stream);
-        var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
         var serializer = CreateSerializer();
 
-        serializer.Serialize(value, writer.Writer);
+        serializer.Serialize(value, writer);
 
-        writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
     }
 
     [MemberData(nameof(GetData), parameters: new[] { 0 })]

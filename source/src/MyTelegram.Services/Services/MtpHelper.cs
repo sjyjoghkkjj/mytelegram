@@ -1,13 +1,29 @@
 ﻿using System.Buffers;
+using System.Buffers.Binary;
+using System.Security.Cryptography;
 
 namespace MyTelegram.Services.Services;
 
-public class MtpHelper(
-    IHashHelper hashHelper)
-    : IMtpHelper, ITransientDependency
+public class MtpHelper(IAesHelper aesHelper) : IMtpHelper, ITransientDependency
 {
-    public AesKeyData CalcTempAesKeyData(byte[] newNonce,
-        byte[] serverNonce)
+    public void Encrypt(long authKeyId, byte[] authKeyData, ReadOnlySpan<byte> data, Span<byte> outputBuffer)
+    {
+        Span<byte> tempSpan = stackalloc byte[32];
+        Span<byte> messageKey = tempSpan.Slice(0, 16);
+        CalcMessageKey(authKeyData, data, true, messageKey);
+        //Span<byte> aesKey = tempSpan.Slice(16, 32);
+        var aesKey = new byte[32];
+        Span<byte> aesIv = tempSpan.Slice(16, 16);
+        CalcAesKey(authKeyData, messageKey, false, aesKey, aesIv);
+
+        var encryptedSpan = outputBuffer.Slice(24);
+        aesHelper.EncryptIge(data, aesKey, aesIv, encryptedSpan);
+        BinaryPrimitives.WriteInt64LittleEndian(outputBuffer, authKeyId);
+        messageKey.CopyTo(outputBuffer.Slice(8, 16));
+    }
+
+    public void CalcTempAesKeyData(byte[] newNonce,
+        byte[] serverNonce, Span<byte> aesKey, Span<byte> aesIv)
     {
         // serverNonce.Length=16 newNonce.Length=32
         // tmp_aes_key := SHA1(new_nonce + server_nonce) + substr (SHA1(server_nonce + new_nonce), 0, 12);
@@ -17,36 +33,48 @@ public class MtpHelper(
         // https://corefork.telegram.org/mtproto/auth_key
         // newNonce is int256,serverNonce is int128
         var length = newNonce.Length + serverNonce.Length;
-        Span<byte> ns = stackalloc byte[length];
-        Span<byte> sn = stackalloc byte[length];
-        Span<byte> nn = stackalloc byte[newNonce.Length + newNonce.Length];
+        var tempBytes = ArrayPool<byte>.Shared.Rent(48 + 48 + 64 + 20 + 20 + 20);
+        var tempSpan = tempBytes.AsSpan();
 
-        newNonce.CopyTo(ns);
-        serverNonce.CopyTo(ns[newNonce.Length..]);
+        try
+        {
+            //Span<byte> ns = stackalloc byte[length];
+            //Span<byte> sn = stackalloc byte[length];
+            //Span<byte> nn = stackalloc byte[newNonce.Length + newNonce.Length];
+            var ns = tempSpan.Slice(0, 48);
+            var sn = tempSpan.Slice(48, 48);
+            var nn = tempSpan.Slice(96, 64);
 
-        serverNonce.CopyTo(sn);
-        newNonce.CopyTo(sn[serverNonce.Length..]);
+            newNonce.CopyTo(ns);
+            serverNonce.CopyTo(ns[newNonce.Length..]);
 
-        newNonce.CopyTo(nn);
-        newNonce.CopyTo(nn[newNonce.Length..]);
+            serverNonce.CopyTo(sn);
+            newNonce.CopyTo(sn[serverNonce.Length..]);
 
-        var nsHash = hashHelper.Sha1(ns);
-        var snHash = hashHelper.Sha1(sn);
-        var nnHash = hashHelper.Sha1(nn);
+            newNonce.CopyTo(nn);
+            newNonce.CopyTo(nn[newNonce.Length..]);
 
-        var tempAesKey = new byte[32];
-        var tempAesIv = new byte[32];
+            //var nsHash = hashHelper.Sha1(ns);
+            //var snHash = hashHelper.Sha1(sn);
+            //var nnHash = hashHelper.Sha1(nn);
+            var nsHash = tempSpan.Slice(160, 20);
+            var snHash = tempSpan.Slice(180, 20);
+            var nnHash = tempSpan.Slice(200, 20);
+            SHA1.HashData(ns, nsHash);
+            SHA1.HashData(sn, snHash);
+            SHA1.HashData(nn, nnHash);
 
-        var tempAesKeySpan = tempAesKey.AsSpan();
-        var tempAesIvSpan = tempAesIv.AsSpan();
-        nsHash.CopyTo(tempAesKeySpan);
-        snHash.AsSpan(0, 12).CopyTo(tempAesKeySpan[nsHash.Length..]);
-
-        snHash.AsSpan(12, 8).CopyTo(tempAesIvSpan);
-        nnHash.CopyTo(tempAesIvSpan[8..]);
-        newNonce.AsSpan(0, 4).CopyTo(tempAesIvSpan[(8 + nnHash.Length)..]);
-
-        return new AesKeyData(tempAesKey, tempAesIv);
+            nsHash.CopyTo(aesKey);
+            snHash.Slice(0, 12).CopyTo(aesKey[nsHash.Length..]);
+            // Console.WriteLine($"tempIv.length:{aesIv.Length}  ,nnHash.length {nnHash.Length}");
+            snHash.Slice(12, 8).CopyTo(aesIv);
+            nnHash.CopyTo(aesIv[8..]);
+            newNonce.AsSpan(0, 4).CopyTo(aesIv[(8 + nnHash.Length)..]);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(tempBytes);
+        }
     }
 
     public long ComputeSalt(byte[] newNonce,
@@ -61,15 +89,8 @@ public class MtpHelper(
         return BitConverter.ToInt64(bytes);
     }
 
-    public void Encrypt(long authKeyId, byte[] authKeyData, ReadOnlySpan<byte> data, Span<byte> outputBuffer)
-    {
-        throw new NotImplementedException();
-    }
-
-    private AesKeyData CalcKey(byte[] authKey,
-        //byte[] msgKey,
-        ReadOnlySpan<byte> msgKey,
-        bool toServer)
+    private void CalcAesKey(ReadOnlySpan<byte> authKey, ReadOnlySpan<byte> msgKey, bool toServer, Span<byte> aesKey,
+        Span<byte> aesIv)
     {
         if (msgKey.Length != 16)
         {
@@ -77,49 +98,54 @@ public class MtpHelper(
         }
 
         var x = toServer ? 0 : 8;
-        // Length=52
-        Span<byte> aSource = stackalloc byte[msgKey.Length + 36];
+        // Length=52(msgKey.Length=16)+36
+        // length=168
+        Span<byte> span = stackalloc byte[52 + 52 + 32 + 32];
+        var aSource = span[..52];
+        var bSource = span.Slice(52, 52);
+        var sha256A = span.Slice(104, 32);
+        var sha256B = span.Slice(136, 32);
+
         msgKey.CopyTo(aSource);
-        authKey.AsSpan(x, 36).CopyTo(aSource[msgKey.Length..]);
-        Span<byte> bSource = stackalloc byte[36 + msgKey.Length];
-        authKey.AsSpan(40 + x, 36).CopyTo(bSource);
+        authKey.Slice(x, 36).CopyTo(aSource[16..]);
+        authKey.Slice(40 + x, 36).CopyTo(bSource);
         msgKey.CopyTo(bSource[36..]);
-        var sha256A = hashHelper.Sha256(aSource).AsSpan();
-        var sha256B = hashHelper.Sha256(bSource).AsSpan();
-        var aesKey = new byte[32];
-        var aesIv = new byte[32];
-        var aesKeySpan = aesKey.AsSpan();
-        var aesIvSpan = aesIv.AsSpan();
-        sha256A[..8].CopyTo(aesKeySpan);
-        sha256B.Slice(8, 16).CopyTo(aesKeySpan[8..]);
-        sha256A.Slice(24, 8).CopyTo(aesKeySpan[24..]);
 
-        sha256B[..8].CopyTo(aesIvSpan);
-        sha256A.Slice(8, 16).CopyTo(aesIvSpan[8..]);
-        sha256B.Slice(24, 8).CopyTo(aesIvSpan[24..]);
+        SHA256.HashData(aSource, sha256A);
+        SHA256.HashData(bSource, sha256B);
+        sha256A[..8].CopyTo(aesKey);
+        sha256B.Slice(8, 16).CopyTo(aesKey[8..]);
+        sha256A.Slice(24, 8).CopyTo(aesKey[24..]);
 
-        return new AesKeyData(aesKey, aesIv);
+        sha256B[..8].CopyTo(aesIv);
+        sha256A.Slice(8, 16).CopyTo(aesIv[8..]);
+        sha256B.Slice(24, 8).CopyTo(aesIv[24..]);
     }
 
-    private ReadOnlySpan<byte> CalcMsgKey(byte[] authKey,
-        //byte[] data,
-        ReadOnlySpan<byte> data,
-        bool toServer)
+    /// <summary>
+    /// Calc message key (16 bytes)
+    /// </summary>
+    /// <param name="authKey"></param>
+    /// <param name="data"></param>
+    /// <param name="toServer"></param>
+    /// <param name="messageKey">16 bytes message key</param>
+    private void CalcMessageKey(ReadOnlySpan<byte> authKey, ReadOnlySpan<byte> data, bool toServer, Span<byte> messageKey)
     {
         var x = toServer ? 8 : 0;
-        var buffer = ArrayPool<byte>.Shared.Rent(32 + data.Length);
-        var span = buffer.AsSpan(0, 32 + data.Length);
-        authKey.AsSpan(88 + x, 32).CopyTo(span);
-        data.CopyTo(span.Slice(32));
-
-        var msgKeyLarge = hashHelper.Sha256(span);
-        ArrayPool<byte>.Shared.Return(buffer);
-
-        return msgKeyLarge.AsSpan(8, 16);
-    }
-
-    private long Mod(long n, int m)
-    {
-        return ((n % m) + m) % m;
+        var bytes = ArrayPool<byte>.Shared.Rent(32 + data.Length + 32);
+        var tempSpan = bytes.AsSpan();
+        try
+        {
+            var span = tempSpan[..(32 + data.Length)];
+            authKey.Slice(88 + x, 32).CopyTo(span);
+            data.CopyTo(span.Slice(32));
+            var messageKeyHash = tempSpan.Slice(32 + data.Length, 32);
+            SHA256.HashData(span, messageKeyHash);
+            messageKeyHash.Slice(8, 16).CopyTo(messageKey);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(bytes);
+        }
     }
 }

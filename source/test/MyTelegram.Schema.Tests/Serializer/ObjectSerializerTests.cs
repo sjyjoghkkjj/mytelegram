@@ -475,10 +475,10 @@ public class ObjectSerializerTests
     public void Serialize_Non_IObject_Throws_Exception()
     {
         var serializer = new ObjectSerializer<TestNoneIObject>();
-        using var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
 
         Assert.Throws<NotSupportedException>(() =>
-            serializer.Serialize(new TestNoneIObject(), writer.Writer));
+            serializer.Serialize(new TestNoneIObject(), writer));
     }
 
     [Fact]
@@ -502,11 +502,11 @@ public class ObjectSerializerTests
 
     private void SerializeTest<TData>(TData data, byte[] expectedValue) where TData : IObject
     {
-        using var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
 
-        data.Serialize(writer.Writer);
+        data.Serialize(writer);
         //var a = writer.Writer.WrittenSpan.ToArray().ToHexString();
-        writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
     }
 
     [Fact]

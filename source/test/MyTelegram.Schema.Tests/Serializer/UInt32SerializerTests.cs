@@ -17,12 +17,12 @@ public class UInt32SerializerTests
         //var stream = new MemoryStream();
         //var bw = new BinaryWriter(stream);
         var value = int.MaxValue + 10u;
-        using var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
         var serializer = CreateSerializer();
 
-        serializer.Serialize(value, writer.Writer);
+        serializer.Serialize(value, writer);
 
-        writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedBytes);
+        writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedBytes);
     }
 
     [Fact]

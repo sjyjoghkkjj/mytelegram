@@ -4,10 +4,11 @@
 public class TVector<T> : IObject, IList<T>
 {
     private readonly List<T> _list;
+    private static readonly ISerializer<T> Serializer = SerializerFactory.CreateSerializer<T>();
 
     public TVector()
     {
-        _list = new List<T>();
+        _list = [];
     }
 
     public TVector(IEnumerable<T> collection)
@@ -25,10 +26,9 @@ public class TVector<T> : IObject, IList<T>
     {
         writer.Write(ConstructorId);
         writer.Write(_list.Count);
-        var serializer = SerializerFactory.CreateSerializer<T>();
         foreach (var item in _list)
         {
-            serializer.Serialize(item, writer);
+            Serializer.Serialize(item, writer);
         }
     }
 
@@ -38,10 +38,10 @@ public class TVector<T> : IObject, IList<T>
         {
             if (count > 0)
             {
-                var serializer = SerializerFactory.CreateSerializer<T>();
+                _list.Capacity = count;
                 for (int i = 0; i < count; i++)
                 {
-                    var item = serializer.Deserialize(ref reader);
+                    var item = Serializer.Deserialize(ref reader);
                     _list.Add(item);
                 }
             }
@@ -61,6 +61,11 @@ public class TVector<T> : IObject, IList<T>
     public void Add(T item)
     {
         _list.Add(item);
+    }
+
+    public void AddRange(IEnumerable<T> items)
+    {
+        _list.AddRange(items);
     }
 
     public void Clear()
@@ -85,7 +90,7 @@ public class TVector<T> : IObject, IList<T>
     }
 
     public int Count => _list.Count;
-    public bool IsReadOnly => ((IList<T>)_list).IsReadOnly;
+    public bool IsReadOnly => false;
 
     public int IndexOf(T item)
     {

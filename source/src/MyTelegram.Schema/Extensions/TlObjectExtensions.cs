@@ -3,39 +3,39 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MyTelegram.Schema.Extensions;
 
-public sealed class ArrayPoolBufferWriterWrapper<T>(ArrayBufferWriter<T> writer) : IDisposable
-{
-    public ArrayBufferWriter<T> Writer => writer;
+//public sealed class ArrayPoolBufferWriterWrapper<T>(ArrayBufferWriter<T> writer) : IDisposable
+//{
+//    public ArrayBufferWriter<T> Writer => writer;
 
-    public int WrittenCount => writer.WrittenCount;
+//    public int WrittenCount => writer.WrittenCount;
 
-    public void Dispose()
-    {
-        writer.Clear();
-        ArrayBufferWriterPool<T>.Return(this);
-    }
-}
-public class ArrayBufferWriterPool : ArrayBufferWriterPool<byte> { }
+//    public void Dispose()
+//    {
+//        writer.Clear();
+//        ArrayBufferWriterPool<T>.Return(this);
+//    }
+//}
+//public class ArrayBufferWriterPool : ArrayBufferWriterPool<byte> { }
 
-public class ArrayBufferWriterPool<T>
-{
-    private static readonly ConcurrentQueue<ArrayPoolBufferWriterWrapper<T>> Queue = [];
+//public class ArrayBufferWriterPool<T>
+//{
+//    private static readonly ConcurrentQueue<ArrayPoolBufferWriterWrapper<T>> Queue = [];
 
-    public static ArrayPoolBufferWriterWrapper<T> Rent(int initialCapacity = 1024)
-    {
-        if (Queue.TryDequeue(out var writer))
-        {
-            return writer;
-        }
-        return new ArrayPoolBufferWriterWrapper<T>(new ArrayBufferWriter<T>(initialCapacity));
-    }
+//    public static ArrayPoolBufferWriterWrapper<T> Rent(int initialCapacity = 1024)
+//    {
+//        if (Queue.TryDequeue(out var writer))
+//        {
+//            return writer;
+//        }
+//        return new ArrayPoolBufferWriterWrapper<T>(new ArrayBufferWriter<T>(initialCapacity));
+//    }
 
-    public static void Return(ArrayPoolBufferWriterWrapper<T> writerWrapper)
-    {
-        writerWrapper.Writer.Clear();
-        Queue.Enqueue(writerWrapper);
-    }
-}
+//    public static void Return(ArrayPoolBufferWriterWrapper<T> writerWrapper)
+//    {
+//        writerWrapper.Writer.Clear();
+//        Queue.Enqueue(writerWrapper);
+//    }
+//}
 
 public static class TlObjectExtensions
 {
@@ -177,20 +177,30 @@ public static class TlObjectExtensions
             return 0;
         }
 
-        var writer = ArrayBufferWriterPool.Rent();
-        int count;
-        try
-        {
-            obj.Serialize(writer.Writer);
-            count = writer.WrittenCount;
-        }
-        finally
-        {
-            ArrayBufferWriterPool.Return(writer);
-        }
+        var writer = new ArrayPoolBufferWriter<byte>();
+        obj.Serialize(writer);
 
-        return count;
+        return writer.WrittenCount;
     }
+
+    //public static void ToBytes(this IObject? obj, Memory<byte> memory)
+    //{
+    //    if (obj == null)
+    //    {
+    //        return;
+    //    }
+    //    var writer = ArrayBufferWriterPool.Rent();
+    //    try
+    //    {
+    //        obj.Serialize(writer.Writer);
+    //        var bytes = writer.Writer.WrittenSpan;
+    //        bytes.CopyTo(memory.Span);
+    //    }
+    //    finally
+    //    {
+    //        ArrayBufferWriterPool.Return(writer);
+    //    }
+    //}
 
     [return: NotNullIfNotNull(nameof(obj))]
     public static byte[]? ToBytes(this IObject? obj)
@@ -199,19 +209,12 @@ public static class TlObjectExtensions
         {
             return null;
         }
-        var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
 
-        try
-        {
-            obj.Serialize(writer.Writer);
-            var bytes = writer.Writer.WrittenSpan.ToArray();
+        obj.Serialize(writer);
+        var bytes = writer.WrittenSpan.ToArray();
 
-            return bytes;
-        }
-        finally
-        {
-            ArrayBufferWriterPool.Return(writer);
-        }
+        return bytes;
     }
 
     [return: NotNullIfNotNull(nameof(readOnlyMemory))]

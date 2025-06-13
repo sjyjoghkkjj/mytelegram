@@ -2,7 +2,6 @@
 
 public class Step2Helper(
     ILogger<Step2Helper> logger,
-    IHashHelper hashHelper,
     IAesHelper aesHelper,
     IMtpHelper mtpHelper,
     IMyRsaHelper myRsaHelper,
@@ -52,9 +51,6 @@ public class Step2Helper(
             case TPQInnerDataTempDc pqInnerDataTempDc:
                 dcId = pqInnerDataTempDc.Dc;
                 break;
-
-            //default:
-            //    throw new ArgumentOutOfRangeException(nameof(tInnerData));
         }
 
         var dh2048P = AuthConsts.Dh2048P;
@@ -103,24 +99,22 @@ public class Step2Helper(
         return ParsePqInnerDataOld(innerDataWithHash);
     }
 
-    private IPQInnerData ParsePqInnerDataOld(ReadOnlySpan<byte> innerDataWithHash)
+    private IPQInnerData ParsePqInnerDataOld(byte[] innerDataWithHash)
     {
-        var shaHash = innerDataWithHash[..20];
-        var innerData = innerDataWithHash[20..];
+        var span = innerDataWithHash.AsSpan();
+        var shaHash = span[..20];
+        var innerData = span[20..];
 
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(innerData.ToArray()));
+        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(innerDataWithHash, 20, innerDataWithHash.Length - 20));
         var tPqInnerData = reader.Read<IPQInnerData>();
         var length = (int)reader.Consumed;
         var realInnerData = innerData[..length];
 
-        var calculatedHash = hashHelper.Sha1(realInnerData.ToArray());
-        if (!shaHash.SequenceEqual(calculatedHash))
+        Span<byte> calcHash = stackalloc byte[20];
+        SHA1.HashData(realInnerData, calcHash);
+        if (!shaHash.SequenceEqual(calcHash))
         {
-            logger.LogWarning(
-                "PQInnerData hash mismatch, client sha1 hash: {RequestHash}, server calculated sha1 hash: {ServerCalculatedHash}",
-                shaHash.ToArray().ToHexString(),
-                calculatedHash.ToArray().ToHexString()
-            );
+            logger.LogWarning("PQInnerData SHA1 hash mismatch");
         }
 
         return tPqInnerData;
@@ -146,31 +140,48 @@ public class Step2Helper(
     private IPQInnerData ParsePqInnerData(ReadOnlySpan<byte> keyAesEncryptedBytes)
     {
         const int tempKeyLength = 32;
-        var tempKeyXor = keyAesEncryptedBytes[..tempKeyLength];
-        var aesEncrypted = keyAesEncryptedBytes[tempKeyLength..];
-        var aesEncryptedSha256Hash = hashHelper.Sha256(aesEncrypted);
-        var tempKey = Xor(tempKeyXor, aesEncryptedSha256Hash);
-        Span<byte> tempIv = stackalloc byte[tempKeyLength];
-        var dataWithHash = aesHelper.DecryptIge(aesEncrypted, tempKey, tempIv);
-        var dataPaddingReversed = dataWithHash[..^32];
-        var hash = dataWithHash[^32..];
-        dataPaddingReversed.AsSpan().Reverse();
-        var dataWithPadding = dataPaddingReversed;
-        var calculatedHash = hashHelper.Sha256(tempKey, dataWithPadding);
-        if (!hash.SequenceEqual(calculatedHash))
+        var tempBytes = ArrayPool<byte>.Shared.Rent(keyAesEncryptedBytes.Length + 32 + 32);
+
+        try
         {
-            logger.LogWarning(
-                "PQInnerData hash mismatch, client sha1 hash: {RequestHash}, server calculated sha1 hash: {ServerCalculatedHash}",
-                hash.ToHexString(),
-                calculatedHash.ToHexString()
-            );
+            var tempSpan = tempBytes.AsSpan(0, keyAesEncryptedBytes.Length + 32 + 32 + 32);
+            var startIndex = keyAesEncryptedBytes.Length - tempKeyLength;
+            var dataWithHash = tempSpan[..(keyAesEncryptedBytes.Length - tempKeyLength)];
 
-            throw new ArgumentException("PQInnerData hash mismatch");
+            var aesEncryptedSha256Hash = tempSpan.Slice(startIndex, 32);
+            var calculatedHash = tempSpan.Slice(startIndex + 32, 32);
+            var aesEncrypted = keyAesEncryptedBytes[tempKeyLength..];
+
+            var tempKeyXor = keyAesEncryptedBytes[..tempKeyLength];
+            SHA256.HashData(aesEncrypted, aesEncryptedSha256Hash);
+            var tempKey = Xor(tempKeyXor, aesEncryptedSha256Hash);
+            Span<byte> tempIv1 = stackalloc byte[32];
+            aesHelper.DecryptIge(aesEncrypted, tempKey, tempIv1, dataWithHash);
+
+            var dataPaddingReversed = dataWithHash[..^32];
+            var hash = dataWithHash[^32..];
+            dataPaddingReversed.Reverse();
+            var dataWithPadding = dataPaddingReversed;
+            using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            hasher.AppendData(tempKey);
+            hasher.AppendData(dataWithPadding);
+            hasher.GetHashAndReset(calculatedHash);
+
+            if (!hash.SequenceEqual(calculatedHash))
+            {
+                logger.LogWarning("PQInnerData hash mismatch");
+
+                throw new ArgumentException("PQInnerData hash mismatch");
+            }
+
+            var tPqInnerData = tempBytes.ToTObject<IPQInnerData>();
+
+            return tPqInnerData;
         }
-
-        var tPqInnerData = dataWithPadding.ToTObject<IPQInnerData>();
-
-        return tPqInnerData;
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(tempBytes);
+        }
     }
 
     private TServerDHParamsOk SerializeResponse(
@@ -193,31 +204,41 @@ public class Step2Helper(
         TServerDHInnerData dhInnerData
     )
     {
-        var buffer = dhInnerData.ToBytes();
-        var sha1Hash = hashHelper.Sha1(buffer);
-        var totalLength = sha1Hash.Length + buffer.Length;
-        var answerWithHashBytes = ArrayPool<byte>.Shared.Rent(totalLength);
+        using var writer = new ArrayPoolBufferWriter<byte>();
+        dhInnerData.Serialize(writer);
+
+        var writtenCount = writer.WrittenCount;
+        var totalLength = writtenCount + 20;// 20=SHA1 hash length
+        var tempBytes = ArrayPool<byte>.Shared.Rent(totalLength + 32 + 16);
+        var tempSpan = tempBytes.AsSpan();
         try
         {
-            var answerWithHashSpan = answerWithHashBytes.AsSpan(0, totalLength);
+            var sha1Hash = tempSpan.Slice(0, 20);
+            var answerWithHashLength = writtenCount + 20;
+            if (answerWithHashLength % 16 != 0)
+            {
+                answerWithHashLength += 16 - (answerWithHashLength % 16);
+            }
+            var answerWithHashSpan = tempSpan.Slice(0, answerWithHashLength);
+            SHA1.HashData(writer.WrittenSpan, sha1Hash);
             sha1Hash.CopyTo(answerWithHashSpan);
-            buffer.CopyTo(answerWithHashSpan.Slice(sha1Hash.Length));
-            var aesKeyData = mtpHelper.CalcTempAesKeyData(newNonce, serverNonce);
-            var encryptedAnswer = aesHelper.EncryptIge(
-                answerWithHashSpan,
-                aesKeyData.Key,
-                aesKeyData.Iv
-            );
+            writer.WrittenSpan.CopyTo(answerWithHashSpan.Slice(20));
+            var aesKey = new byte[32];
+            Span<byte> aesIv = stackalloc byte[32];
+            mtpHelper.CalcTempAesKeyData(newNonce, serverNonce, aesKey, aesIv);
+
+            aesHelper.EncryptIge(answerWithHashSpan, aesKey, aesIv, answerWithHashSpan);
+
             return new TServerDHParamsOk
             {
-                EncryptedAnswer = encryptedAnswer,
+                EncryptedAnswer = answerWithHashSpan.ToArray(),
                 Nonce = nonce,
                 ServerNonce = serverNonce
             };
         }
         finally
         {
-            ArrayPool<byte>.Shared.Return(answerWithHashBytes);
+            ArrayPool<byte>.Shared.Return(tempBytes);
         }
     }
 

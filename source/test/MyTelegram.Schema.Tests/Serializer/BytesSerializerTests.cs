@@ -14,14 +14,14 @@ public class BytesSerializerTests
         var expectedBytes = expectedBytesData.ToBytes();
         //var stream = new MemoryStream();
         //var bw = new BinaryWriter(stream);
-        using var writer = ArrayBufferWriterPool.Rent();
+        using var writer = new ArrayPoolBufferWriter<byte>();
         var serializer = CreateSerializer();
 
         // Act
-        serializer.Serialize(dataBytes, writer.Writer);
+        serializer.Serialize(dataBytes, writer);
 
         // Assert
-        var serializedBytes = writer.Writer.WrittenSpan.ToArray();
+        var serializedBytes = writer.WrittenSpan.ToArray();
         serializedBytes.ShouldBeEquivalentTo(expectedBytes);
     }
 
