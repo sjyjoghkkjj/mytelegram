@@ -16,6 +16,7 @@ internal sealed class GetSendAsHandler(
     IChannelAppService channelAppService,
     ILayeredService<ISendAsPeerConverter> layeredSendAsPeerService,
     IAccessHashHelper accessHashHelper,
+    IMessageAppService messageAppService,
     IPhotoAppService photoAppService)
     : RpcResultObjectHandler<RequestGetSendAs, ISendAsPeers>,
         IGetSendAsHandler
@@ -27,37 +28,28 @@ internal sealed class GetSendAsHandler(
         {
             await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel.ChannelId, inputPeerChannel.AccessHash, AccessHashType.Channel);
 
+            var canSendAsPeer = await messageAppService.CanSendAsPeerAsync(inputPeerChannel.ChannelId, input.UserId);
             var channelReadModel = await channelAppService.GetAsync(inputPeerChannel.ChannelId);
-            // 1. Super group with linked channel
-            // 2. Channel: signature: true 
-            // 3. Linked private channel
-            if (channelReadModel is { MegaGroup: true, LinkedChatId: not null } or { Broadcast: true, Signatures: true })
+            if (canSendAsPeer)
             {
-                var channelReadModels = await queryProcessor.ProcessAsync(new GetSendAsQuery(input.UserId));
-
-                if (channelReadModel.MegaGroup && channelReadModel.CreatorId == input.UserId)
+                var myPublicChannelReadModels = (await queryProcessor.ProcessAsync(new GetSendAsQuery(input.UserId))).ToList();
+                var channelIds = myPublicChannelReadModels.Select(p => p.ChannelId).ToList();
+                if (!channelIds.Contains(channelReadModel.ChannelId))
                 {
-                    channelReadModels = [.. channelReadModels, channelReadModel];
-
-                    var linkedChannelReadModel = await channelAppService.GetAsync(channelReadModel.LinkedChatId);
-                    if (linkedChannelReadModel != null && linkedChannelReadModel.CreatorId == input.UserId)
-                    {
-                        channelReadModels = [.. channelReadModels, linkedChannelReadModel];
-                    }
+                    myPublicChannelReadModels.Insert(0, channelReadModel);
+                    channelIds.Add(channelReadModel.ChannelId);
                 }
-
-                channelReadModels = channelReadModels.DistinctBy(p => p.ChannelId).ToList();
                 var channelMemberReadModels = await queryProcessor.ProcessAsync(
-                    new GetChannelMemberListByChannelIdListQuery(input.UserId,
-                        [.. channelReadModels.Select(p => p.ChannelId)]));
-                var photoReadModels = await photoAppService.GetPhotosAsync(channelReadModels);
-                var channels = chatConverterService.ToChannelList(input, channelReadModels,
+                    new GetChannelMemberListByChannelIdListQuery(input.UserId, channelIds));
+                var photoReadModels = await photoAppService.GetPhotosAsync(myPublicChannelReadModels);
+                var channels = chatConverterService.ToChannelList(input, myPublicChannelReadModels,
                     photoReadModels, channelMemberReadModels, layer: input.Layer);
+                var layeredResult = layeredSendAsPeerService.GetConverter(input.Layer).ToSendAsPeers(channels);
 
-                var r = layeredSendAsPeerService.GetConverter(input.Layer).ToSendAsPeers(channels);
-                if (channelReadModel.Signatures && channelReadModel.CreatorId == input.UserId)
+                // Channel: Current user + Channel + Public channels
+                if (channelReadModel.Broadcast)
                 {
-                    r.Peers.Add(new TSendAsPeer
+                    layeredResult.Peers.Insert(0, new TSendAsPeer
                     {
                         Peer = new TPeerUser
                         {
@@ -66,7 +58,8 @@ internal sealed class GetSendAsHandler(
                     });
                 }
 
-                return r;
+                // Discussion group: Discussion group + Public channels
+                return layeredResult;
             }
         }
 
