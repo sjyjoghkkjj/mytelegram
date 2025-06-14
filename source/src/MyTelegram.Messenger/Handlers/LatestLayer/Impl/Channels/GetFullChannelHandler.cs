@@ -39,7 +39,7 @@ internal sealed class GetFullChannelHandler(
         if (obj.Channel is TInputChannel inputChannel)
         {
             var channelId = inputChannel.ChannelId;
-            await accessHashHelper.CheckAccessHashAsync(channelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, channelId, inputChannel.AccessHash, AccessHashType.Channel);
             var channelReadModel = await channelAppService.GetAsync(channelId);
             if (channelReadModel == null!)
             {
@@ -84,7 +84,7 @@ internal sealed class GetFullChannelHandler(
             }
 
             var chatFull = chatConverterService.ToChannelFull(
-                input.UserId,
+                input,
                 channelReadModel,
                 photoReadModel,
                 channelFullReadModel!,
@@ -119,7 +119,7 @@ internal sealed class GetFullChannelHandler(
                     var linkedChannelMemberReadModel =
                      await queryProcessor.ProcessAsync(
                             new GetChannelMemberByUserIdQuery(linkedChannelReadModel.ChannelId, input.UserId));
-                    linkedChannel = chatConverterService.ToChannel(input.UserId,
+                    linkedChannel = chatConverterService.ToChannel(input,
                       linkedChannelReadModel, linkedChannelPhotoReadModel, linkedChannelMemberReadModel,
                       linkedChannelMemberReadModel == null || linkedChannelMemberReadModel.Left, input.Layer);
 
@@ -154,7 +154,7 @@ internal sealed class GetFullChannelHandler(
                         new GetRecentRequestUserIdListQuery(channelId, 5));
                 layeredChannelFull.RecentRequesters = [.. recentRequesters];
 
-                var users = await userConverterService.GetUserListAsync(input.UserId, [.. recentRequesters], false, false, input.Layer);
+                var users = await userConverterService.GetUserListAsync(input, [.. recentRequesters], false, false, input.Layer);
                 chatFull.Users = [.. users];
             }
         }

@@ -4,22 +4,22 @@ internal sealed class SearchConverterService(IUserConverterService userConverter
     IChatConverterService chatConverterService
     ) : ISearchConverterService, ITransientDependency
 {
-    public IFound ToFound(SearchContactOutput output, int layer)
+    public IFound ToFound(IRequestWithAccessHashKeyId request, SearchContactOutput output, int layer)
     {
-        var users = userConverterService.ToUserList(output.SelfUserId,
+        var users = userConverterService.ToUserList(request,
             output.UserList,
             output.PhotoList,
             output.ContactList,
             output.PrivacyList,
             layer);
 
-        var myChannels = chatConverterService.ToChannelList(output.SelfUserId,
+        var myChannels = chatConverterService.ToChannelList(request,
             output.MyChannelList,
             output.PhotoList,
             output.ChannelMemberList,
             layer: layer);
 
-        var otherChannels = chatConverterService.ToChannelList(output.SelfUserId,
+        var otherChannels = chatConverterService.ToChannelList(request,
             output.ChannelList,
             output.PhotoList,
             [],

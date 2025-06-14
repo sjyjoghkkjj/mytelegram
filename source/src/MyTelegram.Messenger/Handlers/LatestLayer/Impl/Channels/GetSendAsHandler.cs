@@ -25,7 +25,7 @@ internal sealed class GetSendAsHandler(
     {
         if (obj.Peer is TInputPeerChannel inputPeerChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputPeerChannel.ChannelId, inputPeerChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel.ChannelId, inputPeerChannel.AccessHash, AccessHashType.Channel);
 
             var channelReadModel = await channelAppService.GetAsync(inputPeerChannel.ChannelId);
             // 1. Super group with linked channel
@@ -51,7 +51,7 @@ internal sealed class GetSendAsHandler(
                     new GetChannelMemberListByChannelIdListQuery(input.UserId,
                         [.. channelReadModels.Select(p => p.ChannelId)]));
                 var photoReadModels = await photoAppService.GetPhotosAsync(channelReadModels);
-                var channels = chatConverterService.ToChannelList(input.UserId, channelReadModels,
+                var channels = chatConverterService.ToChannelList(input, channelReadModels,
                     photoReadModels, channelMemberReadModels, layer: input.Layer);
 
                 var r = layeredSendAsPeerService.GetConverter(input.Layer).ToSendAsPeers(channels);

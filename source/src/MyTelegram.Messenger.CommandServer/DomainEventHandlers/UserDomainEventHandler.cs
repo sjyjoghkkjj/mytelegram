@@ -32,13 +32,16 @@ public class UserDomainEventHandler(
         if (!domainEvent.AggregateEvent.Bot)
         {
             var welcomeMessage = "Welcome to use MyTelegram!";
-            var sendMessageInput = new SendMessageInput(new RequestInfo(0,
-                    MyTelegramConsts.OfficialUserId,
-                    domainEvent.AggregateEvent.RequestInfo.AuthKeyId,
-                    domainEvent.AggregateEvent.RequestInfo.PermAuthKeyId,
-                    Guid.NewGuid(), 0, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                    DeviceType.Desktop
-                    ),
+            var sendMessageInput = new SendMessageInput(
+                RequestInfo.Empty with
+                {
+                    UserId = MyTelegramConsts.OfficialUserId,
+                    AuthKeyId = domainEvent.AggregateEvent.RequestInfo.AuthKeyId,
+                    PermAuthKeyId = domainEvent.AggregateEvent.RequestInfo.PermAuthKeyId,
+                    Date = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    RequestId = Guid.NewGuid(),
+                    DeviceType = DeviceType.Desktop
+                },
                 MyTelegramConsts.OfficialUserId,
                 new Peer(PeerType.User, domainEvent.AggregateEvent.UserId/*, domainEvent.AggregateEvent.AccessHash*/),
                 welcomeMessage,

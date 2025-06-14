@@ -1,7 +1,7 @@
 ﻿namespace MyTelegram.Core;
 
 public record LayeredPushMessageCreatedIntegrationEvent(
-    int PeerType,
+    PeerType PeerType,
     long PeerId,
     byte[] Data,
     long? ExcludeAuthKeyId,
@@ -16,7 +16,7 @@ public record LayeredPushMessageCreatedIntegrationEvent(
     List<long>? ExcludeUserIds) : ISessionMessage;
 
 public record LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
-    int PeerType,
+    PeerType PeerType,
     long PeerId,
     byte[] Data,
     long? ExcludeAuthKeyId,

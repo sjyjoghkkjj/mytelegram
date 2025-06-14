@@ -33,7 +33,7 @@ internal sealed class ExportChatInviteHandler(
     {
         if (obj.Peer is TInputPeerChannel inputPeerChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputPeerChannel.ChannelId, inputPeerChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel.ChannelId, inputPeerChannel.AccessHash, AccessHashType.Channel);
 
             var chatInviteId = await idGenerator.NextLongIdAsync(IdType.InviteId, inputPeerChannel.ChannelId);
             var inviteHash = chatInviteLinkHelper.GenerateInviteLink();

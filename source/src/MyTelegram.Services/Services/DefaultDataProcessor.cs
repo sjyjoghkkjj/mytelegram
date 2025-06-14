@@ -123,7 +123,8 @@ public class DefaultDataProcessor<TData>(
             obj.Date,
             obj.DeviceType,
             obj.ClientIp,
-            obj.SessionId
+            obj.SessionId,
+            obj.AccessHashKeyId
         );
 
         return req;

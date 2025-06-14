@@ -15,7 +15,8 @@ public record UploadDataReceivedEvent(
     long Date,
     DeviceType DeviceType,
     string ClientIp,
-    long SessionId
+    long SessionId,
+    long AccessHashKeyId
 ) : DataReceivedEvent(
     ConnectionId,
     RequestId,
@@ -30,13 +31,14 @@ public record UploadDataReceivedEvent(
     Date,
     DeviceType,
     ClientIp,
-    SessionId
+    SessionId,
+    AccessHashKeyId
 )
 {
     public static UploadDataReceivedEvent Create()
     {
         return new UploadDataReceivedEvent(string.Empty, Guid.Empty, 0, 0, 0, 0, 0,
             0, default, 0,
-            0, DeviceType.Unknown, string.Empty, 0);
+            0, DeviceType.Unknown, string.Empty, 0, 0);
     }
 }

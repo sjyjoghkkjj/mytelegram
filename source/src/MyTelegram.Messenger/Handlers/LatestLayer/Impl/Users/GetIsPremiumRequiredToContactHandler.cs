@@ -18,7 +18,7 @@ internal sealed class GetIsPremiumRequiredToContactHandler(
         {
             if (item is TInputUser inputUser)
             {
-                await accessHashHelper.CheckAccessHashAsync(inputUser);
+                await accessHashHelper.CheckAccessHashAsync(input, inputUser);
                 userIds.Add(inputUser.UserId);
             }
         }

@@ -3,6 +3,7 @@
 internal sealed class AccessHashHelper(
     IQueryProcessor queryProcessor,
     IReadModelCacheHelper<IUserReadModel> useReadModelCacheHelper,
+    IAccessHashHelper2 accessHashHelper2,
     IPeerHelper peerHelper)
     : IAccessHashHelper, ISingletonDependency
 {
@@ -14,8 +15,81 @@ internal sealed class AccessHashHelper(
     }
 
 
-    public async Task<bool> IsAccessHashValidAsync(long id,
+    public async Task CheckAccessHashAsync(IRequestWithAccessHashKeyId request, long id,
         long accessHash, AccessHashType? accessHashType = null)
+    {
+        if (!await IsAccessHashValidAsync(request, id, accessHash, accessHashType))
+        {
+            switch (accessHashType)
+            {
+                case AccessHashType.WallPaper:
+                    RpcErrors.RpcErrors400.WallpaperInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Theme:
+                    RpcErrors.RpcErrors400.ThemeInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.GroupCall:
+                    RpcErrors.RpcErrors400.GroupcallInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.StickerSet:
+                    RpcErrors.RpcErrors400.StickersetInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.User:
+                    RpcErrors.RpcErrors400.UserIdInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Channel:
+                    RpcErrors.RpcErrors400.ChannelIdInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Document:
+                    RpcErrors.RpcErrors400.DocumentInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Photo:
+                    RpcErrors.RpcErrors400.PhotoInvalid.ThrowRpcError();
+                    break;
+                case AccessHashType.Sticker:
+                    RpcErrors.RpcErrors400.StickersetInvalid.ThrowRpcError();
+                    break;
+                default:
+                    RpcErrors.RpcErrors400.PeerIdInvalid.ThrowRpcError();
+                    break;
+            }
+        }
+    }
+
+    public Task CheckAccessHashAsync(IRequestWithAccessHashKeyId request, IInputPeer? inputPeer) =>
+        inputPeer switch
+        {
+            TInputPeerChannel inputPeerChannel => CheckAccessHashAsync(request, inputPeerChannel.ChannelId,
+                inputPeerChannel.AccessHash),
+            TInputPeerChannelFromMessage inputPeerChannelFromMessage => CheckAccessHashAsync(request, inputPeerChannelFromMessage
+                .Peer),
+            TInputPeerUser inputPeerUser => CheckAccessHashAsync(request, inputPeerUser.UserId, inputPeerUser.AccessHash),
+            TInputPeerUserFromMessage inputPeerUserFromMessage => CheckAccessHashAsync(request, inputPeerUserFromMessage.Peer),
+            _ => Task.CompletedTask
+        };
+
+    public Task CheckAccessHashAsync(IRequestWithAccessHashKeyId request, IInputUser inputUser)
+    {
+        if (inputUser is TInputUser tInputUser)
+        {
+            return CheckAccessHashAsync(request, tInputUser.UserId, tInputUser.AccessHash);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task CheckAccessHashAsync(IRequestWithAccessHashKeyId request, IInputChannel inputChannel)
+    {
+        if (inputChannel is TInputChannel tInputChannel)
+        {
+            return CheckAccessHashAsync(request, tInputChannel.ChannelId, tInputChannel.AccessHash, AccessHashType.Channel);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public async Task<bool> IsAccessHashValidAsync(IRequestWithAccessHashKeyId request, long id,
+                        long accessHash, AccessHashType? accessHashType = null)
     {
         if (_accessHashCaches.TryGetValue(id, out var cachedAccessHash))
         {
@@ -35,6 +109,13 @@ internal sealed class AccessHashHelper(
                 case PeerType.Self:
                     return true;
             }
+        }
+
+        switch (accessHashType)
+        {
+            case AccessHashType.User:
+            case AccessHashType.Channel:
+                return await accessHashHelper2.IsAccessHashValidAsync(request, id, accessHash, accessHashType);
         }
 
         var accessHashReadModel = await queryProcessor.ProcessAsync(new GetAccessHashQueryByIdQuery(id));
@@ -126,79 +207,6 @@ internal sealed class AccessHashHelper(
         }
 
         return false;
-    }
-
-    public async Task CheckAccessHashAsync(long id,
-        long accessHash, AccessHashType? accessHashType = null)
-    {
-        if (!await IsAccessHashValidAsync(id, accessHash, accessHashType))
-        {
-            switch (accessHashType)
-            {
-                case AccessHashType.WallPaper:
-                    RpcErrors.RpcErrors400.WallpaperInvalid.ThrowRpcError();
-                    break;
-                case AccessHashType.Theme:
-                    RpcErrors.RpcErrors400.ThemeInvalid.ThrowRpcError();
-                    break;
-                case AccessHashType.GroupCall:
-                    RpcErrors.RpcErrors400.GroupcallInvalid.ThrowRpcError();
-                    break;
-                case AccessHashType.StickerSet:
-                    RpcErrors.RpcErrors400.StickersetInvalid.ThrowRpcError();
-                    break;
-                case AccessHashType.User:
-                    RpcErrors.RpcErrors400.UserIdInvalid.ThrowRpcError();
-                    break;
-                case AccessHashType.Channel:
-                    RpcErrors.RpcErrors400.ChannelIdInvalid.ThrowRpcError();
-                    break;
-                case AccessHashType.Document:
-                    RpcErrors.RpcErrors400.DocumentInvalid.ThrowRpcError();
-                    break;
-                case AccessHashType.Photo:
-                    RpcErrors.RpcErrors400.PhotoInvalid.ThrowRpcError();
-                    break;
-                case AccessHashType.Sticker:
-                    RpcErrors.RpcErrors400.StickersetInvalid.ThrowRpcError();
-                    break;
-                default:
-                    RpcErrors.RpcErrors400.PeerIdInvalid.ThrowRpcError();
-                    break;
-            }
-        }
-    }
-
-    public Task CheckAccessHashAsync(IInputPeer? inputPeer) =>
-        inputPeer switch
-        {
-            TInputPeerChannel inputPeerChannel => CheckAccessHashAsync(inputPeerChannel.ChannelId,
-                inputPeerChannel.AccessHash),
-            TInputPeerChannelFromMessage inputPeerChannelFromMessage => CheckAccessHashAsync(inputPeerChannelFromMessage
-                .Peer),
-            TInputPeerUser inputPeerUser => CheckAccessHashAsync(inputPeerUser.UserId, inputPeerUser.AccessHash),
-            TInputPeerUserFromMessage inputPeerUserFromMessage => CheckAccessHashAsync(inputPeerUserFromMessage.Peer),
-            _ => Task.CompletedTask
-        };
-
-    public Task CheckAccessHashAsync(IInputUser inputUser)
-    {
-        if (inputUser is TInputUser tInputUser)
-        {
-            return CheckAccessHashAsync(tInputUser.UserId, tInputUser.AccessHash);
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public Task CheckAccessHashAsync(IInputChannel inputChannel)
-    {
-        if (inputChannel is TInputChannel tInputChannel)
-        {
-            return CheckAccessHashAsync(tInputChannel.ChannelId, tInputChannel.AccessHash, AccessHashType.Channel);
-        }
-
-        return Task.CompletedTask;
     }
 }
 

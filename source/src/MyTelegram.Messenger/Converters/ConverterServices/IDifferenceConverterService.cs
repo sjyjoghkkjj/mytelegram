@@ -4,7 +4,9 @@ namespace MyTelegram.Messenger.Converters.ConverterServices;
 
 public interface IDifferenceConverterService
 {
-    IChannelDifference ToChannelDifference(GetMessageOutput output,
+    IChannelDifference ToChannelDifference(
+        IRequestWithAccessHashKeyId request,
+        GetMessageOutput output,
         bool isChannelMember,
         IList<IUpdate> updatesList,
         int updatesMaxPts = 0,
@@ -13,7 +15,9 @@ public interface IDifferenceConverterService
         int layer = 0
     );
 
-    IDifference ToDifference(GetMessageOutput output,
+    IDifference ToDifference(
+        IRequestWithAccessHashKeyId request,
+        GetMessageOutput output,
         IPtsReadModel? pts,
         int cachedPts,
         int limit,

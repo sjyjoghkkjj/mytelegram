@@ -22,7 +22,7 @@ internal sealed class AddContactHandler(
     {
         if (obj.Id is TInputUser inputUser)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputUser.UserId, inputUser.AccessHash, AccessHashType.User);
             var peer = peerHelper.GetPeer(obj.Id, input.UserId);
             var command = new AddContactCommand(ContactId.Create(input.UserId, peer.PeerId),
                 input.ToRequestInfo(),

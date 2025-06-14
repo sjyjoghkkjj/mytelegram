@@ -19,7 +19,7 @@ internal sealed class UpdateColorHandler(
         MyTelegram.Schema.Channels.RequestUpdateColor obj)
     {
         var channel = peerHelper.GetChannel(obj.Channel);
-        await accessHashHelper.CheckAccessHashAsync(obj.Channel);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Channel);
 
         var color = new PeerColor(obj.Color, obj.BackgroundEmojiId);
         var command = new UpdateChannelColorCommand(ChannelId.Create(channel.PeerId), input.ToRequestInfo(), color, obj.BackgroundEmojiId, obj.ForProfile);

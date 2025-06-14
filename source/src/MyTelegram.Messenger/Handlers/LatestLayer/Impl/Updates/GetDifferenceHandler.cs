@@ -114,7 +114,7 @@ internal sealed class GetDifferenceHandler(
         }
 
         dto.MessageList = dto.MessageList.OrderBy(p => p.MessageId).ToList();
-        var r = differenceConverterService.ToDifference(dto, ptsReadModel, cachedPts, limit,
+        var r = differenceConverterService.ToDifference(input, dto, ptsReadModel, cachedPts, limit,
             allUpdateList, [], [], layer: input.Layer);
 
         //logger.LogInformation("{UserId},Layer={Layer},res:{@Res}", input.UserId, input.Layer, r);

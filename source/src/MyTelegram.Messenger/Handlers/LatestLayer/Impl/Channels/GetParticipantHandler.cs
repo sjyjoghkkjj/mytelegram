@@ -31,7 +31,7 @@ internal sealed class GetParticipantHandler(
         var peer = peerHelper.GetPeer(obj.Participant, input.UserId);
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
 
             var channelMemberReadModel = await queryProcessor
                 .ProcessAsync(new GetChannelMemberByUserIdQuery(inputChannel.ChannelId, peer.PeerId));
@@ -44,11 +44,11 @@ internal sealed class GetParticipantHandler(
 
             var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
             channelReadModel.ThrowExceptionIfChannelDeleted();
-            var user = await userConverterService.GetUserAsync(input.UserId, userId, false, false, input.Layer);
+            var user = await userConverterService.GetUserAsync(input, userId, false, false, input.Layer);
 
             var photoReadModel = await photoAppService.GetAsync(channelReadModel!.PhotoId);
             var r = chatConverterService.ToChannelParticipant(
-                input.UserId,
+                input,
                 channelReadModel,
                 photoReadModel,
                 channelMemberReadModel!,

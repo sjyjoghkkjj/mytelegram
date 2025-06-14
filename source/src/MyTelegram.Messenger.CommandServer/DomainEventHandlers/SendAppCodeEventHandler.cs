@@ -29,14 +29,13 @@ public class SendAppCodeEventHandler(
                 };
 
             var sendMessageInput = new SendMessageInput(
-                new RequestInfo(0,
-                    MyTelegramConsts.OfficialUserId,
-                    0,
-                    0,
-                    Guid.NewGuid(),
-                    MyTelegramConsts.Layer,
-                    DateTime.UtcNow.ToTimestamp()
-                ),
+                RequestInfo.Empty with
+                {
+                    UserId = MyTelegramConsts.OfficialUserId,
+                    Layer = MyTelegramConsts.Layer,
+                    Date = DateTime.UtcNow.ToTimestamp(),
+                    RequestId = Guid.NewGuid()
+                },
                 MyTelegramConsts.OfficialUserId,
                 new Peer(PeerType.User, domainEvent.AggregateEvent.UserId),
                 message,

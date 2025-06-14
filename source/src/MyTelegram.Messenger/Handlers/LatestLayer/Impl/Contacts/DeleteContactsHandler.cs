@@ -16,7 +16,7 @@ internal sealed class DeleteContactsHandler(
     {
         foreach (TInputUser inputUser in obj.Id)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputUser.UserId, inputUser.AccessHash, AccessHashType.User);
             var peer = peerHelper.GetPeer(inputUser, input.UserId);
             var command = new DeleteContactCommand(ContactId.Create(input.UserId, peer.PeerId),
                 input.ToRequestInfo(),

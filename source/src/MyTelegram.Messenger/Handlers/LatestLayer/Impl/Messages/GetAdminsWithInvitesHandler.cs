@@ -22,7 +22,7 @@ internal sealed class GetAdminsWithInvitesHandler(
     {
         if (obj.Peer is TInputPeerChannel inputPeerChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputPeerChannel.ChannelId, inputPeerChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel.ChannelId, inputPeerChannel.AccessHash, AccessHashType.Channel);
             var adminWithInvitesList =
                 await queryProcessor.ProcessAsync(new GetAdminInvitesQuery(inputPeerChannel.ChannelId));
             var userIds = adminWithInvitesList.Select(p => p.AdminId).ToList();
@@ -31,7 +31,7 @@ internal sealed class GetAdminsWithInvitesHandler(
             //var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels, contactReadModels);
             //var privacyList = await privacyAppService.GetPrivacyListAsync(userIds);
 
-            var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
+            var users = await userConverterService.GetUserListAsync(input, userIds, false, false, input.Layer);
 
             return new TChatAdminsWithInvites
             {

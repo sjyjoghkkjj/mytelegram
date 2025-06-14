@@ -24,7 +24,7 @@ internal sealed class UpdateProfilePhotoHandler(ICommandBus commandBus, IAccessH
         switch (obj.Id)
         {
             case TInputPhoto inputPhoto:
-                await accessHashHelper.CheckAccessHashAsync(inputPhoto.Id, inputPhoto.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(input, inputPhoto.Id, inputPhoto.AccessHash, AccessHashType.Photo);
                 photoId = inputPhoto.Id;
                 break;
         }

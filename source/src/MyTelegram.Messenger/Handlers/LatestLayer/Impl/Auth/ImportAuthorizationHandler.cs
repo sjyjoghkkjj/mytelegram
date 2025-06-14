@@ -45,7 +45,7 @@ internal sealed class ImportAuthorizationHandler(
             await cacheManager.RemoveAsync(key);
 
             var photos = await photoAppService.GetPhotosAsync(userReadModel);
-            ILayeredUser? user = userReadModel == null ? null : userConverterService.ToUser(input.UserId, userReadModel, photos, layer: input.Layer);
+            ILayeredUser? user = userReadModel == null ? null : userConverterService.ToUser(input, userReadModel, photos, layer: input.Layer);
 
             return layeredService.GetConverter(input.Layer).CreateAuthorization(user);
         }

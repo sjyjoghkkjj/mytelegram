@@ -2,5 +2,5 @@
 
 public interface IGetHistoryConverterService
 {
-    IMessages ToMessages(GetMessageOutput output, int layer);
+    IMessages ToMessages(IRequestWithAccessHashKeyId request, GetMessageOutput output, int layer);
 }

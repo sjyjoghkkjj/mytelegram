@@ -15,7 +15,8 @@ public record DownloadDataReceivedEvent(
     long Date,
     DeviceType DeviceType,
     string ClientIp,
-    long SessionId
+    long SessionId,
+    long AccessHashKeyId
 ) : DataReceivedEvent(
     ConnectionId,
     RequestId,
@@ -30,13 +31,14 @@ public record DownloadDataReceivedEvent(
     Date,
     DeviceType,
     ClientIp,
-    SessionId
+    SessionId,
+    AccessHashKeyId
 )
 {
     public static DownloadDataReceivedEvent Create()
     {
         return new DownloadDataReceivedEvent(string.Empty, Guid.Empty, 0, 0, 0, 0, 0,
             0, default, 0,
-            0, DeviceType.Unknown, string.Empty, 0);
+            0, DeviceType.Unknown, string.Empty, 0, 0);
     }
 }

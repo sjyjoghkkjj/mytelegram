@@ -22,7 +22,7 @@ internal sealed class AcceptContactHandler(
         MyTelegram.Schema.Contacts.RequestAcceptContact obj)
     {
         var peer = peerHelper.GetPeer(obj.Id);
-        await accessHashHelper.CheckAccessHashAsync(obj.Id);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Id);
         var userReadModel = await userAppService.GetAsync(peer.PeerId);
         if (userReadModel == null)
         {

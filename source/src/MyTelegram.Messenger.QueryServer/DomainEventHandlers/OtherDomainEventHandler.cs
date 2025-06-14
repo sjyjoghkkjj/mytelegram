@@ -110,7 +110,7 @@ public class OtherDomainEventHandler(
             return;
         }
 
-        var user = await userConverterService.GetUserAsync(userId, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
+        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.RequestInfo, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
         var r = layeredAuthorizationService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
             .CreateAuthorization(user);
 

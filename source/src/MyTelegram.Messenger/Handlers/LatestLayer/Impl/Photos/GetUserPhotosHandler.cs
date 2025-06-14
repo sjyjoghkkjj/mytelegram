@@ -27,7 +27,7 @@ internal sealed class GetUserPhotosHandler(
         Schema.Photos.RequestGetUserPhotos obj)
     {
         var peer = peerHelper.GetPeer(obj.UserId, input.UserId);
-        await accessHashHelper.CheckAccessHashAsync(obj.UserId);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.UserId);
         bool shouldReturnEmptyProfilePhotos = false;
         if (peer.PeerId != input.UserId)
         {

@@ -20,7 +20,7 @@ internal sealed class ReadDiscussionHandler(
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestReadDiscussion obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
         var selfDialogId = DialogId.Create(input.UserId, peer);
 

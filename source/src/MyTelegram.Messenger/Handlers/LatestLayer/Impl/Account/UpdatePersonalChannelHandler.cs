@@ -18,7 +18,7 @@ internal sealed class UpdatePersonalChannelHandler(
         switch (obj.Channel)
         {
             case TInputChannel inputChannel:
-                await accessHashHelper.CheckAccessHashAsync(inputChannel);
+                await accessHashHelper.CheckAccessHashAsync(input, inputChannel);
                 var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
                 if (channelReadModel!.CreatorId != input.UserId)
                 {

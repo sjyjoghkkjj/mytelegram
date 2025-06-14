@@ -43,7 +43,7 @@ internal sealed class GetUsersHandler(
             }
         }
 
-        var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
+        var users = await userConverterService.GetUserListAsync(input, userIds, false, false, input.Layer);
 
         return [.. users];
     }

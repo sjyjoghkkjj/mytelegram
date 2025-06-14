@@ -24,7 +24,7 @@ internal sealed class GetHistoryHandler(
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         RequestGetHistory obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var userId = input.UserId;
         var peer = peerHelper.GetPeer(obj.Peer, userId);
         var ownerPeerId = peer.PeerType == PeerType.Channel ? peer.PeerId : userId;
@@ -66,6 +66,6 @@ internal sealed class GetHistoryHandler(
             ChannelHistoryMinId = channelHistoryMinId
         });
 
-        return getHistoryConverterService.ToMessages(r, input.Layer);
+        return getHistoryConverterService.ToMessages(input, r, input.Layer);
     }
 }

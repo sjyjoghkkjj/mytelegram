@@ -27,7 +27,7 @@ internal sealed class GetPeerSettingsHandler(
     protected override async Task<MyTelegram.Schema.Messages.IPeerSettings> HandleCoreAsync(IRequestInput input,
         RequestGetPeerSettings obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var userId = input.UserId;
         var peer = peerHelper.GetPeer(obj.Peer, userId);
         if (peer.PeerId == MyTelegramConsts.OfficialUserId || peer.PeerType == PeerType.Self)

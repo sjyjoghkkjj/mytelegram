@@ -30,8 +30,8 @@ internal sealed class HideChatJoinRequestHandler(
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestHideChatJoinRequest obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await accessHashHelper.CheckAccessHashAsync(obj.UserId);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.UserId);
 
         var channelPeer = peerHelper.GetPeer(obj.Peer);
         var channelId = channelPeer.PeerId;

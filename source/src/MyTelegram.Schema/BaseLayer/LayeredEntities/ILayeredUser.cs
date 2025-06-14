@@ -4,6 +4,7 @@ namespace MyTelegram.Schema;
 public interface ILayeredUser : IUser
 {
     //long Id { get; set; }
+    long? AccessHash { get; set; }
     MyTelegram.Schema.IUserStatus? Status { get; set; }
     bool Self { get; set; }
     bool Contact { get; set; }

@@ -25,7 +25,7 @@ internal sealed class GetGroupsForDiscussionHandler(
                 [.. channelReadModels.Select(p => p.ChannelId)]));
 
         var channelList = chatConverterService.ToChannelList(
-            input.UserId,
+            input,
             channelReadModels,
             photoReadModels,
             channelMemberReadModel,

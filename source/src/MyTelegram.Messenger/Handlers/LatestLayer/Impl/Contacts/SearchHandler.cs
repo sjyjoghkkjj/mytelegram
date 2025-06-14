@@ -20,6 +20,6 @@ internal sealed class SearchHandler(IContactAppService contactAppService, ISearc
         var userId = input.UserId;
         var searchResult = await contactAppService.SearchAsync(userId, obj.Q, obj.Limit);
 
-        return searchConverterService.ToFound(searchResult, input.Layer);
+        return searchConverterService.ToFound(input, searchResult, input.Layer);
     }
 }

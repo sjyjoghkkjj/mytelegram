@@ -31,7 +31,7 @@ internal sealed class EditChatDefaultBannedRightsHandler : RpcResultObjectHandle
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestEditChatDefaultBannedRights obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await _accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var peer = _peerHelper.GetPeer(obj.Peer, input.UserId);
 
         switch (peer.PeerType)

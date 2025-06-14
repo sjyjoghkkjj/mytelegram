@@ -26,7 +26,7 @@ internal sealed class GetChannelsHandler(
             if (inputChannel is TInputChannel tInputChannel)
             {
                 channelIds.Add(tInputChannel.ChannelId);
-                await accessHashHelper.CheckAccessHashAsync(tInputChannel.ChannelId, tInputChannel.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(input, tInputChannel.ChannelId, tInputChannel.AccessHash, AccessHashType.Channel);
             }
         }
 
@@ -36,7 +36,7 @@ internal sealed class GetChannelsHandler(
                 await queryProcessor.ProcessAsync(
                     new GetChannelMemberListByChannelIdListQuery(input.UserId, channelIds));
             var channels =
-                await chatConverterService.GetChannelListAsync(input.UserId, channelIds, channelMemberReadModels, layer: input.Layer);
+                await chatConverterService.GetChannelListAsync(input, channelIds, channelMemberReadModels, layer: input.Layer);
             return new TChats
             {
                 Chats = [.. channels]

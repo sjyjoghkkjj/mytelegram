@@ -63,13 +63,13 @@ internal sealed class EditMessageHandler(
         switch (obj.Peer)
         {
             case TInputPeerChannel inputPeerChannel:
-                await accessHashHelper.CheckAccessHashAsync(inputPeerChannel.ChannelId, inputPeerChannel.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel.ChannelId, inputPeerChannel.AccessHash, AccessHashType.Channel);
                 break;
             case TInputPeerChat inputPeerChat:
                 chatReadModel = await queryProcessor.ProcessAsync(new GetChatByChatIdQuery(inputPeerChat.ChatId));
                 break;
             case TInputPeerUser inputPeerUser:
-                await accessHashHelper.CheckAccessHashAsync(inputPeerUser.UserId, inputPeerUser.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(input, inputPeerUser.UserId, inputPeerUser.AccessHash, AccessHashType.User);
                 break;
 
         }

@@ -39,6 +39,6 @@ internal sealed class SearchGlobalHandler(
             UsersOnly = obj.UsersOnly
         });
 
-        return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
+        return getHistoryConverterService.ToMessages(input, getMessageOutput, input.Layer);
     }
 }

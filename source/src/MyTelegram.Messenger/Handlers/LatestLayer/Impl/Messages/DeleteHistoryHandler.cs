@@ -57,7 +57,7 @@ internal sealed class DeleteHistoryHandler(
                 {
                     if (obj.Peer is TInputPeerUser inputUser)
                     {
-                        await accessHashHelper.CheckAccessHashAsync(inputUser.UserId, inputUser.AccessHash);
+                        await accessHashHelper.CheckAccessHashAsync(input, inputUser.UserId, inputUser.AccessHash, AccessHashType.User);
                     }
                 }
                 break;

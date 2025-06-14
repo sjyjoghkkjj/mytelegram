@@ -23,7 +23,7 @@ internal sealed class ToggleDialogPinHandler(
         switch (obj.Peer)
         {
             case TInputDialogPeer inputDialogPeer:
-                await accessHashHelper.CheckAccessHashAsync(inputDialogPeer.Peer);
+                await accessHashHelper.CheckAccessHashAsync(input, inputDialogPeer.Peer);
                 var peer = peerHelper.GetPeer(inputDialogPeer.Peer, input.UserId);
                 //var ownerUid = peer.PeerType == PeerType.Channel ? peer.PeerId : input.UserId;
                 var command =

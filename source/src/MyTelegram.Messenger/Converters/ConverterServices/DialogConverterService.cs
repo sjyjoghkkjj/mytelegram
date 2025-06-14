@@ -10,7 +10,7 @@ public class DialogConverterService(
     ILayeredService<IPeerNotifySettingsConverter> peerNotifySettingsLayeredService,
     ILayeredService<IDialogConverter> dialogLayeredService) : IDialogConverterService, ITransientDependency
 {
-    public IDialogs ToDialogs(GetDialogOutput output, int layer = 0)
+    public IDialogs ToDialogs(IRequestWithAccessHashKeyId request, GetDialogOutput output, int layer = 0)
     {
         var dialogs = new List<IDialog>();
         var channels = output.ChannelList.ToDictionary(k => k.ChannelId);
@@ -26,9 +26,9 @@ public class DialogConverterService(
             dialogs.Add(dialog);
         }
 
-        var users = userConverterService.ToUserList(output.SelfUserId, output.UserList, output.PhotoList, output.ContactList,
+        var users = userConverterService.ToUserList(request, output.UserList, output.PhotoList, output.ContactList,
             output.PrivacyList, layer);
-        var channelList = chatConverterService.ToChannelList(output.SelfUserId,
+        var channelList = chatConverterService.ToChannelList(request,
             output.ChannelList,
             output.PhotoList,
             output.ChannelMemberList,
@@ -44,7 +44,7 @@ public class DialogConverterService(
         }
 
         var messages = messageConverterService
-            .ToMessageList(output.SelfUserId, allMessages, output.PollList, output.ChosenPollOptions,output.UserReactionList, layer);
+            .ToMessageList(output.SelfUserId, allMessages, output.PollList, output.ChosenPollOptions, output.UserReactionList, layer);
 
         if (dialogs.Count == output.Limit)
         {
@@ -66,9 +66,9 @@ public class DialogConverterService(
         };
     }
 
-    public IPeerDialogs ToPeerDialogs(GetDialogOutput output, int layer = 0)
+    public IPeerDialogs ToPeerDialogs(IRequestWithAccessHashKeyId request, GetDialogOutput output, int layer = 0)
     {
-        var dialogs = ToDialogs(output, layer);
+        var dialogs = ToDialogs(request, output, layer);
         var pts = output.PtsReadModel?.Pts ?? 0;
         if (output.CachedPts > pts)
         {
@@ -114,7 +114,7 @@ public class DialogConverterService(
     {
         var peerNotifySettings = peerNotifySettingsLayeredService.GetConverter(layer)
             .ToPeerNotifySettings(dialogReadModel.NotifySettings ?? PeerNotifySettings.DefaultSettings);
-        var dialog= dialogLayeredService.GetConverter(layer).ToDialog(dialogReadModel, channelReadModel, peerNotifySettings);
+        var dialog = dialogLayeredService.GetConverter(layer).ToDialog(dialogReadModel, channelReadModel, peerNotifySettings);
 
         if (dialogReadModel.Draft != null)
         {

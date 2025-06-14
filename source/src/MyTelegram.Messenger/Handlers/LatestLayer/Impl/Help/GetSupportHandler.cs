@@ -29,7 +29,7 @@ internal sealed class GetSupportHandler(
             userReadModel = await userAppService.GetAsync(supportUserId);
         }
 
-        var user = await userConverterService.GetUserAsync(input.UserId, supportUserId, layer: input.Layer);
+        var user = await userConverterService.GetUserAsync(input, supportUserId, layer: input.Layer);
 
         return new TSupport
         {

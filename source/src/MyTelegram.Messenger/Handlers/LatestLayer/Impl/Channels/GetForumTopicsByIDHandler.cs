@@ -17,7 +17,7 @@ internal sealed class GetForumTopicsByIDHandler(IAccessHashHelper accessHashHelp
     protected override async Task<MyTelegram.Schema.Messages.IForumTopics> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestGetForumTopicsByID obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Channel);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Channel);
         var peer = peerHelper.GetChannel(obj.Channel);
         var pts = ptsHelper.GetCachedPts(peer.PeerId);
 

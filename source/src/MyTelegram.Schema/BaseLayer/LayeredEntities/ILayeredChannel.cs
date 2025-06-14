@@ -3,6 +3,7 @@ namespace MyTelegram.Schema;
 
 public interface ILayeredChannel : IChat
 {
+    long? AccessHash { get; set; }
     bool Creator { get; set; }
     IChatPhoto Photo { get; set; }
     bool Left { get; set; }

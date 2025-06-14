@@ -38,7 +38,7 @@ internal sealed class GetFullChatHandler(
                             CancellationToken.None);
                     var photoReadModel = await photoAppService.GetAsync(channel.PhotoId);
                     return chatConverterService.ToChannelFull(
-                        input.UserId,
+                        input,
                         channel,
                         photoReadModel,
                         channelFull!,

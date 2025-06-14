@@ -32,7 +32,7 @@ internal sealed class UpdatePinnedMessageHandler(
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestUpdatePinnedMessage obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
         if (peer.PeerType == PeerType.Channel)
         {

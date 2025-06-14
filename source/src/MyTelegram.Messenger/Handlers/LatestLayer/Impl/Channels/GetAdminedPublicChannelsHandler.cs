@@ -27,7 +27,7 @@ internal sealed class GetAdminedPublicChannelsHandler(
         var channelMemberReadModels = await queryProcessor.ProcessAsync(
             new GetChannelMemberListByChannelIdListQuery(input.UserId,
                 channelReadModels.Select(p => p.ChannelId).ToList()));
-        var channels = chatConverterService.ToChannelList(input.UserId, channelReadModels, photoReadModels,
+        var channels = chatConverterService.ToChannelList(input, channelReadModels, photoReadModels,
             channelMemberReadModels, layer: input.Layer);
 
         var myChannels = channels.Where(p => p is ILayeredChannel);

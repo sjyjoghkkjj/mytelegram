@@ -20,7 +20,7 @@ internal sealed class SaveDraftHandler(
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestSaveDraft obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         int? replyToMsgId = null;
         switch (obj.ReplyTo)
         {

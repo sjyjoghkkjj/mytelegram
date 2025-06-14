@@ -36,7 +36,7 @@ internal sealed class GetChannelDifferenceHandler(
     protected override async Task<MyTelegram.Schema.Updates.IChannelDifference> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Updates.RequestGetChannelDifference obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Channel);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Channel);
         if (obj.Channel is TInputChannel inputChannel)
         {
             var isChannelMember = true;
@@ -88,7 +88,7 @@ internal sealed class GetChannelDifferenceHandler(
 
             var allUpdateList = updatesReadModels.Where(p => p.UpdatesType == UpdatesType.Updates)
                 .SelectMany(p => p.Updates ?? []).ToList();
-            var r = differenceConverterService.ToChannelDifference(dto, isChannelMember, allUpdateList, maxPts, layer: input.Layer);
+            var r = differenceConverterService.ToChannelDifference(input, dto, isChannelMember, allUpdateList, maxPts, layer: input.Layer);
 
             return r;
         }

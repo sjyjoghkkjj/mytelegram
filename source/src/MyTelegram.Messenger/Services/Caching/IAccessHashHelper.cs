@@ -2,15 +2,15 @@
 
 public interface IAccessHashHelper
 {
-    Task<bool> IsAccessHashValidAsync(long id,
+    Task<bool> IsAccessHashValidAsync(IRequestWithAccessHashKeyId request, long id,
         long accessHash, AccessHashType? accessHashType = null);
 
-    Task CheckAccessHashAsync(long id,
+    Task CheckAccessHashAsync(IRequestWithAccessHashKeyId request, long id,
         long accessHash, AccessHashType? accessHashType = null);
 
-    Task CheckAccessHashAsync(IInputPeer? inputPeer);
-    Task CheckAccessHashAsync(IInputUser inputUser);
-    Task CheckAccessHashAsync(IInputChannel inputChannel);
+    Task CheckAccessHashAsync(IRequestWithAccessHashKeyId request, IInputPeer? inputPeer);
+    Task CheckAccessHashAsync(IRequestWithAccessHashKeyId request, IInputUser inputUser);
+    Task CheckAccessHashAsync(IRequestWithAccessHashKeyId request, IInputChannel inputChannel);
     //Task CheckAccessHashAsync(Peer peer);
     void AddAccessHash(long id, long accessHash);
 }

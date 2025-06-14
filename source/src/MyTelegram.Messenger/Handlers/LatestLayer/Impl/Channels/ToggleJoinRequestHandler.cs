@@ -23,7 +23,7 @@ internal sealed class ToggleJoinRequestHandler(
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestToggleJoinRequest obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Channel);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Channel);
         var peer = peerHelper.GetChannel(obj.Channel);
         await channelAdminRightsChecker.CheckAdminRightAsync(peer.PeerId, input.UserId,
             p => p.AdminRights.ChangeInfo, RpcErrors.RpcErrors403.ChatAdminRequired);

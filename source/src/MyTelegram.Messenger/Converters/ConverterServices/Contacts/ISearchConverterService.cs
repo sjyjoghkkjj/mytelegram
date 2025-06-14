@@ -2,5 +2,5 @@
 
 public interface ISearchConverterService
 {
-    IFound ToFound(SearchContactOutput output, int layer);
+    IFound ToFound(IRequestWithAccessHashKeyId request, SearchContactOutput output, int layer);
 }

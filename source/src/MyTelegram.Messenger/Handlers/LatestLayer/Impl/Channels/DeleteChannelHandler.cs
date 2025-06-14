@@ -22,7 +22,7 @@ internal sealed class DeleteChannelHandler(
     protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestDeleteChannel obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Channel);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Channel);
         var peer = peerHelper.GetChannel(obj.Channel);
         var command = new DeleteChannelCommand(ChannelId.Create(peer.PeerId), input.ToRequestInfo());
 

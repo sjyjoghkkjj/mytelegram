@@ -66,9 +66,9 @@ internal sealed class ForwardMessagesHandler(
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestForwardMessages obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.FromPeer);
-        await accessHashHelper.CheckAccessHashAsync(obj.ToPeer);
-        await accessHashHelper.CheckAccessHashAsync(obj.SendAs);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.FromPeer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.ToPeer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.SendAs);
 
         var fromPeer = peerHelper.GetPeer(obj.FromPeer, input.UserId);
         var toPeer = peerHelper.GetPeer(obj.ToPeer, input.UserId);

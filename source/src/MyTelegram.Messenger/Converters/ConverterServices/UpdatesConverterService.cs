@@ -80,10 +80,10 @@ public class UpdatesConverterService(
             Users = []
         };
     }
-    public IUpdates ToChannelUpdates(long selfUserId, IChannelReadModel channelReadModel,
+    public IUpdates ToChannelUpdates(IRequestWithAccessHashKeyId request, IChannelReadModel channelReadModel,
         IPhotoReadModel? photoReadModel, int layer)
     {
-        var channel = chatConverterService.ToChannel(selfUserId, channelReadModel, photoReadModel, null, false, layer);
+        var channel = chatConverterService.ToChannel(request, channelReadModel, photoReadModel, null, false, layer);
         if (channel is ILayeredChannel layeredChannel)
         {
             layeredChannel.Left = false;
@@ -118,7 +118,7 @@ public class UpdatesConverterService(
         var updateChannel = new TUpdateChannel { ChannelId = eventData.ChannelId };
         updateList.Insert(1, updateChannel);
         //var channel = GetChatConverter().ToChannel(eventData);
-        var channel = await chatConverterService.GetChannelAsync(eventData.RequestInfo.UserId, channelId, false, false,
+        var channel = await chatConverterService.GetChannelAsync(eventData.RequestInfo, channelId, false, false,
             layer);
 
         var updates = new TUpdates
@@ -199,7 +199,7 @@ public class UpdatesConverterService(
         )
     {
         var item = aggregateEvent.MessageItem;
-        var channel = chatConverterService.ToChannel(createUpdatesForSelf ? item.SenderPeer.PeerId : 0,
+        var channel = chatConverterService.ToChannel(createUpdatesForSelf ? aggregateEvent.RequestInfo : RequestInfo.Empty,
             channelReadModel,
             null,
             null,

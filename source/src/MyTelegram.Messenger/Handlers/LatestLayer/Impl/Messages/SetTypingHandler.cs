@@ -29,7 +29,7 @@ internal sealed class SetTypingHandler(
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         RequestSetTyping obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var userId = input.UserId;
         var peer = peerHelper.GetPeer(obj.Peer, userId);
         IUpdate? update = null;

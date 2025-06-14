@@ -31,8 +31,8 @@ internal sealed class GetExportedChatInvitesHandler(
     protected async override Task<MyTelegram.Schema.Messages.IExportedChatInvites> HandleCoreAsync(IRequestInput input,
         RequestGetExportedChatInvites obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await accessHashHelper.CheckAccessHashAsync(obj.AdminId);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.AdminId);
         var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
         var channelReadModel = await channelAppService.GetAsync(peer.PeerId);
         if (channelReadModel == null)
@@ -55,7 +55,7 @@ internal sealed class GetExportedChatInvitesHandler(
                     obj.OffsetLink ?? string.Empty,
                     obj.Limit));
         var userIds = invites.Select(p => p.AdminId).ToList();
-        var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
+        var users = await userConverterService.GetUserListAsync(input, userIds, false, false, input.Layer);
 
         //var tInvites = invites.Select(p => objectMapper.Map<IChatInviteReadModel, TChatInviteExported>(p)).ToList();
         //tInvites.ForEach(p => p.Link = chatInviteLinkHelper.GetFullLink(options.Value.JoinChatDomain, p.Link));

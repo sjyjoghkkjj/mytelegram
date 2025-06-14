@@ -20,7 +20,7 @@ internal sealed class GetDialogsHandler(
     protected override async Task<IDialogs> HandleCoreAsync(IRequestInput input,
         RequestGetDialogs obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.OffsetPeer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.OffsetPeer);
 
         var userId = input.UserId;
         var offsetPeer = peerHelper.GetPeer(obj.OffsetPeer);
@@ -41,6 +41,6 @@ internal sealed class GetDialogsHandler(
             OffsetPeer = offsetPeer
         });
 
-        return dialogConverterService.ToDialogs(getDialogOutput, input.Layer);
+        return dialogConverterService.ToDialogs(input, getDialogOutput, input.Layer);
     }
 }

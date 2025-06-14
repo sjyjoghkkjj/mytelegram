@@ -113,8 +113,8 @@ internal sealed class SendMediaHandler(
         RequestSendMedia obj
     )
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await accessHashHelper.CheckAccessHashAsync(obj.SendAs);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.SendAs);
         var needCheckAudioMessagePrivacy = false;
         switch (obj.Media)
         {

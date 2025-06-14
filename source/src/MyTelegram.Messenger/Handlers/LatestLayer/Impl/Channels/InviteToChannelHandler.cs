@@ -43,7 +43,7 @@ internal sealed class InviteToChannelHandler(
         if (obj.Channel is TInputChannel inputChannel)
         {
             var channelId = inputChannel.ChannelId;
-            await accessHashHelper.CheckAccessHashAsync(channelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, channelId, inputChannel.AccessHash, AccessHashType.Channel);
             var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
             channelReadModel.ThrowExceptionIfChannelDeleted();
             var userReadModel = await userAppService.GetAsync(input.UserId);

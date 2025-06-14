@@ -35,7 +35,7 @@ internal sealed class EditExportedChatInviteHandler(
             case TInputPeerChannel inputPeerChannel:
             {
                 var link = obj.Link.Substring(obj.Link.LastIndexOf("/") + 2);
-                await accessHashHelper.CheckAccessHashAsync(inputPeerChannel);
+                await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel);
                 var chatInviteReadModel = await queryProcessor.ProcessAsync(new GetChatInviteQuery(
                     inputPeerChannel.ChannelId,
                     link));

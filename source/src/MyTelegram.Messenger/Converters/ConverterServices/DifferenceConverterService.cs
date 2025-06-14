@@ -10,7 +10,9 @@ public class DifferenceConverterService(
     IUpdatesResponseService updatesResponseService,
     ILayeredService<IMessageConverter> messageLayeredService) : IDifferenceConverterService, ITransientDependency
 {
-    public IChannelDifference ToChannelDifference(GetMessageOutput output, bool isChannelMember, IList<IUpdate> updatesList,
+    public IChannelDifference ToChannelDifference(
+        IRequestWithAccessHashKeyId request,
+        GetMessageOutput output, bool isChannelMember, IList<IUpdate> updatesList,
         int updatesMaxPts = 0,
         bool resetLeftToFalse = false,
         int timeoutSeconds = 30,
@@ -31,12 +33,12 @@ public class DifferenceConverterService(
 
         var messageList = messageConverterService.ToMessageList(output.SelfUserId, output.MessageList, output.PollList, output.ChosenPollOptions, output.UserReactionList, layer);
 
-        var channelList = chatConverterService.ToChannelList(output.SelfUserId, output.ChannelList, output.PhotoList,
+        var channelList = chatConverterService.ToChannelList(request, output.ChannelList, output.PhotoList,
             output.ChannelMemberList, output.JoinedChannelIdList, layer);
-        var userList = userConverterService.ToUserList(output.SelfUserId, output.UserList, output.PhotoList,
+        var userList = userConverterService.ToUserList(request, output.UserList, output.PhotoList,
             output.ContactList, output.PrivacyList, layer);
 
-        var layeredUpdates = updatesList.Select(p => updatesResponseService.ToLayeredData(p, layer));
+        var layeredUpdates = updatesList.Select(p => updatesResponseService.ToLayeredData(output.SelfUserId, request.AccessHashKeyId, p, layer));
 
         return new TChannelDifference
         {
@@ -50,14 +52,16 @@ public class DifferenceConverterService(
         };
     }
 
-    public IDifference ToDifference(GetMessageOutput output, IPtsReadModel? pts, int cachedPts, int limit, IList<IUpdate> updateList,
+    public IDifference ToDifference(
+        IRequestWithAccessHashKeyId request,
+        GetMessageOutput output, IPtsReadModel? pts, int cachedPts, int limit, IList<IUpdate> updateList,
         IList<IChat> chatListFromUpdates, IReadOnlyCollection<IEncryptedMessageReadModel>? encryptedMessageReadModels, int layer = 0)
     {
         var messageList = messageConverterService.ToMessageList(output.SelfUserId, output.MessageList, output.PollList,
             output.ChosenPollOptions, output.UserReactionList, layer);
-        var userList = userConverterService.ToUserList(output.SelfUserId, output.UserList, output.PhotoList,
+        var userList = userConverterService.ToUserList(request, output.UserList, output.PhotoList,
             output.ContactList, output.PrivacyList, layer);
-        var channelList = chatConverterService.ToChannelList(output.SelfUserId, output.ChannelList, output.PhotoList,
+        var channelList = chatConverterService.ToChannelList(request, output.ChannelList, output.PhotoList,
             output.ChannelMemberList, output.JoinedChannelIdList, layer);
 
         var qts = pts?.Qts ?? 0;
@@ -67,7 +71,7 @@ public class DifferenceConverterService(
             unreadCount = 0;
         }
 
-        var layeredUpdates = updateList.Select(p => updatesResponseService.ToLayeredData(p, layer));
+        var layeredUpdates = updateList.Select(p => updatesResponseService.ToLayeredData(output.SelfUserId, request.AccessHashKeyId, p, layer));
 
         if (updateList.Count == limit)
         {

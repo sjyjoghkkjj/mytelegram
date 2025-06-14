@@ -40,7 +40,7 @@ internal sealed class CreateChatHandler(
         {
             if (inputUser is TInputUser u)
             {
-                await accessHashHelper.CheckAccessHashAsync(u.UserId, u.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(input, u.UserId, u.AccessHash, AccessHashType.User);
                 memberUserIds.Add(u.UserId);
 
                 if (peerHelper.IsBotUser(u.UserId))

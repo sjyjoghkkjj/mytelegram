@@ -19,7 +19,7 @@ internal sealed class ToggleNoForwardsHandler(ICommandBus commandBus, IAccessHas
         switch (obj.Peer)
         {
             case TInputPeerChannel inputPeerChannel:
-                await accessHashHelper.CheckAccessHashAsync(inputPeerChannel.ChannelId, inputPeerChannel.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel.ChannelId, inputPeerChannel.AccessHash, AccessHashType.Channel);
                 {
                     var command = new ToggleChannelNoForwardsCommand(ChannelId.Create(inputPeerChannel.ChannelId),
                         input.ToRequestInfo(), obj.Enabled);

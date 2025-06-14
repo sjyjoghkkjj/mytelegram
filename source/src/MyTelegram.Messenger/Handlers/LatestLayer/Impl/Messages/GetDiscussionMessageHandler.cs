@@ -27,7 +27,7 @@ internal sealed class GetDiscussionMessageHandler(
     protected override async Task<IDiscussionMessage> HandleCoreAsync(IRequestInput input,
         RequestGetDiscussionMessage obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         // peer is the channel peer
         var peer = peerHelper.GetPeer(obj.Peer);
         var channelReadModel = await channelAppService.GetAsync(peer.PeerId);
@@ -68,7 +68,7 @@ internal sealed class GetDiscussionMessageHandler(
             await queryProcessor.ProcessAsync(new GetChannelMemberListByChannelIdListQuery(input.UserId, channelIds));
 
         var chats = chatConverterService.ToChannelList(
-            input.UserId,
+            input,
             channelReadModels,
             photoReadModels,
             channelMemberReadModels,

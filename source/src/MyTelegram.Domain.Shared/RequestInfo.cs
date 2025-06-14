@@ -17,6 +17,7 @@ namespace MyTelegram;
 public record RequestInfo(
     long ReqMsgId,
     long UserId,
+    long AccessHashKeyId,
     long AuthKeyId,
     long PermAuthKeyId,
     Guid RequestId,
@@ -25,7 +26,7 @@ public record RequestInfo(
     DeviceType DeviceType = DeviceType.Desktop,
     bool AddRequestIdToCache = true,
     bool IsSubRequest = false
-    )
+    ) : IRequestWithAccessHashKeyId
 {
-    public static RequestInfo Empty { get; } = new(0, 0, 0, 0, Guid.Empty, 0, 0);
+    public static RequestInfo Empty { get; } = new(0, 0, 0, 0, 0, Guid.Empty, 0, 0);
 }

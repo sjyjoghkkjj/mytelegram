@@ -33,7 +33,7 @@ internal sealed class EditPhotoHandler(
         if (obj.Channel is TInputChannel inputChannel)
         {
             channelId = inputChannel.ChannelId;
-            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
         }
         else
         {

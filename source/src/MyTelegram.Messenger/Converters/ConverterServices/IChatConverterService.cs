@@ -4,26 +4,26 @@ namespace MyTelegram.Messenger.Converters.ConverterServices;
 
 public interface IChatConverterService
 {
-    Task<IChat> GetChannelAsync(long selfUserId,
+    Task<IChat> GetChannelAsync(IRequestWithAccessHashKeyId request,
         long channelId,
         bool checkChannelMember,
         bool? channelMemberIsLeft,
         int layer = 0
     );
 
-    Task<List<IChat>> GetChannelListAsync(long selfUserId,
+    Task<List<IChat>> GetChannelListAsync(IRequestWithAccessHashKeyId request,
         List<long> channelIds,
         IReadOnlyCollection<IChannelMemberReadModel>? channelMemberReadModels = null,
         int layer = 0);
 
-    Task<IChatFull> GetChannelFullAsync(long selfUserId,
+    Task<IChatFull> GetChannelFullAsync(IRequestWithAccessHashKeyId request,
         long channelId,
         IPeerNotifySettingsReadModel? peerNotifySettingsReadModel = null,
         IChatInviteReadModel? chatInviteReadModel = null,
         int layer = 0);
 
     Schema.Channels.IChannelParticipant ToChannelParticipant(
-        long selfUserId,
+        IRequestWithAccessHashKeyId request,
         IChannelReadModel channelReadModel,
         IPhotoReadModel? photoReadModel,
         IChannelMemberReadModel channelMemberReadModel,
@@ -32,20 +32,20 @@ public interface IChatConverterService
         int layer = 0
     );
 
-    IChat ToChannel(long selfUserId, IChannelReadModel channelReadModel,
+    IChat ToChannel(IRequestWithAccessHashKeyId request, IChannelReadModel channelReadModel,
         IPhotoReadModel? photoReadModel,
         IChannelMemberReadModel? channelMemberReadModel,
         bool? channelMemberIsLeft,
         int layer);
 
-    List<IChat> ToChannelList(long selfUserId, IReadOnlyCollection<IChannelReadModel> channelReadModels,
+    List<IChat> ToChannelList(IRequestWithAccessHashKeyId request, IReadOnlyCollection<IChannelReadModel> channelReadModels,
         IReadOnlyCollection<IPhotoReadModel> photoReadModels,
         IReadOnlyCollection<IChannelMemberReadModel>? channelMemberReadModels,
         IReadOnlyCollection<long>? joinedChannelIds = null,
         int layer = 0);
 
     IChannelParticipants ToChannelParticipants(
-        long selfUserId,
+        IRequestWithAccessHashKeyId request,
         IChannelReadModel channelReadModel,
         IPhotoReadModel? photoReadModel,
         IReadOnlyCollection<IChatAdminReadModel>? chatAdminReadModels,
@@ -57,7 +57,7 @@ public interface IChatConverterService
     );
 
     Schema.Messages.IChatFull ToChannelFull(
-        long selfUserId,
+        IRequestWithAccessHashKeyId request,
         IChannelReadModel channelReadModel,
         IPhotoReadModel? photoReadModel,
         IChannelFullReadModel channelFullReadModel,

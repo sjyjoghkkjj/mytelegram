@@ -159,7 +159,7 @@ internal sealed class SendCodeHandler(
                     }
                     else
                     {
-                        var user = userConverterService.ToUser(userReadModel.UserId, userReadModel, null, layer: input.Layer);
+                        var user = userConverterService.ToUser(input, userReadModel, null, layer: input.Layer);
 
                         await eventBus.PublishAsync(new UserSignInSuccessEvent(
                             input.ReqMsgId,

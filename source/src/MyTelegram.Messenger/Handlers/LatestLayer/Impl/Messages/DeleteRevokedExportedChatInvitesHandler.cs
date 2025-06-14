@@ -23,7 +23,7 @@ internal sealed class DeleteRevokedExportedChatInvitesHandler(
         switch (obj.Peer)
         {
             case TInputPeerChannel inputPeerChannel:
-                await accessHashHelper.CheckAccessHashAsync(inputPeerChannel);
+                await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel);
                 var peer = peerHelper.GetPeer(obj.Peer);
                 var adminId = peerHelper.GetPeer(obj.AdminId, input.UserId);
                 await channelAdminRightsChecker.CheckAdminRightAsync(inputPeerChannel.ChannelId, input.UserId,

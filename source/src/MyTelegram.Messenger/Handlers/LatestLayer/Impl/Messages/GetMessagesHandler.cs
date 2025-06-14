@@ -30,6 +30,6 @@ internal sealed class GetMessagesHandler(
         var getMessageOutput = await messageAppService
             .GetMessagesAsync(new GetMessagesInput(input.UserId, input.UserId, idList, null) { Limit = 50 });
 
-        return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
+        return getHistoryConverterService.ToMessages(input, getMessageOutput, input.Layer);
     }
 }

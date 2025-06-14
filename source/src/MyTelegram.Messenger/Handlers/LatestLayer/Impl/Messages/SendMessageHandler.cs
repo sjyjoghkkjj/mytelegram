@@ -75,8 +75,8 @@ internal sealed class SendMessageHandler(
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestSendMessage obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await accessHashHelper.CheckAccessHashAsync(obj.SendAs);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.SendAs);
         var media = await ProcessUrlsInMessageAsync(obj);
         if (obj.Message.StartsWith("/"))
         {

@@ -24,7 +24,7 @@ internal sealed class SetDiscussionGroupHandler(
     {
         if (obj.Broadcast is TInputChannel broadcastChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(broadcastChannel.ChannelId, broadcastChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, broadcastChannel.ChannelId, broadcastChannel.AccessHash, AccessHashType.Channel);
         }
         else
         {
@@ -35,7 +35,7 @@ internal sealed class SetDiscussionGroupHandler(
 
         if (obj.Group is TInputChannel groupChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(groupChannel.ChannelId, groupChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, groupChannel.ChannelId, groupChannel.AccessHash, AccessHashType.Channel);
         }
 
         switch (obj.Group)

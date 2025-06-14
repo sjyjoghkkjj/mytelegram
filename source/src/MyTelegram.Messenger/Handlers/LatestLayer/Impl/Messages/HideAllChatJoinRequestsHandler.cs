@@ -29,7 +29,7 @@ internal sealed class HideAllChatJoinRequestsHandler(
     protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestHideAllChatJoinRequests obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var channelPeer = peerHelper.GetPeer(obj.Peer);
         var channelId = channelPeer.PeerId;
         if (string.IsNullOrEmpty(obj.Link))
@@ -69,7 +69,7 @@ internal sealed class HideAllChatJoinRequestsHandler(
         await HideAllChatJoinRequestsAsync(input.ToRequestInfo(), channelId, inviteId, obj.Approved, topMessageId,
             channelHistoryMinId, broadcast);
 
-        var channel = await chatConverterService.GetChannelAsync(input.UserId, channelId, false, false, input.Layer);
+        var channel = await chatConverterService.GetChannelAsync(input, channelId, false, false, input.Layer);
 
         return new TUpdates
         {

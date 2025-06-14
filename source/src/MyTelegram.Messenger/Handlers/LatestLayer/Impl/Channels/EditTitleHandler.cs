@@ -24,7 +24,7 @@ internal sealed class EditTitleHandler(
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
 
             var command = new EditChannelTitleCommand(ChannelId.Create(inputChannel.ChannelId),
                 input.ToRequestInfo(),

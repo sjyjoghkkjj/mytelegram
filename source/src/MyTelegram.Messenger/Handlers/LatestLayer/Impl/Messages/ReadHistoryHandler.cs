@@ -25,7 +25,7 @@ internal sealed class ReadHistoryHandler(
     protected override async Task<IAffectedMessages> HandleCoreAsync(IRequestInput input,
         RequestReadHistory obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         if (obj.MaxId < 0)
         {
             return new TAffectedMessages

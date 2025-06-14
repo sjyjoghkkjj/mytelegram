@@ -21,9 +21,9 @@ public partial class MessageDomainEventHandler
     {
         var updates =
             joinChannelConverterService.ToJoinChannelUpdates(aggregateEvent, aggregateEvent.RequestInfo.Layer);
-        var user = await userConverterService.GetUserAsync(aggregateEvent.RequestInfo.UserId,
+        var user = await userConverterService.GetUserAsync(aggregateEvent.RequestInfo,
             aggregateEvent.RequestInfo.UserId, layer: aggregateEvent.RequestInfo.Layer);
-        var channel = await chatConverterService.GetChannelAsync(aggregateEvent.RequestInfo.UserId,
+        var channel = await chatConverterService.GetChannelAsync(aggregateEvent.RequestInfo,
             aggregateEvent.MessageItem.ToPeer.PeerId,
             false,
             false,
@@ -52,7 +52,7 @@ public partial class MessageDomainEventHandler
         if (updatesForMember is TUpdates tUpdatesForMember)
         {
             tUpdatesForMember.Chats.Add(channel);
-            tUpdatesForMember.Users.Add(await userConverterService.GetUserAsync(0, aggregateEvent.RequestInfo.UserId, false, false));
+            tUpdatesForMember.Users.Add(await userConverterService.GetUserAsync(RequestInfo.Empty, aggregateEvent.RequestInfo.UserId, false, false));
         }
 
         await PushUpdatesToPeerAsync(aggregateEvent.MessageItem.ToPeer, updatesForMember,
@@ -64,7 +64,7 @@ public partial class MessageDomainEventHandler
         var userId = aggregateEvent.MessageItem.SenderUserId;
         var updates = joinChannelConverterService.ToJoinChannelUpdates(aggregateEvent, aggregateEvent.RequestInfo.Layer);
 
-        await UpdateChannelAndUserAsync(aggregateEvent.RequestInfo.UserId, updates, aggregateEvent.MessageItem.ToPeer.PeerId,
+        await UpdateChannelAndUserAsync(aggregateEvent.RequestInfo, updates, aggregateEvent.MessageItem.ToPeer.PeerId,
             [aggregateEvent.RequestInfo.UserId]);
 
         await SendRpcMessageToClientAsync(aggregateEvent.RequestInfo, updates, aggregateEvent.RequestInfo.UserId);
@@ -75,7 +75,7 @@ public partial class MessageDomainEventHandler
             aggregateEvent.RequestInfo.PermAuthKeyId);
 
         var updatesForChannelMember = joinChannelConverterService.ToJoinChannelUpdates(0, aggregateEvent, 0);
-        await UpdateChannelAndUserAsync(0, updatesForChannelMember, aggregateEvent.MessageItem.ToPeer.PeerId,
+        await UpdateChannelAndUserAsync(RequestInfo.Empty, updatesForChannelMember, aggregateEvent.MessageItem.ToPeer.PeerId,
             [aggregateEvent.RequestInfo.UserId]);
 
         await PushUpdatesToPeerAsync(aggregateEvent.MessageItem.ToPeer, updatesForChannelMember,

@@ -2,6 +2,7 @@
 
 public enum AccessHashType
 {
+    Unknown,
     User,
     Channel,
     Document,

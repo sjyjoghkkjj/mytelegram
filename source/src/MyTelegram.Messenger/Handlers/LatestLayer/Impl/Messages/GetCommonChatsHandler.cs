@@ -20,7 +20,7 @@ internal sealed class GetCommonChatsHandler(
     protected override async Task<Schema.Messages.IChats> HandleCoreAsync(IRequestInput input,
         Schema.Messages.RequestGetCommonChats obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.UserId);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.UserId);
         var peer = peerHelper.GetPeer(obj.UserId);
         var limit = obj.Limit;
         if (limit < 0)
@@ -36,7 +36,7 @@ internal sealed class GetCommonChatsHandler(
         {
             var channelReadModels = await channelAppService.GetListAsync(commonChannelIds.ToList());
             var photoReadModels = await photoAppService.GetPhotosAsync(channelReadModels);
-            var chats = chatConverterService.ToChannelList(input.UserId, channelReadModels, photoReadModels, [], commonChannelIds, layer: input.Layer);
+            var chats = chatConverterService.ToChannelList(input, channelReadModels, photoReadModels, [], commonChannelIds, layer: input.Layer);
 
             return new TChats
             {

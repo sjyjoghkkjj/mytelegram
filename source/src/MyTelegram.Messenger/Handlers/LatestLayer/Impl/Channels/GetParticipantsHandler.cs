@@ -27,7 +27,7 @@ internal sealed class GetParticipantsHandler(
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
             var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
             channelReadModel.ThrowExceptionIfChannelDeleted();
             if (channelReadModel.ParticipantsHidden)
@@ -129,7 +129,7 @@ internal sealed class GetParticipantsHandler(
                 userIdList.Add(selfChannelMember.InviterId);
             }
 
-            var users = await userConverterService.GetUserListAsync(input.UserId, userIdList, false, false, input.Layer);
+            var users = await userConverterService.GetUserListAsync(input, userIdList, false, false, input.Layer);
 
             var chatPhoto = await photoAppService.GetAsync(channelReadModel.PhotoId);
 
@@ -162,7 +162,7 @@ internal sealed class GetParticipantsHandler(
             }
 
             return chatConverterService.ToChannelParticipants(
-                input.UserId,
+                input,
                 channelReadModel,
                 chatPhoto,
                 chatAdminReadModels,

@@ -22,7 +22,7 @@ internal sealed class GetRepliesHandler(
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         RequestGetReplies obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var peer = peerHelper.GetPeer(obj.Peer);
         var getMessageOutput = await messageAppService.GetRepliesAsync(new GetRepliesInput
         {
@@ -35,6 +35,6 @@ internal sealed class GetRepliesHandler(
             SelfUserId = input.UserId
         });
 
-        return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
+        return getHistoryConverterService.ToMessages(input, getMessageOutput, input.Layer);
     }
 }

@@ -29,9 +29,9 @@ internal sealed class SearchPostsHandler(
             await queryProcessor.ProcessAsync(
                 new GetChannelMemberListByChannelIdListQuery(input.UserId, channelIdList));
         var channels =
-            await chatConverterService.GetChannelListAsync(input.UserId, channelIdList, channelMemberReadModels,
+            await chatConverterService.GetChannelListAsync(input, channelIdList, channelMemberReadModels,
                 input.Layer);
-        var users = await userConverterService.GetUserListAsync(input.UserId, userIds.ToList(), false, false,
+        var users = await userConverterService.GetUserListAsync(input, userIds.ToList(), false, false,
             input.Layer);
 
         if (messageReadModels.Count == obj.Limit && messageReadModels.Count > 0)

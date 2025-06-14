@@ -42,7 +42,7 @@ internal sealed class EditAdminHandler(
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
 
             var peer = peerHelper.GetPeer(obj.UserId);
             var isBot = peerHelper.IsBotUser(peer.PeerId);

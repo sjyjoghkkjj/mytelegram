@@ -19,7 +19,7 @@ internal sealed class UnpinAllMessagesHandler(ICommandBus commandBus, IPeerHelpe
     protected override async Task<MyTelegram.Schema.Messages.IAffectedHistory> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestUnpinAllMessages obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var peer = peerHelper.GetPeer(obj.Peer);
         var ownerPeerId = input.UserId;
         if (peer.PeerType == PeerType.Channel)

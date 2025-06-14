@@ -30,8 +30,8 @@ internal sealed class SearchHandler(
     protected override async Task<IMessages> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSearch obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await accessHashHelper.CheckAccessHashAsync(obj.FromId);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.FromId);
         var userId = input.UserId;
         var peer = peerHelper.GetPeer(obj.Peer, userId);
 
@@ -52,7 +52,7 @@ internal sealed class SearchHandler(
             MinId = obj.MinId,
             MessageType = GetMessageType(obj.Filter)
         });
-        return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
+        return getHistoryConverterService.ToMessages(input, getMessageOutput, input.Layer);
     }
 
     private static MessageType GetMessageType(IMessagesFilter? filter)

@@ -35,7 +35,7 @@ internal sealed class GetMessagesHandler(
             // Only check accessHash for private channel
             if (string.IsNullOrEmpty(channelReadModel!.UserName))
             {
-                await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
             }
         }
         else
@@ -59,6 +59,6 @@ internal sealed class GetMessagesHandler(
                     new Peer(PeerType.Channel, channelId))
                 { Limit = 50 });
 
-        return getHistoryConverterService.ToMessages(getMessageOutput, input.Layer);
+        return getHistoryConverterService.ToMessages(input, getMessageOutput, input.Layer);
     }
 }

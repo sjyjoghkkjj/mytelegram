@@ -23,7 +23,7 @@ internal sealed class ReorderPinnedDialogsHandler(
             switch (inputDialogPeer)
             {
                 case TInputDialogPeer inputDialogPeer1:
-                    await accessHashHelper.CheckAccessHashAsync(inputDialogPeer1.Peer);
+                    await accessHashHelper.CheckAccessHashAsync(input, inputDialogPeer1.Peer);
                     peerList.Add(peerHelper.GetPeer(inputDialogPeer1.Peer, input.UserId));
                     break;
                     //case TInputDialogPeerFolder inputDialogPeerFolder:

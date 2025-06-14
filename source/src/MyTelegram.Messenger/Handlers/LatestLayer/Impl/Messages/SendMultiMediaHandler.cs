@@ -49,8 +49,8 @@ internal sealed class SendMultiMediaHandler(
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestSendMultiMedia obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await accessHashHelper.CheckAccessHashAsync(obj.SendAs);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.SendAs);
 
         var groupId = randomHelper.NextInt64();
         var groupItemCount = obj.MultiMedia.Count;

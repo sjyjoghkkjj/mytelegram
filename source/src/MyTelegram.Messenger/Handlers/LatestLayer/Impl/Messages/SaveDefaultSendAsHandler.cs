@@ -16,8 +16,8 @@ internal sealed class SaveDefaultSendAsHandler(ICommandBus commandBus, IAccessHa
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSaveDefaultSendAs obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
-        await accessHashHelper.CheckAccessHashAsync(obj.SendAs);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.SendAs);
         var peer = peerHelper.GetPeer(obj.Peer);
         var sendAsPeer = peerHelper.GetPeer(obj.SendAs);
         await messageAppService.CheckSendAsAsync(input.UserId, peer, sendAsPeer);

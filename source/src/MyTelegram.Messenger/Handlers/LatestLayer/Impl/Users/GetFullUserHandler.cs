@@ -34,7 +34,7 @@ internal sealed class GetFullUserHandler(
     protected override async Task<MyTelegram.Schema.Users.IUserFull> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Users.RequestGetFullUser obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Id);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Id);
 
         var selfUserId = input.UserId;
         var targetPeer = peerHelper.GetPeer(obj.Id, input.UserId);
@@ -70,14 +70,14 @@ internal sealed class GetFullUserHandler(
         var peerNotifySettings = peerNotifySettingsLayeredService.GetConverter(input.Layer)
             .ToPeerNotifySettings(peerNotifySettingReadModel?.NotifySettings ?? PeerNotifySettings.DefaultSettings);
 
-        var userFull = userConverterService.ToUserFull(input.UserId, userReadModel, photoReadModels, contactReadModels,
+        var userFull = userConverterService.ToUserFull(input, userReadModel, photoReadModels, contactReadModels,
             privacyReadModels, input.Layer);
 
         userFull.Settings = peerSettings;
         userFull.NotifySettings = peerNotifySettings;
         userFull.Blocked = await blockCacheAppService.IsBlockedAsync(input.UserId, targetPeer.PeerId);
 
-        var user = userConverterService.ToUser(input.UserId, userReadModel, photoReadModels, myContactReadModel,
+        var user = userConverterService.ToUser(input, userReadModel, photoReadModels, myContactReadModel,
             targetUserContactReadModel, privacyReadModels, input.Layer);
 
         await SetPersonalChannelAsync(input, userReadModel, userFull);

@@ -29,7 +29,7 @@ internal sealed class GetChatInviteImportersHandler(
     {
         if (obj.Peer is TInputPeerChannel inputPeerChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputPeerChannel);
+            await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel);
             var userPeer = peerHelper.GetPeer(obj.OffsetUser);
 
             var channelAdminReadModel = await queryProcessor.ProcessAsync(new GetChatAdminQuery(inputPeerChannel.ChannelId, input.UserId));
@@ -54,7 +54,7 @@ internal sealed class GetChatInviteImportersHandler(
 
             var importers = new List<TChatInviteImporter>();
             var userIds = new List<long>();
-            var users = await userConverterService.GetUserListAsync(input.UserId, userIds, false, false, input.Layer);
+            var users = await userConverterService.GetUserListAsync(input, userIds, false, false, input.Layer);
             //var userDict = users.ToDictionary(k => k.Id);
             foreach (var readModel in inviteImporterReadModels)
             {

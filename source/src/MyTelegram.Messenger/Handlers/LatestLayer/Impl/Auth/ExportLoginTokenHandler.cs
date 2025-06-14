@@ -31,7 +31,7 @@ internal sealed class ExportLoginTokenHandler(
 
             var userReadModel = await userAppService.GetAsync(userId);
             var photos = await photoAppService.GetPhotosAsync(userReadModel);
-            ILayeredUser? user = userReadModel == null ? null : userConverterService.ToUser(userReadModel.UserId, userReadModel, photos);
+            ILayeredUser? user = userReadModel == null ? null : userConverterService.ToUser(input, userReadModel, photos);
             return new TLoginTokenSuccess
             {
                 Authorization = layeredService.GetConverter(input.Layer).CreateAuthorization(user)

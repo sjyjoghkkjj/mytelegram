@@ -22,7 +22,7 @@ internal sealed class GetMessageEditDataHandler(
     protected override async Task<IMessageEditData> HandleCoreAsync(IRequestInput input,
         RequestGetMessageEditData obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var message = await queryProcessor
             .ProcessAsync(
                 new GetMessageByIdQuery(

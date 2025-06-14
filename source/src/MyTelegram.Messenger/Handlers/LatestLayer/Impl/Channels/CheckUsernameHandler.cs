@@ -36,7 +36,7 @@ internal sealed class CheckUsernameHandler(
         switch (obj.Channel)
         {
             case TInputChannel inputChannel1:
-                await accessHashHelper.CheckAccessHashAsync(inputChannel1.ChannelId, inputChannel1.AccessHash);
+                await accessHashHelper.CheckAccessHashAsync(input, inputChannel1.ChannelId, inputChannel1.AccessHash, AccessHashType.Channel);
                 break;
             case TInputChannelEmpty _:
                 break;

@@ -34,7 +34,7 @@ internal sealed class ResolveUsernameHandler(
                 switch (userNameReadModel.PeerType)
                 {
                     case PeerType.User:
-                        var user = await userConverterService.GetUserAsync(input.UserId, userNameReadModel.PeerId, false, false, input.Layer);
+                        var user = await userConverterService.GetUserAsync(input, userNameReadModel.PeerId, false, false, input.Layer);
                         return new TResolvedPeer
                         {
                             Chats = [],
@@ -54,7 +54,7 @@ internal sealed class ResolveUsernameHandler(
                                 {
                                     Chats =
                                         new TVector<IChat>(chatConverterService.ToChannel(
-                                            input.UserId,
+                                            input,
                                             channelReadModel,
                                             photoReadModel,
                                             channelMemberReadModel, channelMemberReadModel?.Left ?? true, input.Layer)),

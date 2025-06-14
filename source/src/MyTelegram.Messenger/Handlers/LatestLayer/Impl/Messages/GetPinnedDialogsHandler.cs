@@ -32,6 +32,6 @@ internal sealed class GetPinnedDialogsHandler(
         var cachedPts = ptsHelper.GetCachedPts(input.UserId);
         getDialogOutput.CachedPts = cachedPts;
 
-        return dialogConverterService.ToPeerDialogs(getDialogOutput, input.Layer);
+        return dialogConverterService.ToPeerDialogs(input, getDialogOutput, input.Layer);
     }
 }

@@ -33,5 +33,5 @@ public interface IUpdatesConverterService
 
     IUpdates ToDraftsUpdates(IReadOnlyCollection<IDraftReadModel> draftReadModels, int layer);
 
-    IUpdates ToChannelUpdates(long selfUserId, IChannelReadModel channelReadModel, IPhotoReadModel? photoReadModel, int layer);
+    IUpdates ToChannelUpdates(IRequestWithAccessHashKeyId request, IChannelReadModel channelReadModel, IPhotoReadModel? photoReadModel, int layer);
 }

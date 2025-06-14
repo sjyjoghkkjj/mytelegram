@@ -32,7 +32,7 @@ internal sealed class EditChatAboutHandler(
                 {
                     if (obj.Peer is TInputPeerChannel inputChannel)
                     {
-                        await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+                        await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
                     }
 
                     var command =

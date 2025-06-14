@@ -67,7 +67,7 @@ public class ChannelDomainEventHandler(
         await NotifyUpdateChannelAsync(domainEvent.AggregateEvent.RequestInfo,
                 domainEvent.AggregateEvent.ChannelId);
 
-        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.UserId,
+        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.ChannelId,
             false,
             false,
@@ -162,7 +162,7 @@ public class ChannelDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<ChannelAggregate, ChannelId, ChannelSignatureChangedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.ChannelId,
             false,
             false,
@@ -284,7 +284,7 @@ public class ChannelDomainEventHandler(
         IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberLeftEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.ChannelId,
             false,
             true,
@@ -339,7 +339,7 @@ public class ChannelDomainEventHandler(
 
             if (domainEvent.AggregateEvent.Broadcast)
             {
-                var channel = chatConverterService.ToChannel(domainEvent.AggregateEvent.RequestInfo.UserId,
+                var channel = chatConverterService.ToChannel(domainEvent.AggregateEvent.RequestInfo,
                     item.Item1,
                     item.Item2,
                     null,
@@ -429,14 +429,14 @@ public class ChannelDomainEventHandler(
             updates.Updates.Add(updateChannelParticipant);
         }
 
-        var channel = await chatConverterService.GetChannelAsync(0, aggregateEvent.ChannelId, false, false,
+        var channel = await chatConverterService.GetChannelAsync(RequestInfo.Empty, aggregateEvent.ChannelId, false, false,
             aggregateEvent.RequestInfo.Layer);
         updates.Chats.Add(channel);
 
         var userReadModels = await userAppService.GetListAsync(aggregateEvent.MemberUserIds.ToList());
         var photoReadModels = await photoAppService.GetPhotosAsync(userReadModels);
 
-        var users = userConverterService.ToUserList(0, userReadModels, photoReadModels, [], [],
+        var users = userConverterService.ToUserList(RequestInfo.Empty, userReadModels, photoReadModels, [], [],
             aggregateEvent.RequestInfo.Layer);
 
         updates.Users = new TVector<IUser>(users);
@@ -531,9 +531,9 @@ public class ChannelDomainEventHandler(
             selfUserId = memberUserId;
         }
 
-        var updates = updatesConverterService.ToChannelUpdates(selfUserId, channelReadModel, channelPhotoReadModel, requestInfo.Layer);
-        var updatesForMember = updatesConverterService.ToChannelUpdates(memberUserId, channelReadModel, channelPhotoReadModel, 0);
-      
+        var updates = updatesConverterService.ToChannelUpdates(requestInfo, channelReadModel, channelPhotoReadModel, requestInfo.Layer);
+        var updatesForMember = updatesConverterService.ToChannelUpdates(requestInfo with { UserId = memberUserId }, channelReadModel, channelPhotoReadModel, 0);
+
         await SendRpcMessageToClientAsync(requestInfo, updates);
         if (memberUserId != 0)
         {
@@ -558,7 +558,7 @@ public class ChannelDomainEventHandler(
     )
     {
         var channel =
-            await chatConverterService.GetChannelAsync(channelMemberUserId, channelId, false, false, requestInfo.Layer);
+            await chatConverterService.GetChannelAsync(requestInfo with { UserId = channelMemberUserId }, channelId, false, false, requestInfo.Layer);
 
         var updates = new TUpdates
         {
@@ -596,7 +596,7 @@ public class ChannelDomainEventHandler(
             RecentRequesters = [.. recentRequesters],
             RequestsPending = pendingRequestsCount
         };
-        var users = await userConverterService.GetUserListAsync(0, [.. recentRequesters]);
+        var users = await userConverterService.GetUserListAsync(RequestInfo.Empty, [.. recentRequesters]);
 
         var updates = new TUpdates
         {
@@ -616,7 +616,7 @@ public class ChannelDomainEventHandler(
 
     public async Task HandleAsync(IDomainEvent<ApproveJoinChannelSaga, ApproveJoinChannelSagaId, ApproveJoinChannelCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)
     {
-        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.ChannelId, false, false, domainEvent.AggregateEvent.RequestInfo.Layer);
         var updates = new TUpdates
         {
@@ -632,7 +632,7 @@ public class ChannelDomainEventHandler(
         // After joining a channel, no service message will be sent, so it is necessary to notify the current joiner.
         if (domainEvent.AggregateEvent.Approved && domainEvent.AggregateEvent.Broadcast)
         {
-            var channelForJoinedMember = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.UserId,
+            var channelForJoinedMember = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo,
                 domainEvent.AggregateEvent.ChannelId, false, false);
             var updatesForJoinedMember = new TUpdates
             {
@@ -653,7 +653,7 @@ public class ChannelDomainEventHandler(
         // Notify only the joining user when they join a channel. In supergroups, a join notification will be sent to everyone.
         if (domainEvent.AggregateEvent.Broadcast)
         {
-            var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+            var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo,
                 domainEvent.AggregateEvent.ChannelId, false, false, domainEvent.AggregateEvent.RequestInfo.Layer);
             var updates = new TUpdates
             {
@@ -671,7 +671,7 @@ public class ChannelDomainEventHandler(
     {
         if (domainEvent.AggregateEvent.Broadcast)
         {
-            var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+            var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo,
                 domainEvent.AggregateEvent.ChannelId, false, false, domainEvent.AggregateEvent.RequestInfo.Layer);
             var updates = new TUpdates
             {

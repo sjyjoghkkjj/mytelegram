@@ -29,7 +29,7 @@ internal sealed class EditBannedHandler(
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
 
             var channel = peerHelper.GetChannel(obj.Channel);
             var peer = peerHelper.GetPeer(obj.Participant);

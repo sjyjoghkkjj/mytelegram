@@ -22,7 +22,7 @@ internal sealed class ReadReactionsHandler(
         MyTelegram.Schema.Messages.RequestReadReactions obj)
     {
         var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
 
         return new TAffectedHistory
         {

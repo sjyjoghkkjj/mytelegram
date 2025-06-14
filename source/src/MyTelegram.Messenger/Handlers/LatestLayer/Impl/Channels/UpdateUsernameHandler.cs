@@ -40,7 +40,7 @@ internal sealed class UpdateUsernameHandler(
                 }
             }
 
-            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
             var channelReadModel = await channelAppService.GetAsync(inputChannel.ChannelId);
             var oldUserName = channelReadModel.UserName;
             if (string.Equals(obj.Username, oldUserName, StringComparison.OrdinalIgnoreCase))

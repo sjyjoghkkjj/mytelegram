@@ -17,7 +17,8 @@ public record SessionRequestInput(
     long ServerSalt,
     int Layer,
     long Date,
-    DeviceType DeviceType
+    DeviceType DeviceType,
+    long AccessHashKeyId
 ) : RequestInput(
     ConnectionId,
     RequestId,
@@ -31,5 +32,6 @@ public record SessionRequestInput(
     Date,
     DeviceType,
     ClientIp,
-    RequestSessionId
+    RequestSessionId,
+    AccessHashKeyId
 );

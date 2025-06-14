@@ -37,7 +37,7 @@ public class QueuedObjectMessageSender(
         List<long>? excludeUserIds = null
         ) where TData : IObject
     {
-        sessionMessageQueueProcessor.Enqueue(new LayeredPushMessageCreatedIntegrationEvent((int)peer.PeerType,
+        sessionMessageQueueProcessor.Enqueue(new LayeredPushMessageCreatedIntegrationEvent(peer.PeerType,
                 peer.PeerId,
                 data.ToBytes(),
                 excludeAuthKeyId,
@@ -89,7 +89,7 @@ public class QueuedObjectMessageSender(
         }
 
         sessionMessageQueueProcessor.Enqueue(new LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
-                (int)peer.PeerType,
+               peer.PeerType,
                 peer.PeerId,
                 data.ToBytes(),
                 excludeAuthKeyId,

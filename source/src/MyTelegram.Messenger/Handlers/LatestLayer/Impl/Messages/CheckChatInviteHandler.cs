@@ -58,7 +58,7 @@ internal sealed class CheckChatInviteHandler(
         {
             if (channelMemberReadModel != null)
             {
-                var channel = chatConverterService.ToChannel(input.UserId, channelReadModel, chatPhoto,
+                var channel = chatConverterService.ToChannel(input, channelReadModel, chatPhoto,
                     channelMemberReadModel, null, input.Layer);
 
                 return new TChatInviteAlready

@@ -26,7 +26,7 @@ internal sealed class DeleteExportedChatInviteHandler(
             case TInputPeerChannel inputPeerChannel:
                 {
                     var link = chatInviteLinkHelper.GetHashFromLink(obj.Link);
-                    await accessHashHelper.CheckAccessHashAsync(inputPeerChannel);
+                    await accessHashHelper.CheckAccessHashAsync(input, inputPeerChannel);
                     var chatInviteReadModel = await queryProcessor.ProcessAsync(new GetChatInviteQuery(inputPeerChannel.ChannelId, link));
                     if (chatInviteReadModel == null)
                     {

@@ -36,7 +36,7 @@ internal sealed class GetMessagesViewsHandler : RpcResultObjectHandler<MyTelegra
     protected override async Task<MyTelegram.Schema.Messages.IMessageViews> HandleCoreAsync(IRequestInput input,
         RequestGetMessagesViews obj)
     {
-        await _accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await _accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         // todo:increment==false,only execute query
         var peer = _peerHelper.GetPeer(obj.Peer, input.UserId);
         if (peer.PeerType == PeerType.Channel)

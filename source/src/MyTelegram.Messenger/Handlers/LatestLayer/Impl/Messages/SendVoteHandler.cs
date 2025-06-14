@@ -26,7 +26,7 @@ internal sealed class SendVoteHandler(
     protected override async Task<IUpdates> HandleCoreAsync(IRequestInput input,
         RequestSendVote obj)
     {
-        await accessHashHelper.CheckAccessHashAsync(obj.Peer);
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
 
         var peer = peerHelper.GetPeer(obj.Peer);
         var pollId = await queryProcessor.ProcessAsync(new GetPollIdByMessageIdQuery(peer.PeerId, obj.MsgId), default);

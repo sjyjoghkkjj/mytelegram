@@ -4,7 +4,7 @@ internal sealed class GetHistoryConverterService(IUserConverterService userConve
     IMessageConverterService messageConverterService
     ) : IGetHistoryConverterService, ITransientDependency
 {
-    public IMessages ToMessages(GetMessageOutput output, int layer)
+    public IMessages ToMessages(IRequestWithAccessHashKeyId request, GetMessageOutput output, int layer)
     {
         var messages = messageConverterService.ToMessageList(output.SelfUserId,
             output.MessageList,
@@ -13,14 +13,14 @@ internal sealed class GetHistoryConverterService(IUserConverterService userConve
             output.UserReactionList,
             layer);
 
-        var users = userConverterService.ToUserList(output.SelfUserId,
+        var users = userConverterService.ToUserList(request,
             output.UserList,
             output.PhotoList,
             output.ContactList,
             output.PrivacyList,
             layer);
 
-        var channels = chatConverterService.ToChannelList(output.SelfUserId,
+        var channels = chatConverterService.ToChannelList(request,
             output.ChannelList,
             output.PhotoList,
             output.ChannelMemberList,

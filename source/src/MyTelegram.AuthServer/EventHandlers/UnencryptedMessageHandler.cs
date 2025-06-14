@@ -48,6 +48,7 @@ public class UnencryptedMessageHandler(
                     eventData.Date,
                     DeviceType.Unknown,
                     eventData.ClientIp,
+                    0,
                     0
                 ),
                 obj

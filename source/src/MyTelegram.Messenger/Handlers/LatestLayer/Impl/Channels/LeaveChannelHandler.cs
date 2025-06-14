@@ -26,7 +26,7 @@ internal sealed class LeaveChannelHandler(
     {
         if (obj.Channel is TInputChannel inputChannel)
         {
-            await accessHashHelper.CheckAccessHashAsync(inputChannel.ChannelId, inputChannel.AccessHash);
+            await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
             var channel = peerHelper.GetChannel(obj.Channel);
             var command = new LeaveChannelCommand(ChannelMemberId.Create(channel.PeerId, input.UserId),
                 input.ToRequestInfo(),

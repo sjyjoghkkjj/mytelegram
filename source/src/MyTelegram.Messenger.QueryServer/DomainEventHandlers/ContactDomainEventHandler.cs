@@ -25,7 +25,7 @@ public class ContactDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<ContactAggregate, ContactId, ContactAddedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.SelfUserId,
+        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.TargetUserId,
             true,
             false,
@@ -53,7 +53,7 @@ public class ContactDomainEventHandler(
     public async Task HandleAsync(IDomainEvent<ContactAggregate, ContactId, ContactDeletedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.TargetUid,
             true, false,
             domainEvent.AggregateEvent.RequestInfo.Layer
@@ -78,13 +78,13 @@ public class ContactDomainEventHandler(
         IDomainEvent<ContactAggregate, ContactId, ContactProfilePhotoChangedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.SelfUserId,
+        var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.RequestInfo,
             domainEvent.AggregateEvent.TargetUserId,
             false,
             false,
             domainEvent.AggregateEvent.RequestInfo.Layer
         );
-        var newPhotoId= domainEvent.AggregateEvent.PhotoId;
+        var newPhotoId = domainEvent.AggregateEvent.PhotoId;
         if (newPhotoId == 0)
         {
             switch (user.Photo)
@@ -119,7 +119,7 @@ public class ContactDomainEventHandler(
             .Where(p => p.UserId > 0)
             .Select(p => new TImportedContact { ClientId = p.ClientId, UserId = p.UserId }).ToList();
         var userIds = importedContacts.Select(p => p.UserId).ToList();
-        var users = await userConverterService.GetUserListAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
+        var users = await userConverterService.GetUserListAsync(domainEvent.AggregateEvent.RequestInfo,
             userIds, true, false, domainEvent.AggregateEvent.RequestInfo.Layer
         );
 
