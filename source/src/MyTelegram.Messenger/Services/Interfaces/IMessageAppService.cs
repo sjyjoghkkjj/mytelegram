@@ -20,7 +20,7 @@ public interface IMessageAppService
         IReadOnlyCollection<IMessageReadModel> messageReadModels);
 
     Task<bool> CanSendAsPeerAsync(long channelId, long userId);
-    Task<List<long>> ProcessMessageEntitiesAsync(string? message, IList<IMessageEntity>? entities);
+    Task<List<long>> ProcessMessageEntitiesAsync(string? message, IList<IMessageEntity>? entities, Peer toPeer);
     List<string> GetHashtags(string? message);
     Task<bool> IsValidSendAsPeerAsync(long requestUserId, Peer toPeer, Peer? sendAsPeer);
 }

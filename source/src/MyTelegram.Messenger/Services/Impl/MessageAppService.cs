@@ -333,7 +333,7 @@ public class MessageAppService(
         var channelReadModel = await CheckChannelBannedRightsAsync(input);
 
         var entities = input.Entities ?? [];
-        var mentionedUserIds = await ProcessMessageEntitiesAsync(input.Message, entities);
+        var mentionedUserIds = await ProcessMessageEntitiesAsync(input.Message, entities, input.ToPeer);
         if (entities.Count == 0)
         {
             entities = null;
@@ -499,7 +499,7 @@ public class MessageAppService(
         }
     }
 
-    public Task<List<long>> ProcessMessageEntitiesAsync(string? message, IList<IMessageEntity>? entities)
+    public Task<List<long>> ProcessMessageEntitiesAsync(string? message, IList<IMessageEntity>? entities, Peer toPeer)
     {
         if (string.IsNullOrEmpty(message))
         {
@@ -508,10 +508,10 @@ public class MessageAppService(
 
         ProcessMessageEntityHashtag(message, entities);
         ProcessMessageEntityUrlList(message, entities);
-        return ProcessMessageEntityMentionAsync(message, entities);
+        return ProcessMessageEntityMentionAsync(message, entities, toPeer);
     }
 
-    private async Task<List<long>> ProcessMessageEntityMentionAsync(string message, IList<IMessageEntity>? entities)
+    private async Task<List<long>> ProcessMessageEntityMentionAsync(string message, IList<IMessageEntity>? entities, Peer toPeer)
     {
         var mentionsAndUserNames = GetMentions(message);
         var mentions = mentionsAndUserNames.mentions;
@@ -541,10 +541,6 @@ public class MessageAppService(
 
         if (mentionedUserNames.Count > 0)
         {
-            var mentionedUsers =
-                await queryProcessor.ProcessAsync(new GetUserNameListByNamesQuery(mentionedUserNames, PeerType.User));
-            mentionedUserIds.AddRange(mentionedUsers.Select(p => p.PeerId).Distinct().ToList());
-
             entities ??= [];
             foreach (var messageEntityMention in mentions)
             {
@@ -552,29 +548,23 @@ public class MessageAppService(
             }
         }
 
-        return mentionedUserIds;
-    }
-
-    private (List<TMessageEntityMention> mentions, List<string> userNameList) GetMentions(string message)
-    {
-        var pattern = "@(\\w{4,40})";
-        var mentions = new List<TMessageEntityMention>();
-        var matches = Regex.Matches(message, pattern);
-        var userNameList = new List<string>();
-        foreach (Match match in matches)
+        if (toPeer.PeerType == PeerType.Channel)
         {
-            if (match.Success)
-            {
-                mentions.Add(new TMessageEntityMention
-                {
-                    Offset = match.Index,
-                    Length = match.Length
-                });
-                userNameList.Add(match.Value[1..]);
-            }
+            var mentionedUsers =
+                await queryProcessor.ProcessAsync(new GetUserNameListByNamesQuery(mentionedUserNames, PeerType.User));
+            mentionedUserIds.AddRange(mentionedUsers.Select(p => p.PeerId).Distinct().ToList());
+
+            var memberUserIds =
+                await queryProcessor.ProcessAsync(new GetChannelMemberIdListQuery(toPeer.PeerId, mentionedUserIds));
+
+            mentionedUserIds = memberUserIds.ToList();
+        }
+        else
+        {
+            mentionedUserIds = [];
         }
 
-        return (mentions, userNameList);
+        return mentionedUserIds;
     }
 
     private void ProcessMessageEntityUrlList(string message, IList<IMessageEntity>? entities)

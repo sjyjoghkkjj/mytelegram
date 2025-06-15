@@ -96,7 +96,7 @@ internal sealed class EditMessageHandler(
         }
 
         var entities = obj.Entities ?? [];
-        await messageAppService.ProcessMessageEntitiesAsync(obj.Message, entities);
+        await messageAppService.ProcessMessageEntitiesAsync(obj.Message, entities, peer);
         if (entities.Count == 0)
         {
             entities = null;
