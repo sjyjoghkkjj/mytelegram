@@ -17,6 +17,7 @@ internal sealed class GetPeerSettingsHandler(
     IQueryProcessor queryProcessor,
     IAccessHashHelper accessHashHelper,
     IContactAppService contactAppService,
+    IChannelAppService channelAppService,
     ILayeredService<IPeerSettingsConverter> layeredService)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetPeerSettings,
             MyTelegram.Schema.Messages.IPeerSettings>,
@@ -30,6 +31,13 @@ internal sealed class GetPeerSettingsHandler(
         await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         var userId = input.UserId;
         var peer = peerHelper.GetPeer(obj.Peer, userId);
+		if (peer.PeerType == PeerType.Channel)
+        {
+            if (!await channelAppService.SendRpcErrorIfNotChannelMemberAsync(input, peer.PeerId))
+            {
+                return null!;
+            }
+        }
         if (peer.PeerId == MyTelegramConsts.OfficialUserId || peer.PeerType == PeerType.Self)
         {
             return new MyTelegram.Schema.Messages.TPeerSettings

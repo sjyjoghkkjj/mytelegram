@@ -52,6 +52,11 @@ internal sealed class GetFullChannelHandler(
                 RpcErrors.RpcErrors400.ChannelInvalid.ThrowRpcError();
             }
 
+            if (await channelAppService.SendRpcErrorIfNotChannelMemberAsync(input, channelReadModel!))
+            {
+                return null!;
+            }
+
             var dialogReadModel = await queryProcessor.ProcessAsync(
                 new GetDialogByIdQuery(DialogId.Create(input.UserId, PeerType.Channel, channelId).Value));
             if (dialogReadModel == null)

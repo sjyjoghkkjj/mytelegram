@@ -17,6 +17,7 @@ internal sealed class GetHistoryHandler(
     IQueryProcessor queryProcessor,
     IPeerHelper peerHelper,
     IAccessHashHelper accessHashHelper,
+    IChannelAppService channelAppService,
     IGetHistoryConverterService getHistoryConverterService)
     : RpcResultObjectHandler<RequestGetHistory, IMessages>,
         IGetHistoryHandler
@@ -42,6 +43,12 @@ internal sealed class GetHistoryHandler(
                     Messages = [],
                     Users = []
                 };
+            }
+
+            var channelReadModel = await channelAppService.GetAsync(peer.PeerId);
+            if (await channelAppService.SendRpcErrorIfNotChannelMemberAsync(input, channelReadModel!))
+            {
+                return null!;
             }
         }
 

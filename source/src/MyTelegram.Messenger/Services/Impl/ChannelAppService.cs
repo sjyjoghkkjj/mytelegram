@@ -2,7 +2,10 @@
 
 public class ChannelAppService(IQueryProcessor queryProcessor,
     IReadModelCacheHelper<IChannelReadModel> channelReadModelCacheHelper,
-    IReadModelCacheHelper<IChannelFullReadModel> channelFullReadModelCacheHelper) : ReadModelWithCacheAppService<IChannelReadModel>(channelReadModelCacheHelper), IChannelAppService, ITransientDependency
+    IRpcErrorHelper rpcErrorHelper,
+    IReadModelCacheHelper<IChannelFullReadModel> channelFullReadModelCacheHelper) :
+    ReadModelWithCacheAppService<IChannelReadModel>(channelReadModelCacheHelper),
+    IChannelAppService, ITransientDependency
 {
     public Task<IChannelFullReadModel?> GetChannelFullAsync(long channelId)
     {
@@ -26,5 +29,36 @@ public class ChannelAppService(IQueryProcessor queryProcessor,
     protected override Task<IReadOnlyCollection<IChannelReadModel>> GetReadModelListAsync(List<long> ids)
     {
         return queryProcessor.ProcessAsync(new GetChannelByChannelIdListQuery(ids));
+    }
+
+    public async Task<bool> IsChannelMemberAsync(long userId, long channelId)
+    {
+        var channelMemberReadModel = await queryProcessor
+            .ProcessAsync(new GetChannelMemberByUserIdQuery(channelId, userId));
+
+        return channelMemberReadModel != null;
+    }
+
+
+
+    public async Task<bool> SendRpcErrorIfNotChannelMemberAsync(IRequestInput input, long channelId)
+    {
+        var channelReadModel = await GetAsync(channelId);
+        return await SendRpcErrorIfNotChannelMemberAsync(input, channelReadModel);
+    }
+
+    public async Task<bool> SendRpcErrorIfNotChannelMemberAsync(IRequestInput input, IChannelReadModel channelReadModel)
+    {
+        if (string.IsNullOrEmpty(channelReadModel.UserName))
+        {
+            if (!await IsChannelMemberAsync(input.UserId, channelReadModel.ChannelId))
+            {
+                await rpcErrorHelper.ThrowRpcErrorAsync(input, RpcErrors.RpcErrors400.ChannelPrivate);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 }
