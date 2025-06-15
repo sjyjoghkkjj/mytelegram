@@ -20,6 +20,7 @@
 internal sealed class EditBannedHandler(
     IPeerHelper peerHelper,
     ICommandBus commandBus,
+    IChannelAdminRightsChecker channelAdminRightsChecker,
     IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestEditBanned, MyTelegram.Schema.IUpdates>,
         Channels.IEditBannedHandler
@@ -30,6 +31,8 @@ internal sealed class EditBannedHandler(
         if (obj.Channel is TInputChannel inputChannel)
         {
             await accessHashHelper.CheckAccessHashAsync(input, inputChannel.ChannelId, inputChannel.AccessHash, AccessHashType.Channel);
+            await channelAdminRightsChecker.CheckAdminRightAsync(inputChannel.ChannelId, input.UserId,
+                p => p.AdminRights.BanUsers, RpcErrors.RpcErrors400.ChatAdminRequired);
 
             var channel = peerHelper.GetChannel(obj.Channel);
             var peer = peerHelper.GetPeer(obj.Participant);
