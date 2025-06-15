@@ -41,6 +41,7 @@ public class UserDomainEventHandler(
             domainEvent.AggregateEvent.RequestInfo.PermAuthKeyId,
             userId));
         var user = await userConverterService.GetUserAsync(domainEvent.AggregateEvent.RequestInfo, userId, layer: domainEvent.AggregateEvent.RequestInfo.Layer);
+        user.Self = true;
         var r = layeredAuthorizationService.GetConverter(domainEvent.AggregateEvent.RequestInfo.Layer)
             .CreateAuthorization(user);
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo,
