@@ -130,6 +130,7 @@ public class ContactAppService(
                 var userReadModels2 =
                     await queryProcessor.ProcessAsync(new SearchUserByKeywordQuery(keyword, defaultLimit));
                 allUserReadModels.AddRange(userReadModels2);
+                allUserReadModels = allUserReadModels.DistinctBy(p => p.UserId).ToList();
             }
 
             var channelReadModels = await channelAppService.GetListAsync(channelIdList);
