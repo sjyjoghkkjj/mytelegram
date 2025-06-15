@@ -10,10 +10,10 @@ namespace MyTelegram.Schema.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.markDialogUnread" />
 ///</summary>
-[TlObject(0xc286d98f)]
+[TlObject(0x8c5006f8)]
 public sealed class RequestMarkDialogUnread : IRequest<IBool>
 {
-    public uint ConstructorId => 0xc286d98f;
+    public uint ConstructorId => 0x8c5006f8;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -24,6 +24,7 @@ public sealed class RequestMarkDialogUnread : IRequest<IBool>
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool Unread { get; set; }
+    public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
 
     ///<summary>
     /// Dialog
@@ -34,6 +35,7 @@ public sealed class RequestMarkDialogUnread : IRequest<IBool>
     public void ComputeFlag()
     {
         if (Unread) { Flags[0] = true; }
+        if (ParentPeer != null) { Flags[1] = true; }
 
     }
 
@@ -42,6 +44,7 @@ public sealed class RequestMarkDialogUnread : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
+        if (Flags[1]) { writer.Write(ParentPeer); }
         writer.Write(Peer);
     }
 
@@ -49,6 +52,7 @@ public sealed class RequestMarkDialogUnread : IRequest<IBool>
     {
         Flags = reader.ReadBitArray();
         if (Flags[0]) { Unread = true; }
+        if (Flags[1]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
         Peer = reader.Read<MyTelegram.Schema.IInputDialogPeer>();
     }
 }

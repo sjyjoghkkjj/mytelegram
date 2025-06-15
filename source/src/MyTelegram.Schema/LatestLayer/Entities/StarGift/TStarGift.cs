@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Represents a <a href="https://corefork.telegram.org/api/gifts">star gift, see here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/constructor/starGift" />
 ///</summary>
-[TlObject(0x2cc73c8)]
+[TlObject(0xc62aca28)]
 public sealed class TStarGift : IStarGift
 {
-    public uint ConstructorId => 0x2cc73c8;
+    public uint ConstructorId => 0xc62aca28;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -59,6 +59,7 @@ public sealed class TStarGift : IStarGift
     /// For limited-supply gifts: the total number of gifts that was available in the initial supply.
     ///</summary>
     public int? AvailabilityTotal { get; set; }
+    public long? AvailabilityResale { get; set; }
 
     ///<summary>
     /// The receiver of this gift may convert it to this many Telegram Stars, instead of displaying it on their profile page.<br><code>convert_stars</code> will be equal to <code>stars</code> only if the gift was bought using recently bought Telegram Stars, otherwise it will be less than <code>stars</code>.
@@ -75,6 +76,8 @@ public sealed class TStarGift : IStarGift
     ///</summary>
     public int? LastSaleDate { get; set; }
     public long? UpgradeStars { get; set; }
+    public long? ResellMinStars { get; set; }
+    public string? Title { get; set; }
 
     public void ComputeFlag()
     {
@@ -83,9 +86,12 @@ public sealed class TStarGift : IStarGift
         if (Birthday) { Flags[2] = true; }
         if (/*AvailabilityRemains != 0 && */AvailabilityRemains.HasValue) { Flags[0] = true; }
         if (/*AvailabilityTotal != 0 && */AvailabilityTotal.HasValue) { Flags[0] = true; }
+        if (/*AvailabilityResale != 0 &&*/ AvailabilityResale.HasValue) { Flags[4] = true; }
         if (/*FirstSaleDate != 0 && */FirstSaleDate.HasValue) { Flags[1] = true; }
         if (/*LastSaleDate != 0 && */LastSaleDate.HasValue) { Flags[1] = true; }
         if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags[3] = true; }
+        if (/*ResellMinStars != 0 &&*/ ResellMinStars.HasValue) { Flags[4] = true; }
+        if (Title != null) { Flags[5] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -98,10 +104,13 @@ public sealed class TStarGift : IStarGift
         writer.Write(Stars);
         if (Flags[0]) { writer.Write(AvailabilityRemains.Value); }
         if (Flags[0]) { writer.Write(AvailabilityTotal.Value); }
+        if (Flags[4]) { writer.Write(AvailabilityResale.Value); }
         writer.Write(ConvertStars);
         if (Flags[1]) { writer.Write(FirstSaleDate.Value); }
         if (Flags[1]) { writer.Write(LastSaleDate.Value); }
         if (Flags[3]) { writer.Write(UpgradeStars.Value); }
+        if (Flags[4]) { writer.Write(ResellMinStars.Value); }
+        if (Flags[5]) { writer.Write(Title); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -115,9 +124,12 @@ public sealed class TStarGift : IStarGift
         Stars = reader.ReadInt64();
         if (Flags[0]) { AvailabilityRemains = reader.ReadInt32(); }
         if (Flags[0]) { AvailabilityTotal = reader.ReadInt32(); }
+        if (Flags[4]) { AvailabilityResale = reader.ReadInt64(); }
         ConvertStars = reader.ReadInt64();
         if (Flags[1]) { FirstSaleDate = reader.ReadInt32(); }
         if (Flags[1]) { LastSaleDate = reader.ReadInt32(); }
         if (Flags[3]) { UpgradeStars = reader.ReadInt64(); }
+        if (Flags[4]) { ResellMinStars = reader.ReadInt64(); }
+        if (Flags[5]) { Title = reader.ReadString(); }
     }
 }

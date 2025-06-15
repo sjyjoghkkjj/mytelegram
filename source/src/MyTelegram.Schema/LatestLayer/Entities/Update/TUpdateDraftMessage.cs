@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Notifies a change of a message <a href="https://corefork.telegram.org/api/drafts">draft</a>.
 /// See <a href="https://corefork.telegram.org/constructor/updateDraftMessage" />
 ///</summary>
-[TlObject(0x1b49ec6d)]
+[TlObject(0xedfc111e)]
 public sealed class TUpdateDraftMessage : IUpdate
 {
-    public uint ConstructorId => 0x1b49ec6d;
+    public uint ConstructorId => 0xedfc111e;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -26,6 +26,7 @@ public sealed class TUpdateDraftMessage : IUpdate
     /// ID of the <a href="https://corefork.telegram.org/api/forum#forum-topics">forum topic</a> to which the draft is associated
     ///</summary>
     public int? TopMsgId { get; set; }
+    public MyTelegram.Schema.IPeer? SavedPeerId { get; set; }
 
     ///<summary>
     /// The draft
@@ -36,6 +37,7 @@ public sealed class TUpdateDraftMessage : IUpdate
     public void ComputeFlag()
     {
         if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
+        if (SavedPeerId != null) { Flags[1] = true; }
 
     }
 
@@ -46,6 +48,7 @@ public sealed class TUpdateDraftMessage : IUpdate
         writer.Write(Flags);
         writer.Write(Peer);
         if (Flags[0]) { writer.Write(TopMsgId.Value); }
+        if (Flags[1]) { writer.Write(SavedPeerId); }
         writer.Write(Draft);
     }
 
@@ -54,6 +57,7 @@ public sealed class TUpdateDraftMessage : IUpdate
         Flags = reader.ReadBitArray();
         Peer = reader.Read<MyTelegram.Schema.IPeer>();
         if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
+        if (Flags[1]) { SavedPeerId = reader.Read<MyTelegram.Schema.IPeer>(); }
         Draft = reader.Read<MyTelegram.Schema.IDraftMessage>();
     }
 }

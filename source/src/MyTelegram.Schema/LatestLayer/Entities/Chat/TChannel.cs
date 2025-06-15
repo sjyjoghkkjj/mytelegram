@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Channel/supergroup infoWhen updating the <a href="https://corefork.telegram.org/api/peers">local peer database</a>, all fields from the newly received constructor take priority over the old constructor cached locally (including by removing fields that aren't set in the new constructor).The only exception to the above rule is when the <code>min</code> flag is set, in which case <strong>only</strong> the following fields must be applied over any locally stored version:See <a href="https://github.com/tdlib/td/blob/a24af0992245f838f2b4b418a0a2d5fa9caa27b5/td/telegram/ChatManager.cpp#L8329">here »</a> for an implementation of the logic to use when updating the <a href="https://corefork.telegram.org/api/peers">local user peer database</a>.
 /// See <a href="https://corefork.telegram.org/constructor/channel" />
 ///</summary>
-[TlObject(0x7482147e)]
+[TlObject(0xfe685355)]
 public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
 {
-    public uint ConstructorId => 0x7482147e;
+    public uint ConstructorId => 0xfe685355;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -164,6 +164,10 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool SignatureProfiles { get; set; }
+    public bool Autotranslation { get; set; }
+    public bool BroadcastMessagesAllowed { get; set; }
+    public bool Monoforum { get; set; }
+    public bool ForumTabs { get; set; }
 
     ///<summary>
     /// ID of the channel, see <a href="https://corefork.telegram.org/api/peers#peer-id">here »</a> for more info
@@ -263,6 +267,7 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
     public int? SubscriptionUntilDate { get; set; }
     public long? BotVerificationIcon { get; set; }
     public long? SendPaidMessagesStars { get; set; }
+    public long? LinkedMonoforumId { get; set; }
 
     public void ComputeFlag()
     {
@@ -290,6 +295,10 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         if (StoriesHiddenMin) { Flags2[2] = true; }
         if (StoriesUnavailable) { Flags2[3] = true; }
         if (SignatureProfiles) { Flags2[12] = true; }
+        if (Autotranslation) { Flags2[15] = true; }
+        if (BroadcastMessagesAllowed) { Flags2[16] = true; }
+        if (Monoforum) { Flags2[17] = true; }
+        if (ForumTabs) { Flags2[19] = true; }
         if (/*AccessHash != 0 &&*/ AccessHash.HasValue) { Flags[13] = true; }
         if (Username != null) { Flags[6] = true; }
         if (RestrictionReason?.Count > 0) { Flags[9] = true; }
@@ -306,6 +315,7 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags2[11] = true; }
         if (/*BotVerificationIcon != 0 &&*/ BotVerificationIcon.HasValue) { Flags2[13] = true; }
         if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2[14] = true; }
+        if (/*LinkedMonoforumId != 0 &&*/ LinkedMonoforumId.HasValue) { Flags2[18] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -334,6 +344,7 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         if (Flags2[11]) { writer.Write(SubscriptionUntilDate.Value); }
         if (Flags2[13]) { writer.Write(BotVerificationIcon.Value); }
         if (Flags2[14]) { writer.Write(SendPaidMessagesStars.Value); }
+        if (Flags2[18]) { writer.Write(LinkedMonoforumId.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -364,6 +375,10 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         if (Flags2[2]) { StoriesHiddenMin = true; }
         if (Flags2[3]) { StoriesUnavailable = true; }
         if (Flags2[12]) { SignatureProfiles = true; }
+        if (Flags2[15]) { Autotranslation = true; }
+        if (Flags2[16]) { BroadcastMessagesAllowed = true; }
+        if (Flags2[17]) { Monoforum = true; }
+        if (Flags2[19]) { ForumTabs = true; }
         Id = reader.ReadInt64();
         if (Flags[13]) { AccessHash = reader.ReadInt64(); }
         Title = reader.ReadString();
@@ -384,5 +399,6 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         if (Flags2[11]) { SubscriptionUntilDate = reader.ReadInt32(); }
         if (Flags2[13]) { BotVerificationIcon = reader.ReadInt64(); }
         if (Flags2[14]) { SendPaidMessagesStars = reader.ReadInt64(); }
+        if (Flags2[18]) { LinkedMonoforumId = reader.ReadInt64(); }
     }
 }

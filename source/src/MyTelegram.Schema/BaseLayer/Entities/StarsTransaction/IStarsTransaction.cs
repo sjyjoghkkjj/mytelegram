@@ -40,6 +40,7 @@ public interface IStarsTransaction : IObject
     bool Reaction { get; set; }
     bool StargiftUpgrade { get; set; }
     bool BusinessTransfer { get; set; }
+    bool StargiftResale { get; set; }
 
     ///<summary>
     /// Transaction ID.

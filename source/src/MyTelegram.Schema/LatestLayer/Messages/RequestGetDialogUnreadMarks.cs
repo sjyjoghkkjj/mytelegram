@@ -7,25 +7,29 @@ namespace MyTelegram.Schema.Messages;
 /// Get dialogs manually marked as unread
 /// See <a href="https://corefork.telegram.org/method/messages.getDialogUnreadMarks" />
 ///</summary>
-[TlObject(0x22e24e22)]
+[TlObject(0x21202222)]
 public sealed class RequestGetDialogUnreadMarks : IRequest<TVector<MyTelegram.Schema.IDialogPeer>>
 {
-    public uint ConstructorId => 0x22e24e22;
+    public uint ConstructorId => 0x21202222;
+    public BitArray Flags { get; set; } = new BitArray(32);
+    public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
 
     public void ComputeFlag()
     {
-
+        if (ParentPeer != null) { Flags[0] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-
+        writer.Write(Flags);
+        if (Flags[0]) { writer.Write(ParentPeer); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
-
+        Flags = reader.ReadBitArray();
+        if (Flags[0]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

@@ -10,10 +10,13 @@ namespace MyTelegram.Schema.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.getSavedHistory" />
 ///</summary>
-[TlObject(0x3d9a414d)]
+[TlObject(0x998ab009)]
 public sealed class RequestGetSavedHistory : IRequest<MyTelegram.Schema.Messages.IMessages>
 {
-    public uint ConstructorId => 0x3d9a414d;
+    public uint ConstructorId => 0x998ab009;
+    public BitArray Flags { get; set; } = new BitArray(32);
+    public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
+
     ///<summary>
     /// Target peer
     /// See <a href="https://corefork.telegram.org/type/InputPeer" />
@@ -57,6 +60,7 @@ public sealed class RequestGetSavedHistory : IRequest<MyTelegram.Schema.Messages
 
     public void ComputeFlag()
     {
+        if (ParentPeer != null) { Flags[0] = true; }
 
     }
 
@@ -64,6 +68,8 @@ public sealed class RequestGetSavedHistory : IRequest<MyTelegram.Schema.Messages
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
+        if (Flags[0]) { writer.Write(ParentPeer); }
         writer.Write(Peer);
         writer.Write(OffsetId);
         writer.Write(OffsetDate);
@@ -76,6 +82,8 @@ public sealed class RequestGetSavedHistory : IRequest<MyTelegram.Schema.Messages
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
+        Flags = reader.ReadBitArray();
+        if (Flags[0]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
         Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         OffsetId = reader.ReadInt32();
         OffsetDate = reader.ReadInt32();

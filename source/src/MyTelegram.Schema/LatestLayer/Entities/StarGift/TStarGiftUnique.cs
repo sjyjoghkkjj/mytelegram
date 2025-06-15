@@ -6,10 +6,10 @@ namespace MyTelegram.Schema;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/constructor/starGiftUnique" />
 ///</summary>
-[TlObject(0x5c62d151)]
+[TlObject(0x6411db89)]
 public sealed class TStarGiftUnique : IStarGift
 {
-    public uint ConstructorId => 0x5c62d151;
+    public uint ConstructorId => 0x6411db89;
     public BitArray Flags { get; set; } = new BitArray(32);
     public long Id { get; set; }
     public string Title { get; set; }
@@ -22,6 +22,7 @@ public sealed class TStarGiftUnique : IStarGift
     public int AvailabilityIssued { get; set; }
     public int AvailabilityTotal { get; set; }
     public string? GiftAddress { get; set; }
+    public long? ResellStars { get; set; }
 
     public void ComputeFlag()
     {
@@ -29,6 +30,7 @@ public sealed class TStarGiftUnique : IStarGift
         if (OwnerName != null) { Flags[1] = true; }
         if (OwnerAddress != null) { Flags[2] = true; }
         if (GiftAddress != null) { Flags[3] = true; }
+        if (/*ResellStars != 0 &&*/ ResellStars.HasValue) { Flags[4] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -47,6 +49,7 @@ public sealed class TStarGiftUnique : IStarGift
         writer.Write(AvailabilityIssued);
         writer.Write(AvailabilityTotal);
         if (Flags[3]) { writer.Write(GiftAddress); }
+        if (Flags[4]) { writer.Write(ResellStars.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -63,5 +66,6 @@ public sealed class TStarGiftUnique : IStarGift
         AvailabilityIssued = reader.ReadInt32();
         AvailabilityTotal = reader.ReadInt32();
         if (Flags[3]) { GiftAddress = reader.ReadString(); }
+        if (Flags[4]) { ResellStars = reader.ReadInt64(); }
     }
 }

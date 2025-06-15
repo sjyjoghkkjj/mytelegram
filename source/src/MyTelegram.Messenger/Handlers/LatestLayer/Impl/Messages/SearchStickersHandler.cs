@@ -9,6 +9,9 @@ internal sealed class SearchStickersHandler : RpcResultObjectHandler<MyTelegram.
     protected override Task<MyTelegram.Schema.Messages.IFoundStickers> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSearchStickers obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Messages.IFoundStickers>(new TFoundStickers
+        {
+            Stickers = []
+        });
     }
 }

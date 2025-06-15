@@ -238,6 +238,7 @@ services:
       # App__MediaOnly: ${App__MediaOnly}
       App__DatabaseName: ${App__DatabaseName}
       App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
+      App__AccessHashSecretKey: ${App__AccessHashSecretKey}
       # App__IdGeneratorGrpcServiceUrl: ${App__IdGeneratorGrpcServiceUrl}
       App__MessengerServerGrpcServiceUrl: ${App__MessengerServerGrpcServiceUrl}
       # App__DispatchUnknownObjectToMessengerServer: ${App__DispatchUnknownObjectToMessengerServer}
@@ -287,6 +288,7 @@ services:
       ConnectionStrings__Default: ${ConnectionStrings__Default}
       App__DatabaseName: ${App__DatabaseName}
       App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
+      App__AccessHashSecretKey: ${App__AccessHashSecretKey}
       # App__ThisDcId: ${App__ThisDcId}
       # App__MediaDcId: ${App__MediaDcId}
       # App__UploadRootPath: ${App__UploadRootPath}
@@ -317,6 +319,7 @@ services:
       ConnectionStrings__Default: ${ConnectionStrings__Default}
       App__DatabaseName: ${App__DatabaseName}
       App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
+      App__AccessHashSecretKey: ${App__AccessHashSecretKey}
       App__FileServerGrpcServiceUrl: ${App__FileServerGrpcServiceUrl}
       App__FixedVerifyCode: ${App__FixedVerifyCode}
       App__VerificationCodeLength: ${App__VerificationCodeLength}
@@ -407,6 +410,7 @@ services:
       ConnectionStrings__Default: ${ConnectionStrings__Default}
       App__DatabaseName: ${App__DatabaseName}
       App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
+      App__AccessHashSecretKey: ${App__AccessHashSecretKey}
       App__FileServerGrpcServiceUrl: ${App__FileServerGrpcServiceUrl}
       App__FixedVerifyCode: ${App__FixedVerifyCode}
       App__VerificationCodeLength: ${App__VerificationCodeLength}

@@ -6,10 +6,10 @@ namespace MyTelegram.Schema;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/constructor/savedStarGift" />
 ///</summary>
-[TlObject(0x6056dba5)]
+[TlObject(0xdfda0499)]
 public sealed class TSavedStarGift : ISavedStarGift
 {
-    public uint ConstructorId => 0x6056dba5;
+    public uint ConstructorId => 0xdfda0499;
     public BitArray Flags { get; set; } = new BitArray(32);
     public bool NameHidden { get; set; }
     public bool Unsaved { get; set; }
@@ -26,6 +26,8 @@ public sealed class TSavedStarGift : ISavedStarGift
     public long? UpgradeStars { get; set; }
     public int? CanExportAt { get; set; }
     public long? TransferStars { get; set; }
+    public int? CanTransferAt { get; set; }
+    public int? CanResellAt { get; set; }
 
     public void ComputeFlag()
     {
@@ -42,6 +44,8 @@ public sealed class TSavedStarGift : ISavedStarGift
         if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags[6] = true; }
         if (/*CanExportAt != 0 && */CanExportAt.HasValue) { Flags[7] = true; }
         if (/*TransferStars != 0 &&*/ TransferStars.HasValue) { Flags[8] = true; }
+        if (/*CanTransferAt != 0 && */CanTransferAt.HasValue) { Flags[13] = true; }
+        if (/*CanResellAt != 0 && */CanResellAt.HasValue) { Flags[14] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -59,6 +63,8 @@ public sealed class TSavedStarGift : ISavedStarGift
         if (Flags[6]) { writer.Write(UpgradeStars.Value); }
         if (Flags[7]) { writer.Write(CanExportAt.Value); }
         if (Flags[8]) { writer.Write(TransferStars.Value); }
+        if (Flags[13]) { writer.Write(CanTransferAt.Value); }
+        if (Flags[14]) { writer.Write(CanResellAt.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -79,5 +85,7 @@ public sealed class TSavedStarGift : ISavedStarGift
         if (Flags[6]) { UpgradeStars = reader.ReadInt64(); }
         if (Flags[7]) { CanExportAt = reader.ReadInt32(); }
         if (Flags[8]) { TransferStars = reader.ReadInt64(); }
+        if (Flags[13]) { CanTransferAt = reader.ReadInt32(); }
+        if (Flags[14]) { CanResellAt = reader.ReadInt32(); }
     }
 }

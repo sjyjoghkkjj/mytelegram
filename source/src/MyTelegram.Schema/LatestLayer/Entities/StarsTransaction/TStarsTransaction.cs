@@ -47,6 +47,7 @@ public sealed class TStarsTransaction : IStarsTransaction
     public bool Reaction { get; set; }
     public bool StargiftUpgrade { get; set; }
     public bool BusinessTransfer { get; set; }
+    public bool StargiftResale { get; set; }
 
     ///<summary>
     /// Transaction ID.
@@ -160,6 +161,7 @@ public sealed class TStarsTransaction : IStarsTransaction
         if (Reaction) { Flags[11] = true; }
         if (StargiftUpgrade) { Flags[18] = true; }
         if (BusinessTransfer) { Flags[21] = true; }
+        if (StargiftResale) { Flags[22] = true; }
         if (Title != null) { Flags[0] = true; }
         if (Description != null) { Flags[1] = true; }
         if (Photo != null) { Flags[2] = true; }
@@ -217,6 +219,7 @@ public sealed class TStarsTransaction : IStarsTransaction
         if (Flags[11]) { Reaction = true; }
         if (Flags[18]) { StargiftUpgrade = true; }
         if (Flags[21]) { BusinessTransfer = true; }
+        if (Flags[22]) { StargiftResale = true; }
         Id = reader.ReadString();
         Stars = reader.Read<MyTelegram.Schema.IStarsAmount>();
         Date = reader.ReadInt32();

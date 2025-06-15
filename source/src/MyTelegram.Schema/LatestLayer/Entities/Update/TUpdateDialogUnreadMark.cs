@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// The manual unread mark of a chat was changed
 /// See <a href="https://corefork.telegram.org/constructor/updateDialogUnreadMark" />
 ///</summary>
-[TlObject(0xe16459c3)]
+[TlObject(0xb658f23e)]
 public sealed class TUpdateDialogUnreadMark : IUpdate
 {
-    public uint ConstructorId => 0xe16459c3;
+    public uint ConstructorId => 0xb658f23e;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -27,11 +27,12 @@ public sealed class TUpdateDialogUnreadMark : IUpdate
     /// See <a href="https://corefork.telegram.org/type/DialogPeer" />
     ///</summary>
     public MyTelegram.Schema.IDialogPeer Peer { get; set; }
+    public MyTelegram.Schema.IPeer? SavedPeerId { get; set; }
 
     public void ComputeFlag()
     {
         if (Unread) { Flags[0] = true; }
-
+        if (SavedPeerId != null) { Flags[1] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -40,6 +41,7 @@ public sealed class TUpdateDialogUnreadMark : IUpdate
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
+        if (Flags[1]) { writer.Write(SavedPeerId); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -47,5 +49,6 @@ public sealed class TUpdateDialogUnreadMark : IUpdate
         Flags = reader.ReadBitArray();
         if (Flags[0]) { Unread = true; }
         Peer = reader.Read<MyTelegram.Schema.IDialogPeer>();
+        if (Flags[1]) { SavedPeerId = reader.Read<MyTelegram.Schema.IPeer>(); }
     }
 }

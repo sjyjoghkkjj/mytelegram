@@ -10,10 +10,10 @@ namespace MyTelegram.Schema.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.getUnreadReactions" />
 ///</summary>
-[TlObject(0x3223495b)]
+[TlObject(0xbd7f90ac)]
 public sealed class RequestGetUnreadReactions : IRequest<MyTelegram.Schema.Messages.IMessages>
 {
-    public uint ConstructorId => 0x3223495b;
+    public uint ConstructorId => 0xbd7f90ac;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -29,6 +29,7 @@ public sealed class RequestGetUnreadReactions : IRequest<MyTelegram.Schema.Messa
     /// If set, considers only reactions to messages within the specified <a href="https://corefork.telegram.org/api/forum#forum-topics">forum topic</a>
     ///</summary>
     public int? TopMsgId { get; set; }
+    public MyTelegram.Schema.IInputPeer? SavedPeerId { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/offsets">Offsets for pagination, for more info click here</a>
@@ -58,6 +59,7 @@ public sealed class RequestGetUnreadReactions : IRequest<MyTelegram.Schema.Messa
     public void ComputeFlag()
     {
         if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
+        if (SavedPeerId != null) { Flags[1] = true; }
 
     }
 
@@ -68,6 +70,7 @@ public sealed class RequestGetUnreadReactions : IRequest<MyTelegram.Schema.Messa
         writer.Write(Flags);
         writer.Write(Peer);
         if (Flags[0]) { writer.Write(TopMsgId.Value); }
+        if (Flags[1]) { writer.Write(SavedPeerId); }
         writer.Write(OffsetId);
         writer.Write(AddOffset);
         writer.Write(Limit);
@@ -80,6 +83,7 @@ public sealed class RequestGetUnreadReactions : IRequest<MyTelegram.Schema.Messa
         Flags = reader.ReadBitArray();
         Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
+        if (Flags[1]) { SavedPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
         OffsetId = reader.ReadInt32();
         AddOffset = reader.ReadInt32();
         Limit = reader.ReadInt32();

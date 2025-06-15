@@ -30,12 +30,14 @@ public class UpdatesResponseService(
                 {
                     if (updates.Users[i] is TUser user)
                     {
-                        var layeredUser = userResponseService.ToLayeredData(user, layer);
-                        layeredUser.AccessHash =
-                            accessHashHelper2.GenerateAccessHash(userId, accessHashKeyId, user.Id, AccessHashType.User);
-                        layeredUser.Self = userId == user.Id;
+                        updates.Users[i] = userResponseService.ToLayeredData(user, layer); ;
+                    }
 
-                        updates.Users[i] = layeredUser;
+                    if (updates.Users[i] is ILayeredUser layeredUser)
+                    {
+                        layeredUser.AccessHash =
+                            accessHashHelper2.GenerateAccessHash(userId, accessHashKeyId, layeredUser.Id, AccessHashType.User);
+                        layeredUser.Self = userId == layeredUser.Id;
                     }
                 }
 
@@ -43,10 +45,12 @@ public class UpdatesResponseService(
                 {
                     if (updates.Chats[i] is TChannel channel)
                     {
-                        var layeredChannel = channelResponseService.ToLayeredData(channel, layer);
-                        layeredChannel.AccessHash = accessHashHelper2.GenerateAccessHash(userId, accessHashKeyId, channel.Id, AccessHashType.Channel);
-                        
-                        updates.Chats[i] = layeredChannel;
+                        updates.Chats[i] = channelResponseService.ToLayeredData(channel, layer);
+                    }
+
+                    if (updates.Chats[i] is ILayeredChannel layeredChannel)
+                    {
+                        layeredChannel.AccessHash = accessHashHelper2.GenerateAccessHash(userId, accessHashKeyId, layeredChannel.Id, AccessHashType.Channel);
                     }
                 }
 

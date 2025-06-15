@@ -35,7 +35,7 @@ public sealed class RequestCreateConferenceCall : IRequest<MyTelegram.Schema.IUp
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(RandomId);
-        if (Flags[3]) { writer.Write(PublicKey); }
+        if (Flags[3]) { writer.WriteRawBytes(PublicKey); }
         if (Flags[3]) { writer.Write(Block); }
         if (Flags[3]) { writer.Write(Params); }
     }
@@ -47,7 +47,7 @@ public sealed class RequestCreateConferenceCall : IRequest<MyTelegram.Schema.IUp
         if (Flags[2]) { VideoStopped = true; }
         if (Flags[3]) { Join = true; }
         RandomId = reader.ReadInt32();
-        if (Flags[3]) { PublicKey = reader.ReadBytes(); }
+        if (Flags[3]) { PublicKey = reader.ReadInt256(); }
         if (Flags[3]) { Block = reader.ReadBytes(); }
         if (Flags[3]) { Params = reader.Read<MyTelegram.Schema.IDataJSON>(); }
     }

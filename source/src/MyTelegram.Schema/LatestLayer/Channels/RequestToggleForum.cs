@@ -12,10 +12,10 @@ namespace MyTelegram.Schema.Channels;
 /// 400 CHAT_NOT_MODIFIED No changes were made to chat information because the new information you passed is identical to the current information.
 /// See <a href="https://corefork.telegram.org/method/channels.toggleForum" />
 ///</summary>
-[TlObject(0xa4298b29)]
+[TlObject(0x3ff75734)]
 public sealed class RequestToggleForum : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0xa4298b29;
+    public uint ConstructorId => 0x3ff75734;
     ///<summary>
     /// Supergroup ID
     /// See <a href="https://corefork.telegram.org/type/InputChannel" />
@@ -27,6 +27,7 @@ public sealed class RequestToggleForum : IRequest<MyTelegram.Schema.IUpdates>
     /// See <a href="https://corefork.telegram.org/type/Bool" />
     ///</summary>
     public bool Enabled { get; set; }
+    public bool Tabs { get; set; }
 
     public void ComputeFlag()
     {
@@ -39,11 +40,13 @@ public sealed class RequestToggleForum : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(ConstructorId);
         writer.Write(Channel);
         writer.Write(Enabled);
+        writer.Write(Tabs);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
         Enabled = reader.Read();
+        Tabs = reader.Read();
     }
 }

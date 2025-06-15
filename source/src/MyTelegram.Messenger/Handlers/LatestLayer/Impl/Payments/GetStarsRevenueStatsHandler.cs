@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Payments;
+﻿using MyTelegram.Schema.Payments;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Payments;
 
 ///<summary>
 /// Get <a href="https://corefork.telegram.org/api/stars">Telegram Star revenue statistics »</a>.
@@ -13,6 +15,29 @@ internal sealed class GetStarsRevenueStatsHandler : RpcResultObjectHandler<MyTel
     protected override Task<MyTelegram.Schema.Payments.IStarsRevenueStats> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Payments.RequestGetStarsRevenueStats obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Payments.IStarsRevenueStats>(new TStarsRevenueStats
+        {
+            Status = new TStarsRevenueStatus
+            {
+                AvailableBalance = new TStarsAmount
+                {
+                    Amount = 10000
+                },
+                CurrentBalance = new TStarsAmount
+                {
+                    Amount = 10000
+                },
+                OverallRevenue = new TStarsAmount
+                {
+                    Amount = 10000
+                },
+                WithdrawalEnabled = false
+            },
+            RevenueGraph = new TStatsGraphError
+            {
+                Error = "Not implemented"
+            },
+            UsdRate = 1
+        });
     }
 }

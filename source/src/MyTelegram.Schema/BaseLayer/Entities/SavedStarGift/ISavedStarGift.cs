@@ -24,4 +24,6 @@ public interface ISavedStarGift : IObject
     long? UpgradeStars { get; set; }
     int? CanExportAt { get; set; }
     long? TransferStars { get; set; }
+    int? CanTransferAt { get; set; }
+    int? CanResellAt { get; set; }
 }

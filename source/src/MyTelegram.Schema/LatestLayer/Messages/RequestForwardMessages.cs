@@ -57,10 +57,10 @@ namespace MyTelegram.Schema.Messages;
 /// 400 YOU_BLOCKED_USER You blocked this user.
 /// See <a href="https://corefork.telegram.org/method/messages.forwardMessages" />
 ///</summary>
-[TlObject(0xbb9fa475)]
+[TlObject(0x38f0188c)]
 public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0xbb9fa475;
+    public uint ConstructorId => 0x38f0188c;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -134,6 +134,7 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
     /// Destination <a href="https://corefork.telegram.org/api/forum#forum-topics">forum topic</a>
     ///</summary>
     public int? TopMsgId { get; set; }
+    public MyTelegram.Schema.IInputReplyTo? ReplyTo { get; set; }
 
     ///<summary>
     /// Scheduled message date for scheduled messages
@@ -164,6 +165,7 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
         if (Noforwards) { Flags[14] = true; }
         if (AllowPaidFloodskip) { Flags[19] = true; }
         if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[9] = true; }
+        if (ReplyTo != null) { Flags[22] = true; }
         if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[10] = true; }
         if (SendAs != null) { Flags[13] = true; }
         if (QuickReplyShortcut != null) { Flags[17] = true; }
@@ -181,6 +183,7 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
         writer.Write(RandomId);
         writer.Write(ToPeer);
         if (Flags[9]) { writer.Write(TopMsgId.Value); }
+        if (Flags[22]) { writer.Write(ReplyTo); }
         if (Flags[10]) { writer.Write(ScheduleDate.Value); }
         if (Flags[13]) { writer.Write(SendAs); }
         if (Flags[17]) { writer.Write(QuickReplyShortcut); }
@@ -203,6 +206,7 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
         RandomId = reader.Read<TVector<long>>();
         ToPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
         if (Flags[9]) { TopMsgId = reader.ReadInt32(); }
+        if (Flags[22]) { ReplyTo = reader.Read<MyTelegram.Schema.IInputReplyTo>(); }
         if (Flags[10]) { ScheduleDate = reader.ReadInt32(); }
         if (Flags[13]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
         if (Flags[17]) { QuickReplyShortcut = reader.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }

@@ -16,10 +16,10 @@ namespace MyTelegram.Schema.Stories;
 /// 400 STORY_SEND_FLOOD_WEEKLY_%d You've hit the weekly story limit as specified by the <a href="https://corefork.telegram.org/api/config#stories-sent-weekly-limit-default"><code>stories_sent_weekly_limit_*</code> client configuration parameters</a>: wait for the specified number of seconds before posting a new story.
 /// See <a href="https://corefork.telegram.org/method/stories.canSendStory" />
 ///</summary>
-[TlObject(0xc7dfdfdd)]
-public sealed class RequestCanSendStory : IRequest<IBool>
+[TlObject(0x30eb63f0)]
+public sealed class RequestCanSendStory : IRequest<MyTelegram.Schema.Stories.ICanSendStoryCount>
 {
-    public uint ConstructorId => 0xc7dfdfdd;
+    public uint ConstructorId => 0x30eb63f0;
     ///<summary>
     /// The peer from which we wish to post stories.
     /// See <a href="https://corefork.telegram.org/type/InputPeer" />

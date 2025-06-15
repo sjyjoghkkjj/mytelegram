@@ -12,10 +12,10 @@ namespace MyTelegram.Schema.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.unpinAllMessages" />
 ///</summary>
-[TlObject(0xee22b9a8)]
+[TlObject(0x62dd747)]
 public sealed class RequestUnpinAllMessages : IRequest<MyTelegram.Schema.Messages.IAffectedHistory>
 {
-    public uint ConstructorId => 0xee22b9a8;
+    public uint ConstructorId => 0x62dd747;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -31,10 +31,12 @@ public sealed class RequestUnpinAllMessages : IRequest<MyTelegram.Schema.Message
     /// <a href="https://corefork.telegram.org/api/forum#forum-topics">Forum topic</a> where to unpin
     ///</summary>
     public int? TopMsgId { get; set; }
+    public MyTelegram.Schema.IInputPeer? SavedPeerId { get; set; }
 
     public void ComputeFlag()
     {
         if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
+        if (SavedPeerId != null) { Flags[1] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -44,6 +46,7 @@ public sealed class RequestUnpinAllMessages : IRequest<MyTelegram.Schema.Message
         writer.Write(Flags);
         writer.Write(Peer);
         if (Flags[0]) { writer.Write(TopMsgId.Value); }
+        if (Flags[1]) { writer.Write(SavedPeerId); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -51,5 +54,6 @@ public sealed class RequestUnpinAllMessages : IRequest<MyTelegram.Schema.Message
         Flags = reader.ReadBitArray();
         Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
+        if (Flags[1]) { SavedPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

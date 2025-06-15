@@ -13,6 +13,10 @@ internal sealed class GetStarsRevenueAdsAccountUrlHandler : RpcResultObjectHandl
     protected override Task<MyTelegram.Schema.Payments.IStarsRevenueAdsAccountUrl> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Payments.RequestGetStarsRevenueAdsAccountUrl obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Payments.IStarsRevenueAdsAccountUrl>(
+            new MyTelegram.Schema.Payments.TStarsRevenueAdsAccountUrl
+            {
+                Url = "https://ads.telegram.org/"
+            });
     }
 }

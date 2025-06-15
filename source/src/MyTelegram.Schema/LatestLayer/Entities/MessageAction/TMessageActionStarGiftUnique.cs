@@ -6,10 +6,10 @@ namespace MyTelegram.Schema;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/constructor/messageActionStarGiftUnique" />
 ///</summary>
-[TlObject(0xacdfcb81)]
+[TlObject(0x2e3ae60e)]
 public sealed class TMessageActionStarGiftUnique : IMessageAction
 {
-    public uint ConstructorId => 0xacdfcb81;
+    public uint ConstructorId => 0x2e3ae60e;
     public BitArray Flags { get; set; } = new BitArray(32);
     public bool Upgrade { get; set; }
     public bool Transferred { get; set; }
@@ -21,6 +21,9 @@ public sealed class TMessageActionStarGiftUnique : IMessageAction
     public MyTelegram.Schema.IPeer? FromId { get; set; }
     public MyTelegram.Schema.IPeer? Peer { get; set; }
     public long? SavedId { get; set; }
+    public long? ResaleStars { get; set; }
+    public int? CanTransferAt { get; set; }
+    public int? CanResellAt { get; set; }
 
     public void ComputeFlag()
     {
@@ -33,6 +36,9 @@ public sealed class TMessageActionStarGiftUnique : IMessageAction
         if (FromId != null) { Flags[6] = true; }
         if (Peer != null) { Flags[7] = true; }
         if (/*SavedId != 0 &&*/ SavedId.HasValue) { Flags[7] = true; }
+        if (/*ResaleStars != 0 &&*/ ResaleStars.HasValue) { Flags[8] = true; }
+        if (/*CanTransferAt != 0 && */CanTransferAt.HasValue) { Flags[9] = true; }
+        if (/*CanResellAt != 0 && */CanResellAt.HasValue) { Flags[10] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -46,6 +52,9 @@ public sealed class TMessageActionStarGiftUnique : IMessageAction
         if (Flags[6]) { writer.Write(FromId); }
         if (Flags[7]) { writer.Write(Peer); }
         if (Flags[7]) { writer.Write(SavedId.Value); }
+        if (Flags[8]) { writer.Write(ResaleStars.Value); }
+        if (Flags[9]) { writer.Write(CanTransferAt.Value); }
+        if (Flags[10]) { writer.Write(CanResellAt.Value); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -61,5 +70,8 @@ public sealed class TMessageActionStarGiftUnique : IMessageAction
         if (Flags[6]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
         if (Flags[7]) { Peer = reader.Read<MyTelegram.Schema.IPeer>(); }
         if (Flags[7]) { SavedId = reader.ReadInt64(); }
+        if (Flags[8]) { ResaleStars = reader.ReadInt64(); }
+        if (Flags[9]) { CanTransferAt = reader.ReadInt32(); }
+        if (Flags[10]) { CanResellAt = reader.ReadInt32(); }
     }
 }

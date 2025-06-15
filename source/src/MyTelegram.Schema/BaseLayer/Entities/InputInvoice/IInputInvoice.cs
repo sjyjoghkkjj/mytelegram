@@ -16,6 +16,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TInputInvoiceStarGiftTransfer), nameof(TInputInvoiceStarGiftTransfer))]
 [JsonDerivedType(typeof(TInputInvoicePremiumGiftStars), nameof(TInputInvoicePremiumGiftStars))]
 [JsonDerivedType(typeof(TInputInvoiceBusinessBotTransferStars), nameof(TInputInvoiceBusinessBotTransferStars))]
+[JsonDerivedType(typeof(TInputInvoiceStarGiftResale), nameof(TInputInvoiceStarGiftResale))]
 public interface IInputInvoice : IObject
 {
 

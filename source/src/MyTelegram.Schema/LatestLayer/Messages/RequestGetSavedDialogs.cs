@@ -7,10 +7,10 @@ namespace MyTelegram.Schema.Messages;
 /// Returns the current saved dialog list, see <a href="https://corefork.telegram.org/api/saved-messages">here »</a> for more info.
 /// See <a href="https://corefork.telegram.org/method/messages.getSavedDialogs" />
 ///</summary>
-[TlObject(0x5381d21a)]
+[TlObject(0x1e91fc99)]
 public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages.ISavedDialogs>
 {
-    public uint ConstructorId => 0x5381d21a;
+    public uint ConstructorId => 0x1e91fc99;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -21,6 +21,7 @@ public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool ExcludePinned { get; set; }
+    public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/offsets">Offsets for pagination, for more info click here</a>
@@ -51,6 +52,7 @@ public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages
     public void ComputeFlag()
     {
         if (ExcludePinned) { Flags[0] = true; }
+        if (ParentPeer != null) { Flags[1] = true; }
 
     }
 
@@ -59,6 +61,7 @@ public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
+        if (Flags[1]) { writer.Write(ParentPeer); }
         writer.Write(OffsetDate);
         writer.Write(OffsetId);
         writer.Write(OffsetPeer);
@@ -70,6 +73,7 @@ public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages
     {
         Flags = reader.ReadBitArray();
         if (Flags[0]) { ExcludePinned = true; }
+        if (Flags[1]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
         OffsetDate = reader.ReadInt32();
         OffsetId = reader.ReadInt32();
         OffsetPeer = reader.Read<MyTelegram.Schema.IInputPeer>();

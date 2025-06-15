@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// The specified <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a> messages were read
 /// See <a href="https://corefork.telegram.org/constructor/updateChannelReadMessagesContents" />
 ///</summary>
-[TlObject(0xea29055d)]
+[TlObject(0x25f324f7)]
 public sealed class TUpdateChannelReadMessagesContents : IUpdate
 {
-    public uint ConstructorId => 0xea29055d;
+    public uint ConstructorId => 0x25f324f7;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -25,6 +25,7 @@ public sealed class TUpdateChannelReadMessagesContents : IUpdate
     /// <a href="https://corefork.telegram.org/api/forum#forum-topics">Forum topic ID</a>.
     ///</summary>
     public int? TopMsgId { get; set; }
+    public MyTelegram.Schema.IPeer? SavedPeerId { get; set; }
 
     ///<summary>
     /// IDs of messages that were read
@@ -34,6 +35,7 @@ public sealed class TUpdateChannelReadMessagesContents : IUpdate
     public void ComputeFlag()
     {
         if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
+        if (SavedPeerId != null) { Flags[1] = true; }
 
     }
 
@@ -44,6 +46,7 @@ public sealed class TUpdateChannelReadMessagesContents : IUpdate
         writer.Write(Flags);
         writer.Write(ChannelId);
         if (Flags[0]) { writer.Write(TopMsgId.Value); }
+        if (Flags[1]) { writer.Write(SavedPeerId); }
         writer.Write(Messages);
     }
 
@@ -52,6 +55,7 @@ public sealed class TUpdateChannelReadMessagesContents : IUpdate
         Flags = reader.ReadBitArray();
         ChannelId = reader.ReadInt64();
         if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
+        if (Flags[1]) { SavedPeerId = reader.Read<MyTelegram.Schema.IPeer>(); }
         Messages = reader.Read<TVector<int>>();
     }
 }

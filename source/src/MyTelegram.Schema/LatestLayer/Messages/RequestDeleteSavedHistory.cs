@@ -10,14 +10,15 @@ namespace MyTelegram.Schema.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.deleteSavedHistory" />
 ///</summary>
-[TlObject(0x6e98102b)]
+[TlObject(0x4dc5085f)]
 public sealed class RequestDeleteSavedHistory : IRequest<MyTelegram.Schema.Messages.IAffectedHistory>
 {
-    public uint ConstructorId => 0x6e98102b;
+    public uint ConstructorId => 0x4dc5085f;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
     public BitArray Flags { get; set; } = new BitArray(32);
+    public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
 
     ///<summary>
     /// Peer, whose messages will be deleted from <a href="https://corefork.telegram.org/api/saved-messages">saved messages »</a>
@@ -42,6 +43,7 @@ public sealed class RequestDeleteSavedHistory : IRequest<MyTelegram.Schema.Messa
 
     public void ComputeFlag()
     {
+        if (ParentPeer != null) { Flags[0] = true; }
         if (/*MinDate != 0 && */MinDate.HasValue) { Flags[2] = true; }
         if (/*MaxDate != 0 && */MaxDate.HasValue) { Flags[3] = true; }
     }
@@ -51,6 +53,7 @@ public sealed class RequestDeleteSavedHistory : IRequest<MyTelegram.Schema.Messa
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
+        if (Flags[0]) { writer.Write(ParentPeer); }
         writer.Write(Peer);
         writer.Write(MaxId);
         if (Flags[2]) { writer.Write(MinDate.Value); }
@@ -60,6 +63,7 @@ public sealed class RequestDeleteSavedHistory : IRequest<MyTelegram.Schema.Messa
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Flags = reader.ReadBitArray();
+        if (Flags[0]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
         Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         MaxId = reader.ReadInt32();
         if (Flags[2]) { MinDate = reader.ReadInt32(); }

@@ -10,10 +10,10 @@ namespace MyTelegram.Schema.Messages;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.readReactions" />
 ///</summary>
-[TlObject(0x54aa7f8e)]
+[TlObject(0x9ec44f93)]
 public sealed class RequestReadReactions : IRequest<MyTelegram.Schema.Messages.IAffectedHistory>
 {
-    public uint ConstructorId => 0x54aa7f8e;
+    public uint ConstructorId => 0x9ec44f93;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -29,10 +29,12 @@ public sealed class RequestReadReactions : IRequest<MyTelegram.Schema.Messages.I
     /// Mark as read only reactions to messages within the specified <a href="https://corefork.telegram.org/api/forum#forum-topics">forum topic</a>
     ///</summary>
     public int? TopMsgId { get; set; }
+    public MyTelegram.Schema.IInputPeer? SavedPeerId { get; set; }
 
     public void ComputeFlag()
     {
         if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
+        if (SavedPeerId != null) { Flags[1] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,6 +44,7 @@ public sealed class RequestReadReactions : IRequest<MyTelegram.Schema.Messages.I
         writer.Write(Flags);
         writer.Write(Peer);
         if (Flags[0]) { writer.Write(TopMsgId.Value); }
+        if (Flags[1]) { writer.Write(SavedPeerId); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -49,5 +52,6 @@ public sealed class RequestReadReactions : IRequest<MyTelegram.Schema.Messages.I
         Flags = reader.ReadBitArray();
         Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
         if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
+        if (Flags[1]) { SavedPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

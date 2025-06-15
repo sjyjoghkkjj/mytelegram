@@ -6,11 +6,12 @@ namespace MyTelegram.Schema;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/constructor/starGiftAttributeBackdrop" />
 ///</summary>
-[TlObject(0x94271762)]
+[TlObject(0xd93d859c)]
 public sealed class TStarGiftAttributeBackdrop : IStarGiftAttribute
 {
-    public uint ConstructorId => 0x94271762;
+    public uint ConstructorId => 0xd93d859c;
     public string Name { get; set; }
+    public int BackdropId { get; set; }
     public int CenterColor { get; set; }
     public int EdgeColor { get; set; }
     public int PatternColor { get; set; }
@@ -27,6 +28,7 @@ public sealed class TStarGiftAttributeBackdrop : IStarGiftAttribute
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Name);
+        writer.Write(BackdropId);
         writer.Write(CenterColor);
         writer.Write(EdgeColor);
         writer.Write(PatternColor);
@@ -37,6 +39,7 @@ public sealed class TStarGiftAttributeBackdrop : IStarGiftAttribute
     public void Deserialize(ref SequenceReader<byte> reader)
     {
         Name = reader.ReadString();
+        BackdropId = reader.ReadInt32();
         CenterColor = reader.ReadInt32();
         EdgeColor = reader.ReadInt32();
         PatternColor = reader.ReadInt32();

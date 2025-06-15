@@ -23,8 +23,6 @@ internal sealed class GetPeerSettingsHandler(
             MyTelegram.Schema.Messages.IPeerSettings>,
         Messages.IGetPeerSettingsHandler
 {
-    private readonly IObjectMapper _objectMapper = objectMapper;
-
     protected override async Task<MyTelegram.Schema.Messages.IPeerSettings> HandleCoreAsync(IRequestInput input,
         RequestGetPeerSettings obj)
     {

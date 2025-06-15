@@ -6,14 +6,17 @@ namespace MyTelegram.Schema;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/constructor/messageActionPaidMessagesPrice" />
 ///</summary>
-[TlObject(0xbcd71419)]
+[TlObject(0x84b88578)]
 public sealed class TMessageActionPaidMessagesPrice : IMessageAction
 {
-    public uint ConstructorId => 0xbcd71419;
+    public uint ConstructorId => 0x84b88578;
+    public BitArray Flags { get; set; } = new BitArray(32);
+    public bool BroadcastMessagesAllowed { get; set; }
     public long Stars { get; set; }
 
     public void ComputeFlag()
     {
+        if (BroadcastMessagesAllowed) { Flags[0] = true; }
 
     }
 
@@ -21,11 +24,14 @@ public sealed class TMessageActionPaidMessagesPrice : IMessageAction
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
         writer.Write(Stars);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
+        Flags = reader.ReadBitArray();
+        if (Flags[0]) { BroadcastMessagesAllowed = true; }
         Stars = reader.ReadInt64();
     }
 }

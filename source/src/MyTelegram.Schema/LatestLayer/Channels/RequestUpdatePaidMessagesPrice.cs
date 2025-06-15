@@ -6,15 +6,18 @@ namespace MyTelegram.Schema.Channels;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/channels.updatePaidMessagesPrice" />
 ///</summary>
-[TlObject(0xfc84653f)]
+[TlObject(0x4b12327b)]
 public sealed class RequestUpdatePaidMessagesPrice : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0xfc84653f;
+    public uint ConstructorId => 0x4b12327b;
+    public BitArray Flags { get; set; } = new BitArray(32);
+    public bool BroadcastMessagesAllowed { get; set; }
     public MyTelegram.Schema.IInputChannel Channel { get; set; }
     public long SendPaidMessagesStars { get; set; }
 
     public void ComputeFlag()
     {
+        if (BroadcastMessagesAllowed) { Flags[0] = true; }
 
     }
 
@@ -22,12 +25,15 @@ public sealed class RequestUpdatePaidMessagesPrice : IRequest<MyTelegram.Schema.
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
         writer.Write(Channel);
         writer.Write(SendPaidMessagesStars);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
     {
+        Flags = reader.ReadBitArray();
+        if (Flags[0]) { BroadcastMessagesAllowed = true; }
         Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
         SendPaidMessagesStars = reader.ReadInt64();
     }

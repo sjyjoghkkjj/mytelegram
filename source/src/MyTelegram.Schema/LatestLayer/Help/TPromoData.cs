@@ -7,10 +7,10 @@ namespace MyTelegram.Schema.Help;
 /// MTProxy/Public Service Announcement information
 /// See <a href="https://corefork.telegram.org/constructor/help.promoData" />
 ///</summary>
-[TlObject(0x8c39793f)]
+[TlObject(0x8a4d87a)]
 public sealed class TPromoData : IPromoData
 {
-    public uint ConstructorId => 0x8c39793f;
+    public uint ConstructorId => 0x8a4d87a;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -31,7 +31,20 @@ public sealed class TPromoData : IPromoData
     /// MTProxy/PSA peer
     /// See <a href="https://corefork.telegram.org/type/Peer" />
     ///</summary>
-    public MyTelegram.Schema.IPeer Peer { get; set; }
+    public MyTelegram.Schema.IPeer? Peer { get; set; }
+
+    ///<summary>
+    /// PSA type
+    ///</summary>
+    public string? PsaType { get; set; }
+
+    ///<summary>
+    /// PSA message
+    ///</summary>
+    public string? PsaMessage { get; set; }
+    public TVector<string> PendingSuggestions { get; set; }
+    public TVector<string> DismissedSuggestions { get; set; }
+    public MyTelegram.Schema.IPendingSuggestion? CustomPendingSuggestion { get; set; }
 
     ///<summary>
     /// Chat info
@@ -43,21 +56,14 @@ public sealed class TPromoData : IPromoData
     ///</summary>
     public TVector<MyTelegram.Schema.IUser> Users { get; set; }
 
-    ///<summary>
-    /// PSA type
-    ///</summary>
-    public string? PsaType { get; set; }
-
-    ///<summary>
-    /// PSA message
-    ///</summary>
-    public string? PsaMessage { get; set; }
-
     public void ComputeFlag()
     {
         if (Proxy) { Flags[0] = true; }
+        if (Peer != null) { Flags[3] = true; }
         if (PsaType != null) { Flags[1] = true; }
         if (PsaMessage != null) { Flags[2] = true; }
+        if (CustomPendingSuggestion != null) { Flags[4] = true; }
+
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -66,11 +72,14 @@ public sealed class TPromoData : IPromoData
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Expires);
-        writer.Write(Peer);
-        writer.Write(Chats);
-        writer.Write(Users);
+        if (Flags[3]) { writer.Write(Peer); }
         if (Flags[1]) { writer.Write(PsaType); }
         if (Flags[2]) { writer.Write(PsaMessage); }
+        writer.Write(PendingSuggestions);
+        writer.Write(DismissedSuggestions);
+        if (Flags[4]) { writer.Write(CustomPendingSuggestion); }
+        writer.Write(Chats);
+        writer.Write(Users);
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -78,10 +87,13 @@ public sealed class TPromoData : IPromoData
         Flags = reader.ReadBitArray();
         if (Flags[0]) { Proxy = true; }
         Expires = reader.ReadInt32();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        if (Flags[3]) { Peer = reader.Read<MyTelegram.Schema.IPeer>(); }
         if (Flags[1]) { PsaType = reader.ReadString(); }
         if (Flags[2]) { PsaMessage = reader.ReadString(); }
+        PendingSuggestions = reader.Read<TVector<string>>();
+        DismissedSuggestions = reader.Read<TVector<string>>();
+        if (Flags[4]) { CustomPendingSuggestion = reader.Read<MyTelegram.Schema.IPendingSuggestion>(); }
+        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

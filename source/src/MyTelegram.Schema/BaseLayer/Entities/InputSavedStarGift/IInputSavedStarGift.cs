@@ -7,6 +7,7 @@ namespace MyTelegram.Schema;
 ///</summary>
 [JsonDerivedType(typeof(TInputSavedStarGiftUser), nameof(TInputSavedStarGiftUser))]
 [JsonDerivedType(typeof(TInputSavedStarGiftChat), nameof(TInputSavedStarGiftChat))]
+[JsonDerivedType(typeof(TInputSavedStarGiftSlug), nameof(TInputSavedStarGiftSlug))]
 public interface IInputSavedStarGift : IObject
 {
 

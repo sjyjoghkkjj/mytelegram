@@ -8,6 +8,7 @@ namespace MyTelegram.Schema;
 ///</summary>
 [JsonDerivedType(typeof(TInputReplyToMessage), nameof(TInputReplyToMessage))]
 [JsonDerivedType(typeof(TInputReplyToStory), nameof(TInputReplyToStory))]
+[JsonDerivedType(typeof(TInputReplyToMonoForum), nameof(TInputReplyToMonoForum))]
 public interface IInputReplyTo : IObject
 {
 

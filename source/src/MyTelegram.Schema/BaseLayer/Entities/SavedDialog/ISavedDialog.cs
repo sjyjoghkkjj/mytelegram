@@ -7,18 +7,14 @@ namespace MyTelegram.Schema;
 /// See <a href="https://corefork.telegram.org/constructor/SavedDialog" />
 ///</summary>
 [JsonDerivedType(typeof(TSavedDialog), nameof(TSavedDialog))]
+[JsonDerivedType(typeof(TMonoForumDialog), nameof(TMonoForumDialog))]
 public interface ISavedDialog : IObject
 {
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
     BitArray Flags { get; set; }
-
-    ///<summary>
-    /// Is the dialog pinned
-    ///</summary>
-    bool Pinned { get; set; }
-
+    
     ///<summary>
     /// The dialog
     /// See <a href="https://corefork.telegram.org/type/Peer" />

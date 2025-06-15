@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// Reply to a message.
 /// See <a href="https://corefork.telegram.org/constructor/inputReplyToMessage" />
 ///</summary>
-[TlObject(0x22c0f6d5)]
+[TlObject(0xb07038b0)]
 public sealed class TInputReplyToMessage : IInputReplyTo
 {
-    public uint ConstructorId => 0x22c0f6d5;
+    public uint ConstructorId => 0xb07038b0;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -46,6 +46,7 @@ public sealed class TInputReplyToMessage : IInputReplyTo
     /// Offset of the message <code>quote_text</code> within the original message (in <a href="https://corefork.telegram.org/api/entities#entity-length">UTF-16 code units</a>).
     ///</summary>
     public int? QuoteOffset { get; set; }
+    public MyTelegram.Schema.IInputPeer? MonoforumPeerId { get; set; }
 
     public void ComputeFlag()
     {
@@ -54,6 +55,7 @@ public sealed class TInputReplyToMessage : IInputReplyTo
         if (QuoteText != null) { Flags[2] = true; }
         if (QuoteEntities?.Count > 0) { Flags[3] = true; }
         if (/*QuoteOffset != 0 && */QuoteOffset.HasValue) { Flags[4] = true; }
+        if (MonoforumPeerId != null) { Flags[5] = true; }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -67,6 +69,7 @@ public sealed class TInputReplyToMessage : IInputReplyTo
         if (Flags[2]) { writer.Write(QuoteText); }
         if (Flags[3]) { writer.Write(QuoteEntities); }
         if (Flags[4]) { writer.Write(QuoteOffset.Value); }
+        if (Flags[5]) { writer.Write(MonoforumPeerId); }
     }
 
     public void Deserialize(ref SequenceReader<byte> reader)
@@ -78,5 +81,6 @@ public sealed class TInputReplyToMessage : IInputReplyTo
         if (Flags[2]) { QuoteText = reader.ReadString(); }
         if (Flags[3]) { QuoteEntities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
         if (Flags[4]) { QuoteOffset = reader.ReadInt32(); }
+        if (Flags[5]) { MonoforumPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

@@ -149,6 +149,8 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TUpdatePaidReactionPrivacy), nameof(TUpdatePaidReactionPrivacy))]
 [JsonDerivedType(typeof(TUpdateSentPhoneCode), nameof(TUpdateSentPhoneCode))]
 [JsonDerivedType(typeof(TUpdateGroupCallChainBlocks), nameof(TUpdateGroupCallChainBlocks))]
+[JsonDerivedType(typeof(TUpdateReadMonoForumInbox), nameof(TUpdateReadMonoForumInbox))]
+[JsonDerivedType(typeof(TUpdateReadMonoForumOutbox), nameof(TUpdateReadMonoForumOutbox))]
 public interface IUpdate : IObject
 {
 

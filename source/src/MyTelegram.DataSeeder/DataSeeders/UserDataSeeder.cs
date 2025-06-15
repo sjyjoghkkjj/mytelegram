@@ -47,7 +47,7 @@ public class UserDataSeeder(
             var accessHash = Random.Shared.NextInt64();
             var createUserCommand =
                 new CreateUserCommand(aggregateId,
-                    new RequestInfo(0, 0, 0, 0, 0, Guid.Empty, 0, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()),
+                    RequestInfo.Empty with { Date = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() },
                     userId,
                     accessHash,
                     phoneNumber,

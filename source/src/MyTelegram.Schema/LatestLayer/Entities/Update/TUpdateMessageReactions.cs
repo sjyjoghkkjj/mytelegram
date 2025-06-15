@@ -7,10 +7,10 @@ namespace MyTelegram.Schema;
 /// New <a href="https://corefork.telegram.org/api/reactions">message reactions »</a> are available
 /// See <a href="https://corefork.telegram.org/constructor/updateMessageReactions" />
 ///</summary>
-[TlObject(0x5e1b3cb8)]
+[TlObject(0x1e297bfa)]
 public sealed class TUpdateMessageReactions : IUpdate
 {
-    public uint ConstructorId => 0x5e1b3cb8;
+    public uint ConstructorId => 0x1e297bfa;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
@@ -31,6 +31,7 @@ public sealed class TUpdateMessageReactions : IUpdate
     /// <a href="https://corefork.telegram.org/api/forum#forum-topics">Forum topic ID</a>
     ///</summary>
     public int? TopMsgId { get; set; }
+    public MyTelegram.Schema.IPeer? SavedPeerId { get; set; }
 
     ///<summary>
     /// Reactions
@@ -41,6 +42,7 @@ public sealed class TUpdateMessageReactions : IUpdate
     public void ComputeFlag()
     {
         if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
+        if (SavedPeerId != null) { Flags[1] = true; }
 
     }
 
@@ -52,6 +54,7 @@ public sealed class TUpdateMessageReactions : IUpdate
         writer.Write(Peer);
         writer.Write(MsgId);
         if (Flags[0]) { writer.Write(TopMsgId.Value); }
+        if (Flags[1]) { writer.Write(SavedPeerId); }
         writer.Write(Reactions);
     }
 
@@ -61,6 +64,7 @@ public sealed class TUpdateMessageReactions : IUpdate
         Peer = reader.Read<MyTelegram.Schema.IPeer>();
         MsgId = reader.ReadInt32();
         if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
+        if (Flags[1]) { SavedPeerId = reader.Read<MyTelegram.Schema.IPeer>(); }
         Reactions = reader.Read<MyTelegram.Schema.IMessageReactions>();
     }
 }
