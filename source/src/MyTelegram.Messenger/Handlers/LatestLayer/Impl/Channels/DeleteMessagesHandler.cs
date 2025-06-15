@@ -37,7 +37,7 @@ internal sealed class DeleteMessagesHandler(
                 {
                     var firstInboxMessageId =
                         await queryProcessor.ProcessAsync(
-                            new GetFirstInboxMessageIdByMessageIdListQuery(inputChannel.ChannelId, ids));
+                            new GetFirstInboxMessageIdByMessageIdListQuery(input.UserId, inputChannel.ChannelId, ids));
                     if (firstInboxMessageId > 0)
                     {
                         RpcErrors.RpcErrors403.MessageDeleteForbidden.ThrowRpcError();

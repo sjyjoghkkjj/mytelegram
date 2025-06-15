@@ -435,7 +435,7 @@ public record GetAdminedPublicChannelIdsQuery(long UserId) : IQuery<IReadOnlyCol
 
 public record GetAdminedPublicChannelsQuery(long UserId) : IQuery<IReadOnlyCollection<IChannelReadModel>>;
 
-public record GetFirstInboxMessageIdByMessageIdListQuery(long ChannelId, List<int> MessageIds) : IQuery<int?>;
+public record GetFirstInboxMessageIdByMessageIdListQuery(long UserId, long ChannelId, List<int> MessageIds) : IQuery<int?>;
 
 public record GetCommentsMessageIdListQuery(long ChannelId, List<int> MessageIds) : IQuery<IReadOnlyCollection<int>>;
 

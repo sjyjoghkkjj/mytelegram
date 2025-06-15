@@ -6,6 +6,6 @@ public class
     public async Task<int?> ExecuteQueryAsync(GetFirstInboxMessageIdByMessageIdListQuery query, CancellationToken cancellationToken)
     {
         return await store.FirstOrDefaultAsync(p =>
-            p.OwnerPeerId == query.ChannelId && !p.Out && query.MessageIds.Contains(p.MessageId), p => p.MessageId, cancellationToken: cancellationToken);
+            p.OwnerPeerId == query.ChannelId && p.SenderPeerId != query.UserId && query.MessageIds.Contains(p.MessageId), p => p.MessageId, cancellationToken: cancellationToken);
     }
 }
