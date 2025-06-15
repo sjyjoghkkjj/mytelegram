@@ -53,7 +53,7 @@ public class MessageAppService(
         return canSendAsPeer;
     }
 
-    private async Task<bool> IsValidSendAsPeerAsync(long requestUserId, Peer toPeer, Peer? sendAsPeer)
+    public async Task<bool> IsValidSendAsPeerAsync(long requestUserId, Peer toPeer, Peer? sendAsPeer)
     {
         if (sendAsPeer != null)
         {

@@ -458,7 +458,7 @@ public partial class MessageDomainEventHandler(
 
         await PushUpdatesToPeerAsync(item.ToPeer,
                 channelMemberUpdates,
-                aggregateEvent.RequestInfo.AuthKeyId,
+                excludeUserId:aggregateEvent.RequestInfo.UserId,
                 updatesType: updatesType,
                 skipSaveUpdates: true,
                 excludeUserIds: aggregateEvent.MentionedUserIds
@@ -505,7 +505,7 @@ public partial class MessageDomainEventHandler(
             var channelUpdates = updatesConverterService.ToUpdatePinnedMessageServiceUpdates(0, aggregateEvent, 0);
             if (channelUpdates is TUpdates tUpdates)
             {
-                var user = await GetUserAsync(aggregateEvent.RequestInfo, 0);
+                var user = await GetUserAsync(aggregateEvent.RequestInfo, aggregateEvent.RequestInfo.UserId);
                 tUpdates.Users.Add(user);
             }
 

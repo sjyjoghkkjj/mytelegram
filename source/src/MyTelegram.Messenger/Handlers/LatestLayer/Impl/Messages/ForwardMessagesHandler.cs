@@ -59,6 +59,7 @@ internal sealed class ForwardMessagesHandler(
     IPeerHelper peerHelper,
     IChannelAppService channelAppService,
     IMessageAppService messageAppService,
+    IQueryProcessor queryProcessor,
     IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestForwardMessages, MyTelegram.Schema.IUpdates>,
         Messages.IForwardMessagesHandler
@@ -85,6 +86,28 @@ internal sealed class ForwardMessagesHandler(
 
             var channelReadModel = await channelAppService.GetAsync(toPeer.PeerId);
             post = channelReadModel!.Broadcast;
+
+            if (channelReadModel.Broadcast || channelReadModel.LinkedChatId != null && sendAs == null)
+            {
+                if (await messageAppService.CanSendAsPeerAsync(channelReadModel.ChannelId, input.UserId))
+                {
+                    var defaultSendAs = await queryProcessor.ProcessAsync(
+                        new GetUserConfigByKeyQuery(input.UserId, ((int)UserConfigType.SendAsPeer).ToString()));
+                    if (defaultSendAs != null)
+                    {
+                        if (long.TryParse(defaultSendAs.Value, out var sendAsPeerId))
+                        {
+                            var tempSendAs = peerHelper.GetPeer(sendAsPeerId);
+                            if (await messageAppService.IsValidSendAsPeerAsync(input.UserId, toPeer, tempSendAs))
+                            {
+                                sendAs = tempSendAs;
+                            }
+                        }
+                    }
+
+                    sendAs ??= toPeer;
+                }
+            }
 
             if (channelReadModel.CreatorId != input.UserId)
             {

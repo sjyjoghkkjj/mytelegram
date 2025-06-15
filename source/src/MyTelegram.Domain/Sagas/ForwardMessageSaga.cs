@@ -48,7 +48,8 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             domainEvent.AggregateEvent.ForwardFromLinkedChannel,
             domainEvent.AggregateEvent.Post,
             domainEvent.AggregateEvent.TtlPeriod,
-            domainEvent.AggregateEvent.FromNames
+            domainEvent.AggregateEvent.FromNames,
+            domainEvent.AggregateEvent.SendAs
         ));
         ForwardMessage(domainEvent.AggregateEvent);
         return Task.CompletedTask;
@@ -85,97 +86,112 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
     {
         var item = aggregateEvent.OriginalMessageItem;
         var isForwardToSavedMessages = _state.ToPeer.PeerId == _state.RequestInfo.UserId;
+        long? postChannelId = null;
+        int? postMessageId = null;
+        Peer? savedPeerId;
+        Peer? sendAs = _state.SendAs;
+        var isOut = true;
+        string? fromName = null;
+        _state.FromNames?.TryGetValue(item.SenderUserId, out fromName);
+
+        var fwd = new MessageFwdHeader
+        {
+            Imported = false,
+            SavedOut = false,
+            FromName = fromName,
+            SavedDate = null,
+            PsaType = null,
+            Date = item.Date
+        };
+
+        if (_state.ForwardFromLinkedChannel)
+        {
+            fwd.ChannelPost = item.MessageId;
+            fwd.PostAuthor = item.PostAuthor;
+            fwd.SavedFromPeer = item.ToPeer;
+            fwd.SavedFromMsgId = item.MessageId;
+            fwd.FromId = item.ToPeer;
+
+            fwd.ForwardFromLinkedChannel = true;
+
+            postChannelId = item.ToPeer.PeerId;
+            postMessageId = item.MessageId;
+            savedPeerId = _state.FromPeer;
+            isOut = false;
+        }
+        else
+        {
+            switch (item.ToPeer.PeerType)
+            {
+                case PeerType.Channel:
+                    fwd.FromId = item.SenderPeer;
+                    fwd.SavedFromMsgId = item.MessageId;
+                    fwd.PostAuthor = item.PostAuthor;
+                    if (item.Post)
+                    {
+                        fwd.FromId = item.ToPeer;
+                        fwd.ChannelPost = item.MessageId;
+                    }
+
+                    if (item.SendAs != null)
+                    {
+                        // When item.SendAs in a message is not null, it indicates that the message comes from a channel post or a discussion group admin.
+                        // In this case, fwd.FromId should be set to the channel's ID or the discussion group's ID.
+                        fwd.FromId = item.ToPeer;
+                    }
+
+                    if (item.IsForwardFromChannelPost)
+                    {
+                        fwd.FromId = item.ToPeer;
+                        fwd.ChannelPost = item.FwdHeader?.ChannelPost;
+
+                        if (item.FwdHeader != null)
+                        {
+                            fwd.FromId = item.FwdHeader.FromId;
+                            fwd.ChannelPost = item.FwdHeader.ChannelPost;
+                            fwd.SavedFromMsgId = item.FwdHeader.SavedFromMsgId;
+                        }
+                    }
+
+                    if (item.FwdHeader != null)
+                    {
+                        fwd.ChannelPost = item.FwdHeader.ChannelPost;
+                    }
+
+                    break;
+
+                case PeerType.User:
+                    fwd.FromId = item.SenderPeer;
+                    break;
+            }
+
+            if (isForwardToSavedMessages)
+            {
+                fwd.SavedOut = item.SenderUserId == aggregateEvent.RequestInfo.UserId;
+                fwd.SavedFromPeer = _state.FromPeer;
+                fwd.SavedFromMsgId = item.MessageId;
+                sendAs = aggregateEvent.OriginalMessageItem.SendAs;
+            }
+            if (!string.IsNullOrEmpty(fwd.FromName))
+            {
+                fwd.FromId = null;
+                savedPeerId = MyTelegramConsts.AnonymousUserId.ToUserPeer();
+            }
+            else
+            {
+                savedPeerId = null;
+            }
+        }
 
         var selfUserId = _state.RequestInfo.UserId;
         var ownerPeerId = _state.ToPeer.PeerType == PeerType.Channel
             ? _state.ToPeer.PeerId
             : selfUserId;
-
-        //Peer? fromId = null;
-        //Peer? peerId = null;
-        Peer? savedPeerId;
         var senderPeer = new Peer(PeerType.User, _state.RequestInfo.UserId);
-        bool savedOut = false;
-        var fwdFromId = _state.FromPeer;
-        string? fromName = null;
-        var fwdDate = item.Date;
-        var channelPost = _state.FromPeer.PeerType == PeerType.Channel ? aggregateEvent.OriginalMessageItem.MessageId : 0;
-        var postAuthor = item.PostAuthor;
-        Peer? fwdSavedFromPeer = null;
-        int? fwdSavedFromMsgId = null;
-        Peer? fwdSavedFromId = null;
-        string? fwdSavedFromName = null;
-        int? fwdSavedDate = null;
-
-        var isOut = true;
-        MessageReply? reply = null;
-        long? postChannelId = null;
-        int? postMessageId = null;
-        Peer? sendAs = null;
-
-        _state.FromNames?.TryGetValue(item.SenderUserId, out fromName);
-
-        // Forward from user peer
-        if (_state.FromPeer.PeerType == PeerType.User &&
-            item.SenderPeer.PeerId == aggregateEvent.RequestInfo.UserId)
-        {
-            fwdFromId = item.SenderPeer;
-            fromName = null;
-        }
-
         if (_state.ForwardFromLinkedChannel)
         {
-            fwdSavedFromPeer = _state.FromPeer;
-            fwdSavedFromMsgId = aggregateEvent.OriginalMessageItem.MessageId;
-            senderPeer = _state.FromPeer;
-            isOut = false;
-            reply = aggregateEvent.OriginalMessageItem.Reply;
-            postChannelId = aggregateEvent.OriginalMessageItem.ToPeer.PeerId;
-            postMessageId = aggregateEvent.OriginalMessageItem.MessageId;
-            sendAs = aggregateEvent.OriginalMessageItem.SendAs;
+            senderPeer = item.ToPeer;
         }
-
-        if (isForwardToSavedMessages)
-        {
-            savedOut = item.IsOut;
-            savedPeerId = _state.FromPeer;
-            fwdSavedFromPeer = _state.FromPeer;
-            fwdSavedFromMsgId = item.MessageId;
-
-            if (item.FwdHeader != null)
-            {
-                fwdFromId = item.FwdHeader.FromId;
-                fwdSavedFromId = item.FwdHeader.SavedFromId;
-                fwdSavedDate = item.FwdHeader.Date;
-            }
-        }
-        else
-        {
-            savedPeerId = null;
-        }
-
-        if (!string.IsNullOrEmpty(fromName))
-        {
-            fwdFromId = null;
-            savedPeerId = MyTelegramConsts.AnonymousUserId.ToUserPeer();
-        }
-
-        var fwdHeader = new MessageFwdHeader(
-            false,
-            savedOut,
-            fwdFromId,
-            fromName,
-            channelPost,
-            postAuthor,
-            fwdDate,
-            fwdSavedFromPeer,
-            fwdSavedFromMsgId,
-            fwdSavedFromId,
-            fwdSavedFromName,
-            fwdSavedDate,
-            null,
-            _state.ForwardFromLinkedChannel);
-
         var outMessageId = await _idGenerator.NextIdAsync(IdType.MessageId, ownerPeerId);
 
         var ownerPeer = _state.ToPeer.PeerType == PeerType.Channel
@@ -199,11 +215,11 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             //InputReplyTo: item.InputReplyTo,
             Entities: item.Entities,
             Media: item.Media,
-            FwdHeader: fwdHeader,
+            FwdHeader: fwd,
             Views: item.Views,
             PollId: item.PollId,
             EditHide: _state.ForwardFromLinkedChannel,
-            Reply: reply,
+            Reply: _state.ForwardFromLinkedChannel ? item.Reply : null,
             IsForwardFromChannelPost: _state.ForwardFromLinkedChannel,
             PostChannelId: postChannelId,
             PostMessageId: postMessageId,

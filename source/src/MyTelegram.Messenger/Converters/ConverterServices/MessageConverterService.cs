@@ -190,7 +190,7 @@ public class MessageConverterService(
         var isOut = item.IsOut;
         var fromId = item.SenderPeer.ToPeer();
 
-        if (item.ToPeer.PeerType == PeerType.Channel && selfUserId != 0)
+        if (item.ToPeer.PeerType == PeerType.Channel /*&& selfUserId != 0*/)
         {
             isOut = item.SenderPeer.PeerId == selfUserId;
         }

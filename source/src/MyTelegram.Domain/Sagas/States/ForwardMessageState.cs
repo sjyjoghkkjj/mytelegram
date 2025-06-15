@@ -17,7 +17,7 @@ public class ForwardMessageState : AggregateState<ForwardMessageSaga, ForwardMes
     public bool Post { get; private set; }
     public int? TtlPeriod { get; private set; }
     public Dictionary<long, string>? FromNames { get; private set; }
-
+    public Peer? SendAs { get; private set; }
     public void Apply(ForwardMessageSagaStartedSagaEvent aggregateEvent)
     {
         RequestInfo = aggregateEvent.RequestInfo;
@@ -29,6 +29,7 @@ public class ForwardMessageState : AggregateState<ForwardMessageSaga, ForwardMes
         Post = aggregateEvent.Post;
         TtlPeriod = aggregateEvent.TtlPeriod;
         FromNames = aggregateEvent.FromNames;
+        SendAs = aggregateEvent.SendAs;
     }
 
     public void Apply(ForwardSingleMessageSuccessSagaEvent aggregateEvent)
