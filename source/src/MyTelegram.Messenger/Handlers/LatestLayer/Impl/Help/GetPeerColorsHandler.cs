@@ -1,26 +1,26 @@
 ﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
-///<summary>
-/// Get the set of <a href="https://corefork.telegram.org/api/colors">accent color palettes »</a> that can be used for message accents.
+/// <summary>
+/// Get the set of <a href="https://corefork.telegram.org/api/colors">accent color palettes »</a> that can be used for
+/// message accents.
 /// See <a href="https://corefork.telegram.org/method/help.getPeerColors" />
-///</summary>
-internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetPeerColors, MyTelegram.Schema.Help.IPeerColors>,
-    Help.IGetPeerColorsHandler
+/// </summary>
+internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<RequestGetPeerColors, IPeerColors>,
+    IGetPeerColorsHandler
 {
-    protected override Task<MyTelegram.Schema.Help.IPeerColors> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Help.RequestGetPeerColors obj)
+    private static readonly IPeerColors Colors = new TPeerColors
     {
-        var colors = new List<TPeerColorOption>
-        {
-            new() {ColorId = 5},
-            new() {ColorId = 3},
-            new() {ColorId = 1},
-            new() {ColorId = 0},
-            new() {ColorId = 2},
-            new() {ColorId = 4},
-            new() {ColorId = 6},
+        Colors =
+        [
+            new TPeerColorOption { ColorId = 5 },
+            new TPeerColorOption { ColorId = 3 },
+            new TPeerColorOption { ColorId = 1 },
+            new TPeerColorOption { ColorId = 0 },
+            new TPeerColorOption { ColorId = 2 },
+            new TPeerColorOption { ColorId = 4 },
+            new TPeerColorOption { ColorId = 6 },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 12,
                 Colors = new TPeerColorSet
@@ -40,7 +40,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                     ]
                 }
             },
-            new()
+            new TPeerColorOption
             {
                 ColorId = 10,
                 Colors = new TPeerColorSet
@@ -61,7 +61,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 8,
                 Colors = new TPeerColorSet
@@ -82,7 +82,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 7,
                 Colors = new TPeerColorSet
@@ -103,7 +103,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 9,
                 Colors = new TPeerColorSet
@@ -124,7 +124,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 11,
                 Colors = new TPeerColorSet
@@ -145,7 +145,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 13,
                 Colors = new TPeerColorSet
@@ -166,7 +166,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 14,
                 Colors = new TPeerColorSet
@@ -189,7 +189,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 15,
                 Colors = new TPeerColorSet
@@ -212,7 +212,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 16,
                 Colors = new TPeerColorSet
@@ -235,7 +235,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 17,
                 Colors = new TPeerColorSet
@@ -258,7 +258,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 18,
                 Colors = new TPeerColorSet
@@ -281,7 +281,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 19,
                 Colors = new TPeerColorSet
@@ -304,7 +304,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 20,
                 Colors = new TPeerColorSet
@@ -327,7 +327,7 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                 }
             },
 
-            new()
+            new TPeerColorOption
             {
                 ColorId = 21,
                 Colors = new TPeerColorSet
@@ -348,13 +348,13 @@ internal sealed class GetPeerColorsHandler : RpcResultObjectHandler<MyTelegram.S
                         0xbf5103
                     ]
                 }
-            },
+            }
+        ]
+    };
 
-        };
-
-        return Task.FromResult<MyTelegram.Schema.Help.IPeerColors>(new TPeerColors
-        {
-            Colors = [.. colors]
-        });
+    protected override Task<IPeerColors> HandleCoreAsync(IRequestInput input,
+        RequestGetPeerColors obj)
+    {
+        return Task.FromResult(Colors);
     }
 }

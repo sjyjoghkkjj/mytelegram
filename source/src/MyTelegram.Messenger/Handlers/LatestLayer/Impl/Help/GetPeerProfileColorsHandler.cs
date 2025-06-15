@@ -1,360 +1,261 @@
 ﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Help;
 
-///<summary>
-/// Get the set of <a href="https://corefork.telegram.org/api/colors">accent color palettes »</a> that can be used in profile page backgrounds.
-/// See <a href="https://corefork.telegram.org/method/help.getPeerProfileColors" />
-///</summary>
-internal sealed class GetPeerProfileColorsHandler : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetPeerProfileColors, MyTelegram.Schema.Help.IPeerColors>,
-    Help.IGetPeerProfileColorsHandler
+/// <summary>
+///     Get the set of <a href="https://corefork.telegram.org/api/colors">accent color palettes »</a> that can be used in
+///     profile page backgrounds.
+///     See <a href="https://corefork.telegram.org/method/help.getPeerProfileColors" />
+/// </summary>
+internal sealed class GetPeerProfileColorsHandler : RpcResultObjectHandler<RequestGetPeerProfileColors, IPeerColors>,
+    IGetPeerProfileColorsHandler
 {
-    protected override Task<MyTelegram.Schema.Help.IPeerColors> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Help.RequestGetPeerProfileColors obj)
+    private static readonly IPeerColors Colors = new TPeerColors
     {
-        var colors = new List<TPeerColorOption>
+        Colors = new TVector<IPeerColorOption>(new TPeerColorOption
         {
-            new() {ColorId = 5},
-            new() {ColorId = 3},
-            new() {ColorId = 1},
-            new() {ColorId = 0},
-            new() {ColorId = 2},
-            new() {ColorId = 4},
-            new() {ColorId = 6},
-
-            new()
+            ColorId = 5,
+            Colors = new TPeerColorProfileSet
             {
-                ColorId = 12,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        3379668,
-                        8246256
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        5423103,
-                        742548
-                    ]
-                }
+                PaletteColors = [4888278],
+                BgColors = [5935035],
+                StoryColors = [7264511, 7405535]
             },
-            new()
+            DarkColors = new TPeerColorProfileSet
             {
-                ColorId = 10,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        2599184,
-                        11000919
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        11004782,
-                        1474093
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 8,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        14712875,
-                        16434484
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        15511630,
-                        12801812
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 7,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        14766162,
-                        16363107
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        16749440,
-                        10039095
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 9,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        10510323,
-                        16027647
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        13015039,
-                        6173128
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 11,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        2600142,
-                        8579286
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        4249808,
-                        285823
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 13,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        14500721,
-                        16760479
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        16746150,
-                        9320046
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 14,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        2391021,
-                        15747158,
-                        16777215
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        4170494,
-                        15024719,
-                        16777215
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 15,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        14055202,
-                        2007057,
-                        16777215
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        16748638,
-                        3319079,
-                        16777215
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 16,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        1547842,
-                        15223359,
-                        16777215
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        6738788,
-                        13976655,
-                        16777215
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 17,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        2659503,
-                        7324758,
-                        16777215
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        2276578,
-                        4039232,
-                        16777215
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 18,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        826035,
-                        16756117,
-                        16770741
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        2276578,
-                        16750456,
-                        16767595
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 19,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        7821270,
-                        16225808,
-                        16768654
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        9933311,
-                        15889181,
-                        16767833
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 20,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        1410511,
-                        15903517,
-                        16777215
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        4040427,
-                        15639837,
-                        16777215
-                    ]
-                }
-            },
-
-            new()
-            {
-                ColorId = 21,
-                Colors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        0xfc4528,
-                        0x4fd57e,
-                        0xf62e7b
-                    ]
-                },
-                DarkColors = new TPeerColorSet
-                {
-                    Colors =
-                    [
-                        0x640db5,
-                        0x498141,
-                        0xbf5103
-                    ]
-                }
-            },
-
-        };
-
-        return Task.FromResult<MyTelegram.Schema.Help.IPeerColors>(new TPeerColors
+                PaletteColors = [3375297],
+                BgColors = [4682132],
+                StoryColors = [9029631, 7536638]
+            }
+        }, new TPeerColorOption
         {
-            Colors = [.. colors]
-        });
+            ColorId = 3,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [5485111],
+                BgColors = [4825941],
+                StoryColors = [7991418, 13299018]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [3972130],
+                BgColors = [3371323],
+                StoryColors = [7919501, 12703080]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 1,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [14386489],
+                BgColors = [12745790],
+                StoryColors = [16756531, 16240230]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [12807972],
+                BgColors = [9723436],
+                StoryColors = [16756531, 16240230]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 0,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [13722204],
+                BgColors = [12211792],
+                StoryColors = [16752253, 16758622]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [12209223],
+                BgColors = [10241344],
+                StoryColors = [16744573, 16745797]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 2,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [10513887],
+                BgColors = [9792200],
+                StoryColors = [16030463, 16753387]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [9000906],
+                BgColors = [7426201],
+                StoryColors = [15366399, 16755185]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 4,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [4565185],
+                BgColors = [4102061],
+                StoryColors = [5036799, 4325314]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [3646897],
+                BgColors = [3702407],
+                StoryColors = [4708863, 3342285]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 6,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [13460119],
+                BgColors = [12079992],
+                StoryColors = [16746153, 16754323]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [11947138],
+                BgColors = [9717603],
+                StoryColors = [16675727, 16751486]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 7,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [9477803],
+                BgColors = [8358805],
+                StoryColors = [12834019, 15726847]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [7964822],
+                BgColors = [4412001],
+                StoryColors = [10071235, 14871283]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 13,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [3574481, 8246256],
+                BgColors = [5475266, 5089469],
+                StoryColors = [7264511, 7405535]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [5148620, 7525869],
+                BgColors = [3694988, 4557729],
+                StoryColors = [9029631, 7536638]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 11,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [2599184, 11000919],
+                BgColors = [4036437, 9021008],
+                StoryColors = [7991418, 13299018]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [4036437, 10932055],
+                BgColors = [2714179, 6262596],
+                StoryColors = [7919501, 12703080]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 9,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [14712875, 15842348],
+                BgColors = [13595204, 13407283],
+                StoryColors = [16756531, 16240230]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [13595204, 15247677],
+                BgColors = [9393455, 10580530],
+                StoryColors = [16756531, 16240230]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 8,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [14966882, 16363107],
+                BgColors = [13194845, 14253143],
+                StoryColors = [16752253, 16758622]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [13194845, 16486759],
+                BgColors = [10044227, 11294782],
+                StoryColors = [16744573, 16745797]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 10,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [10510323, 16027647],
+                BgColors = [9855700, 12150454],
+                StoryColors = [16030463, 16753387]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [9855700, 15236580],
+                BgColors = [6506129, 9588898],
+                StoryColors = [15366399, 16755185]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 12,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [2600142, 9234906],
+                BgColors = [4036026, 5287320],
+                StoryColors = [5036799, 4325314]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [3774400, 7986629],
+                BgColors = [3173500, 4102270],
+                StoryColors = [4708863, 3342285]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 14,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [13715826, 16760479],
+                BgColors = [11554676, 13723245],
+                StoryColors = [16746153, 16754323]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [12865666, 15830166],
+                BgColors = [8929632, 10900057],
+                StoryColors = [16675727, 16751486]
+            }
+        }, new TPeerColorOption
+        {
+            ColorId = 15,
+            Colors = new TPeerColorProfileSet
+            {
+                PaletteColors = [7108740, 11384769],
+                BgColors = [6517890, 8096407],
+                StoryColors = [12834019, 15726847]
+            },
+            DarkColors = new TPeerColorProfileSet
+            {
+                PaletteColors = [7108740, 11384769],
+                BgColors = [5464174, 3688020],
+                StoryColors = [10071235, 14871283]
+            }
+        })
+    };
+
+    protected override Task<IPeerColors> HandleCoreAsync(IRequestInput input,
+        RequestGetPeerProfileColors obj)
+    {
+        return Task.FromResult(Colors);
     }
 }
