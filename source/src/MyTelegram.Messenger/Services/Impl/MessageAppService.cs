@@ -567,6 +567,28 @@ public class MessageAppService(
         return mentionedUserIds;
     }
 
+    private (List<TMessageEntityMention> mentions, List<string> userNameList) GetMentions(string message)
+    {
+        var pattern = "@(\\w{4,40})";
+        var mentions = new List<TMessageEntityMention>();
+        var matches = Regex.Matches(message, pattern);
+        var userNameList = new List<string>();
+        foreach (Match match in matches)
+        {
+            if (match.Success)
+            {
+                mentions.Add(new TMessageEntityMention
+                {
+                    Offset = match.Index,
+                    Length = match.Length
+                });
+                userNameList.Add(match.Value[1..]);
+            }
+        }
+
+        return (mentions, userNameList);
+    }
+
     private void ProcessMessageEntityUrlList(string message, IList<IMessageEntity>? entities)
     {
         var matches = Regex.Matches(message, UrlPattern);
