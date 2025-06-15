@@ -93,7 +93,7 @@ public class ContactAppService(
     public async Task<SearchContactOutput> SearchAsync(long selfUserId,
         string keyword, int limit)
     {
-        if (keyword?.Length > 0)
+        if (keyword?.Length > 4)
         {
             var searchKeyword = keyword;
             if (searchKeyword.StartsWith("@"))
