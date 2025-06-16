@@ -31,7 +31,7 @@ internal sealed class GetPeerSettingsHandler(
         var peer = peerHelper.GetPeer(obj.Peer, userId);
 		if (peer.PeerType == PeerType.Channel)
         {
-            if (!await channelAppService.SendRpcErrorIfNotChannelMemberAsync(input, peer.PeerId))
+            if (await channelAppService.SendRpcErrorIfNotChannelMemberAsync(input, peer.PeerId))
             {
                 return null!;
             }
