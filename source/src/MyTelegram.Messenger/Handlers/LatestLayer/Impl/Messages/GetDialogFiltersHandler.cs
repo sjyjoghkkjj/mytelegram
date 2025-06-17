@@ -6,12 +6,13 @@
 ///</summary>
 internal sealed class GetDialogFiltersHandler(
     IQueryProcessor queryProcessor,
+    IAccessHashHelper2 accessHashHelper2,
     ILayeredService<IDialogFilterConverter> dialogFilterLayeredService)
-    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetDialogFilters,
-            MyTelegram.Schema.Messages.IDialogFilters>,
-        Messages.IGetDialogFiltersHandler
+    : RpcResultObjectHandler<RequestGetDialogFilters,
+            IDialogFilters>,
+        IGetDialogFiltersHandler
 {
-    protected override async Task<MyTelegram.Schema.Messages.IDialogFilters> HandleCoreAsync(IRequestInput input,
+    protected override async Task<IDialogFilters> HandleCoreAsync(IRequestInput input,
         RequestGetDialogFilters obj)
     {
         var filterReadModels = await queryProcessor.ProcessAsync(new GetDialogFiltersQuery(input.UserId), CancellationToken.None);
@@ -25,6 +26,18 @@ internal sealed class GetDialogFiltersHandler(
         {
             var filter = converter.ToDialogFilter(filterReadModel.Filter);
             filters.Add(filter);
+            switch (filter)
+            {
+                case TDialogFilter dialogFilter:
+                    UpdateAccessHash(input, dialogFilter.ExcludePeers);
+                    UpdateAccessHash(input, dialogFilter.IncludePeers);
+                    UpdateAccessHash(input, dialogFilter.PinnedPeers);
+                    break;
+                case TDialogFilterChatlist dialogFilterChatlist:
+                    UpdateAccessHash(input, dialogFilterChatlist.PinnedPeers);
+                    UpdateAccessHash(input, dialogFilterChatlist.IncludePeers);
+                    break;
+            }
         }
 
         return new TDialogFilters
@@ -32,5 +45,23 @@ internal sealed class GetDialogFiltersHandler(
             Filters = filters,
             TagsEnabled = true,
         };
+    }
+
+    private void UpdateAccessHash(IRequestInput requestInput, TVector<IInputPeer> peers)
+    {
+        foreach (var inputPeer in peers)
+        {
+            switch (inputPeer)
+            {
+                case TInputPeerChannel inputPeerChannel:
+                    inputPeerChannel.AccessHash = accessHashHelper2.GenerateAccessHash(requestInput.UserId,
+                        requestInput.AccessHashKeyId, inputPeerChannel.ChannelId, AccessHashType.Channel);
+                    break;
+                case TInputPeerUser inputPeerUser:
+                    inputPeerUser.AccessHash = accessHashHelper2.GenerateAccessHash(requestInput.UserId,
+                        requestInput.AccessHashKeyId, inputPeerUser.UserId, AccessHashType.User);
+                    break;
+            }
+        }
     }
 }
