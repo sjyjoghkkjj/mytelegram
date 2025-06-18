@@ -60,10 +60,10 @@ internal sealed class AccessHashHelper(
         inputPeer switch
         {
             TInputPeerChannel inputPeerChannel => CheckAccessHashAsync(request, inputPeerChannel.ChannelId,
-                inputPeerChannel.AccessHash),
+                inputPeerChannel.AccessHash, AccessHashType.Channel),
             TInputPeerChannelFromMessage inputPeerChannelFromMessage => CheckAccessHashAsync(request, inputPeerChannelFromMessage
                 .Peer),
-            TInputPeerUser inputPeerUser => CheckAccessHashAsync(request, inputPeerUser.UserId, inputPeerUser.AccessHash),
+            TInputPeerUser inputPeerUser => CheckAccessHashAsync(request, inputPeerUser.UserId, inputPeerUser.AccessHash, AccessHashType.User),
             TInputPeerUserFromMessage inputPeerUserFromMessage => CheckAccessHashAsync(request, inputPeerUserFromMessage.Peer),
             _ => Task.CompletedTask
         };
@@ -91,10 +91,6 @@ internal sealed class AccessHashHelper(
     public async Task<bool> IsAccessHashValidAsync(IRequestWithAccessHashKeyId request, long id,
                         long accessHash, AccessHashType? accessHashType = null)
     {
-        if (_accessHashCaches.TryGetValue(id, out var cachedAccessHash))
-        {
-            return accessHash == cachedAccessHash;
-        }
         if (accessHashType == null)
         {
             var peer = peerHelper.GetPeer(id);
@@ -116,6 +112,11 @@ internal sealed class AccessHashHelper(
             case AccessHashType.User:
             case AccessHashType.Channel:
                 return await accessHashHelper2.IsAccessHashValidAsync(request, id, accessHash, accessHashType);
+        }
+
+        if (_accessHashCaches.TryGetValue(id, out var cachedAccessHash))
+        {
+            return accessHash == cachedAccessHash;
         }
 
         var accessHashReadModel = await queryProcessor.ProcessAsync(new GetAccessHashQueryByIdQuery(id));
