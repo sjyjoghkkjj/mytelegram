@@ -51,7 +51,13 @@ public record GetChannelMembersByChannelIdQuery(
     List<long> MemberUserIdList,
     //bool? Kicked,
     int Offset,
-    int Limit)
+    int Limit,
+    bool OnlyAdmin = false,
+    bool OnlyBots = false,
+    bool OnlyKicked = false,
+    bool OnlyBanned = false,
+    string? Keyword = null
+    )
     : IQuery<IReadOnlyCollection<IChannelMemberReadModel>>;
 
 public record GetChannelPushUpdatesBySeqNoQuery(
@@ -345,6 +351,8 @@ public record GetMaxMessageIdByPeerIdQuery(long PeerId) : IQuery<int>;
 
 public record GetChatAdminListByChannelIdQuery(long PeerId, int Skip, int Limit)
     : IQuery<IReadOnlyCollection<IChatAdminReadModel>>;
+
+public record GetChatAdminListQuery(int Skip, int Limit) : IQuery<IReadOnlyCollection<IChatAdminReadModel>>;
 
 public record GetAdminLogListQuery(long ChannelId, List<AdminLogEventAction> ActionTypes, int Skip, int Limit) : IQuery<
     IReadOnlyCollection<IChannelAdminLogEventReadModel>>;

@@ -13,4 +13,5 @@ public record DataSeederConfig
     public bool IsDialogFilterMigrated { get; set; }
 
     public bool IsUserNameIdMigrated { get; set; }
+    public bool IsChatAdminMigrated { get; set; }
 }

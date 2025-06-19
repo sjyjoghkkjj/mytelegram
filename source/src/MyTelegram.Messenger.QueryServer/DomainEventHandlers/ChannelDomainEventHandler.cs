@@ -262,13 +262,38 @@ public class ChannelDomainEventHandler(
                 domainEvent.AggregateEvent.ChannelId);
     }
 
-    public Task HandleAsync(
+    public async Task HandleAsync(
         IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberBannedRightsChangedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        return NotifyUpdateChannelAsync(domainEvent.AggregateEvent.RequestInfo,
+        var channel = await chatConverterService.GetChannelAsync(domainEvent.AggregateEvent.RequestInfo,
+            domainEvent.AggregateEvent.ChannelId, false, false, domainEvent.AggregateEvent.RequestInfo.Layer);
+        await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, new TUpdates
+        {
+            Chats = [channel],
+            Users = [],
+            Updates = [],
+            Date = DateTime.UtcNow.ToTimestamp()
+        });
+
+        var channelForMember = await chatConverterService.GetChannelAsync(RequestInfo.Empty with { UserId = domainEvent.AggregateEvent.MemberUserId },
             domainEvent.AggregateEvent.ChannelId,
-            domainEvent.AggregateEvent.MemberUserId);
+            false,
+            false,
+            0);
+        if (channelForMember is ILayeredChannel layeredChannel)
+        {
+            layeredChannel.BannedRights = domainEvent.AggregateEvent.BannedRights.ToChatBannedRights();
+            layeredChannel.AdminRights = null;
+        }
+
+        await PushUpdatesToPeerAsync(domainEvent.AggregateEvent.MemberUserId.ToUserPeer(), new TUpdates
+        {
+            Chats = [channelForMember],
+            Users = [],
+            Updates = [new TUpdateChannel { ChannelId = domainEvent.AggregateEvent.ChannelId }],
+            Date = DateTime.UtcNow.ToTimestamp()
+        });
     }
 
     public Task HandleAsync(
@@ -532,7 +557,7 @@ public class ChannelDomainEventHandler(
         }
 
         var updates = updatesConverterService.ToChannelUpdates(requestInfo, channelReadModel, channelPhotoReadModel, requestInfo.Layer);
-        var updatesForMember = updatesConverterService.ToChannelUpdates(requestInfo with { UserId = memberUserId }, channelReadModel, channelPhotoReadModel, 0);
+        var updatesForMember = updatesConverterService.ToChannelUpdates(RequestInfo.Empty with { UserId = memberUserId }, channelReadModel, channelPhotoReadModel, 0);
 
         await SendRpcMessageToClientAsync(requestInfo, updates);
         if (memberUserId != 0)

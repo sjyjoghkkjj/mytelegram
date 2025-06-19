@@ -18,4 +18,10 @@ public interface IChannelMemberReadModel : IReadModel
     ChatJoinType ChatJoinType { get; }
     int? SubscriptionUntilDate { get; }
     bool? IsBroadcast { get; }
+    bool IsAdmin { get; }
+    //bool IsCreator { get; }
+    string? Rank { get; }
+    bool CanEdit { get; }
+    long? PromotedBy { get; }
+    int AdminRights { get; }
 }

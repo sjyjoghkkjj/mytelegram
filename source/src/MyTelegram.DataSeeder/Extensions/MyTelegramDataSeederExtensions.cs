@@ -1,5 +1,6 @@
 ﻿using MyTelegram.EventFlow.MongoDB.Extensions;
 using MyTelegram.Messenger.NativeAot;
+using MyTelegram.QueryHandlers.MongoDB.ChatAdmin;
 using MyTelegram.QueryHandlers.MongoDB.User;
 using MyTelegram.QueryHandlers.MongoDB.UserName;
 
@@ -18,7 +19,10 @@ public static class MyTelegramDataSeederExtensions
 
             options.UseMongoDbSnapshotStore();
             options.AddMyTelegramMongoDbReadModel();
-            options.AddQueryHandlers(typeof(GetUserByIdQueryHandler), typeof(GetAllUserNameQueryHandler));
+            options.AddQueryHandlers(typeof(GetUserByIdQueryHandler),
+                typeof(GetAllUserNameQueryHandler),
+                typeof(GetChatAdminListQueryHandler)
+                );
             options.AddSystemTextJson(jsonSerializerOptions =>
             {
                 jsonSerializerOptions.AddSingleValueObjects(

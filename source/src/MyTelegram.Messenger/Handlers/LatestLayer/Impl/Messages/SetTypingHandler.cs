@@ -22,6 +22,7 @@ internal sealed class SetTypingHandler(
     IPeerHelper peerHelper,
     IObjectMessageSender messageSender,
     IBlockCacheAppService blockCacheAppService,
+    IChannelAppService channelAppService,
     IAccessHashHelper accessHashHelper)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSetTyping, IBool>,
         Messages.ISetTypingHandler
@@ -58,6 +59,13 @@ internal sealed class SetTypingHandler(
                 };
                 break;
             case PeerType.Channel:
+                var channelReadModel = await channelAppService.GetAsync(peer.PeerId);
+                var admin = channelReadModel.AdminList.FirstOrDefault(p => p.UserId == input.UserId);
+                if (admin?.AdminRights.Anonymous ?? false)
+                {
+                    return new TBoolTrue();
+                }
+
                 update = new TUpdateChannelUserTyping
                 {
                     Action = obj.Action,

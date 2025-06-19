@@ -12,26 +12,29 @@ public class ChatAndChannelMemberStateChangedEventHandler(IEventBus eventBus) :
     {
         return eventBus.PublishAsync(new ChannelMemberChangedEvent(domainEvent.AggregateEvent.ChannelId,
             MemberStateChangeType.Add,
-            new[] { domainEvent.AggregateEvent.CreatorId }));
+            [domainEvent.AggregateEvent.CreatorId]));
     }
 
     public Task HandleAsync(
         IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberBannedRightsChangedEvent> domainEvent,
         CancellationToken cancellationToken)
     {
-        var memberStateChangeType = MemberStateChangeType.None;
-        if (domainEvent.AggregateEvent.BannedRights.ViewMessages)
-        {
-            memberStateChangeType = MemberStateChangeType.Remove;
-        }
-        else if (domainEvent.AggregateEvent.RemovedFromKicked)
-        {
-            memberStateChangeType = MemberStateChangeType.Add;
-        }
+        //var memberStateChangeType = MemberStateChangeType.None;
+        //if (domainEvent.AggregateEvent.BannedRights.ViewMessages)
+        //{
+        //    memberStateChangeType = MemberStateChangeType.Remove;
+        //}
+        //else if (domainEvent.AggregateEvent.RemovedFromKicked)
+        //{
+        //    memberStateChangeType = MemberStateChangeType.Add;
+        //}
 
-        return eventBus.PublishAsync(new ChannelMemberChangedEvent(domainEvent.AggregateEvent.ChannelId,
-            memberStateChangeType,
-            new[] { domainEvent.AggregateEvent.MemberUserId }));
+        return eventBus.PublishAsync(new ChannelMemberBannedEvent(domainEvent.AggregateEvent.ChannelId,
+            domainEvent.AggregateEvent.MemberUserId, domainEvent.AggregateEvent.BannedRights.ToIntValue(),
+            domainEvent.AggregateEvent.BannedRights.UntilDate));
+        //return eventBus.PublishAsync(new ChannelMemberChangedEvent(domainEvent.AggregateEvent.ChannelId,
+        //    memberStateChangeType,
+        //    [domainEvent.AggregateEvent.MemberUserId]));
     }
 
     public Task HandleAsync(

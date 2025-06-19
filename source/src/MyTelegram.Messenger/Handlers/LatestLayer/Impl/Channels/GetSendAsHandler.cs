@@ -46,8 +46,9 @@ internal sealed class GetSendAsHandler(
                     photoReadModels, channelMemberReadModels, layer: input.Layer);
                 var layeredResult = layeredSendAsPeerService.GetConverter(input.Layer).ToSendAsPeers(channels);
 
-                // Channel: Current user + Channel + Public channels
-                if (channelReadModel.Broadcast)
+                var admin = channelReadModel.AdminList.FirstOrDefault(p => p.UserId == input.UserId);
+
+                if (channelReadModel.Broadcast || admin is { AdminRights.Anonymous: false })
                 {
                     layeredResult.Peers.Insert(0, new TSendAsPeer
                     {

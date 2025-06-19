@@ -5,7 +5,8 @@ public class ChannelMemberReadModel : IChannelMemberReadModel,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent>,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberJoinedEvent>,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberBannedRightsChangedEvent>,
-    IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberLeftEvent>
+    IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberLeftEvent>,
+	IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelAdminEditedEvent2>
 
 {
     public int BannedRights { get; private set; }
@@ -24,6 +25,13 @@ public class ChannelMemberReadModel : IChannelMemberReadModel,
     public ChatJoinType ChatJoinType { get; private set; }
     public int? SubscriptionUntilDate { get; private set; }
     public bool? IsBroadcast { get; private set; }
+
+    public bool IsAdmin { get; private set; }
+    //public bool IsCreator { get; private set; }
+    public string? Rank { get; private set; }
+    public bool CanEdit { get; private set; }
+    public long? PromotedBy { get; private set; }
+    public int AdminRights { get; private set; }
     public virtual long? Version { get; set; }
 
     public Task ApplyAsync(IReadModelContext context,
@@ -50,6 +58,8 @@ public class ChannelMemberReadModel : IChannelMemberReadModel,
         Kicked = domainEvent.AggregateEvent.Kicked;
         KickedBy = domainEvent.AggregateEvent.KickedBy;
         Left = domainEvent.AggregateEvent.Left;
+        IsAdmin = false;
+        AdminRights = 0;
 
         return Task.CompletedTask;
     }
@@ -97,6 +107,19 @@ public class ChannelMemberReadModel : IChannelMemberReadModel,
         CancellationToken cancellationToken)
     {
         Left = true;
+
+        return Task.CompletedTask;
+    }
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelAdminEditedEvent2> domainEvent, CancellationToken cancellationToken)
+    {
+        AdminRights = domainEvent.AggregateEvent.AdminRights;
+        Rank = domainEvent.AggregateEvent.Rank;
+        PromotedBy = domainEvent.AggregateEvent.RequestInfo.UserId;
+        IsAdmin = domainEvent.AggregateEvent.IsAdmin;
+        if (IsAdmin)
+        {
+            BannedRights = 0;
+        }
 
         return Task.CompletedTask;
     }

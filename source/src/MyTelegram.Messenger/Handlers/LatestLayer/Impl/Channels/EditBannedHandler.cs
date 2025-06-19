@@ -36,6 +36,12 @@ internal sealed class EditBannedHandler(
 
             var channel = peerHelper.GetChannel(obj.Channel);
             var peer = peerHelper.GetPeer(obj.Participant);
+            if (obj.BannedRights.SendPlain)
+            {
+                obj.BannedRights.SendMessages = true;
+                obj.BannedRights.Flags[1] = true;
+            }
+
             var bannedRights = ChatBannedRights.FromValue(obj.BannedRights.Flags.ToInt32(), obj.BannedRights.UntilDate);
             var command = new EditBannedCommand(ChannelMemberId.Create(channel.PeerId, peer.PeerId),
                 input.ToRequestInfo(),

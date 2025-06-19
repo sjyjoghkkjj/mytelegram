@@ -291,8 +291,16 @@ public class MessageAppService(
         }
         else if (input.ToPeer.PeerType == PeerType.Channel)
         {
+            var channelReadModel = await channelAppService.GetAsync(input.ToPeer.PeerId);
+
             if (!await CanSendAsPeerAsync(input.ToPeer.PeerId, input.RequestInfo.UserId))
             {
+                var admin = channelReadModel.AdminList.FirstOrDefault(p => p.UserId == input.SenderUserId);
+                if (admin is { AdminRights.Anonymous: true })
+                {
+                    return channelReadModel.ChannelId.ToChannelPeer();
+                }
+
                 return null;
             }
             Peer? sendAsPeer;
@@ -311,7 +319,6 @@ public class MessageAppService(
                 }
             }
 
-            var channelReadModel = await channelAppService.GetAsync(input.ToPeer.PeerId);
             if (channelReadModel is { MegaGroup: true, LinkedChatId: not null })
             {
                 sendAsPeer = channelReadModel.ChannelId.ToChannelPeer();
@@ -417,7 +424,8 @@ public class MessageAppService(
             input.RandomId,
             true,
             input.SendMessageType,
-            (MessageType)input.SendMessageType,
+            //(MessageType)input.SendMessageType,
+            input.MessageType,
             subType,
             input.InputReplyTo,
             //input.MessageActionData,

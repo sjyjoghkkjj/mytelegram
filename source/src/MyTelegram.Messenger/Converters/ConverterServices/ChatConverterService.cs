@@ -143,7 +143,9 @@ public class ChatConverterService(
     }
 
     public IChannelParticipants ToChannelParticipants(IRequestWithAccessHashKeyId request, IChannelReadModel channelReadModel,
-        IPhotoReadModel? photoReadModel, IReadOnlyCollection<IChatAdminReadModel>? chatAdminReadModels,
+        IPhotoReadModel? photoReadModel,
+        //IReadOnlyCollection<IChatAdminReadModel>? chatAdminReadModels,
+        int participantCount,
         IReadOnlyCollection<IChannelMemberReadModel> channelMemberReadModels, IEnumerable<IUser> users,
         DeviceType deviceType, bool forceNotLeft, int layer)
     {
@@ -168,22 +170,22 @@ public class ChatConverterService(
             channelMemberReadModel,
             channelMemberIsLeft, layer);
 
-        if (channelReadModel.Broadcast)
-        {
-            if (request.UserId != channelReadModel.CreatorId)
-            {
-                chatAdminReadModels = [];
-            }
-        }
+        //if (channelReadModel.Broadcast)
+        //{
+        //    if (request.UserId != channelReadModel.CreatorId)
+        //    {
+        //        chatAdminReadModels = [];
+        //    }
+        //}
 
         var participants =
-            ToChannelParticipantsCore(request, channelReadModel, chatAdminReadModels, channelMemberReadModels,
+            ToChannelParticipantsCore(request, channelReadModel, [], channelMemberReadModels,
                 layer);
 
         return new TChannelParticipants
         {
             Chats = new TVector<IChat>(channel),
-            Count = participants.Count,
+            Count = participantCount,//channelReadModel.ParticipantsCount ?? participants.Count,
             Participants = [.. participants],
             Users = [.. users]
         };
@@ -201,6 +203,10 @@ public class ChatConverterService(
     )
     {
         var channel = ToChannel(request, channelReadModel, photoReadModel, channelMemberReadModel, null, layer);
+        if (channel is ILayeredChannel layeredChannel)
+        {
+            layeredChannel.ParticipantsCount = null;
+        }
 
         var fullChat = ToChannelFull(
             request,
@@ -283,11 +289,14 @@ public class ChatConverterService(
         }
         else
         {
-            var admin = channelReadModel.AdminList.FirstOrDefault(p => p.UserId == request.UserId);
-            channel.AdminRights = admin != null
-                ? chatAdminRightsLayeredService.GetConverter(layer)
-                    .ToChatAdminRights(admin.AdminRights)
-                : null;
+            if (channel.BannedRights == null)
+            {
+                var admin = channelReadModel.AdminList.FirstOrDefault(p => p.UserId == request.UserId);
+                channel.AdminRights = admin != null
+                    ? chatAdminRightsLayeredService.GetConverter(layer)
+                        .ToChatAdminRights(admin.AdminRights)
+                    : null;
+            }
         }
 
         return channel;
@@ -377,7 +386,22 @@ public class ChatConverterService(
             channelFull.CanSetStickers = true;
         }
 
+        var anonymouseAdminCount = channelReadModel.AdminList.Count(p => p.AdminRights.Anonymous);
+        if (channelFull.ParticipantsCount != null)
+        {
+            channelFull.ParticipantsCount -= anonymouseAdminCount;
+            if (channelFull.ParticipantsCount < 0)
+            {
+                channelFull.ParticipantsCount = 0;
+            }
+        }
+
         return channelFull;
+    }
+
+    private bool IsAnonymousAdmin(int adminRights)
+    {
+        return (adminRights & (1 << 10)) != 0;
     }
 
     private IReadOnlyList<IChannelParticipant> ToChannelParticipantsCore(
@@ -391,10 +415,10 @@ public class ChatConverterService(
     {
         var participants = new List<IChannelParticipant>();
         var selfUserId = request.UserId;
-        foreach (var chatAdminReadModel in chatAdminReadModels ?? [])
-        {
-            participants.Add(ToChatParticipantAdmin(request, chatAdminReadModel));
-        }
+        //foreach (var chatAdminReadModel in chatAdminReadModels ?? [])
+        //{
+        //    participants.Add(ToChatParticipantAdmin(request, chatAdminReadModel));
+        //}
 
         foreach (var channelMemberReadModel in channelMemberReadModels)
         {
@@ -470,26 +494,31 @@ public class ChatConverterService(
 
         if (channelMemberReadModel.UserId == channelReadModel.CreatorId)
         {
+            var creatorRights = ChatAdminRights.GetCreatorRights();
+            creatorRights.Anonymous = new ChatAdminRights(channelMemberReadModel.AdminRights).Anonymous;
             return new TChannelParticipantCreator
             {
                 UserId = channelMemberReadModel.UserId,
-                AdminRights = ChatAdminRights.GetCreatorRights().ToChatAdminRights()
+                AdminRights = creatorRights.ToChatAdminRights(),
+                Rank = channelMemberReadModel.Rank
             };
         }
 
-        var admin = channelReadModel.AdminList.FirstOrDefault(p => p.UserId == channelMemberReadModel.UserId);
-        if (admin != null)
+        //var admin = channelReadModel.AdminList.FirstOrDefault(p => p.UserId == channelMemberReadModel.UserId);
+        //if (admin != null)
+        if (channelMemberReadModel.IsAdmin)
         {
             return new TChannelParticipantAdmin
             {
-                AdminRights = admin.AdminRights.ToChatAdminRights(),
+                //AdminRights = admin.AdminRights.ToChatAdminRights(),
+                AdminRights = new ChatAdminRights(channelMemberReadModel.AdminRights).ToChatAdminRights(),
                 Date = channelMemberReadModel.Date,
                 InviterId = channelMemberReadModel.InviterId,
-                Rank = admin.Rank,
-                UserId = admin.UserId,
+                Rank = channelMemberReadModel.Rank,
+                UserId = channelMemberReadModel.UserId,
                 Self = channelMemberReadModel.UserId == request.UserId,
-                CanEdit = admin.CanEdit,
-                PromotedBy = admin.PromotedBy
+                CanEdit = channelMemberReadModel.CanEdit,
+                PromotedBy = channelMemberReadModel.PromotedBy ?? 0
             };
         }
 

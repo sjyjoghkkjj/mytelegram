@@ -43,6 +43,7 @@ namespace MyTelegram.Messenger.NativeAot;
 [JsonSerializable(typeof(MyTelegram.Domain.Events.AppCode.CheckSignUpCodeCompletedEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.AppCode.EmailCodeCreatedEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Channel.ChannelAboutEditedEvent))]
+[JsonSerializable(typeof(MyTelegram.Domain.Events.Channel.ChannelAdminEditedEvent2))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Channel.ChannelAdminRightsEditedEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Channel.ChannelColorUpdatedEvent))]
 [JsonSerializable(typeof(MyTelegram.Domain.Events.Channel.ChannelCreatedEvent))]

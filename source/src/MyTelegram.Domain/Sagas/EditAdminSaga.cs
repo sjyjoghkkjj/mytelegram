@@ -23,7 +23,8 @@ public class EditAdminSaga : MyInMemoryAggregateSaga<EditAdminSaga, EditAdminSag
             domainEvent.AggregateEvent.IsBot,
             domainEvent.AggregateEvent.IsNewAdmin,
             domainEvent.AggregateEvent.PromotedBy,
-            domainEvent.AggregateEvent.AdminRights
+            domainEvent.AggregateEvent.AdminRights,
+            domainEvent.AggregateEvent.Rank
             ));
         if (!domainEvent.AggregateEvent.IsChannelMember)
         {
@@ -45,6 +46,14 @@ public class EditAdminSaga : MyInMemoryAggregateSaga<EditAdminSaga, EditAdminSag
         }
         else
         {
+            var command = new EditChannelAdminCommand2(
+                ChannelMemberId.Create(domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.UserId),
+                domainEvent.AggregateEvent.RequestInfo, domainEvent.AggregateEvent.ChannelId,
+                domainEvent.AggregateEvent.UserId, _state.AdminRights.GetFlags().ToInt32(),
+                _state.Rank
+            );
+            Publish(command);
+
             HandleEditAdminCompleted();
         }
 
@@ -59,6 +68,14 @@ public class EditAdminSaga : MyInMemoryAggregateSaga<EditAdminSaga, EditAdminSag
 
     public Task HandleAsync(IDomainEvent<ChannelMemberAggregate, ChannelMemberId, ChannelMemberCreatedEvent> domainEvent, ISagaContext sagaContext, CancellationToken cancellationToken)
     {
+        var command = new EditChannelAdminCommand2(
+            ChannelMemberId.Create(domainEvent.AggregateEvent.ChannelId, domainEvent.AggregateEvent.UserId),
+            domainEvent.AggregateEvent.RequestInfo, domainEvent.AggregateEvent.ChannelId,
+            domainEvent.AggregateEvent.UserId, _state.AdminRights.GetFlags().ToInt32(),
+            _state.Rank
+        );
+        Publish(command);
+
         HandleEditAdminCompleted();
 
         return Task.CompletedTask;
@@ -77,6 +94,7 @@ public class EditAdminSagaState : AggregateState<EditAdminSaga, EditAdminSagaId,
     public bool IsNewAdmin { get; private set; }
     public long PromotedBy { get; private set; }
     public ChatAdminRights AdminRights { get; private set; } = default!;
+    public string Rank { get; private set; }
     public void Apply(EditAdminStartedSagaEvent aggregateEvent)
     {
         RequestInfo = aggregateEvent.RequestInfo;
@@ -87,6 +105,7 @@ public class EditAdminSagaState : AggregateState<EditAdminSaga, EditAdminSagaId,
         IsNewAdmin = aggregateEvent.IsNewAdmin;
         PromotedBy = aggregateEvent.PromotedBy;
         AdminRights = aggregateEvent.AdminRights;
+        Rank = aggregateEvent.Rank;
     }
 
     public void Apply(EditAdminCompletedSagaEvent aggregateEvent)
@@ -102,7 +121,8 @@ public class EditAdminStartedSagaEvent(RequestInfo requestInfo,
     bool isBot,
     bool isNewAdmin,
     long promotedBy,
-    ChatAdminRights adminRights
+    ChatAdminRights adminRights,
+    string rank
 ) : RequestAggregateEvent2<EditAdminSaga, EditAdminSagaId>(requestInfo)
 {
     public long ChannelId { get; } = channelId;
@@ -112,6 +132,7 @@ public class EditAdminStartedSagaEvent(RequestInfo requestInfo,
     public bool IsNewAdmin { get; } = isNewAdmin;
     public long PromotedBy { get; } = promotedBy;
     public ChatAdminRights AdminRights { get; } = adminRights;
+    public string Rank { get; } = rank;
 }
 
 public class EditAdminCompletedSagaEvent(RequestInfo requestInfo,

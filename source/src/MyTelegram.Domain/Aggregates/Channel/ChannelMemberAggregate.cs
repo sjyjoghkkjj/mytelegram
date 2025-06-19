@@ -9,6 +9,12 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
         Register(_state);
     }
 
+    public void EditChannelAdmin2(RequestInfo requestInfo, long channelId, long userId, int adminRights, string rank)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        Emit(new ChannelAdminEditedEvent2(requestInfo, channelId, userId, adminRights, rank, adminRights != 0));
+    }
+
     public void Create(
         RequestInfo requestInfo,
         long channelId,
@@ -88,7 +94,7 @@ public class ChannelMemberAggregate : SnapshotAggregateRoot<ChannelMemberAggrega
         else
         {
             kicked = false;
-            kickedBy = 0;
+            kickedBy = adminId;
             left = false;
         }
 

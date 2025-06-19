@@ -7,7 +7,8 @@ public class ChannelMemberState : AggregateState<ChannelMemberAggregate, Channel
     IApply<ChannelCreatorCreatedEvent>,
     IApply<ChannelMemberJoinedEvent>,
     IApply<ChannelMemberBannedRightsChangedEvent>,
-    IApply<ChannelMemberLeftEvent>
+    IApply<ChannelMemberLeftEvent>,
+	IApply<ChannelAdminEditedEvent2>
 {
     public bool Banned { get; private set; }
 
@@ -61,5 +62,9 @@ public class ChannelMemberState : AggregateState<ChannelMemberAggregate, Channel
         Banned = snapshot.Banned;
         IsBot= snapshot.IsBot;
         Broadcast= snapshot.Broadcast;
+    }
+    public void Apply(ChannelAdminEditedEvent2 aggregateEvent)
+    {
+        
     }
 }

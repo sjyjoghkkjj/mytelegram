@@ -21,7 +21,17 @@ public class UpdatesResponseService(
     ILayeredService<IUpdateMessageExtendedMediaResponseConverter> updateMessageExtendedMediaLayeredService
 ) : IUpdatesResponseService, ITransientDependency
 {
-    public IUpdates ToLayeredData(long userId, long accessHashKeyId, IUpdates latestLayerData, int layer)
+    public IUpdates ToLayeredData(long userId, long accessHashKeyId, IUpdates latestLayerData, int layer, LayeredResponseExtraData? layeredResponseExtraData)
+    {
+        return ToLayeredDataCore(userId, accessHashKeyId, latestLayerData, layer, layeredResponseExtraData);
+    }
+
+    public IUpdate ToLayeredData(long userId, long accessHashKeyId, IUpdate latestLayerData, int layer, LayeredResponseExtraData? layeredResponseExtraData)
+    {
+        return ToLayeredUpdateData(userId, accessHashKeyId, latestLayerData, layer, layeredResponseExtraData);
+    }
+
+    private IUpdates ToLayeredDataCore(long userId, long accessHashKeyId, IUpdates latestLayerData, int layer, LayeredResponseExtraData? layeredResponseExtraData)
     {
         switch (latestLayerData)
         {
@@ -51,18 +61,24 @@ public class UpdatesResponseService(
                     if (updates.Chats[i] is ILayeredChannel layeredChannel)
                     {
                         layeredChannel.AccessHash = accessHashHelper2.GenerateAccessHash(userId, accessHashKeyId, layeredChannel.Id, AccessHashType.Channel);
+                        if (layeredResponseExtraData != null && layeredResponseExtraData.BannedRights != 0)
+                        {
+                            layeredChannel.AdminRights = null;
+                            layeredChannel.BannedRights = ChatBannedRights.FromValue(layeredResponseExtraData.BannedRights, layeredResponseExtraData.UntilDate)
+                                .ToChatBannedRights();
+                        }
                     }
                 }
 
                 for (var i = 0; i < updates.Updates.Count; i++)
                 {
                     var update = updates.Updates[i];
-                    updates.Updates[i] = ToLayeredUpdateData(userId, accessHashKeyId, update, layer);
+                    updates.Updates[i] = ToLayeredUpdateData(userId, accessHashKeyId, update, layer, layeredResponseExtraData);
                 }
 
                 break;
             case TUpdateShort updateShort:
-                updateShort.Update = ToLayeredUpdateData(userId, accessHashKeyId, updateShort.Update, layer);
+                updateShort.Update = ToLayeredUpdateData(userId, accessHashKeyId, updateShort.Update, layer, layeredResponseExtraData);
                 break;
             case TUpdateShortSentMessage updateShortSentMessage:
 
@@ -74,12 +90,7 @@ public class UpdatesResponseService(
         return latestLayerData;
     }
 
-    public IUpdate ToLayeredData(long userId, long accessHashKeyId, IUpdate latestLayerData, int layer)
-    {
-        return ToLayeredUpdateData(userId, accessHashKeyId, latestLayerData, layer);
-    }
-
-    private IUpdate ToLayeredUpdateData(long userId, long accessHashKeyId, IUpdate update, int layer)
+    private IUpdate ToLayeredUpdateData(long userId, long accessHashKeyId, IUpdate update, int layer, LayeredResponseExtraData? layeredResponseExtraData)
     {
         switch (update)
         {
