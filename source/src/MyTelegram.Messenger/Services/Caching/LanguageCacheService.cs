@@ -38,7 +38,7 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         var languages = await queryProcessor.ProcessAsync(new GetAllLanguagesQuery());
         var groupedLanguages = languages.GroupBy(p => p.Platform)
             .ToDictionary(k => GetLanguagePack(k.Key),
-                v => v.ToFrozenDictionary(x => GetLanguageTextKey(x.LanguageCode, x.Platform)));
+                v => v.ToFrozenDictionary(x => GetLanguageTextKey(x.LanguageCode, x.Platform, false)));
         _languageReadModels = groupedLanguages.ToFrozenDictionary();
         logger.LogInformation("Loading all languages completed, count: {Count}", languages.Count);
     }
@@ -49,13 +49,21 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         var languageTexts = await queryProcessor.ProcessAsync(new GetAllLanguageTextsQuery());
         _languageTexts = languageTexts.GroupBy(p => new { p.LanguageCode, p.Platform },
                 v => new LanguageTextItem(v.Key, v.Value, v.LanguageVersion))
-            .ToFrozenDictionary(k => GetLanguageTextKey(k.Key.LanguageCode, k.Key.Platform),
+            .ToFrozenDictionary(k => GetLanguageTextKey(k.Key.LanguageCode, k.Key.Platform, false),
                 v => v.ToDictionary(k1 => k1.Key, v1 => v1));
         sw.Stop();
         logger.LogInformation("Loading all language texts completed, count: {Count}, time: {TimeSpan}", languageTexts.Count, sw.Elapsed);
     }
 
-    private string GetLanguageTextKey(string languageCode, string languagePack) => $"{languageCode}_{languagePack}";
+    private string GetLanguageTextKey(string languageCode, string languagePack, bool removeSuffix = true)
+    {
+        if (removeSuffix)
+        {
+            return $"{GetLanguageCode(languageCode)}_{languagePack}";
+        }
+
+        return $"{languageCode}_{languagePack}";
+    }
 
     private string GetLanguagePack(DeviceType deviceType)
     {
@@ -72,11 +80,11 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
 
         return langPack;
     }
-    private string GetLanguageTextKey(string languageCode, DeviceType deviceType)
+    private string GetLanguageTextKey(string languageCode, DeviceType deviceType, bool removeSuffix = true)
     {
         var langPack = GetLanguagePack(deviceType);
 
-        return GetLanguageTextKey(languageCode, langPack);
+        return GetLanguageTextKey(languageCode, langPack, removeSuffix);
     }
 
     public async Task<IReadOnlyCollection<ILanguageReadModel>> GetAllLanguagesAsync(string languagePack)
@@ -178,5 +186,16 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         }
 
         return Task.FromResult<List<LanguageTextItem>>([]);
+    }
+
+    private string GetLanguageCode(string langCode)
+    {
+        // The WebA client uses language codes with the `-raw` suffix
+        if (langCode.EndsWith("-raw"))
+        {
+            return langCode[..^4];
+        }
+
+        return langCode;
     }
 }
