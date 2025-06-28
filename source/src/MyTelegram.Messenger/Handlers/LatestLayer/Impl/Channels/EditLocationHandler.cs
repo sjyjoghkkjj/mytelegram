@@ -17,6 +17,6 @@ internal sealed class EditLocationHandler : RpcResultObjectHandler<MyTelegram.Sc
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestEditLocation obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new MyTelegram.Schema.TBoolTrue());
     }
 }

@@ -25,7 +25,7 @@ internal sealed class GetCollectibleInfoHandler : RpcResultObjectHandler<MyTeleg
             Amount = 10000000,
             CryptoCurrency = "BTC",
             CryptoAmount = 1,
-            Url = "https://google.com"
+            Url = "https://fragment.com/"
         });
     }
 }

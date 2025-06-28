@@ -17,6 +17,6 @@ internal sealed class SetStickersHandler : RpcResultObjectHandler<MyTelegram.Sch
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestSetStickers obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new MyTelegram.Schema.TBoolTrue());
     }
 }

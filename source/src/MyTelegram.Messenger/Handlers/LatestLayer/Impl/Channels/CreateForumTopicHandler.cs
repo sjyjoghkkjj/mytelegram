@@ -16,6 +16,13 @@ internal sealed class CreateForumTopicHandler : RpcResultObjectHandler<MyTelegra
     protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestCreateForumTopic obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.IUpdates>(
+            new TUpdates
+            {
+                Users = [],
+                Updates = [],
+                Chats = [],
+                Date = CurrentDate
+            });
     }
 }

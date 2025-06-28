@@ -1,4 +1,4 @@
-﻿// ReSharper disable All
+﻿using TAutoSaveSettings = MyTelegram.Schema.Account.TAutoSaveSettings;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
@@ -12,6 +12,14 @@ internal sealed class GetAutoSaveSettingsHandler : RpcResultObjectHandler<MyTele
     protected override Task<MyTelegram.Schema.Account.IAutoSaveSettings> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetAutoSaveSettings obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Account.IAutoSaveSettings>(new TAutoSaveSettings
+        {
+            BroadcastsSettings = new Schema.TAutoSaveSettings(),
+            ChatsSettings = new Schema.TAutoSaveSettings(),
+            UsersSettings = new Schema.TAutoSaveSettings(),
+            Chats = [],
+            Users = [],
+            Exceptions = []
+        });
     }
 }

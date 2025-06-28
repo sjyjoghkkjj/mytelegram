@@ -15,6 +15,10 @@ internal sealed class GetPasswordSettingsHandler : RpcResultObjectHandler<MyTele
     protected override Task<MyTelegram.Schema.Account.IPasswordSettings> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetPasswordSettings obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.Account.IPasswordSettings>(
+            new MyTelegram.Schema.Account.TPasswordSettings
+            {
+                
+            });
     }
 }

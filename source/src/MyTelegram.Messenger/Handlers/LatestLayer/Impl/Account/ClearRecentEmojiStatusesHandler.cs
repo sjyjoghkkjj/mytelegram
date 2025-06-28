@@ -12,6 +12,6 @@ internal sealed class ClearRecentEmojiStatusesHandler : RpcResultObjectHandler<M
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestClearRecentEmojiStatuses obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

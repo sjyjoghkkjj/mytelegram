@@ -11,6 +11,6 @@ internal sealed class SetEmojiStickersHandler : RpcResultObjectHandler<MyTelegra
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestSetEmojiStickers obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IBool>(new MyTelegram.Schema.TBoolTrue());
     }
 }

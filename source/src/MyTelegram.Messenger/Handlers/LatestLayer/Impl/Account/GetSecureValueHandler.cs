@@ -12,6 +12,6 @@ internal sealed class GetSecureValueHandler : RpcResultObjectHandler<MyTelegram.
     protected override Task<TVector<MyTelegram.Schema.ISecureValue>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetSecureValue obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<TVector<MyTelegram.Schema.ISecureValue>>([]);
     }
 }

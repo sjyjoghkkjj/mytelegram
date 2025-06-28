@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 
 ///<summary>
 /// Register device to receive <a href="https://corefork.telegram.org/api/push-updates">PUSH notifications</a>
@@ -14,17 +12,10 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Account;
 /// 400 WEBPUSH_TOKEN_INVALID The specified web push token is invalid.
 /// See <a href="https://corefork.telegram.org/method/account.registerDevice" />
 ///</summary>
-internal sealed class RegisterDeviceHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestRegisterDevice, IBool>,
-    Account.IRegisterDeviceHandler
-
+internal sealed class RegisterDeviceHandler(ICommandBus commandBus)
+    : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestRegisterDevice, IBool>,
+        Account.IRegisterDeviceHandler
 {
-    private readonly ICommandBus _commandBus;
-
-    public RegisterDeviceHandler(ICommandBus commandBus)
-    {
-        _commandBus = commandBus;
-    }
-
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestRegisterDevice obj)
     {
@@ -38,7 +29,8 @@ internal sealed class RegisterDeviceHandler : RpcResultObjectHandler<MyTelegram.
             obj.AppSandbox,
             obj.Secret,
             obj.OtherUids.ToList());
-        await _commandBus.PublishAsync(command);
+        await commandBus.PublishAsync(command);
+
         return new TBoolTrue();
     }
 }

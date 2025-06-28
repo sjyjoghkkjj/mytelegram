@@ -25,6 +25,13 @@ internal sealed class EditCreatorHandler : RpcResultObjectHandler<MyTelegram.Sch
     protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestEditCreator obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<MyTelegram.Schema.IUpdates>(
+            new TUpdates
+            {
+                Users = [],
+                Updates = [],
+                Chats = [],
+                Date = CurrentDate
+            });
     }
 }
