@@ -19,7 +19,7 @@ internal sealed class SaveDefaultSendAsHandler(ICommandBus commandBus, IAccessHa
         await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
         await accessHashHelper.CheckAccessHashAsync(input, obj.SendAs);
         var peer = peerHelper.GetPeer(obj.Peer);
-        var sendAsPeer = peerHelper.GetPeer(obj.SendAs);
+        var sendAsPeer = peerHelper.GetPeer(obj.SendAs, input.UserId);
         await messageAppService.CheckSendAsAsync(input.UserId, peer, sendAsPeer);
         var key = ((int)UserConfigType.SendAsPeer).ToString();
         var command = new UpdateUserConfigCommand(
