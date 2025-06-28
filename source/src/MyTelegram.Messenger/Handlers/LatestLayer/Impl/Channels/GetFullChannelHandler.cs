@@ -1,13 +1,4 @@
-﻿// ReSharper disable All
-
-using MyTelegram.Messenger.Converters.ConverterServices;
-using MyTelegram.Schema;
-using GetStickerSetByIdQuery = MyTelegram.Queries.GetStickerSetByIdQuery;
-using GetWallPaperQuery = MyTelegram.Queries.GetWallPaperQuery;
-using TChatFull = MyTelegram.Schema.Messages.TChatFull;
-using TStickerSet = MyTelegram.Schema.TStickerSet;
-
-namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
+﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Channels;
 
 ///<summary>
 /// Get full info about a <a href="https://corefork.telegram.org/api/channel#supergroups">supergroup</a>, <a href="https://corefork.telegram.org/api/channel#gigagroups">gigagroup</a> or <a href="https://corefork.telegram.org/api/channel#channels">channel</a>
