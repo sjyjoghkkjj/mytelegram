@@ -40,7 +40,7 @@ MyTelegram is telegram server side api implementation written in c#, support pri
    ```
 4. Default verification code is `22222`
 
-## Build mytelegram server docker images
+## Build MyTelegram server docker images
 
 - ### Linux/amd64 (build)
 ```
