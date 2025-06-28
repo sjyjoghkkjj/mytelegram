@@ -23,21 +23,6 @@ MyTelegram is telegram server side api implementation written in c#, support pri
 - ForumTopics(Pro version)
 - Themes/Wallpapers/Auto-Delete Messages/Scheduled Messages/Chatlist/Telegram Business/Stories/Email Login/Email Sender/Direct messages/Push Server(Firebase) (Pro version)
 
-## Build docker images
-
-- ### linux/amd64 (build)
-```
-build-all-amd64.sh
-```
-- ### linux/arm64 (build)
-```
-build-all-arm64.sh
-```
-- ### linux/amd64 & linux/arm64 (build and push)
-```
-build-and-push-all-amd64-arm64.sh
-```
-
 ## Run MyTelegram server
 
 - ### Run MyTelegram server with docker
@@ -54,6 +39,17 @@ build-and-push-all-amd64-arm64.sh
       docker compose up
    ```
 4. Default verification code is `22222`
+
+## Build mytelegram server docker images
+
+- ### Linux/amd64 (build)
+```
+build-all-amd64.sh
+```
+- ### Linux/arm64 (build)
+```
+build-all-arm64.sh
+```
 
 ## MyTelegram clients
 [TDesktop for mytelegram](https://github.com/loyldg/mytelegram-tdesktop)
