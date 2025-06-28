@@ -23,12 +23,6 @@ MyTelegram is telegram server side api implementation written in c#, support pri
 - ForumTopics(Pro version)
 - Themes/Wallpapers/Auto-Delete Messages/Scheduled Messages/Chatlist/Telegram Business/Stories/Email Login/Email Sender/Direct messages/Push Server(Firebase) (Pro version)
 
-## Build MyTelegram Server
-
-1. Install [.NET SDK 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-2. Run `build/build.ps1` or `build/build.sh`
-3. Build output folder is `out/{version}`
-
 ## Build docker images
 
 - ### linux/amd64 (build)
