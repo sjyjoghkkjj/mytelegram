@@ -311,7 +311,7 @@ public class MessageAppService(
             {
                 if (long.TryParse(userConfigReadModel.Value, out var sendAsPeerId))
                 {
-                    sendAsPeer = sendAsPeerId.ToChannelPeer();
+                    sendAsPeer = peerHelper.GetPeer(sendAsPeerId);
                     if (await IsValidSendAsPeerAsync(input.RequestInfo.UserId, input.ToPeer, sendAsPeer))
                     {
                         return sendAsPeer;
