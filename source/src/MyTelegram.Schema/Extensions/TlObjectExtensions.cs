@@ -3,58 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MyTelegram.Schema.Extensions;
 
-//public sealed class ArrayPoolBufferWriterWrapper<T>(ArrayBufferWriter<T> writer) : IDisposable
-//{
-//    public ArrayBufferWriter<T> Writer => writer;
-
-//    public int WrittenCount => writer.WrittenCount;
-
-//    public void Dispose()
-//    {
-//        writer.Clear();
-//        ArrayBufferWriterPool<T>.Return(this);
-//    }
-//}
-//public class ArrayBufferWriterPool : ArrayBufferWriterPool<byte> { }
-
-//public class ArrayBufferWriterPool<T>
-//{
-//    private static readonly ConcurrentQueue<ArrayPoolBufferWriterWrapper<T>> Queue = [];
-
-//    public static ArrayPoolBufferWriterWrapper<T> Rent(int initialCapacity = 1024)
-//    {
-//        if (Queue.TryDequeue(out var writer))
-//        {
-//            return writer;
-//        }
-//        return new ArrayPoolBufferWriterWrapper<T>(new ArrayBufferWriter<T>(initialCapacity));
-//    }
-
-//    public static void Return(ArrayPoolBufferWriterWrapper<T> writerWrapper)
-//    {
-//        writerWrapper.Writer.Clear();
-//        Queue.Enqueue(writerWrapper);
-//    }
-//}
 
 public static class TlObjectExtensions
 {
-    //private static readonly BytesSerializer BytesSerializer = new();
-    //[return: NotNullIfNotNull("obj")]
-    //public static byte[]? ToBytes(this IObject? obj)
-    //{
-    //    if (obj == null)
-    //    {
-    //        return null;
-    //    }
-
-    //    var stream = new MemoryStream();
-    //    var bw = new BinaryWriter(stream);
-    //    obj.Serialize(bw);
-
-    //    return stream.ToArray();
-    //}
-
     public static long? ToPeerId(this IPeer? peer)
     {
         long? ownerId = null;
@@ -162,12 +113,19 @@ public static class TlObjectExtensions
     [return: NotNullIfNotNull(nameof(inputReplyTo))]
     public static int? ToReplyToMsgId(this IInputReplyTo? inputReplyTo)
     {
-        return inputReplyTo switch
+        switch (inputReplyTo)
         {
-            TInputReplyToMessage inputReplyToMessage => inputReplyToMessage.ReplyToMsgId,
-            TInputReplyToStory inputReplyToStory => inputReplyToStory.StoryId,
-            _ => null
-        };
+            case TInputReplyToMessage inputReplyToMessage:
+                if (inputReplyToMessage.TopMsgId != null)
+                {
+                    return inputReplyToMessage.TopMsgId;
+                }
+                return inputReplyToMessage.ReplyToMsgId;
+            case TInputReplyToStory inputReplyToStory:
+                return inputReplyToStory.StoryId;
+            default:
+                return null;
+        }
     }
 
     public static int GetLength(this IObject? obj)
@@ -177,30 +135,12 @@ public static class TlObjectExtensions
             return 0;
         }
 
-        var writer = new ArrayPoolBufferWriter<byte>();
+        using var writer = new ArrayPoolBufferWriter<byte>();
         obj.Serialize(writer);
 
         return writer.WrittenCount;
     }
 
-    //public static void ToBytes(this IObject? obj, Memory<byte> memory)
-    //{
-    //    if (obj == null)
-    //    {
-    //        return;
-    //    }
-    //    var writer = ArrayBufferWriterPool.Rent();
-    //    try
-    //    {
-    //        obj.Serialize(writer.Writer);
-    //        var bytes = writer.Writer.WrittenSpan;
-    //        bytes.CopyTo(memory.Span);
-    //    }
-    //    finally
-    //    {
-    //        ArrayBufferWriterPool.Return(writer);
-    //    }
-    //}
 
     [return: NotNullIfNotNull(nameof(obj))]
     public static byte[]? ToBytes(this IObject? obj)
