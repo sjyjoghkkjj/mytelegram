@@ -1,8 +1,4 @@
 ﻿using EventFlow.Aggregates.ExecutionResults;
-using MyTelegram.Domain.Aggregates.Messaging;
-using MyTelegram.Domain.Aggregates.Pts;
-using MyTelegram.Domain.Commands.Pts;
-using MyTelegram.Domain.Events.Messaging;
 using MyTelegram.Domain.Events.Pts;
 using MyTelegram.Messenger.Services.Caching;
 
@@ -30,7 +26,8 @@ public class PtsEventHandler(IPtsHelper ptsHelper,
     ISubscribeSynchronousTo<SendMessageSaga, SendMessageSagaId, SendOutboxMessageCompletedSagaEvent>,
     ISubscribeSynchronousTo<SendMessageSaga, SendMessageSagaId, ReceiveInboxMessageCompletedSagaEvent>,
     ISubscribeSynchronousTo<PtsAggregate, PtsId, PtsAckedEvent>,
-    ISubscribeSynchronousTo<PtsAggregate, PtsId, QtsAckedEvent>
+    ISubscribeSynchronousTo<PtsAggregate, PtsId, QtsAckedEvent>,
+    ISubscribeSynchronousTo<DeleteChannelMessagesSaga, DeleteChannelMessagesSagaId, DeleteChannelMessagesCompletedSagaEvent>
 {
     public Task HandleAsync(
         IDomainEvent<ClearHistorySaga, ClearHistorySagaId, ClearSingleUserHistoryCompletedSagaEvent> domainEvent,
@@ -209,5 +206,10 @@ public class PtsEventHandler(IPtsHelper ptsHelper,
         ptsCommandExecutor.Enqueue(updatePtsForAuthKeyIdCommand);
 
         return Task.CompletedTask;
+    }
+
+    public Task HandleAsync(IDomainEvent<DeleteChannelMessagesSaga, DeleteChannelMessagesSagaId, DeleteChannelMessagesCompletedSagaEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        return IncrementGlobalSeqNoAsync(domainEvent.AggregateEvent.RequestInfo.UserId);
     }
 }

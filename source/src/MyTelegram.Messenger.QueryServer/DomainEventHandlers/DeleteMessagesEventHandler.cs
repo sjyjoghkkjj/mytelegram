@@ -66,8 +66,6 @@ public class DeleteMessagesEventHandler(
             domainEvent.AggregateEvent.RequestInfo.AuthKeyId, chats: new List<long> { channelId });
         await AddRpcGlobalSeqNoForAuthKeyIdAsync(domainEvent.AggregateEvent.RequestInfo.ReqMsgId,
             domainEvent.AggregateEvent.RequestInfo.UserId, globalSeqNo);
-        await UpdateSelfGlobalSeqNoAfterSendChannelMessageAsync(domainEvent.AggregateEvent.RequestInfo.UserId,
-            globalSeqNo);
 
         var r = new TAffectedMessages
         {
