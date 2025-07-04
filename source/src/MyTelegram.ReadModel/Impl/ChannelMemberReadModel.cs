@@ -6,7 +6,7 @@ public class ChannelMemberReadModel : IChannelMemberReadModel,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberJoinedEvent>,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberBannedRightsChangedEvent>,
     IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelMemberLeftEvent>,
-	IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelAdminEditedEvent2>
+    IAmReadModelFor<ChannelMemberAggregate, ChannelMemberId, ChannelAdminEditedEvent2>
 
 {
     public int BannedRights { get; private set; }
@@ -45,6 +45,7 @@ public class ChannelMemberReadModel : IChannelMemberReadModel,
         Date = domainEvent.AggregateEvent.Date;
         ChatJoinType = ChatJoinType.InvitedByAdmin;
         IsBroadcast = domainEvent.AggregateEvent.IsBroadcast;
+        IsAdmin = true;
 
         return Task.CompletedTask;
     }
