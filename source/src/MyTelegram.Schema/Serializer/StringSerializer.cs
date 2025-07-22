@@ -8,8 +8,10 @@ public class StringSerializer : ISerializer<string>//, ISerializer2<string>
     public void Serialize(string value,
         IBufferWriter<byte> writer)
     {
-        var data = Encoding.UTF8.GetBytes(value);
-        _bytesSerializer.Serialize(data, writer);
+        using var owner = MemoryPool<byte>.Shared.Rent(value.Length * 4);
+        var count = Encoding.UTF8.GetBytes(value, owner.Memory.Span);
+        var buffer = owner.Memory.Slice(0, count);
+        _bytesSerializer.Serialize(buffer.Span, writer);
     }
 
     public string Deserialize(ref SequenceReader<byte> reader)
