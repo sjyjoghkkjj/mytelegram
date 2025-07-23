@@ -126,5 +126,22 @@ public class CreateChannelSaga :
             domainEvent.AggregateEvent.Broadcast
         );
         Publish(createChatInviteCommand);
+
+        if (domainEvent.AggregateEvent.MemberUserIds.Count > 0)
+        {
+            var command = new StartInviteToChannelCommand(TempId.New,
+                domainEvent.AggregateEvent.RequestInfo with { RequestId = Guid.NewGuid(), ReqMsgId = 0 },
+                domainEvent.AggregateEvent.ChannelId,
+                domainEvent.AggregateEvent.Broadcast,
+                false,
+                domainEvent.AggregateEvent.RequestInfo.UserId,
+                0,
+                1,
+                domainEvent.AggregateEvent.MemberUserIds,
+                domainEvent.AggregateEvent.BotUserIds,
+                ChatJoinType.InvitedByAdmin
+            );
+            Publish(command);
+        }
     }
 }
