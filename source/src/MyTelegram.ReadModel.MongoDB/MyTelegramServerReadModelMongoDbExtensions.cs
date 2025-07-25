@@ -58,6 +58,16 @@ public static class MyTelegramServerReadModelMongoDbExtensions
             var cm = new BsonClassMap(type);
             cm.AutoMap();
             cm.SetDiscriminator(discriminator);
+            var memberMap = cm.GetMemberMap("Flags");
+            if (memberMap != null)
+            {
+                cm.UnmapMember(memberMap.MemberInfo);
+            }
+            var memberMap2 = cm.GetMemberMap("Flags2");
+            if (memberMap2 != null)
+            {
+                cm.UnmapMember(memberMap2.MemberInfo);
+            }
             BsonClassMap.RegisterClassMap(cm);
         }
     }
