@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TStarGiftAttributeOriginalDetails : IStarGiftAttribute
 {
     public uint ConstructorId => 0xe0bff26c;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public MyTelegram.Schema.IPeer? SenderId { get; set; }
     public MyTelegram.Schema.IPeer RecipientId { get; set; }
     public int Date { get; set; }
@@ -18,8 +18,8 @@ public sealed class TStarGiftAttributeOriginalDetails : IStarGiftAttribute
 
     public void ComputeFlag()
     {
-        if (SenderId != null) { Flags[0] = true; }
-        if (Message != null) { Flags[1] = true; }
+        if (SenderId != null) { Flags = Flags.SetBit(0); }
+        if (Message != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -27,18 +27,18 @@ public sealed class TStarGiftAttributeOriginalDetails : IStarGiftAttribute
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(SenderId); }
+        if (Flags.IsBitSet(0)) { writer.Write(SenderId); }
         writer.Write(RecipientId);
         writer.Write(Date);
-        if (Flags[1]) { writer.Write(Message); }
+        if (Flags.IsBitSet(1)) { writer.Write(Message); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { SenderId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        RecipientId = reader.Read<MyTelegram.Schema.IPeer>();
-        Date = reader.ReadInt32();
-        if (Flags[1]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { SenderId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        RecipientId = buffer.Read<MyTelegram.Schema.IPeer>();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Message = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
     }
 }

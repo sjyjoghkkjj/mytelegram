@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TMessageActionStarGiftUnique : IMessageAction
 {
     public uint ConstructorId => 0x2e3ae60e;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Upgrade { get; set; }
     public bool Transferred { get; set; }
     public bool Saved { get; set; }
@@ -27,18 +27,18 @@ public sealed class TMessageActionStarGiftUnique : IMessageAction
 
     public void ComputeFlag()
     {
-        if (Upgrade) { Flags[0] = true; }
-        if (Transferred) { Flags[1] = true; }
-        if (Saved) { Flags[2] = true; }
-        if (Refunded) { Flags[5] = true; }
-        if (/*CanExportAt != 0 && */CanExportAt.HasValue) { Flags[3] = true; }
-        if (/*TransferStars != 0 &&*/ TransferStars.HasValue) { Flags[4] = true; }
-        if (FromId != null) { Flags[6] = true; }
-        if (Peer != null) { Flags[7] = true; }
-        if (/*SavedId != 0 &&*/ SavedId.HasValue) { Flags[7] = true; }
-        if (/*ResaleStars != 0 &&*/ ResaleStars.HasValue) { Flags[8] = true; }
-        if (/*CanTransferAt != 0 && */CanTransferAt.HasValue) { Flags[9] = true; }
-        if (/*CanResellAt != 0 && */CanResellAt.HasValue) { Flags[10] = true; }
+        if (Upgrade) { Flags = Flags.SetBit(0); }
+        if (Transferred) { Flags = Flags.SetBit(1); }
+        if (Saved) { Flags = Flags.SetBit(2); }
+        if (Refunded) { Flags = Flags.SetBit(5); }
+        if (/*CanExportAt != 0 && */CanExportAt.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*TransferStars != 0 &&*/ TransferStars.HasValue) { Flags = Flags.SetBit(4); }
+        if (FromId != null) { Flags = Flags.SetBit(6); }
+        if (Peer != null) { Flags = Flags.SetBit(7); }
+        if (/*SavedId != 0 &&*/ SavedId.HasValue) { Flags = Flags.SetBit(7); }
+        if (/*ResaleStars != 0 &&*/ ResaleStars.HasValue) { Flags = Flags.SetBit(8); }
+        if (/*CanTransferAt != 0 && */CanTransferAt.HasValue) { Flags = Flags.SetBit(9); }
+        if (/*CanResellAt != 0 && */CanResellAt.HasValue) { Flags = Flags.SetBit(10); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -47,31 +47,31 @@ public sealed class TMessageActionStarGiftUnique : IMessageAction
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Gift);
-        if (Flags[3]) { writer.Write(CanExportAt.Value); }
-        if (Flags[4]) { writer.Write(TransferStars.Value); }
-        if (Flags[6]) { writer.Write(FromId); }
-        if (Flags[7]) { writer.Write(Peer); }
-        if (Flags[7]) { writer.Write(SavedId.Value); }
-        if (Flags[8]) { writer.Write(ResaleStars.Value); }
-        if (Flags[9]) { writer.Write(CanTransferAt.Value); }
-        if (Flags[10]) { writer.Write(CanResellAt.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(CanExportAt.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(TransferStars.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(FromId); }
+        if (Flags.IsBitSet(7)) { writer.Write(Peer); }
+        if (Flags.IsBitSet(7)) { writer.Write(SavedId.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(ResaleStars.Value); }
+        if (Flags.IsBitSet(9)) { writer.Write(CanTransferAt.Value); }
+        if (Flags.IsBitSet(10)) { writer.Write(CanResellAt.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Upgrade = true; }
-        if (Flags[1]) { Transferred = true; }
-        if (Flags[2]) { Saved = true; }
-        if (Flags[5]) { Refunded = true; }
-        Gift = reader.Read<MyTelegram.Schema.IStarGift>();
-        if (Flags[3]) { CanExportAt = reader.ReadInt32(); }
-        if (Flags[4]) { TransferStars = reader.ReadInt64(); }
-        if (Flags[6]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[7]) { Peer = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[7]) { SavedId = reader.ReadInt64(); }
-        if (Flags[8]) { ResaleStars = reader.ReadInt64(); }
-        if (Flags[9]) { CanTransferAt = reader.ReadInt32(); }
-        if (Flags[10]) { CanResellAt = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Upgrade = true; }
+        if (Flags.IsBitSet(1)) { Transferred = true; }
+        if (Flags.IsBitSet(2)) { Saved = true; }
+        if (Flags.IsBitSet(5)) { Refunded = true; }
+        Gift = buffer.Read<MyTelegram.Schema.IStarGift>();
+        if (Flags.IsBitSet(3)) { CanExportAt = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { TransferStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(6)) { FromId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(7)) { Peer = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(7)) { SavedId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(8)) { ResaleStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(9)) { CanTransferAt = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(10)) { CanResellAt = buffer.ReadInt32(); }
     }
 }

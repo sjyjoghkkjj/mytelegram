@@ -39,9 +39,9 @@ public sealed class RequestStartHistoryImport : IRequest<IBool>
         writer.Write(ImportId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        ImportId = reader.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        ImportId = buffer.ReadInt64();
     }
 }

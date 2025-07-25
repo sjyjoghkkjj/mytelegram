@@ -52,12 +52,12 @@ public sealed class TChatlistInviteAlready : IChatlistInvite
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FilterId = reader.ReadInt32();
-        MissingPeers = reader.Read<TVector<MyTelegram.Schema.IPeer>>();
-        AlreadyPeers = reader.Read<TVector<MyTelegram.Schema.IPeer>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        FilterId = buffer.ReadInt32();
+        MissingPeers = buffer.Read<TVector<MyTelegram.Schema.IPeer>>();
+        AlreadyPeers = buffer.Read<TVector<MyTelegram.Schema.IPeer>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

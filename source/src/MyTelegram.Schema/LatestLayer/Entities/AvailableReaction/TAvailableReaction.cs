@@ -14,7 +14,7 @@ public sealed class TAvailableReaction : IAvailableReaction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If not set, the reaction can be added to new messages and enabled in chats.
@@ -82,10 +82,10 @@ public sealed class TAvailableReaction : IAvailableReaction
 
     public void ComputeFlag()
     {
-        if (Inactive) { Flags[0] = true; }
-        if (Premium) { Flags[2] = true; }
-        if (AroundAnimation != null) { Flags[1] = true; }
-        if (CenterIcon != null) { Flags[1] = true; }
+        if (Inactive) { Flags = Flags.SetBit(0); }
+        if (Premium) { Flags = Flags.SetBit(2); }
+        if (AroundAnimation != null) { Flags = Flags.SetBit(1); }
+        if (CenterIcon != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -100,23 +100,23 @@ public sealed class TAvailableReaction : IAvailableReaction
         writer.Write(SelectAnimation);
         writer.Write(ActivateAnimation);
         writer.Write(EffectAnimation);
-        if (Flags[1]) { writer.Write(AroundAnimation); }
-        if (Flags[1]) { writer.Write(CenterIcon); }
+        if (Flags.IsBitSet(1)) { writer.Write(AroundAnimation); }
+        if (Flags.IsBitSet(1)) { writer.Write(CenterIcon); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Inactive = true; }
-        if (Flags[2]) { Premium = true; }
-        Reaction = reader.ReadString();
-        Title = reader.ReadString();
-        StaticIcon = reader.Read<MyTelegram.Schema.IDocument>();
-        AppearAnimation = reader.Read<MyTelegram.Schema.IDocument>();
-        SelectAnimation = reader.Read<MyTelegram.Schema.IDocument>();
-        ActivateAnimation = reader.Read<MyTelegram.Schema.IDocument>();
-        EffectAnimation = reader.Read<MyTelegram.Schema.IDocument>();
-        if (Flags[1]) { AroundAnimation = reader.Read<MyTelegram.Schema.IDocument>(); }
-        if (Flags[1]) { CenterIcon = reader.Read<MyTelegram.Schema.IDocument>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Inactive = true; }
+        if (Flags.IsBitSet(2)) { Premium = true; }
+        Reaction = buffer.ReadString();
+        Title = buffer.ReadString();
+        StaticIcon = buffer.Read<MyTelegram.Schema.IDocument>();
+        AppearAnimation = buffer.Read<MyTelegram.Schema.IDocument>();
+        SelectAnimation = buffer.Read<MyTelegram.Schema.IDocument>();
+        ActivateAnimation = buffer.Read<MyTelegram.Schema.IDocument>();
+        EffectAnimation = buffer.Read<MyTelegram.Schema.IDocument>();
+        if (Flags.IsBitSet(1)) { AroundAnimation = buffer.Read<MyTelegram.Schema.IDocument>(); }
+        if (Flags.IsBitSet(1)) { CenterIcon = buffer.Read<MyTelegram.Schema.IDocument>(); }
     }
 }

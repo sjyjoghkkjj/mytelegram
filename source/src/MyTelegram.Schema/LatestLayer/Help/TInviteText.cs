@@ -28,8 +28,8 @@ public sealed class TInviteText : IInviteText
         writer.Write(Message);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Message = reader.ReadString();
+        Message = buffer.ReadString();
     }
 }

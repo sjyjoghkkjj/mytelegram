@@ -14,7 +14,7 @@ public sealed class TPhoneCall : IPhoneCall
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether P2P connection to the other peer is allowed
@@ -57,7 +57,7 @@ public sealed class TPhoneCall : IPhoneCall
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/end-to-end/voice-calls">Parameter for key exchange</a>
     ///</summary>
-    public byte[] GAOrB { get; set; }
+    public ReadOnlyMemory<byte> GAOrB { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/end-to-end/voice-calls">Key fingerprint</a>
@@ -88,10 +88,10 @@ public sealed class TPhoneCall : IPhoneCall
 
     public void ComputeFlag()
     {
-        if (P2pAllowed) { Flags[5] = true; }
-        if (Video) { Flags[6] = true; }
-        if (ConferenceSupported) { Flags[8] = true; }
-        if (CustomParameters != null) { Flags[7] = true; }
+        if (P2pAllowed) { Flags = Flags.SetBit(5); }
+        if (Video) { Flags = Flags.SetBit(6); }
+        if (ConferenceSupported) { Flags = Flags.SetBit(8); }
+        if (CustomParameters != null) { Flags = Flags.SetBit(7); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -109,25 +109,25 @@ public sealed class TPhoneCall : IPhoneCall
         writer.Write(Protocol);
         writer.Write(Connections);
         writer.Write(StartDate);
-        if (Flags[7]) { writer.Write(CustomParameters); }
+        if (Flags.IsBitSet(7)) { writer.Write(CustomParameters); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[5]) { P2pAllowed = true; }
-        if (Flags[6]) { Video = true; }
-        if (Flags[8]) { ConferenceSupported = true; }
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        AdminId = reader.ReadInt64();
-        ParticipantId = reader.ReadInt64();
-        GAOrB = reader.ReadBytes();
-        KeyFingerprint = reader.ReadInt64();
-        Protocol = reader.Read<MyTelegram.Schema.IPhoneCallProtocol>();
-        Connections = reader.Read<TVector<MyTelegram.Schema.IPhoneConnection>>();
-        StartDate = reader.ReadInt32();
-        if (Flags[7]) { CustomParameters = reader.Read<MyTelegram.Schema.IDataJSON>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(5)) { P2pAllowed = true; }
+        if (Flags.IsBitSet(6)) { Video = true; }
+        if (Flags.IsBitSet(8)) { ConferenceSupported = true; }
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        AdminId = buffer.ReadInt64();
+        ParticipantId = buffer.ReadInt64();
+        GAOrB = buffer.ReadBytes();
+        KeyFingerprint = buffer.ReadInt64();
+        Protocol = buffer.Read<MyTelegram.Schema.IPhoneCallProtocol>();
+        Connections = buffer.Read<TVector<MyTelegram.Schema.IPhoneConnection>>();
+        StartDate = buffer.ReadInt32();
+        if (Flags.IsBitSet(7)) { CustomParameters = buffer.Read<MyTelegram.Schema.IDataJSON>(); }
     }
 }

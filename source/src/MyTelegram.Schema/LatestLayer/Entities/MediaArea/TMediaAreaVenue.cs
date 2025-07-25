@@ -66,14 +66,14 @@ public sealed class TMediaAreaVenue : IMediaArea
         writer.Write(VenueType);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Coordinates = reader.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
-        Geo = reader.Read<MyTelegram.Schema.IGeoPoint>();
-        Title = reader.ReadString();
-        Address = reader.ReadString();
-        Provider = reader.ReadString();
-        VenueId = reader.ReadString();
-        VenueType = reader.ReadString();
+        Coordinates = buffer.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
+        Geo = buffer.Read<MyTelegram.Schema.IGeoPoint>();
+        Title = buffer.ReadString();
+        Address = buffer.ReadString();
+        Provider = buffer.ReadString();
+        VenueId = buffer.ReadString();
+        VenueType = buffer.ReadString();
     }
 }

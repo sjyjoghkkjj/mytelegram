@@ -26,9 +26,9 @@ public sealed class RequestInvokeWithBusinessConnection : IRequest<IObject>, IHa
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ConnectionId = reader.ReadString();
-        Query = reader.Read<IObject>();
+        ConnectionId = buffer.ReadString();
+        Query = buffer.Read<IObject>();
     }
 }

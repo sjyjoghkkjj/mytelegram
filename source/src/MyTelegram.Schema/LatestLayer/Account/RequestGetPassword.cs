@@ -24,7 +24,7 @@ public sealed class RequestGetPassword : IRequest<MyTelegram.Schema.Account.IPas
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

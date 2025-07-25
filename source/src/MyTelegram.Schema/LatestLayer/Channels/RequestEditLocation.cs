@@ -49,10 +49,10 @@ public sealed class RequestEditLocation : IRequest<IBool>
         writer.Write(Address);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>();
-        Address = reader.ReadString();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>();
+        Address = buffer.ReadString();
     }
 }

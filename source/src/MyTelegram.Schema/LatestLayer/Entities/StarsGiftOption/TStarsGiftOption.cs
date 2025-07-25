@@ -14,7 +14,7 @@ public sealed class TStarsGiftOption : IStarsGiftOption
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the option must only be shown in the full list of topup options.
@@ -44,8 +44,8 @@ public sealed class TStarsGiftOption : IStarsGiftOption
 
     public void ComputeFlag()
     {
-        if (Extended) { Flags[1] = true; }
-        if (StoreProduct != null) { Flags[0] = true; }
+        if (Extended) { Flags = Flags.SetBit(1); }
+        if (StoreProduct != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -55,18 +55,18 @@ public sealed class TStarsGiftOption : IStarsGiftOption
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Stars);
-        if (Flags[0]) { writer.Write(StoreProduct); }
+        if (Flags.IsBitSet(0)) { writer.Write(StoreProduct); }
         writer.Write(Currency);
         writer.Write(Amount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Extended = true; }
-        Stars = reader.ReadInt64();
-        if (Flags[0]) { StoreProduct = reader.ReadString(); }
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Extended = true; }
+        Stars = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { StoreProduct = buffer.ReadString(); }
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
     }
 }

@@ -24,7 +24,7 @@ public sealed class RequestSignUp : IRequest<MyTelegram.Schema.Auth.IAuthorizati
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, users on Telegram that have already added <code>phone_number</code> to their contacts will <em>not</em> receive signup notifications about this user.
@@ -54,7 +54,7 @@ public sealed class RequestSignUp : IRequest<MyTelegram.Schema.Auth.IAuthorizati
 
     public void ComputeFlag()
     {
-        if (NoJoinedNotifications) { Flags[0] = true; }
+        if (NoJoinedNotifications) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -69,13 +69,13 @@ public sealed class RequestSignUp : IRequest<MyTelegram.Schema.Auth.IAuthorizati
         writer.Write(LastName);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NoJoinedNotifications = true; }
-        PhoneNumber = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NoJoinedNotifications = true; }
+        PhoneNumber = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
     }
 }

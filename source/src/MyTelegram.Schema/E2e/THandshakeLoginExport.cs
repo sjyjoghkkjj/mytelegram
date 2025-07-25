@@ -8,8 +8,8 @@ namespace MyTelegram.Schema.E2e;
 public sealed class THandshakeLoginExport : IHandshakePublic
 {
     public uint ConstructorId => 0xF6F07754;
-    public byte[] Accept { get; set; }
-    public byte[] EncryptedKey { get; set; }
+    public ReadOnlyMemory<byte> Accept { get; set; }
+    public ReadOnlyMemory<byte> EncryptedKey { get; set; }
 
     public void ComputeFlag()
     {
@@ -24,9 +24,9 @@ public sealed class THandshakeLoginExport : IHandshakePublic
         writer.Write(EncryptedKey);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Accept = reader.ReadBytes();
-        EncryptedKey = reader.ReadBytes();
+        Accept = buffer.ReadBytes();
+        EncryptedKey = buffer.ReadBytes();
     }
 }

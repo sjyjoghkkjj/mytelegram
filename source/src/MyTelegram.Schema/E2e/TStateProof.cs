@@ -8,15 +8,15 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TStateProof : IStateProof
 {
     public uint ConstructorId => 0xD6B679E6;
-    public BitArray Flags { get; set; } = new BitArray(32);
-    public byte[] KvHash { get; set; }
+    public int Flags { get; set; }
+    public ReadOnlyMemory<byte> KvHash { get; set; }
     public MyTelegram.Schema.E2e.IGroupState? GroupState { get; set; }
     public MyTelegram.Schema.E2e.ISharedKey? SharedKey { get; set; }
 
     public void ComputeFlag()
     {
-        if (GroupState != null) { Flags[0] = true; }
-        if (SharedKey != null) { Flags[1] = true; }
+        if (GroupState != null) { Flags = Flags.SetBit(0); }
+        if (SharedKey != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -25,15 +25,15 @@ public sealed class TStateProof : IStateProof
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.WriteRawBytes(KvHash);
-        if (Flags[0]) { writer.Write(GroupState); }
-        if (Flags[1]) { writer.Write(SharedKey); }
+        if (Flags.IsBitSet(0)) { writer.Write(GroupState); }
+        if (Flags.IsBitSet(1)) { writer.Write(SharedKey); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        KvHash = reader.ReadInt256();
-        if (Flags[0]) { GroupState = reader.Read<MyTelegram.Schema.E2e.IGroupState>(); }
-        if (Flags[1]) { SharedKey = reader.Read<MyTelegram.Schema.E2e.ISharedKey>(); }
+        Flags = buffer.ReadInt32();
+        KvHash = buffer.ReadInt256();
+        if (Flags.IsBitSet(0)) { GroupState = buffer.Read<MyTelegram.Schema.E2e.IGroupState>(); }
+        if (Flags.IsBitSet(1)) { SharedKey = buffer.Read<MyTelegram.Schema.E2e.ISharedKey>(); }
     }
 }

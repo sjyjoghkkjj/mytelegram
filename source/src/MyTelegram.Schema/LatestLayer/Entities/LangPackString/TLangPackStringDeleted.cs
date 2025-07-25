@@ -28,8 +28,8 @@ public sealed class TLangPackStringDeleted : ILangPackString
         writer.Write(Key);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Key = reader.ReadString();
+        Key = buffer.ReadString();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TInputPeerPhotoFileLocation : IInputFileLocation
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to download the high-quality version of the picture
@@ -35,7 +35,7 @@ public sealed class TInputPeerPhotoFileLocation : IInputFileLocation
 
     public void ComputeFlag()
     {
-        if (Big) { Flags[0] = true; }
+        if (Big) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class TInputPeerPhotoFileLocation : IInputFileLocation
         writer.Write(PhotoId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Big = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        PhotoId = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Big = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        PhotoId = buffer.ReadInt64();
     }
 }

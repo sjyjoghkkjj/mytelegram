@@ -42,10 +42,10 @@ public sealed class TInputMediaAreaChannelPost : IMediaArea
         writer.Write(MsgId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Coordinates = reader.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        MsgId = reader.ReadInt32();
+        Coordinates = buffer.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        MsgId = buffer.ReadInt32();
     }
 }

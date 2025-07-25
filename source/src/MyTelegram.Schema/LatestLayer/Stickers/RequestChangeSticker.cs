@@ -17,7 +17,7 @@ public sealed class RequestChangeSticker : IRequest<MyTelegram.Schema.Messages.I
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The sticker
@@ -43,9 +43,9 @@ public sealed class RequestChangeSticker : IRequest<MyTelegram.Schema.Messages.I
 
     public void ComputeFlag()
     {
-        if (Emoji != null) { Flags[0] = true; }
-        if (MaskCoords != null) { Flags[1] = true; }
-        if (Keywords != null) { Flags[2] = true; }
+        if (Emoji != null) { Flags = Flags.SetBit(0); }
+        if (MaskCoords != null) { Flags = Flags.SetBit(1); }
+        if (Keywords != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -54,17 +54,17 @@ public sealed class RequestChangeSticker : IRequest<MyTelegram.Schema.Messages.I
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Sticker);
-        if (Flags[0]) { writer.Write(Emoji); }
-        if (Flags[1]) { writer.Write(MaskCoords); }
-        if (Flags[2]) { writer.Write(Keywords); }
+        if (Flags.IsBitSet(0)) { writer.Write(Emoji); }
+        if (Flags.IsBitSet(1)) { writer.Write(MaskCoords); }
+        if (Flags.IsBitSet(2)) { writer.Write(Keywords); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Sticker = reader.Read<MyTelegram.Schema.IInputDocument>();
-        if (Flags[0]) { Emoji = reader.ReadString(); }
-        if (Flags[1]) { MaskCoords = reader.Read<MyTelegram.Schema.IMaskCoords>(); }
-        if (Flags[2]) { Keywords = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Sticker = buffer.Read<MyTelegram.Schema.IInputDocument>();
+        if (Flags.IsBitSet(0)) { Emoji = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { MaskCoords = buffer.Read<MyTelegram.Schema.IMaskCoords>(); }
+        if (Flags.IsBitSet(2)) { Keywords = buffer.ReadString(); }
     }
 }

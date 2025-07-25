@@ -28,10 +28,10 @@ public sealed class RequestReadSavedHistory : IRequest<IBool>
         writer.Write(MaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MaxId = reader.ReadInt32();
+        ParentPeer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MaxId = buffer.ReadInt32();
     }
 }

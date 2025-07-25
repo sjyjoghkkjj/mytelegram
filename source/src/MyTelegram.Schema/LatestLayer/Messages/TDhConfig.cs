@@ -19,7 +19,7 @@ public sealed class TDhConfig : IDhConfig
     ///<summary>
     /// New value <strong>primitive root</strong>, see <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Wikipedia</a>
     ///</summary>
-    public byte[] P { get; set; }
+    public ReadOnlyMemory<byte> P { get; set; }
 
     ///<summary>
     /// Version of set of parameters
@@ -29,7 +29,7 @@ public sealed class TDhConfig : IDhConfig
     ///<summary>
     /// Random sequence of bytes of assigned length
     ///</summary>
-    public byte[] Random { get; set; }
+    public ReadOnlyMemory<byte> Random { get; set; }
 
     public void ComputeFlag()
     {
@@ -46,11 +46,11 @@ public sealed class TDhConfig : IDhConfig
         writer.Write(Random);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        G = reader.ReadInt32();
-        P = reader.ReadBytes();
-        Version = reader.ReadInt32();
-        Random = reader.ReadBytes();
+        G = buffer.ReadInt32();
+        P = buffer.ReadBytes();
+        Version = buffer.ReadInt32();
+        Random = buffer.ReadBytes();
     }
 }

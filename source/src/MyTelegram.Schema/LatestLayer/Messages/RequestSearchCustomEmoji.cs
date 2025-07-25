@@ -37,9 +37,9 @@ public sealed class RequestSearchCustomEmoji : IRequest<MyTelegram.Schema.IEmoji
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Emoticon = reader.ReadString();
-        Hash = reader.ReadInt64();
+        Emoticon = buffer.ReadString();
+        Hash = buffer.ReadInt64();
     }
 }

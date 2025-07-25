@@ -24,8 +24,8 @@ public sealed class RequestCanPurchaseStore : IRequest<IBool>
         writer.Write(Purpose);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Purpose = reader.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
+        Purpose = buffer.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
     }
 }

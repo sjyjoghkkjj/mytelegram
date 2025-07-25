@@ -14,7 +14,7 @@ public sealed class TUpdateChannelParticipant : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the participant joined using a <a href="https://corefork.telegram.org/api/links#chat-folder-links">chat folder deep link »</a>.
@@ -67,10 +67,10 @@ public sealed class TUpdateChannelParticipant : IUpdate
 
     public void ComputeFlag()
     {
-        if (ViaChatlist) { Flags[3] = true; }
-        if (PrevParticipant != null) { Flags[0] = true; }
-        if (NewParticipant != null) { Flags[1] = true; }
-        if (Invite != null) { Flags[2] = true; }
+        if (ViaChatlist) { Flags = Flags.SetBit(3); }
+        if (PrevParticipant != null) { Flags = Flags.SetBit(0); }
+        if (NewParticipant != null) { Flags = Flags.SetBit(1); }
+        if (Invite != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -83,23 +83,23 @@ public sealed class TUpdateChannelParticipant : IUpdate
         writer.Write(Date);
         writer.Write(ActorId);
         writer.Write(UserId);
-        if (Flags[0]) { writer.Write(PrevParticipant); }
-        if (Flags[1]) { writer.Write(NewParticipant); }
-        if (Flags[2]) { writer.Write(Invite); }
+        if (Flags.IsBitSet(0)) { writer.Write(PrevParticipant); }
+        if (Flags.IsBitSet(1)) { writer.Write(NewParticipant); }
+        if (Flags.IsBitSet(2)) { writer.Write(Invite); }
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { ViaChatlist = true; }
-        ChannelId = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        ActorId = reader.ReadInt64();
-        UserId = reader.ReadInt64();
-        if (Flags[0]) { PrevParticipant = reader.Read<MyTelegram.Schema.IChannelParticipant>(); }
-        if (Flags[1]) { NewParticipant = reader.Read<MyTelegram.Schema.IChannelParticipant>(); }
-        if (Flags[2]) { Invite = reader.Read<MyTelegram.Schema.IExportedChatInvite>(); }
-        Qts = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { ViaChatlist = true; }
+        ChannelId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        ActorId = buffer.ReadInt64();
+        UserId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { PrevParticipant = buffer.Read<MyTelegram.Schema.IChannelParticipant>(); }
+        if (Flags.IsBitSet(1)) { NewParticipant = buffer.Read<MyTelegram.Schema.IChannelParticipant>(); }
+        if (Flags.IsBitSet(2)) { Invite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>(); }
+        Qts = buffer.ReadInt32();
     }
 }

@@ -42,9 +42,9 @@ public sealed class RequestInviteToGroupCall : IRequest<MyTelegram.Schema.IUpdat
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IInputUser>>();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IInputUser>>();
     }
 }

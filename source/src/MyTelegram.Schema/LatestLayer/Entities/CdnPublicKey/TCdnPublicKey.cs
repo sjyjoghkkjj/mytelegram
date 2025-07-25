@@ -34,9 +34,9 @@ public sealed class TCdnPublicKey : ICdnPublicKey
         writer.Write(PublicKey);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DcId = reader.ReadInt32();
-        PublicKey = reader.ReadString();
+        DcId = buffer.ReadInt32();
+        PublicKey = buffer.ReadString();
     }
 }

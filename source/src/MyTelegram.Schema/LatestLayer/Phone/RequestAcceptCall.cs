@@ -50,10 +50,10 @@ public sealed class RequestAcceptCall : IRequest<MyTelegram.Schema.Phone.IPhoneC
         writer.Write(Protocol);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPhoneCall>();
-        GB = reader.ReadBytes();
-        Protocol = reader.Read<MyTelegram.Schema.IPhoneCallProtocol>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPhoneCall>();
+        GB = buffer.ReadBytes();
+        Protocol = buffer.Read<MyTelegram.Schema.IPhoneCallProtocol>();
     }
 }

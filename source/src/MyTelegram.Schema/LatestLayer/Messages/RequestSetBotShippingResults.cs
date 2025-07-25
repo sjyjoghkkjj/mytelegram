@@ -18,7 +18,7 @@ public sealed class RequestSetBotShippingResults : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Unique identifier for the query to be answered
@@ -37,8 +37,8 @@ public sealed class RequestSetBotShippingResults : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Error != null) { Flags[0] = true; }
-        if (ShippingOptions?.Count > 0) { Flags[1] = true; }
+        if (Error != null) { Flags = Flags.SetBit(0); }
+        if (ShippingOptions?.Count > 0) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -47,15 +47,15 @@ public sealed class RequestSetBotShippingResults : IRequest<IBool>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(QueryId);
-        if (Flags[0]) { writer.Write(Error); }
-        if (Flags[1]) { writer.Write(ShippingOptions); }
+        if (Flags.IsBitSet(0)) { writer.Write(Error); }
+        if (Flags.IsBitSet(1)) { writer.Write(ShippingOptions); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        QueryId = reader.ReadInt64();
-        if (Flags[0]) { Error = reader.ReadString(); }
-        if (Flags[1]) { ShippingOptions = reader.Read<TVector<MyTelegram.Schema.IShippingOption>>(); }
+        Flags = buffer.ReadInt32();
+        QueryId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Error = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { ShippingOptions = buffer.Read<TVector<MyTelegram.Schema.IShippingOption>>(); }
     }
 }

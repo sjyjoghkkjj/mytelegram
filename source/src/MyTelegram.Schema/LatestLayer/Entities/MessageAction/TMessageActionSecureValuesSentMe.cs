@@ -35,9 +35,9 @@ public sealed class TMessageActionSecureValuesSentMe : IMessageAction
         writer.Write(Credentials);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Values = reader.Read<TVector<MyTelegram.Schema.ISecureValue>>();
-        Credentials = reader.Read<MyTelegram.Schema.ISecureCredentialsEncrypted>();
+        Values = buffer.Read<TVector<MyTelegram.Schema.ISecureValue>>();
+        Credentials = buffer.Read<MyTelegram.Schema.ISecureCredentialsEncrypted>();
     }
 }

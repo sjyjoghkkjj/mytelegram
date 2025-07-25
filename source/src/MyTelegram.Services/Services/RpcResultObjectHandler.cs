@@ -4,7 +4,7 @@ public abstract class RpcResultObjectHandler<TInput, TOutput> : BaseObjectHandle
     where TInput : IRequest<TOutput>
     where TOutput : IObject
 {
-    private readonly IGZipHelper _gzipHelper = new GZipHelper();
+    //private readonly IGZipHelper _gzipHelper = new GZipHelper();
     public override async Task<IObject> HandleAsync(IRequestInput request,
         IObject obj)
     {
@@ -15,15 +15,15 @@ public abstract class RpcResultObjectHandler<TInput, TOutput> : BaseObjectHandle
         }
 
         var rpcResult = new TRpcResult { ReqMsgId = request.ReqMsgId, Result = r };
-        var length = r.GetLength();
-        if (length > 500)
-        {
-            var gzipPacked = new TGzipPacked
-            {
-                PackedData = _gzipHelper.Compress(r.ToBytes())
-            };
-            rpcResult.Result = gzipPacked;
-        }
+        //var length = r.GetLength();
+        //if (length > 500)
+        //{
+        //    var gzipPacked = new TGzipPacked
+        //    {
+        //        PackedData = _gzipHelper.Compress(r.ToBytes())
+        //    };
+        //    rpcResult.Result = gzipPacked;
+        //}
         return rpcResult;
     }
 }

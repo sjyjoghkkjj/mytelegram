@@ -4,7 +4,7 @@ internal sealed class DocumentConverter(IObjectMapper objectMapper) : IDocumentC
 {
     public int Layer => Layers.LayerLatest;
 
-    public IDocument ToDocument(IDocumentReadModel documentReadModel)
+    public ILayeredDocument ToDocument(IDocumentReadModel documentReadModel)
     {
         return objectMapper.Map<IDocumentReadModel, TDocument>(documentReadModel);
     }

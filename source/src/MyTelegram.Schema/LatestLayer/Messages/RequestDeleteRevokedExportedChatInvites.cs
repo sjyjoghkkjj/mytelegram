@@ -40,9 +40,9 @@ public sealed class RequestDeleteRevokedExportedChatInvites : IRequest<IBool>
         writer.Write(AdminId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        AdminId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        AdminId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

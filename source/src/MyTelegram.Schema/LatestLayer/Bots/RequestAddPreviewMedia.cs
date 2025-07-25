@@ -45,10 +45,10 @@ public sealed class RequestAddPreviewMedia : IRequest<MyTelegram.Schema.IBotPrev
         writer.Write(Media);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        LangCode = reader.ReadString();
-        Media = reader.Read<MyTelegram.Schema.IInputMedia>();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        LangCode = buffer.ReadString();
+        Media = buffer.Read<MyTelegram.Schema.IInputMedia>();
     }
 }

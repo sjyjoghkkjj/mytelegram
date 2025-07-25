@@ -14,7 +14,7 @@ public sealed class TPremiumSubscriptionOption : IPremiumSubscriptionOption
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this subscription option is currently in use.
@@ -60,10 +60,10 @@ public sealed class TPremiumSubscriptionOption : IPremiumSubscriptionOption
 
     public void ComputeFlag()
     {
-        if (Current) { Flags[1] = true; }
-        if (CanPurchaseUpgrade) { Flags[2] = true; }
-        if (Transaction != null) { Flags[3] = true; }
-        if (StoreProduct != null) { Flags[0] = true; }
+        if (Current) { Flags = Flags.SetBit(1); }
+        if (CanPurchaseUpgrade) { Flags = Flags.SetBit(2); }
+        if (Transaction != null) { Flags = Flags.SetBit(3); }
+        if (StoreProduct != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -71,24 +71,24 @@ public sealed class TPremiumSubscriptionOption : IPremiumSubscriptionOption
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[3]) { writer.Write(Transaction); }
+        if (Flags.IsBitSet(3)) { writer.Write(Transaction); }
         writer.Write(Months);
         writer.Write(Currency);
         writer.Write(Amount);
         writer.Write(BotUrl);
-        if (Flags[0]) { writer.Write(StoreProduct); }
+        if (Flags.IsBitSet(0)) { writer.Write(StoreProduct); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Current = true; }
-        if (Flags[2]) { CanPurchaseUpgrade = true; }
-        if (Flags[3]) { Transaction = reader.ReadString(); }
-        Months = reader.ReadInt32();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
-        BotUrl = reader.ReadString();
-        if (Flags[0]) { StoreProduct = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Current = true; }
+        if (Flags.IsBitSet(2)) { CanPurchaseUpgrade = true; }
+        if (Flags.IsBitSet(3)) { Transaction = buffer.ReadString(); }
+        Months = buffer.ReadInt32();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
+        BotUrl = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { StoreProduct = buffer.ReadString(); }
     }
 }

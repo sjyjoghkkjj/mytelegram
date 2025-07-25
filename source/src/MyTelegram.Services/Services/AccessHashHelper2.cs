@@ -183,8 +183,6 @@ public sealed class AccessHashHelper2(
         GenerateAccessHashSecretKeyForUser(accessHashKeyBytes, accessHashSecretKey);
         HMACSHA256.HashData(accessHashSecretKey, bytes[..17], dest);
 
-        // Console.WriteLine($"Generate access hash {BitConverter.ToInt64(dest)}: currentUserId: {currentUserId} targetId: {targetId}, type: {accessHashType}");
-
         return BitConverter.ToInt64(dest);
     }
 }

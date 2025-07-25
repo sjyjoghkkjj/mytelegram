@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TStarGiftUnique : IStarGift
 {
     public uint ConstructorId => 0x6411db89;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public long Id { get; set; }
     public string Title { get; set; }
     public string Slug { get; set; }
@@ -26,11 +26,11 @@ public sealed class TStarGiftUnique : IStarGift
 
     public void ComputeFlag()
     {
-        if (OwnerId != null) { Flags[0] = true; }
-        if (OwnerName != null) { Flags[1] = true; }
-        if (OwnerAddress != null) { Flags[2] = true; }
-        if (GiftAddress != null) { Flags[3] = true; }
-        if (/*ResellStars != 0 &&*/ ResellStars.HasValue) { Flags[4] = true; }
+        if (OwnerId != null) { Flags = Flags.SetBit(0); }
+        if (OwnerName != null) { Flags = Flags.SetBit(1); }
+        if (OwnerAddress != null) { Flags = Flags.SetBit(2); }
+        if (GiftAddress != null) { Flags = Flags.SetBit(3); }
+        if (/*ResellStars != 0 &&*/ ResellStars.HasValue) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,30 +42,30 @@ public sealed class TStarGiftUnique : IStarGift
         writer.Write(Title);
         writer.Write(Slug);
         writer.Write(Num);
-        if (Flags[0]) { writer.Write(OwnerId); }
-        if (Flags[1]) { writer.Write(OwnerName); }
-        if (Flags[2]) { writer.Write(OwnerAddress); }
+        if (Flags.IsBitSet(0)) { writer.Write(OwnerId); }
+        if (Flags.IsBitSet(1)) { writer.Write(OwnerName); }
+        if (Flags.IsBitSet(2)) { writer.Write(OwnerAddress); }
         writer.Write(Attributes);
         writer.Write(AvailabilityIssued);
         writer.Write(AvailabilityTotal);
-        if (Flags[3]) { writer.Write(GiftAddress); }
-        if (Flags[4]) { writer.Write(ResellStars.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(GiftAddress); }
+        if (Flags.IsBitSet(4)) { writer.Write(ResellStars.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Id = reader.ReadInt64();
-        Title = reader.ReadString();
-        Slug = reader.ReadString();
-        Num = reader.ReadInt32();
-        if (Flags[0]) { OwnerId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[1]) { OwnerName = reader.ReadString(); }
-        if (Flags[2]) { OwnerAddress = reader.ReadString(); }
-        Attributes = reader.Read<TVector<MyTelegram.Schema.IStarGiftAttribute>>();
-        AvailabilityIssued = reader.ReadInt32();
-        AvailabilityTotal = reader.ReadInt32();
-        if (Flags[3]) { GiftAddress = reader.ReadString(); }
-        if (Flags[4]) { ResellStars = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        Id = buffer.ReadInt64();
+        Title = buffer.ReadString();
+        Slug = buffer.ReadString();
+        Num = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { OwnerId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(1)) { OwnerName = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { OwnerAddress = buffer.ReadString(); }
+        Attributes = buffer.Read<TVector<MyTelegram.Schema.IStarGiftAttribute>>();
+        AvailabilityIssued = buffer.ReadInt32();
+        AvailabilityTotal = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { GiftAddress = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { ResellStars = buffer.ReadInt64(); }
     }
 }

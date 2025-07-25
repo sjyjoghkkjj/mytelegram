@@ -24,7 +24,7 @@ public sealed class RequestGetAutoSaveSettings : IRequest<MyTelegram.Schema.Acco
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

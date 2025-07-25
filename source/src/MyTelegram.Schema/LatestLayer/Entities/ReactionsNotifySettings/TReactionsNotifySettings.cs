@@ -14,7 +14,7 @@ public sealed class TReactionsNotifySettings : IReactionsNotifySettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Message reaction notification settings, if not set completely disables notifications/updates about message reactions.
@@ -42,8 +42,8 @@ public sealed class TReactionsNotifySettings : IReactionsNotifySettings
 
     public void ComputeFlag()
     {
-        if (MessagesNotifyFrom != null) { Flags[0] = true; }
-        if (StoriesNotifyFrom != null) { Flags[1] = true; }
+        if (MessagesNotifyFrom != null) { Flags = Flags.SetBit(0); }
+        if (StoriesNotifyFrom != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -52,18 +52,18 @@ public sealed class TReactionsNotifySettings : IReactionsNotifySettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(MessagesNotifyFrom); }
-        if (Flags[1]) { writer.Write(StoriesNotifyFrom); }
+        if (Flags.IsBitSet(0)) { writer.Write(MessagesNotifyFrom); }
+        if (Flags.IsBitSet(1)) { writer.Write(StoriesNotifyFrom); }
         writer.Write(Sound);
         writer.Write(ShowPreviews);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { MessagesNotifyFrom = reader.Read<MyTelegram.Schema.IReactionNotificationsFrom>(); }
-        if (Flags[1]) { StoriesNotifyFrom = reader.Read<MyTelegram.Schema.IReactionNotificationsFrom>(); }
-        Sound = reader.Read<MyTelegram.Schema.INotificationSound>();
-        ShowPreviews = reader.Read();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { MessagesNotifyFrom = buffer.Read<MyTelegram.Schema.IReactionNotificationsFrom>(); }
+        if (Flags.IsBitSet(1)) { StoriesNotifyFrom = buffer.Read<MyTelegram.Schema.IReactionNotificationsFrom>(); }
+        Sound = buffer.Read<MyTelegram.Schema.INotificationSound>();
+        ShowPreviews = buffer.Read();
     }
 }

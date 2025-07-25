@@ -24,7 +24,7 @@ public sealed class RequestGetInlineBotResults : IRequest<MyTelegram.Schema.Mess
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The bot to query
@@ -56,7 +56,7 @@ public sealed class RequestGetInlineBotResults : IRequest<MyTelegram.Schema.Mess
 
     public void ComputeFlag()
     {
-        if (GeoPoint != null) { Flags[0] = true; }
+        if (GeoPoint != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -67,18 +67,18 @@ public sealed class RequestGetInlineBotResults : IRequest<MyTelegram.Schema.Mess
         writer.Write(Flags);
         writer.Write(Bot);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(GeoPoint); }
+        if (Flags.IsBitSet(0)) { writer.Write(GeoPoint); }
         writer.Write(Query);
         writer.Write(Offset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[0]) { GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>(); }
-        Query = reader.ReadString();
-        Offset = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(0)) { GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>(); }
+        Query = buffer.ReadString();
+        Offset = buffer.ReadString();
     }
 }

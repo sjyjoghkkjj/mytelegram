@@ -14,7 +14,7 @@ public sealed class TWebPageAttributeStickerSet : IWebPageAttribute
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this i s a <a href="https://corefork.telegram.org/api/custom-emoji">custom emoji stickerset</a>.
@@ -35,8 +35,8 @@ public sealed class TWebPageAttributeStickerSet : IWebPageAttribute
 
     public void ComputeFlag()
     {
-        if (Emojis) { Flags[0] = true; }
-        if (TextColor) { Flags[1] = true; }
+        if (Emojis) { Flags = Flags.SetBit(0); }
+        if (TextColor) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class TWebPageAttributeStickerSet : IWebPageAttribute
         writer.Write(Stickers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Emojis = true; }
-        if (Flags[1]) { TextColor = true; }
-        Stickers = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Emojis = true; }
+        if (Flags.IsBitSet(1)) { TextColor = true; }
+        Stickers = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
     }
 }

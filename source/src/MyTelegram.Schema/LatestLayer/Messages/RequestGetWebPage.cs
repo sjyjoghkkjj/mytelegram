@@ -37,9 +37,9 @@ public sealed class RequestGetWebPage : IRequest<MyTelegram.Schema.Messages.IWeb
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        Hash = reader.ReadInt32();
+        Url = buffer.ReadString();
+        Hash = buffer.ReadInt32();
     }
 }

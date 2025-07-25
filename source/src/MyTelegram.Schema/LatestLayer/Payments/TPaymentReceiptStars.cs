@@ -14,7 +14,7 @@ public sealed class TPaymentReceiptStars : IPaymentReceipt
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Date of generation
@@ -70,7 +70,7 @@ public sealed class TPaymentReceiptStars : IPaymentReceipt
 
     public void ComputeFlag()
     {
-        if (Photo != null) { Flags[2] = true; }
+        if (Photo != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -83,7 +83,7 @@ public sealed class TPaymentReceiptStars : IPaymentReceipt
         writer.Write(BotId);
         writer.Write(Title);
         writer.Write(Description);
-        if (Flags[2]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(2)) { writer.Write(Photo); }
         writer.Write(Invoice);
         writer.Write(Currency);
         writer.Write(TotalAmount);
@@ -91,18 +91,18 @@ public sealed class TPaymentReceiptStars : IPaymentReceipt
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Date = reader.ReadInt32();
-        BotId = reader.ReadInt64();
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        if (Flags[2]) { Photo = reader.Read<MyTelegram.Schema.IWebDocument>(); }
-        Invoice = reader.Read<MyTelegram.Schema.IInvoice>();
-        Currency = reader.ReadString();
-        TotalAmount = reader.ReadInt64();
-        TransactionId = reader.ReadString();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        BotId = buffer.ReadInt64();
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        if (Flags.IsBitSet(2)) { Photo = buffer.Read<MyTelegram.Schema.IWebDocument>(); }
+        Invoice = buffer.Read<MyTelegram.Schema.IInvoice>();
+        Currency = buffer.ReadString();
+        TotalAmount = buffer.ReadInt64();
+        TransactionId = buffer.ReadString();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

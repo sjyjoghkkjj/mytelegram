@@ -175,29 +175,29 @@ public sealed class TBroadcastStats : IBroadcastStats
         writer.Write(RecentPostsInteractions);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Period = reader.Read<MyTelegram.Schema.IStatsDateRangeDays>();
-        Followers = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        ViewsPerPost = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        SharesPerPost = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        ReactionsPerPost = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        ViewsPerStory = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        SharesPerStory = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        ReactionsPerStory = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        EnabledNotifications = reader.Read<MyTelegram.Schema.IStatsPercentValue>();
-        GrowthGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        FollowersGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        MuteGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        TopHoursGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        InteractionsGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        IvInteractionsGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        ViewsBySourceGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        NewFollowersBySourceGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        LanguagesGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        ReactionsByEmotionGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        StoryInteractionsGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        StoryReactionsByEmotionGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        RecentPostsInteractions = reader.Read<TVector<MyTelegram.Schema.IPostInteractionCounters>>();
+        Period = buffer.Read<MyTelegram.Schema.IStatsDateRangeDays>();
+        Followers = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        ViewsPerPost = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        SharesPerPost = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        ReactionsPerPost = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        ViewsPerStory = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        SharesPerStory = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        ReactionsPerStory = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        EnabledNotifications = buffer.Read<MyTelegram.Schema.IStatsPercentValue>();
+        GrowthGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        FollowersGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        MuteGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        TopHoursGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        InteractionsGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        IvInteractionsGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        ViewsBySourceGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        NewFollowersBySourceGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        LanguagesGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        ReactionsByEmotionGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        StoryInteractionsGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        StoryReactionsByEmotionGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        RecentPostsInteractions = buffer.Read<TVector<MyTelegram.Schema.IPostInteractionCounters>>();
     }
 }

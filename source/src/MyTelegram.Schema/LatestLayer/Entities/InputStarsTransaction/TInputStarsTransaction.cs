@@ -14,7 +14,7 @@ public sealed class TInputStarsTransaction : IInputStarsTransaction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, fetches info about the refund transaction for this transaction.
@@ -29,7 +29,7 @@ public sealed class TInputStarsTransaction : IInputStarsTransaction
 
     public void ComputeFlag()
     {
-        if (Refund) { Flags[0] = true; }
+        if (Refund) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -41,10 +41,10 @@ public sealed class TInputStarsTransaction : IInputStarsTransaction
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Refund = true; }
-        Id = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Refund = true; }
+        Id = buffer.ReadString();
     }
 }

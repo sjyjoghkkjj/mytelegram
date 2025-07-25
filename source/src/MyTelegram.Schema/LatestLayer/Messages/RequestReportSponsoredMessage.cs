@@ -14,12 +14,12 @@ public sealed class RequestReportSponsoredMessage : IRequest<MyTelegram.Schema.C
     ///<summary>
     /// The ad's unique ID.
     ///</summary>
-    public byte[] RandomId { get; set; }
+    public ReadOnlyMemory<byte> RandomId { get; set; }
 
     ///<summary>
     /// Chosen report option, initially an empty string, see <a href="https://corefork.telegram.org/api/sponsored-messages#reporting-sponsored-messages">here »</a> for more info on the full flow.
     ///</summary>
-    public byte[] Option { get; set; }
+    public ReadOnlyMemory<byte> Option { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,9 +34,9 @@ public sealed class RequestReportSponsoredMessage : IRequest<MyTelegram.Schema.C
         writer.Write(Option);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        RandomId = reader.ReadBytes();
-        Option = reader.ReadBytes();
+        RandomId = buffer.ReadBytes();
+        Option = buffer.ReadBytes();
     }
 }

@@ -13,7 +13,7 @@ public sealed class RequestGetConnectedStarRefBots : IRequest<MyTelegram.Schema.
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -38,8 +38,8 @@ public sealed class RequestGetConnectedStarRefBots : IRequest<MyTelegram.Schema.
 
     public void ComputeFlag()
     {
-        if (/*OffsetDate != 0 && */OffsetDate.HasValue) { Flags[2] = true; }
-        if (OffsetLink != null) { Flags[2] = true; }
+        if (/*OffsetDate != 0 && */OffsetDate.HasValue) { Flags = Flags.SetBit(2); }
+        if (OffsetLink != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -49,17 +49,17 @@ public sealed class RequestGetConnectedStarRefBots : IRequest<MyTelegram.Schema.
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[2]) { writer.Write(OffsetDate.Value); }
-        if (Flags[2]) { writer.Write(OffsetLink); }
+        if (Flags.IsBitSet(2)) { writer.Write(OffsetDate.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(OffsetLink); }
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[2]) { OffsetDate = reader.ReadInt32(); }
-        if (Flags[2]) { OffsetLink = reader.ReadString(); }
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(2)) { OffsetDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { OffsetLink = buffer.ReadString(); }
+        Limit = buffer.ReadInt32();
     }
 }

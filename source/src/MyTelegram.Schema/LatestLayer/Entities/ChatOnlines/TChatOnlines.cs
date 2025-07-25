@@ -28,8 +28,8 @@ public sealed class TChatOnlines : IChatOnlines
         writer.Write(Onlines);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Onlines = reader.ReadInt32();
+        Onlines = buffer.ReadInt32();
     }
 }

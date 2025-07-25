@@ -19,7 +19,7 @@ public sealed class RequestApplyBoost : IRequest<MyTelegram.Schema.Premium.IMyBo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Which <a href="https://corefork.telegram.org/api/boost">boost slots</a> to assign to this peer.
@@ -34,7 +34,7 @@ public sealed class RequestApplyBoost : IRequest<MyTelegram.Schema.Premium.IMyBo
 
     public void ComputeFlag()
     {
-        if (Slots?.Count > 0) { Flags[0] = true; }
+        if (Slots?.Count > 0) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -43,14 +43,14 @@ public sealed class RequestApplyBoost : IRequest<MyTelegram.Schema.Premium.IMyBo
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Slots); }
+        if (Flags.IsBitSet(0)) { writer.Write(Slots); }
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Slots = reader.Read<TVector<int>>(); }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Slots = buffer.Read<TVector<int>>(); }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

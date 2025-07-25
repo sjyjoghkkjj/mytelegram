@@ -28,8 +28,8 @@ public sealed class TInputCollectiblePhone : IInputCollectible
         writer.Write(Phone);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Phone = reader.ReadString();
+        Phone = buffer.ReadString();
     }
 }

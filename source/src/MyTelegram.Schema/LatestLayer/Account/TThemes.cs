@@ -34,9 +34,9 @@ public sealed class TThemes : IThemes
         writer.Write(Themes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Themes = reader.Read<TVector<MyTelegram.Schema.ITheme>>();
+        Hash = buffer.ReadInt64();
+        Themes = buffer.Read<TVector<MyTelegram.Schema.ITheme>>();
     }
 }

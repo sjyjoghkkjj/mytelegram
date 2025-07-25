@@ -17,5 +17,5 @@ public interface IExportedAuthorization : IObject
     ///<summary>
     /// authorizes key
     ///</summary>
-    byte[] Bytes { get; set; }
+    ReadOnlyMemory<byte> Bytes { get; set; }
 }

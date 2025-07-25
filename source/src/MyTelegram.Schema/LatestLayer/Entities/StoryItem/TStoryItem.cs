@@ -14,7 +14,7 @@ public sealed class TStoryItem : IStoryItem
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this story is pinned on the user's profile
@@ -137,23 +137,23 @@ public sealed class TStoryItem : IStoryItem
 
     public void ComputeFlag()
     {
-        if (Pinned) { Flags[5] = true; }
-        if (Public) { Flags[7] = true; }
-        if (CloseFriends) { Flags[8] = true; }
-        if (Min) { Flags[9] = true; }
-        if (Noforwards) { Flags[10] = true; }
-        if (Edited) { Flags[11] = true; }
-        if (Contacts) { Flags[12] = true; }
-        if (SelectedContacts) { Flags[13] = true; }
-        if (Out) { Flags[16] = true; }
-        if (FromId != null) { Flags[18] = true; }
-        if (FwdFrom != null) { Flags[17] = true; }
-        if (Caption != null) { Flags[0] = true; }
-        if (Entities?.Count > 0) { Flags[1] = true; }
-        if (MediaAreas?.Count > 0) { Flags[14] = true; }
-        if (Privacy?.Count > 0) { Flags[2] = true; }
-        if (Views != null) { Flags[3] = true; }
-        if (SentReaction != null) { Flags[15] = true; }
+        if (Pinned) { Flags = Flags.SetBit(5); }
+        if (Public) { Flags = Flags.SetBit(7); }
+        if (CloseFriends) { Flags = Flags.SetBit(8); }
+        if (Min) { Flags = Flags.SetBit(9); }
+        if (Noforwards) { Flags = Flags.SetBit(10); }
+        if (Edited) { Flags = Flags.SetBit(11); }
+        if (Contacts) { Flags = Flags.SetBit(12); }
+        if (SelectedContacts) { Flags = Flags.SetBit(13); }
+        if (Out) { Flags = Flags.SetBit(16); }
+        if (FromId != null) { Flags = Flags.SetBit(18); }
+        if (FwdFrom != null) { Flags = Flags.SetBit(17); }
+        if (Caption != null) { Flags = Flags.SetBit(0); }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (MediaAreas?.Count > 0) { Flags = Flags.SetBit(14); }
+        if (Privacy?.Count > 0) { Flags = Flags.SetBit(2); }
+        if (Views != null) { Flags = Flags.SetBit(3); }
+        if (SentReaction != null) { Flags = Flags.SetBit(15); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -163,41 +163,41 @@ public sealed class TStoryItem : IStoryItem
         writer.Write(Flags);
         writer.Write(Id);
         writer.Write(Date);
-        if (Flags[18]) { writer.Write(FromId); }
-        if (Flags[17]) { writer.Write(FwdFrom); }
+        if (Flags.IsBitSet(18)) { writer.Write(FromId); }
+        if (Flags.IsBitSet(17)) { writer.Write(FwdFrom); }
         writer.Write(ExpireDate);
-        if (Flags[0]) { writer.Write(Caption); }
-        if (Flags[1]) { writer.Write(Entities); }
+        if (Flags.IsBitSet(0)) { writer.Write(Caption); }
+        if (Flags.IsBitSet(1)) { writer.Write(Entities); }
         writer.Write(Media);
-        if (Flags[14]) { writer.Write(MediaAreas); }
-        if (Flags[2]) { writer.Write(Privacy); }
-        if (Flags[3]) { writer.Write(Views); }
-        if (Flags[15]) { writer.Write(SentReaction); }
+        if (Flags.IsBitSet(14)) { writer.Write(MediaAreas); }
+        if (Flags.IsBitSet(2)) { writer.Write(Privacy); }
+        if (Flags.IsBitSet(3)) { writer.Write(Views); }
+        if (Flags.IsBitSet(15)) { writer.Write(SentReaction); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[5]) { Pinned = true; }
-        if (Flags[7]) { Public = true; }
-        if (Flags[8]) { CloseFriends = true; }
-        if (Flags[9]) { Min = true; }
-        if (Flags[10]) { Noforwards = true; }
-        if (Flags[11]) { Edited = true; }
-        if (Flags[12]) { Contacts = true; }
-        if (Flags[13]) { SelectedContacts = true; }
-        if (Flags[16]) { Out = true; }
-        Id = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        if (Flags[18]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[17]) { FwdFrom = reader.Read<MyTelegram.Schema.IStoryFwdHeader>(); }
-        ExpireDate = reader.ReadInt32();
-        if (Flags[0]) { Caption = reader.ReadString(); }
-        if (Flags[1]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        Media = reader.Read<MyTelegram.Schema.IMessageMedia>();
-        if (Flags[14]) { MediaAreas = reader.Read<TVector<MyTelegram.Schema.IMediaArea>>(); }
-        if (Flags[2]) { Privacy = reader.Read<TVector<MyTelegram.Schema.IPrivacyRule>>(); }
-        if (Flags[3]) { Views = reader.Read<MyTelegram.Schema.IStoryViews>(); }
-        if (Flags[15]) { SentReaction = reader.Read<MyTelegram.Schema.IReaction>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(5)) { Pinned = true; }
+        if (Flags.IsBitSet(7)) { Public = true; }
+        if (Flags.IsBitSet(8)) { CloseFriends = true; }
+        if (Flags.IsBitSet(9)) { Min = true; }
+        if (Flags.IsBitSet(10)) { Noforwards = true; }
+        if (Flags.IsBitSet(11)) { Edited = true; }
+        if (Flags.IsBitSet(12)) { Contacts = true; }
+        if (Flags.IsBitSet(13)) { SelectedContacts = true; }
+        if (Flags.IsBitSet(16)) { Out = true; }
+        Id = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(18)) { FromId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(17)) { FwdFrom = buffer.Read<MyTelegram.Schema.IStoryFwdHeader>(); }
+        ExpireDate = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Caption = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        Media = buffer.Read<MyTelegram.Schema.IMessageMedia>();
+        if (Flags.IsBitSet(14)) { MediaAreas = buffer.Read<TVector<MyTelegram.Schema.IMediaArea>>(); }
+        if (Flags.IsBitSet(2)) { Privacy = buffer.Read<TVector<MyTelegram.Schema.IPrivacyRule>>(); }
+        if (Flags.IsBitSet(3)) { Views = buffer.Read<MyTelegram.Schema.IStoryViews>(); }
+        if (Flags.IsBitSet(15)) { SentReaction = buffer.Read<MyTelegram.Schema.IReaction>(); }
     }
 }

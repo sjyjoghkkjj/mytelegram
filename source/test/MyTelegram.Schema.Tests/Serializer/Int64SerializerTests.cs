@@ -20,13 +20,10 @@ public class Int64SerializerTests
     public void DeserializeTest()
     {
         var expectedBytes = "6300000000000000".ToBytes();
-        //var stream = new MemoryStream(expectedBytes);
-        //var br = new BinaryReader(stream);
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(expectedBytes));
-
+        ReadOnlyMemory<byte> buffer = expectedBytes;
         var serializer = CreateSerializer();
 
-        var actualBytes = serializer.Deserialize(ref reader);
+        var actualBytes = serializer.Deserialize(ref buffer);
 
         actualBytes.ShouldBeEquivalentTo(99L);
     }

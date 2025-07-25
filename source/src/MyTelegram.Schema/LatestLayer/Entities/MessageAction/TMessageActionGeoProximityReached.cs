@@ -42,10 +42,10 @@ public sealed class TMessageActionGeoProximityReached : IMessageAction
         writer.Write(Distance);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FromId = reader.Read<MyTelegram.Schema.IPeer>();
-        ToId = reader.Read<MyTelegram.Schema.IPeer>();
-        Distance = reader.ReadInt32();
+        FromId = buffer.Read<MyTelegram.Schema.IPeer>();
+        ToId = buffer.Read<MyTelegram.Schema.IPeer>();
+        Distance = buffer.ReadInt32();
     }
 }

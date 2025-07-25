@@ -10,13 +10,13 @@ namespace MyTelegram.Schema;
 public sealed class TInputEmojiStatusCollectible : IEmojiStatus
 {
     public uint ConstructorId => 0x7141dbf;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public long CollectibleId { get; set; }
     public int? Until { get; set; }
 
     public void ComputeFlag()
     {
-        if (/*Until != 0 && */Until.HasValue) { Flags[0] = true; }
+        if (/*Until != 0 && */Until.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -25,13 +25,13 @@ public sealed class TInputEmojiStatusCollectible : IEmojiStatus
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(CollectibleId);
-        if (Flags[0]) { writer.Write(Until.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Until.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        CollectibleId = reader.ReadInt64();
-        if (Flags[0]) { Until = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        CollectibleId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Until = buffer.ReadInt32(); }
     }
 }

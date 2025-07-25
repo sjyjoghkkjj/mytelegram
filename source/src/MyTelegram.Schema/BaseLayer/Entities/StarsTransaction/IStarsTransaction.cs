@@ -12,7 +12,7 @@ public interface IStarsTransaction : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether this transaction is a refund.
@@ -46,12 +46,7 @@ public interface IStarsTransaction : IObject
     /// Transaction ID.
     ///</summary>
     string Id { get; set; }
-
-    ///<summary>
-    /// Amount of Stars (negative for outgoing transactions).
-    /// See <a href="https://corefork.telegram.org/type/StarsAmount" />
-    ///</summary>
-    MyTelegram.Schema.IStarsAmount Stars { get; set; }
+    MyTelegram.Schema.IStarsAmount Amount { get; set; }
 
     ///<summary>
     /// Date of the transaction (unixtime).
@@ -93,7 +88,7 @@ public interface IStarsTransaction : IObject
     ///<summary>
     /// Bot specified invoice payload (i.e. the <code>payload</code> passed to <a href="https://corefork.telegram.org/constructor/inputMediaInvoice">inputMediaInvoice</a> when <a href="https://corefork.telegram.org/api/payments">creating the invoice</a>).
     ///</summary>
-    byte[]? BotPayload { get; set; }
+    ReadOnlyMemory<byte>? BotPayload { get; set; }
 
     ///<summary>
     /// For <a href="https://corefork.telegram.org/api/paid-media">paid media transactions »</a>, message ID of the paid media posted to <code>peer.peer</code> (can point to a deleted message; either way, <code>extended_media</code> will always contain the bought media).
@@ -145,4 +140,6 @@ public interface IStarsTransaction : IObject
     MyTelegram.Schema.IStarsAmount? StarrefAmount { get; set; }
     int? PaidMessages { get; set; }
     int? PremiumGiftMonths { get; set; }
+    int? AdsProceedsFromDate { get; set; }
+    int? AdsProceedsToDate { get; set; }
 }

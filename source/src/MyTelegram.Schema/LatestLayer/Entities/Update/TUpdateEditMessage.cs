@@ -41,10 +41,10 @@ public sealed class TUpdateEditMessage : IUpdate
         writer.Write(PtsCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Message = reader.Read<MyTelegram.Schema.IMessage>();
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
+        Message = buffer.Read<MyTelegram.Schema.IMessage>();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TMessageActionGiftStars : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Three-letter ISO 4217 <a href="https://corefork.telegram.org/bots/payments#supported-currencies">currency</a> code
@@ -48,9 +48,9 @@ public sealed class TMessageActionGiftStars : IMessageAction
 
     public void ComputeFlag()
     {
-        if (CryptoCurrency != null) { Flags[0] = true; }
-        if (/*CryptoAmount != 0 &&*/ CryptoAmount.HasValue) { Flags[0] = true; }
-        if (TransactionId != null) { Flags[1] = true; }
+        if (CryptoCurrency != null) { Flags = Flags.SetBit(0); }
+        if (/*CryptoAmount != 0 &&*/ CryptoAmount.HasValue) { Flags = Flags.SetBit(0); }
+        if (TransactionId != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -61,19 +61,19 @@ public sealed class TMessageActionGiftStars : IMessageAction
         writer.Write(Currency);
         writer.Write(Amount);
         writer.Write(Stars);
-        if (Flags[0]) { writer.Write(CryptoCurrency); }
-        if (Flags[0]) { writer.Write(CryptoAmount.Value); }
-        if (Flags[1]) { writer.Write(TransactionId); }
+        if (Flags.IsBitSet(0)) { writer.Write(CryptoCurrency); }
+        if (Flags.IsBitSet(0)) { writer.Write(CryptoAmount.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(TransactionId); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
-        Stars = reader.ReadInt64();
-        if (Flags[0]) { CryptoCurrency = reader.ReadString(); }
-        if (Flags[0]) { CryptoAmount = reader.ReadInt64(); }
-        if (Flags[1]) { TransactionId = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
+        Stars = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { CryptoCurrency = buffer.ReadString(); }
+        if (Flags.IsBitSet(0)) { CryptoAmount = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(1)) { TransactionId = buffer.ReadString(); }
     }
 }

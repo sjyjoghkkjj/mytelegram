@@ -1,5 +1,8 @@
 ﻿// ReSharper disable StringLiteralTypo
 
+using System.Buffers;
+using MyTelegram.Schema.Extensions;
+
 namespace MyTelegram.Schema.Serializer;
 
 public class BytesSerializerTests
@@ -36,10 +39,11 @@ public class BytesSerializerTests
         //var br = new BinaryReader(new MemoryStream(inputBytes));
         //var buffer = new ReadOnlySequence<byte>(inputBytes);
         var serializer = CreateSerializer();
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(inputBytes));
+        //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(inputBytes));
+        ReadOnlyMemory<byte> buffer = inputBytes;
 
         // Act
-        var actualData = serializer.Deserialize(ref reader);
+        var actualData = serializer.Deserialize(ref buffer);
 
         // Assert
         actualData.ShouldBeEquivalentTo(expectedBytes);

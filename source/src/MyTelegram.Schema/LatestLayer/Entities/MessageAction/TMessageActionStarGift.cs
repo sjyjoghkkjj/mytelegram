@@ -14,7 +14,7 @@ public sealed class TMessageActionStarGift : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the name of the sender of the gift will be hidden if the destination user decides to display the gift on their profile
@@ -61,19 +61,19 @@ public sealed class TMessageActionStarGift : IMessageAction
 
     public void ComputeFlag()
     {
-        if (NameHidden) { Flags[0] = true; }
-        if (Saved) { Flags[2] = true; }
-        if (Converted) { Flags[3] = true; }
-        if (Upgraded) { Flags[5] = true; }
-        if (Refunded) { Flags[9] = true; }
-        if (CanUpgrade) { Flags[10] = true; }
-        if (Message != null) { Flags[1] = true; }
-        if (/*ConvertStars != 0 &&*/ ConvertStars.HasValue) { Flags[4] = true; }
-        if (/*UpgradeMsgId != 0 && */UpgradeMsgId.HasValue) { Flags[5] = true; }
-        if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags[8] = true; }
-        if (FromId != null) { Flags[11] = true; }
-        if (Peer != null) { Flags[12] = true; }
-        if (/*SavedId != 0 &&*/ SavedId.HasValue) { Flags[12] = true; }
+        if (NameHidden) { Flags = Flags.SetBit(0); }
+        if (Saved) { Flags = Flags.SetBit(2); }
+        if (Converted) { Flags = Flags.SetBit(3); }
+        if (Upgraded) { Flags = Flags.SetBit(5); }
+        if (Refunded) { Flags = Flags.SetBit(9); }
+        if (CanUpgrade) { Flags = Flags.SetBit(10); }
+        if (Message != null) { Flags = Flags.SetBit(1); }
+        if (/*ConvertStars != 0 &&*/ ConvertStars.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*UpgradeMsgId != 0 && */UpgradeMsgId.HasValue) { Flags = Flags.SetBit(5); }
+        if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags = Flags.SetBit(8); }
+        if (FromId != null) { Flags = Flags.SetBit(11); }
+        if (Peer != null) { Flags = Flags.SetBit(12); }
+        if (/*SavedId != 0 &&*/ SavedId.HasValue) { Flags = Flags.SetBit(12); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -82,31 +82,31 @@ public sealed class TMessageActionStarGift : IMessageAction
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Gift);
-        if (Flags[1]) { writer.Write(Message); }
-        if (Flags[4]) { writer.Write(ConvertStars.Value); }
-        if (Flags[5]) { writer.Write(UpgradeMsgId.Value); }
-        if (Flags[8]) { writer.Write(UpgradeStars.Value); }
-        if (Flags[11]) { writer.Write(FromId); }
-        if (Flags[12]) { writer.Write(Peer); }
-        if (Flags[12]) { writer.Write(SavedId.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Message); }
+        if (Flags.IsBitSet(4)) { writer.Write(ConvertStars.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(UpgradeMsgId.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(UpgradeStars.Value); }
+        if (Flags.IsBitSet(11)) { writer.Write(FromId); }
+        if (Flags.IsBitSet(12)) { writer.Write(Peer); }
+        if (Flags.IsBitSet(12)) { writer.Write(SavedId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NameHidden = true; }
-        if (Flags[2]) { Saved = true; }
-        if (Flags[3]) { Converted = true; }
-        if (Flags[5]) { Upgraded = true; }
-        if (Flags[9]) { Refunded = true; }
-        if (Flags[10]) { CanUpgrade = true; }
-        Gift = reader.Read<MyTelegram.Schema.IStarGift>();
-        if (Flags[1]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
-        if (Flags[4]) { ConvertStars = reader.ReadInt64(); }
-        if (Flags[5]) { UpgradeMsgId = reader.ReadInt32(); }
-        if (Flags[8]) { UpgradeStars = reader.ReadInt64(); }
-        if (Flags[11]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[12]) { Peer = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[12]) { SavedId = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NameHidden = true; }
+        if (Flags.IsBitSet(2)) { Saved = true; }
+        if (Flags.IsBitSet(3)) { Converted = true; }
+        if (Flags.IsBitSet(5)) { Upgraded = true; }
+        if (Flags.IsBitSet(9)) { Refunded = true; }
+        if (Flags.IsBitSet(10)) { CanUpgrade = true; }
+        Gift = buffer.Read<MyTelegram.Schema.IStarGift>();
+        if (Flags.IsBitSet(1)) { Message = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        if (Flags.IsBitSet(4)) { ConvertStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(5)) { UpgradeMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(8)) { UpgradeStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(11)) { FromId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(12)) { Peer = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(12)) { SavedId = buffer.ReadInt64(); }
     }
 }

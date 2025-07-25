@@ -22,7 +22,7 @@ public sealed class RequestRequestCall : IRequest<MyTelegram.Schema.Phone.IPhone
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to start a video call
@@ -54,7 +54,7 @@ public sealed class RequestRequestCall : IRequest<MyTelegram.Schema.Phone.IPhone
 
     public void ComputeFlag()
     {
-        if (Video) { Flags[0] = true; }
+        if (Video) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -69,13 +69,13 @@ public sealed class RequestRequestCall : IRequest<MyTelegram.Schema.Phone.IPhone
         writer.Write(Protocol);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Video = true; }
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        RandomId = reader.ReadInt32();
-        GAHash = reader.ReadBytes();
-        Protocol = reader.Read<MyTelegram.Schema.IPhoneCallProtocol>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Video = true; }
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        RandomId = buffer.ReadInt32();
+        GAHash = buffer.ReadBytes();
+        Protocol = buffer.Read<MyTelegram.Schema.IPhoneCallProtocol>();
     }
 }

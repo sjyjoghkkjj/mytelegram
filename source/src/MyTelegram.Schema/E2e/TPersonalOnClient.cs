@@ -24,9 +24,9 @@ public sealed class TPersonalOnClient : IPersonalOnClient
         writer.Write(Personal);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        SignedAt = reader.ReadInt32();
-        Personal = reader.Read<MyTelegram.Schema.E2e.IPersonal>();
+        SignedAt = buffer.ReadInt32();
+        Personal = buffer.Read<MyTelegram.Schema.E2e.IPersonal>();
     }
 }

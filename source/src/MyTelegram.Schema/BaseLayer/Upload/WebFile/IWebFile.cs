@@ -33,5 +33,5 @@ public interface IWebFile : IObject
     ///<summary>
     /// Data
     ///</summary>
-    byte[] Bytes { get; set; }
+    ReadOnlyMemory<byte> Bytes { get; set; }
 }

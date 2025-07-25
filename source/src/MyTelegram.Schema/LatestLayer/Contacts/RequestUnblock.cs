@@ -20,7 +20,7 @@ public sealed class RequestUnblock : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the peer should be removed from the story blocklist; if not set, the peer will be removed from the main blocklist, see <a href="https://corefork.telegram.org/api/block">here »</a> for more info.
@@ -36,7 +36,7 @@ public sealed class RequestUnblock : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (MyStoriesFrom) { Flags[0] = true; }
+        if (MyStoriesFrom) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -48,10 +48,10 @@ public sealed class RequestUnblock : IRequest<IBool>
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { MyStoriesFrom = true; }
-        Id = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { MyStoriesFrom = true; }
+        Id = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

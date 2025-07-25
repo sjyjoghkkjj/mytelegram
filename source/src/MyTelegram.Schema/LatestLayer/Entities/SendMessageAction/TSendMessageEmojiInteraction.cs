@@ -41,10 +41,10 @@ public sealed class TSendMessageEmojiInteraction : ISendMessageAction
         writer.Write(Interaction);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Emoticon = reader.ReadString();
-        MsgId = reader.ReadInt32();
-        Interaction = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Emoticon = buffer.ReadString();
+        MsgId = buffer.ReadInt32();
+        Interaction = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

@@ -42,9 +42,9 @@ public sealed class RequestRegisterDevice : IRequest<IBool>
         writer.Write(Token);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        TokenType = reader.ReadInt32();
-        Token = reader.ReadString();
+        TokenType = buffer.ReadInt32();
+        Token = buffer.ReadString();
     }
 }

@@ -17,5 +17,5 @@ public interface IMessageReportOption : IObject
     ///<summary>
     /// Option identifier: if the user selects this option, re-invoke <a href="https://corefork.telegram.org/method/messages.report">messages.report</a>, passing this option to <code>option</code>
     ///</summary>
-    byte[] Option { get; set; }
+    ReadOnlyMemory<byte> Option { get; set; }
 }

@@ -35,9 +35,9 @@ public sealed class RequestFulfillStarsSubscription : IRequest<IBool>
         writer.Write(SubscriptionId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        SubscriptionId = reader.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        SubscriptionId = buffer.ReadString();
     }
 }

@@ -31,8 +31,8 @@ public sealed class RequestExportAuthorization : IRequest<MyTelegram.Schema.Auth
         writer.Write(DcId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DcId = reader.ReadInt32();
+        DcId = buffer.ReadInt32();
     }
 }

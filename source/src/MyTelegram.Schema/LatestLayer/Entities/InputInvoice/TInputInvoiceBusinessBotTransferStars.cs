@@ -26,9 +26,9 @@ public sealed class TInputInvoiceBusinessBotTransferStars : IInputInvoice
         writer.Write(Stars);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        Stars = reader.ReadInt64();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Stars = buffer.ReadInt64();
     }
 }

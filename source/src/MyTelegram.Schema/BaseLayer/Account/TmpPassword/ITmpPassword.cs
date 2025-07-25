@@ -12,7 +12,7 @@ public interface ITmpPassword : IObject
     ///<summary>
     /// Temporary password
     ///</summary>
-    byte[] TmpPassword { get; set; }
+    ReadOnlyMemory<byte> TmpPassword { get; set; }
 
     ///<summary>
     /// Validity period

@@ -20,7 +20,7 @@ public sealed class RequestUpdateBusinessWorkHours : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Opening hours (optional, if not set removes all opening hours).
@@ -30,7 +30,7 @@ public sealed class RequestUpdateBusinessWorkHours : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (BusinessWorkHours != null) { Flags[0] = true; }
+        if (BusinessWorkHours != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -38,12 +38,12 @@ public sealed class RequestUpdateBusinessWorkHours : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(BusinessWorkHours); }
+        if (Flags.IsBitSet(0)) { writer.Write(BusinessWorkHours); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { BusinessWorkHours = reader.Read<MyTelegram.Schema.IBusinessWorkHours>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { BusinessWorkHours = buffer.Read<MyTelegram.Schema.IBusinessWorkHours>(); }
     }
 }

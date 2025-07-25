@@ -41,7 +41,8 @@ public class Layers
     public const int Layer200 = 200;
     public const int Layer202 = 202;
     public const int Layer204 = 204;
+    public const int Layer206 = 206;
 
 
-    public const int LayerLatest = Layer204;
+    public const int LayerLatest = Layer206;
 }

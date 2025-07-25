@@ -10,7 +10,6 @@ public record UpdatesDataReceivedEvent(
     long AuthKeyId,
     long PermAuthKeyId,
     ReadOnlyMemory<byte> Data,
-    //byte[] Data,
     int Layer,
     long Date,
     DeviceType DeviceType,

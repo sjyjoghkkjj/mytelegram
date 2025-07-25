@@ -14,7 +14,7 @@ public sealed class TDocumentAttributeCustomEmoji : IDocumentAttribute
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this custom emoji can be sent by non-Premium users
@@ -41,8 +41,8 @@ public sealed class TDocumentAttributeCustomEmoji : IDocumentAttribute
 
     public void ComputeFlag()
     {
-        if (Free) { Flags[0] = true; }
-        if (TextColor) { Flags[1] = true; }
+        if (Free) { Flags = Flags.SetBit(0); }
+        if (TextColor) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -55,12 +55,12 @@ public sealed class TDocumentAttributeCustomEmoji : IDocumentAttribute
         writer.Write(Stickerset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Free = true; }
-        if (Flags[1]) { TextColor = true; }
-        Alt = reader.ReadString();
-        Stickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Free = true; }
+        if (Flags.IsBitSet(1)) { TextColor = true; }
+        Alt = buffer.ReadString();
+        Stickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
     }
 }

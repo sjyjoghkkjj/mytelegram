@@ -40,9 +40,9 @@ public sealed class RequestSaveCallDebug : IRequest<IBool>
         writer.Write(Debug);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPhoneCall>();
-        Debug = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPhoneCall>();
+        Debug = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

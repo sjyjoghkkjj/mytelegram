@@ -14,7 +14,7 @@ public sealed class TRequestedPeerChannel : IRequestedPeer
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Channel/supergroup ID.
@@ -39,9 +39,9 @@ public sealed class TRequestedPeerChannel : IRequestedPeer
 
     public void ComputeFlag()
     {
-        if (Title != null) { Flags[0] = true; }
-        if (Username != null) { Flags[1] = true; }
-        if (Photo != null) { Flags[2] = true; }
+        if (Title != null) { Flags = Flags.SetBit(0); }
+        if (Username != null) { Flags = Flags.SetBit(1); }
+        if (Photo != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,17 +50,17 @@ public sealed class TRequestedPeerChannel : IRequestedPeer
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ChannelId);
-        if (Flags[0]) { writer.Write(Title); }
-        if (Flags[1]) { writer.Write(Username); }
-        if (Flags[2]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(0)) { writer.Write(Title); }
+        if (Flags.IsBitSet(1)) { writer.Write(Username); }
+        if (Flags.IsBitSet(2)) { writer.Write(Photo); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ChannelId = reader.ReadInt64();
-        if (Flags[0]) { Title = reader.ReadString(); }
-        if (Flags[1]) { Username = reader.ReadString(); }
-        if (Flags[2]) { Photo = reader.Read<MyTelegram.Schema.IPhoto>(); }
+        Flags = buffer.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Username = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Photo = buffer.Read<MyTelegram.Schema.IPhoto>(); }
     }
 }

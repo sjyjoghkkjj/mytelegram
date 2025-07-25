@@ -40,10 +40,10 @@ public sealed class TTopPeers : ITopPeers
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Categories = reader.Read<TVector<MyTelegram.Schema.ITopPeerCategoryPeers>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Categories = buffer.Read<TVector<MyTelegram.Schema.ITopPeerCategoryPeers>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

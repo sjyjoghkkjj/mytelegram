@@ -46,11 +46,11 @@ public sealed class TFound : IFound
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MyResults = reader.Read<TVector<MyTelegram.Schema.IPeer>>();
-        Results = reader.Read<TVector<MyTelegram.Schema.IPeer>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        MyResults = buffer.Read<TVector<MyTelegram.Schema.IPeer>>();
+        Results = buffer.Read<TVector<MyTelegram.Schema.IPeer>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

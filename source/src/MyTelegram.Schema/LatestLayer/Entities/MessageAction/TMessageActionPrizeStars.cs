@@ -14,7 +14,7 @@ public sealed class TMessageActionPrizeStars : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, this indicates the reverse transaction that refunds the remaining stars to the creator of a giveaway if, when the giveaway ends, the number of members in the channel is smaller than the number of winners in the giveaway.
@@ -45,7 +45,7 @@ public sealed class TMessageActionPrizeStars : IMessageAction
 
     public void ComputeFlag()
     {
-        if (Unclaimed) { Flags[0] = true; }
+        if (Unclaimed) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -60,13 +60,13 @@ public sealed class TMessageActionPrizeStars : IMessageAction
         writer.Write(GiveawayMsgId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Unclaimed = true; }
-        Stars = reader.ReadInt64();
-        TransactionId = reader.ReadString();
-        BoostPeer = reader.Read<MyTelegram.Schema.IPeer>();
-        GiveawayMsgId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Unclaimed = true; }
+        Stars = buffer.ReadInt64();
+        TransactionId = buffer.ReadString();
+        BoostPeer = buffer.Read<MyTelegram.Schema.IPeer>();
+        GiveawayMsgId = buffer.ReadInt32();
     }
 }

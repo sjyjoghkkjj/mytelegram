@@ -51,10 +51,10 @@ public sealed class RequestToggleUsername : IRequest<IBool>
         writer.Write(Active);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Username = reader.ReadString();
-        Active = reader.Read();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Username = buffer.ReadString();
+        Active = buffer.Read();
     }
 }

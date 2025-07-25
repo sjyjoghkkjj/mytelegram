@@ -26,9 +26,9 @@ public sealed class TStarGiftAttributeCounter : IStarGiftAttributeCounter
         writer.Write(Count);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Attribute = reader.Read<MyTelegram.Schema.IStarGiftAttributeId>();
-        Count = reader.ReadInt32();
+        Attribute = buffer.Read<MyTelegram.Schema.IStarGiftAttributeId>();
+        Count = buffer.ReadInt32();
     }
 }

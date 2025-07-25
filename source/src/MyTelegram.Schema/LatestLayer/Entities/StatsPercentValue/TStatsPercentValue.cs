@@ -35,9 +35,9 @@ public sealed class TStatsPercentValue : IStatsPercentValue
         writer.Write(Total);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Part = reader.ReadDouble();
-        Total = reader.ReadDouble();
+        Part = buffer.ReadDouble();
+        Total = buffer.ReadDouble();
     }
 }

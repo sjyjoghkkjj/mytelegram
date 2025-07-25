@@ -42,10 +42,10 @@ public sealed class TUpdateChatDefaultBannedRights : IUpdate
         writer.Write(Version);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        DefaultBannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>();
-        Version = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        DefaultBannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>();
+        Version = buffer.ReadInt32();
     }
 }

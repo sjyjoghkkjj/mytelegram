@@ -33,8 +33,8 @@ public sealed class RequestUnpinAllMessages : IRequest<MyTelegram.Schema.Message
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

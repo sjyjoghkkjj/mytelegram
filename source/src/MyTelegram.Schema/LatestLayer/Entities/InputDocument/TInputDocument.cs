@@ -24,7 +24,7 @@ public sealed class TInputDocument : IInputDocument
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/file_reference">File reference</a>
     ///</summary>
-    public byte[] FileReference { get; set; }
+    public ReadOnlyMemory<byte> FileReference { get; set; }
 
     public void ComputeFlag()
     {
@@ -40,10 +40,10 @@ public sealed class TInputDocument : IInputDocument
         writer.Write(FileReference);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        FileReference = reader.ReadBytes();
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        FileReference = buffer.ReadBytes();
     }
 }

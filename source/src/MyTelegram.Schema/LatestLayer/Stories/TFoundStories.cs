@@ -14,7 +14,7 @@ public sealed class TFoundStories : IFoundStories
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Total number of results found for the query.
@@ -43,7 +43,7 @@ public sealed class TFoundStories : IFoundStories
 
     public void ComputeFlag()
     {
-        if (NextOffset != null) { Flags[0] = true; }
+        if (NextOffset != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -54,18 +54,18 @@ public sealed class TFoundStories : IFoundStories
         writer.Write(Flags);
         writer.Write(Count);
         writer.Write(Stories);
-        if (Flags[0]) { writer.Write(NextOffset); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextOffset); }
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Count = reader.ReadInt32();
-        Stories = reader.Read<TVector<MyTelegram.Schema.IFoundStory>>();
-        if (Flags[0]) { NextOffset = reader.ReadString(); }
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        Count = buffer.ReadInt32();
+        Stories = buffer.Read<TVector<MyTelegram.Schema.IFoundStory>>();
+        if (Flags.IsBitSet(0)) { NextOffset = buffer.ReadString(); }
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

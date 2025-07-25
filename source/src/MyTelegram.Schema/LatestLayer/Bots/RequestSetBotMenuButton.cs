@@ -41,9 +41,9 @@ public sealed class RequestSetBotMenuButton : IRequest<IBool>
         writer.Write(Button);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        Button = reader.Read<MyTelegram.Schema.IBotMenuButton>();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Button = buffer.Read<MyTelegram.Schema.IBotMenuButton>();
     }
 }

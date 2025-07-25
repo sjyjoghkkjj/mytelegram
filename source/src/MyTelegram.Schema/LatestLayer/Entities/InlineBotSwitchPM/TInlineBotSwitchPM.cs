@@ -34,9 +34,9 @@ public sealed class TInlineBotSwitchPM : IInlineBotSwitchPM
         writer.Write(StartParam);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        StartParam = reader.ReadString();
+        Text = buffer.ReadString();
+        StartParam = buffer.ReadString();
     }
 }

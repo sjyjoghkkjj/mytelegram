@@ -43,10 +43,10 @@ public sealed class RequestImportWebTokenAuthorization : IRequest<MyTelegram.Sch
         writer.Write(WebAuthToken);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ApiId = reader.ReadInt32();
-        ApiHash = reader.ReadString();
-        WebAuthToken = reader.ReadString();
+        ApiId = buffer.ReadInt32();
+        ApiHash = buffer.ReadString();
+        WebAuthToken = buffer.ReadString();
     }
 }

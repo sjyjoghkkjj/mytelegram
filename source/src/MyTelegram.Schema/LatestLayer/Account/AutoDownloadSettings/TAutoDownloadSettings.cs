@@ -43,10 +43,10 @@ public sealed class TAutoDownloadSettings : IAutoDownloadSettings
         writer.Write(High);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Low = reader.Read<MyTelegram.Schema.IAutoDownloadSettings>();
-        Medium = reader.Read<MyTelegram.Schema.IAutoDownloadSettings>();
-        High = reader.Read<MyTelegram.Schema.IAutoDownloadSettings>();
+        Low = buffer.Read<MyTelegram.Schema.IAutoDownloadSettings>();
+        Medium = buffer.Read<MyTelegram.Schema.IAutoDownloadSettings>();
+        High = buffer.Read<MyTelegram.Schema.IAutoDownloadSettings>();
     }
 }

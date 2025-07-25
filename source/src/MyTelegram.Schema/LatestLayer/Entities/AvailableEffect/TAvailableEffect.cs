@@ -14,7 +14,7 @@ public sealed class TAvailableEffect : IAvailableEffect
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether a <a href="https://corefork.telegram.org/api/premium">Premium</a> subscription is required to use this effect.
@@ -49,9 +49,9 @@ public sealed class TAvailableEffect : IAvailableEffect
 
     public void ComputeFlag()
     {
-        if (PremiumRequired) { Flags[2] = true; }
-        if (/*StaticIconId != 0 &&*/ StaticIconId.HasValue) { Flags[0] = true; }
-        if (/*EffectAnimationId != 0 &&*/ EffectAnimationId.HasValue) { Flags[1] = true; }
+        if (PremiumRequired) { Flags = Flags.SetBit(2); }
+        if (/*StaticIconId != 0 &&*/ StaticIconId.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*EffectAnimationId != 0 &&*/ EffectAnimationId.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -61,19 +61,19 @@ public sealed class TAvailableEffect : IAvailableEffect
         writer.Write(Flags);
         writer.Write(Id);
         writer.Write(Emoticon);
-        if (Flags[0]) { writer.Write(StaticIconId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(StaticIconId.Value); }
         writer.Write(EffectStickerId);
-        if (Flags[1]) { writer.Write(EffectAnimationId.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(EffectAnimationId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { PremiumRequired = true; }
-        Id = reader.ReadInt64();
-        Emoticon = reader.ReadString();
-        if (Flags[0]) { StaticIconId = reader.ReadInt64(); }
-        EffectStickerId = reader.ReadInt64();
-        if (Flags[1]) { EffectAnimationId = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { PremiumRequired = true; }
+        Id = buffer.ReadInt64();
+        Emoticon = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { StaticIconId = buffer.ReadInt64(); }
+        EffectStickerId = buffer.ReadInt64();
+        if (Flags.IsBitSet(1)) { EffectAnimationId = buffer.ReadInt64(); }
     }
 }

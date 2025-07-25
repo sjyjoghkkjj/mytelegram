@@ -34,9 +34,9 @@ public sealed class TAttachMenuBotIconColor : IAttachMenuBotIconColor
         writer.Write(Color);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Name = reader.ReadString();
-        Color = reader.ReadInt32();
+        Name = buffer.ReadString();
+        Color = buffer.ReadInt32();
     }
 }

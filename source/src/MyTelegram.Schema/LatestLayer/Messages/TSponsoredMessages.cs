@@ -7,19 +7,21 @@ namespace MyTelegram.Schema.Messages;
 /// A set of sponsored messages associated to a channel
 /// See <a href="https://corefork.telegram.org/constructor/messages.sponsoredMessages" />
 ///</summary>
-[TlObject(0xc9ee1d87)]
+[TlObject(0xffda656d)]
 public sealed class TSponsoredMessages : ISponsoredMessages
 {
-    public uint ConstructorId => 0xc9ee1d87;
+    public uint ConstructorId => 0xffda656d;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, specifies the minimum number of messages between shown sponsored messages; otherwise, only one sponsored message must be shown after all ordinary messages.
     ///</summary>
     public int? PostsBetween { get; set; }
+    public int? StartDelay { get; set; }
+    public int? BetweenDelay { get; set; }
 
     ///<summary>
     /// Sponsored messages
@@ -38,7 +40,9 @@ public sealed class TSponsoredMessages : ISponsoredMessages
 
     public void ComputeFlag()
     {
-        if (/*PostsBetween != 0 && */PostsBetween.HasValue) { Flags[0] = true; }
+        if (/*PostsBetween != 0 && */PostsBetween.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*StartDelay != 0 && */StartDelay.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*BetweenDelay != 0 && */BetweenDelay.HasValue) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -47,18 +51,22 @@ public sealed class TSponsoredMessages : ISponsoredMessages
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(PostsBetween.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(PostsBetween.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(StartDelay.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(BetweenDelay.Value); }
         writer.Write(Messages);
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { PostsBetween = reader.ReadInt32(); }
-        Messages = reader.Read<TVector<MyTelegram.Schema.ISponsoredMessage>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { PostsBetween = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { StartDelay = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { BetweenDelay = buffer.ReadInt32(); }
+        Messages = buffer.Read<TVector<MyTelegram.Schema.ISponsoredMessage>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

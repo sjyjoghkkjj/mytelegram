@@ -14,7 +14,7 @@ public sealed class TInputMediaPaidMedia : IInputMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The price of the media in <a href="https://corefork.telegram.org/api/stars">Telegram Stars</a>.
@@ -33,7 +33,7 @@ public sealed class TInputMediaPaidMedia : IInputMedia
 
     public void ComputeFlag()
     {
-        if (Payload != null) { Flags[0] = true; }
+        if (Payload != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -43,14 +43,14 @@ public sealed class TInputMediaPaidMedia : IInputMedia
         writer.Write(Flags);
         writer.Write(StarsAmount);
         writer.Write(ExtendedMedia);
-        if (Flags[0]) { writer.Write(Payload); }
+        if (Flags.IsBitSet(0)) { writer.Write(Payload); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        StarsAmount = reader.ReadInt64();
-        ExtendedMedia = reader.Read<TVector<MyTelegram.Schema.IInputMedia>>();
-        if (Flags[0]) { Payload = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        StarsAmount = buffer.ReadInt64();
+        ExtendedMedia = buffer.Read<TVector<MyTelegram.Schema.IInputMedia>>();
+        if (Flags.IsBitSet(0)) { Payload = buffer.ReadString(); }
     }
 }

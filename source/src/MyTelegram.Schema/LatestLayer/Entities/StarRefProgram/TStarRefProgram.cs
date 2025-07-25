@@ -13,7 +13,7 @@ public sealed class TStarRefProgram : IStarRefProgram
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -43,9 +43,9 @@ public sealed class TStarRefProgram : IStarRefProgram
 
     public void ComputeFlag()
     {
-        if (/*DurationMonths != 0 && */DurationMonths.HasValue) { Flags[0] = true; }
-        if (/*EndDate != 0 && */EndDate.HasValue) { Flags[1] = true; }
-        if (DailyRevenuePerUser != null) { Flags[2] = true; }
+        if (/*DurationMonths != 0 && */DurationMonths.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*EndDate != 0 && */EndDate.HasValue) { Flags = Flags.SetBit(1); }
+        if (DailyRevenuePerUser != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,18 +55,18 @@ public sealed class TStarRefProgram : IStarRefProgram
         writer.Write(Flags);
         writer.Write(BotId);
         writer.Write(CommissionPermille);
-        if (Flags[0]) { writer.Write(DurationMonths.Value); }
-        if (Flags[1]) { writer.Write(EndDate.Value); }
-        if (Flags[2]) { writer.Write(DailyRevenuePerUser); }
+        if (Flags.IsBitSet(0)) { writer.Write(DurationMonths.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(EndDate.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(DailyRevenuePerUser); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        BotId = reader.ReadInt64();
-        CommissionPermille = reader.ReadInt32();
-        if (Flags[0]) { DurationMonths = reader.ReadInt32(); }
-        if (Flags[1]) { EndDate = reader.ReadInt32(); }
-        if (Flags[2]) { DailyRevenuePerUser = reader.Read<MyTelegram.Schema.IStarsAmount>(); }
+        Flags = buffer.ReadInt32();
+        BotId = buffer.ReadInt64();
+        CommissionPermille = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { DurationMonths = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { EndDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { DailyRevenuePerUser = buffer.Read<MyTelegram.Schema.IStarsAmount>(); }
     }
 }

@@ -14,7 +14,7 @@ public sealed class TUpdatePinnedDialogs : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/folders#peer-folders">Peer folder ID, for more info click here</a>
@@ -28,8 +28,8 @@ public sealed class TUpdatePinnedDialogs : IUpdate
 
     public void ComputeFlag()
     {
-        if (/*FolderId != 0 && */FolderId.HasValue) { Flags[1] = true; }
-        if (Order?.Count > 0) { Flags[0] = true; }
+        if (/*FolderId != 0 && */FolderId.HasValue) { Flags = Flags.SetBit(1); }
+        if (Order?.Count > 0) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -37,14 +37,14 @@ public sealed class TUpdatePinnedDialogs : IUpdate
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(FolderId.Value); }
-        if (Flags[0]) { writer.Write(Order); }
+        if (Flags.IsBitSet(1)) { writer.Write(FolderId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Order); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { FolderId = reader.ReadInt32(); }
-        if (Flags[0]) { Order = reader.Read<TVector<MyTelegram.Schema.IDialogPeer>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { FolderId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { Order = buffer.Read<TVector<MyTelegram.Schema.IDialogPeer>>(); }
     }
 }

@@ -14,7 +14,7 @@ public sealed class TAutoDownloadSettings : IAutoDownloadSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Disable automatic media downloads?
@@ -78,11 +78,11 @@ public sealed class TAutoDownloadSettings : IAutoDownloadSettings
 
     public void ComputeFlag()
     {
-        if (Disabled) { Flags[0] = true; }
-        if (VideoPreloadLarge) { Flags[1] = true; }
-        if (AudioPreloadNext) { Flags[2] = true; }
-        if (PhonecallsLessData) { Flags[3] = true; }
-        if (StoriesPreload) { Flags[4] = true; }
+        if (Disabled) { Flags = Flags.SetBit(0); }
+        if (VideoPreloadLarge) { Flags = Flags.SetBit(1); }
+        if (AudioPreloadNext) { Flags = Flags.SetBit(2); }
+        if (PhonecallsLessData) { Flags = Flags.SetBit(3); }
+        if (StoriesPreload) { Flags = Flags.SetBit(4); }
 
     }
 
@@ -99,19 +99,19 @@ public sealed class TAutoDownloadSettings : IAutoDownloadSettings
         writer.Write(LargeQueueActiveOperationsMax);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Disabled = true; }
-        if (Flags[1]) { VideoPreloadLarge = true; }
-        if (Flags[2]) { AudioPreloadNext = true; }
-        if (Flags[3]) { PhonecallsLessData = true; }
-        if (Flags[4]) { StoriesPreload = true; }
-        PhotoSizeMax = reader.ReadInt32();
-        VideoSizeMax = reader.ReadInt64();
-        FileSizeMax = reader.ReadInt64();
-        VideoUploadMaxbitrate = reader.ReadInt32();
-        SmallQueueActiveOperationsMax = reader.ReadInt32();
-        LargeQueueActiveOperationsMax = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Disabled = true; }
+        if (Flags.IsBitSet(1)) { VideoPreloadLarge = true; }
+        if (Flags.IsBitSet(2)) { AudioPreloadNext = true; }
+        if (Flags.IsBitSet(3)) { PhonecallsLessData = true; }
+        if (Flags.IsBitSet(4)) { StoriesPreload = true; }
+        PhotoSizeMax = buffer.ReadInt32();
+        VideoSizeMax = buffer.ReadInt64();
+        FileSizeMax = buffer.ReadInt64();
+        VideoUploadMaxbitrate = buffer.ReadInt32();
+        SmallQueueActiveOperationsMax = buffer.ReadInt32();
+        LargeQueueActiveOperationsMax = buffer.ReadInt32();
     }
 }

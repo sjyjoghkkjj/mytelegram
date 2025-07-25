@@ -40,10 +40,10 @@ public sealed class TUpdateChannelMessageViews : IUpdate
         writer.Write(Views);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
-        Id = reader.ReadInt32();
-        Views = reader.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        Id = buffer.ReadInt32();
+        Views = buffer.ReadInt32();
     }
 }

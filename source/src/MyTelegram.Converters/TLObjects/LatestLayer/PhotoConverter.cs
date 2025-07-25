@@ -16,7 +16,7 @@ public class PhotoConverter : IPhotoConverter, ITransientDependency
         {
             DcId = photoReadModel.DcId,
             PhotoId = photoReadModel.PhotoId,
-            HasVideo = photoReadModel.VideoSizes?.Count > 0
+            HasVideo = photoReadModel.VideoSizes2?.Count > 0
         };
     }
 

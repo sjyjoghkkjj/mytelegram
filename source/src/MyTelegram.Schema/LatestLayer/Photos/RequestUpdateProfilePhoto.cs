@@ -23,7 +23,7 @@ public sealed class RequestUpdateProfilePhoto : IRequest<MyTelegram.Schema.Photo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the chosen profile photo will be shown to users that can't display your main profile photo due to your privacy settings.
@@ -45,8 +45,8 @@ public sealed class RequestUpdateProfilePhoto : IRequest<MyTelegram.Schema.Photo
 
     public void ComputeFlag()
     {
-        if (Fallback) { Flags[0] = true; }
-        if (Bot != null) { Flags[1] = true; }
+        if (Fallback) { Flags = Flags.SetBit(0); }
+        if (Bot != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -55,15 +55,15 @@ public sealed class RequestUpdateProfilePhoto : IRequest<MyTelegram.Schema.Photo
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(Bot); }
+        if (Flags.IsBitSet(1)) { writer.Write(Bot); }
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Fallback = true; }
-        if (Flags[1]) { Bot = reader.Read<MyTelegram.Schema.IInputUser>(); }
-        Id = reader.Read<MyTelegram.Schema.IInputPhoto>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Fallback = true; }
+        if (Flags.IsBitSet(1)) { Bot = buffer.Read<MyTelegram.Schema.IInputUser>(); }
+        Id = buffer.Read<MyTelegram.Schema.IInputPhoto>();
     }
 }

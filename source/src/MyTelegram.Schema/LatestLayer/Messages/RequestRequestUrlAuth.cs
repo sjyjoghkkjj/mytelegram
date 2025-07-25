@@ -14,7 +14,7 @@ public sealed class RequestRequestUrlAuth : IRequest<MyTelegram.Schema.IUrlAuthR
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Peer where the message is located
@@ -39,10 +39,10 @@ public sealed class RequestRequestUrlAuth : IRequest<MyTelegram.Schema.IUrlAuthR
 
     public void ComputeFlag()
     {
-        if (Peer != null) { Flags[1] = true; }
-        if (/*MsgId != 0 && */MsgId.HasValue) { Flags[1] = true; }
-        if (/*ButtonId != 0 && */ButtonId.HasValue) { Flags[1] = true; }
-        if (Url != null) { Flags[2] = true; }
+        if (Peer != null) { Flags = Flags.SetBit(1); }
+        if (/*MsgId != 0 && */MsgId.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*ButtonId != 0 && */ButtonId.HasValue) { Flags = Flags.SetBit(1); }
+        if (Url != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,18 +50,18 @@ public sealed class RequestRequestUrlAuth : IRequest<MyTelegram.Schema.IUrlAuthR
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(Peer); }
-        if (Flags[1]) { writer.Write(MsgId.Value); }
-        if (Flags[1]) { writer.Write(ButtonId.Value); }
-        if (Flags[2]) { writer.Write(Url); }
+        if (Flags.IsBitSet(1)) { writer.Write(Peer); }
+        if (Flags.IsBitSet(1)) { writer.Write(MsgId.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(ButtonId.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(Url); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Peer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[1]) { MsgId = reader.ReadInt32(); }
-        if (Flags[1]) { ButtonId = reader.ReadInt32(); }
-        if (Flags[2]) { Url = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Peer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(1)) { MsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { ButtonId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { Url = buffer.ReadString(); }
     }
 }

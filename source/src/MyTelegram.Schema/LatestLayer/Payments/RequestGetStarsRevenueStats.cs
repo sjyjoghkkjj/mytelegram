@@ -17,13 +17,14 @@ public sealed class RequestGetStarsRevenueStats : IRequest<MyTelegram.Schema.Pay
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to enable dark theme for graph colors
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool Dark { get; set; }
+    public bool Ton { get; set; }
 
     ///<summary>
     /// Get statistics for the specified bot, channel or ourselves (<a href="https://corefork.telegram.org/constructor/inputPeerSelf">inputPeerSelf</a>).
@@ -33,7 +34,8 @@ public sealed class RequestGetStarsRevenueStats : IRequest<MyTelegram.Schema.Pay
 
     public void ComputeFlag()
     {
-        if (Dark) { Flags[0] = true; }
+        if (Dark) { Flags = Flags.SetBit(0); }
+        if (Ton) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -45,10 +47,11 @@ public sealed class RequestGetStarsRevenueStats : IRequest<MyTelegram.Schema.Pay
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Dark = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Dark = true; }
+        if (Flags.IsBitSet(1)) { Ton = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

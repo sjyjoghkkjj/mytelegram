@@ -22,7 +22,7 @@ public sealed class RequestGetExportedChatInvites : IRequest<MyTelegram.Schema.M
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to fetch revoked chat invites
@@ -59,9 +59,9 @@ public sealed class RequestGetExportedChatInvites : IRequest<MyTelegram.Schema.M
 
     public void ComputeFlag()
     {
-        if (Revoked) { Flags[3] = true; }
-        if (/*OffsetDate != 0 && */OffsetDate.HasValue) { Flags[2] = true; }
-        if (OffsetLink != null) { Flags[2] = true; }
+        if (Revoked) { Flags = Flags.SetBit(3); }
+        if (/*OffsetDate != 0 && */OffsetDate.HasValue) { Flags = Flags.SetBit(2); }
+        if (OffsetLink != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -72,19 +72,19 @@ public sealed class RequestGetExportedChatInvites : IRequest<MyTelegram.Schema.M
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(AdminId);
-        if (Flags[2]) { writer.Write(OffsetDate.Value); }
-        if (Flags[2]) { writer.Write(OffsetLink); }
+        if (Flags.IsBitSet(2)) { writer.Write(OffsetDate.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(OffsetLink); }
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { Revoked = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        AdminId = reader.Read<MyTelegram.Schema.IInputUser>();
-        if (Flags[2]) { OffsetDate = reader.ReadInt32(); }
-        if (Flags[2]) { OffsetLink = reader.ReadString(); }
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Revoked = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        AdminId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        if (Flags.IsBitSet(2)) { OffsetDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { OffsetLink = buffer.ReadString(); }
+        Limit = buffer.ReadInt32();
     }
 }

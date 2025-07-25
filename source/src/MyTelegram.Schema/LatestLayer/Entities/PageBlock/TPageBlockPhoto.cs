@@ -14,7 +14,7 @@ public sealed class TPageBlockPhoto : IPageBlock
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Photo ID
@@ -39,8 +39,8 @@ public sealed class TPageBlockPhoto : IPageBlock
 
     public void ComputeFlag()
     {
-        if (Url != null) { Flags[0] = true; }
-        if (/*WebpageId != 0 &&*/ WebpageId.HasValue) { Flags[0] = true; }
+        if (Url != null) { Flags = Flags.SetBit(0); }
+        if (/*WebpageId != 0 &&*/ WebpageId.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,16 +50,16 @@ public sealed class TPageBlockPhoto : IPageBlock
         writer.Write(Flags);
         writer.Write(PhotoId);
         writer.Write(Caption);
-        if (Flags[0]) { writer.Write(Url); }
-        if (Flags[0]) { writer.Write(WebpageId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Url); }
+        if (Flags.IsBitSet(0)) { writer.Write(WebpageId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        PhotoId = reader.ReadInt64();
-        Caption = reader.Read<MyTelegram.Schema.IPageCaption>();
-        if (Flags[0]) { Url = reader.ReadString(); }
-        if (Flags[0]) { WebpageId = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        PhotoId = buffer.ReadInt64();
+        Caption = buffer.Read<MyTelegram.Schema.IPageCaption>();
+        if (Flags.IsBitSet(0)) { Url = buffer.ReadString(); }
+        if (Flags.IsBitSet(0)) { WebpageId = buffer.ReadInt64(); }
     }
 }

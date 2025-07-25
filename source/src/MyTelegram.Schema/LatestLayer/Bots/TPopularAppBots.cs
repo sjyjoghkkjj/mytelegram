@@ -14,7 +14,7 @@ public sealed class TPopularAppBots : IPopularAppBots
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Offset for <a href="https://corefork.telegram.org/api/offsets">pagination</a>.
@@ -28,7 +28,7 @@ public sealed class TPopularAppBots : IPopularAppBots
 
     public void ComputeFlag()
     {
-        if (NextOffset != null) { Flags[0] = true; }
+        if (NextOffset != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -37,14 +37,14 @@ public sealed class TPopularAppBots : IPopularAppBots
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(NextOffset); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextOffset); }
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NextOffset = reader.ReadString(); }
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NextOffset = buffer.ReadString(); }
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

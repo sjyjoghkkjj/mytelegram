@@ -55,7 +55,7 @@ public sealed class RequestEditMessage : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Disable webpage preview
@@ -114,14 +114,14 @@ public sealed class RequestEditMessage : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (NoWebpage) { Flags[1] = true; }
-        if (InvertMedia) { Flags[16] = true; }
-        if (Message != null) { Flags[11] = true; }
-        if (Media != null) { Flags[14] = true; }
-        if (ReplyMarkup != null) { Flags[2] = true; }
-        if (Entities?.Count > 0) { Flags[3] = true; }
-        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[15] = true; }
-        if (/*QuickReplyShortcutId != 0 && */QuickReplyShortcutId.HasValue) { Flags[17] = true; }
+        if (NoWebpage) { Flags = Flags.SetBit(1); }
+        if (InvertMedia) { Flags = Flags.SetBit(16); }
+        if (Message != null) { Flags = Flags.SetBit(11); }
+        if (Media != null) { Flags = Flags.SetBit(14); }
+        if (ReplyMarkup != null) { Flags = Flags.SetBit(2); }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags = Flags.SetBit(15); }
+        if (/*QuickReplyShortcutId != 0 && */QuickReplyShortcutId.HasValue) { Flags = Flags.SetBit(17); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -131,26 +131,26 @@ public sealed class RequestEditMessage : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Id);
-        if (Flags[11]) { writer.Write(Message); }
-        if (Flags[14]) { writer.Write(Media); }
-        if (Flags[2]) { writer.Write(ReplyMarkup); }
-        if (Flags[3]) { writer.Write(Entities); }
-        if (Flags[15]) { writer.Write(ScheduleDate.Value); }
-        if (Flags[17]) { writer.Write(QuickReplyShortcutId.Value); }
+        if (Flags.IsBitSet(11)) { writer.Write(Message); }
+        if (Flags.IsBitSet(14)) { writer.Write(Media); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyMarkup); }
+        if (Flags.IsBitSet(3)) { writer.Write(Entities); }
+        if (Flags.IsBitSet(15)) { writer.Write(ScheduleDate.Value); }
+        if (Flags.IsBitSet(17)) { writer.Write(QuickReplyShortcutId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { NoWebpage = true; }
-        if (Flags[16]) { InvertMedia = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.ReadInt32();
-        if (Flags[11]) { Message = reader.ReadString(); }
-        if (Flags[14]) { Media = reader.Read<MyTelegram.Schema.IInputMedia>(); }
-        if (Flags[2]) { ReplyMarkup = reader.Read<MyTelegram.Schema.IReplyMarkup>(); }
-        if (Flags[3]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        if (Flags[15]) { ScheduleDate = reader.ReadInt32(); }
-        if (Flags[17]) { QuickReplyShortcutId = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { NoWebpage = true; }
+        if (Flags.IsBitSet(16)) { InvertMedia = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.ReadInt32();
+        if (Flags.IsBitSet(11)) { Message = buffer.ReadString(); }
+        if (Flags.IsBitSet(14)) { Media = buffer.Read<MyTelegram.Schema.IInputMedia>(); }
+        if (Flags.IsBitSet(2)) { ReplyMarkup = buffer.Read<MyTelegram.Schema.IReplyMarkup>(); }
+        if (Flags.IsBitSet(3)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        if (Flags.IsBitSet(15)) { ScheduleDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(17)) { QuickReplyShortcutId = buffer.ReadInt32(); }
     }
 }

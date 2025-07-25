@@ -46,10 +46,10 @@ public sealed class RequestAcceptEncryption : IRequest<MyTelegram.Schema.IEncryp
         writer.Write(KeyFingerprint);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputEncryptedChat>();
-        GB = reader.ReadBytes();
-        KeyFingerprint = reader.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IInputEncryptedChat>();
+        GB = buffer.ReadBytes();
+        KeyFingerprint = buffer.ReadInt64();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TUsername : IUsername
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the username is editable, meaning it wasn't bought on <a href="https://fragment.com/">fragment</a>.
@@ -35,8 +35,8 @@ public sealed class TUsername : IUsername
 
     public void ComputeFlag()
     {
-        if (Editable) { Flags[0] = true; }
-        if (Active) { Flags[1] = true; }
+        if (Editable) { Flags = Flags.SetBit(0); }
+        if (Active) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class TUsername : IUsername
         writer.Write(Username);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Editable = true; }
-        if (Flags[1]) { Active = true; }
-        Username = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Editable = true; }
+        if (Flags.IsBitSet(1)) { Active = true; }
+        Username = buffer.ReadString();
     }
 }

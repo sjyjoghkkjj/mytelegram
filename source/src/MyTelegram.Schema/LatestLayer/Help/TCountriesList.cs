@@ -34,9 +34,9 @@ public sealed class TCountriesList : ICountriesList
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Countries = reader.Read<TVector<MyTelegram.Schema.Help.ICountry>>();
-        Hash = reader.ReadInt32();
+        Countries = buffer.Read<TVector<MyTelegram.Schema.Help.ICountry>>();
+        Hash = buffer.ReadInt32();
     }
 }

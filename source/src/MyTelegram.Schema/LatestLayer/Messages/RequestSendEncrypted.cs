@@ -22,7 +22,7 @@ public sealed class RequestSendEncrypted : IRequest<MyTelegram.Schema.Messages.I
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Send encrypted message without a notification
@@ -48,7 +48,7 @@ public sealed class RequestSendEncrypted : IRequest<MyTelegram.Schema.Messages.I
 
     public void ComputeFlag()
     {
-        if (Silent) { Flags[0] = true; }
+        if (Silent) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -62,12 +62,12 @@ public sealed class RequestSendEncrypted : IRequest<MyTelegram.Schema.Messages.I
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Silent = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputEncryptedChat>();
-        RandomId = reader.ReadInt64();
-        Data = reader.ReadBytes();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Silent = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputEncryptedChat>();
+        RandomId = buffer.ReadInt64();
+        Data = buffer.ReadBytes();
     }
 }

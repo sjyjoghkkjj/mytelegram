@@ -34,9 +34,9 @@ public sealed class TKeyboardButtonCopy : IKeyboardButton
         writer.Write(CopyText);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        CopyText = reader.ReadString();
+        Text = buffer.ReadString();
+        CopyText = buffer.ReadString();
     }
 }

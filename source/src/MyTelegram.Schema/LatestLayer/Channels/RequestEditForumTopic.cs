@@ -25,7 +25,7 @@ public sealed class RequestEditForumTopic : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Supergroup
@@ -62,10 +62,10 @@ public sealed class RequestEditForumTopic : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (Title != null) { Flags[0] = true; }
-        if (/*IconEmojiId != 0 &&*/ IconEmojiId.HasValue) { Flags[1] = true; }
-        if (Closed !=null) { Flags[2] = true; }
-        if (Hidden !=null) { Flags[3] = true; }
+        if (Title != null) { Flags = Flags.SetBit(0); }
+        if (/*IconEmojiId != 0 &&*/ IconEmojiId.HasValue) { Flags = Flags.SetBit(1); }
+        if (Closed !=null) { Flags = Flags.SetBit(2); }
+        if (Hidden !=null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -75,20 +75,20 @@ public sealed class RequestEditForumTopic : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Flags);
         writer.Write(Channel);
         writer.Write(TopicId);
-        if (Flags[0]) { writer.Write(Title); }
-        if (Flags[1]) { writer.Write(IconEmojiId.Value); }
-        if (Flags[2]) { writer.Write(Closed.Value); }
-        if (Flags[3]) { writer.Write(Hidden.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Title); }
+        if (Flags.IsBitSet(1)) { writer.Write(IconEmojiId.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(Closed.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Hidden.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        TopicId = reader.ReadInt32();
-        if (Flags[0]) { Title = reader.ReadString(); }
-        if (Flags[1]) { IconEmojiId = reader.ReadInt64(); }
-        if (Flags[2]) { Closed = reader.Read(); }
-        if (Flags[3]) { Hidden = reader.Read(); }
+        Flags = buffer.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        TopicId = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { IconEmojiId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(2)) { Closed = buffer.Read(); }
+        if (Flags.IsBitSet(3)) { Hidden = buffer.Read(); }
     }
 }

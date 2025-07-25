@@ -59,13 +59,13 @@ public sealed class TMessageMediaVenue : IMessageMedia
         writer.Write(VenueType);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Geo = reader.Read<MyTelegram.Schema.IGeoPoint>();
-        Title = reader.ReadString();
-        Address = reader.ReadString();
-        Provider = reader.ReadString();
-        VenueId = reader.ReadString();
-        VenueType = reader.ReadString();
+        Geo = buffer.Read<MyTelegram.Schema.IGeoPoint>();
+        Title = buffer.ReadString();
+        Address = buffer.ReadString();
+        Provider = buffer.ReadString();
+        VenueId = buffer.ReadString();
+        VenueType = buffer.ReadString();
     }
 }

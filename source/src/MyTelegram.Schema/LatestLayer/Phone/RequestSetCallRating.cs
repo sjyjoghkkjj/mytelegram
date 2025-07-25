@@ -17,7 +17,7 @@ public sealed class RequestSetCallRating : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user decided on their own initiative to rate the call
@@ -43,7 +43,7 @@ public sealed class RequestSetCallRating : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (UserInitiative) { Flags[0] = true; }
+        if (UserInitiative) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -57,12 +57,12 @@ public sealed class RequestSetCallRating : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Comment);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { UserInitiative = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPhoneCall>();
-        Rating = reader.ReadInt32();
-        Comment = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { UserInitiative = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPhoneCall>();
+        Rating = buffer.ReadInt32();
+        Comment = buffer.ReadString();
     }
 }

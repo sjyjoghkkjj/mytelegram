@@ -34,9 +34,9 @@ public sealed class TConnectedBots : IConnectedBots
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ConnectedBots = reader.Read<TVector<MyTelegram.Schema.IConnectedBot>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        ConnectedBots = buffer.Read<TVector<MyTelegram.Schema.IConnectedBot>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

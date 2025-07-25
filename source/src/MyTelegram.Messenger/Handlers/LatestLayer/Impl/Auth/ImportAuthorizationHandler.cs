@@ -40,7 +40,7 @@ internal sealed class ImportAuthorizationHandler(
                 RpcErrors.RpcErrors400.UserIdInvalid.ThrowRpcError();
             }
 
-            await eventBus.PublishAsync(new BindUidToSessionEvent(userReadModel!.UserId, input.AuthKeyId, input.PermAuthKeyId));
+            await eventBus.PublishAsync(new BindUserIdToSessionEvent(userReadModel!.UserId, input.AuthKeyId, input.PermAuthKeyId));
 
             await cacheManager.RemoveAsync(key);
 

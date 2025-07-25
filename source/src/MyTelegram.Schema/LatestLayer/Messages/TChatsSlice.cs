@@ -34,9 +34,9 @@ public sealed class TChatsSlice : IChats
         writer.Write(Chats);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
+        Count = buffer.ReadInt32();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
     }
 }

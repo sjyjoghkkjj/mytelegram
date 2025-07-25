@@ -18,7 +18,7 @@ public sealed class RequestUpdateProfile : IRequest<MyTelegram.Schema.IUser>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// New user first name
@@ -37,9 +37,9 @@ public sealed class RequestUpdateProfile : IRequest<MyTelegram.Schema.IUser>
 
     public void ComputeFlag()
     {
-        if (FirstName != null) { Flags[0] = true; }
-        if (LastName != null) { Flags[1] = true; }
-        if (About != null) { Flags[2] = true; }
+        if (FirstName != null) { Flags = Flags.SetBit(0); }
+        if (LastName != null) { Flags = Flags.SetBit(1); }
+        if (About != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -47,16 +47,16 @@ public sealed class RequestUpdateProfile : IRequest<MyTelegram.Schema.IUser>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(FirstName); }
-        if (Flags[1]) { writer.Write(LastName); }
-        if (Flags[2]) { writer.Write(About); }
+        if (Flags.IsBitSet(0)) { writer.Write(FirstName); }
+        if (Flags.IsBitSet(1)) { writer.Write(LastName); }
+        if (Flags.IsBitSet(2)) { writer.Write(About); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { FirstName = reader.ReadString(); }
-        if (Flags[1]) { LastName = reader.ReadString(); }
-        if (Flags[2]) { About = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { FirstName = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { LastName = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { About = buffer.ReadString(); }
     }
 }

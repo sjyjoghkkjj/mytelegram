@@ -40,10 +40,10 @@ public sealed class TGroupCallDiscarded : IGroupCall
         writer.Write(Duration);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        Duration = reader.ReadInt32();
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        Duration = buffer.ReadInt32();
     }
 }

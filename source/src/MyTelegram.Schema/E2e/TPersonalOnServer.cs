@@ -8,7 +8,7 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TPersonalOnServer : IPersonalOnServer
 {
     public uint ConstructorId => 0x3DDB7846;
-    public byte[] Signature { get; set; }
+    public ReadOnlyMemory<byte> Signature { get; set; }
     public int SignedAt { get; set; }
     public MyTelegram.Schema.E2e.IPersonal Personal { get; set; }
 
@@ -26,10 +26,10 @@ public sealed class TPersonalOnServer : IPersonalOnServer
         writer.Write(Personal);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Signature = reader.ReadInt512();
-        SignedAt = reader.ReadInt32();
-        Personal = reader.Read<MyTelegram.Schema.E2e.IPersonal>();
+        Signature = buffer.ReadInt512();
+        SignedAt = buffer.ReadInt32();
+        Personal = buffer.Read<MyTelegram.Schema.E2e.IPersonal>();
     }
 }

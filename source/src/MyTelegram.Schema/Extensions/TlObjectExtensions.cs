@@ -6,6 +6,45 @@ namespace MyTelegram.Schema.Extensions;
 
 public static class TlObjectExtensions
 {
+    public static int SetBit(this int value, int bitIndex)
+    {
+        if (bitIndex >= 32)
+        {
+            throw new ArgumentOutOfRangeException(nameof(bitIndex));
+        }
+
+        return value | (1 << bitIndex);
+    }
+
+    public static bool IsBitSet(this int value, int bitIndex)
+    {
+        return ((value >> bitIndex) & 1) == 1;
+    }
+
+    public static ILayeredDocument ToNewDocument(this ILayeredDocument document)
+    {
+        switch (document)
+        {
+            case TDocument d:
+                return new TDocument
+                {
+                    AccessHash = d.AccessHash,
+                    Attributes = d.Attributes,
+                    Date = d.Date,
+                    DcId = d.DcId,
+                    FileReference = d.FileReference,
+                    Id = d.Id,
+                    Flags = d.Flags,
+                    MimeType = d.MimeType,
+                    Size = d.Size,
+                    Thumbs = d.Thumbs,
+                    VideoThumbs = d.VideoThumbs,
+                };
+        }
+
+        return document;
+    }
+
     public static long? ToPeerId(this IPeer? peer)
     {
         long? ownerId = null;
@@ -162,8 +201,9 @@ public static class TlObjectExtensions
     {
         if (readOnlyMemory?.Length > 0)
         {
-            var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(readOnlyMemory.Value));
-            return reader.Read<TObject>();
+            //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(readOnlyMemory.Value));
+            //return reader.Read<TObject>();
+            return readOnlyMemory.Value.ToTObject<TObject>();
         }
 
         return default;
@@ -173,8 +213,9 @@ public static class TlObjectExtensions
     {
         if (readOnlyMemory.Length > 0)
         {
-            var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(readOnlyMemory));
-            return reader.Read<TObject>();
+            //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(readOnlyMemory));
+            //return reader.Read<TObject>();
+            return readOnlyMemory.Read<TObject>();
         }
 
         return default;

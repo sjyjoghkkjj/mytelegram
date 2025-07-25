@@ -10,13 +10,13 @@ namespace MyTelegram.Schema.Payments;
 public sealed class RequestUpgradeStarGift : IRequest<MyTelegram.Schema.IUpdates>
 {
     public uint ConstructorId => 0xaed6e4f5;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool KeepOriginalDetails { get; set; }
     public MyTelegram.Schema.IInputSavedStarGift Stargift { get; set; }
 
     public void ComputeFlag()
     {
-        if (KeepOriginalDetails) { Flags[0] = true; }
+        if (KeepOriginalDetails) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -28,10 +28,10 @@ public sealed class RequestUpgradeStarGift : IRequest<MyTelegram.Schema.IUpdates
         writer.Write(Stargift);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { KeepOriginalDetails = true; }
-        Stargift = reader.Read<MyTelegram.Schema.IInputSavedStarGift>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { KeepOriginalDetails = true; }
+        Stargift = buffer.Read<MyTelegram.Schema.IInputSavedStarGift>();
     }
 }

@@ -24,8 +24,8 @@ public sealed class TStarGiftUpgradePreview : IStarGiftUpgradePreview
         writer.Write(SampleAttributes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        SampleAttributes = reader.Read<TVector<MyTelegram.Schema.IStarGiftAttribute>>();
+        SampleAttributes = buffer.Read<TVector<MyTelegram.Schema.IStarGiftAttribute>>();
     }
 }

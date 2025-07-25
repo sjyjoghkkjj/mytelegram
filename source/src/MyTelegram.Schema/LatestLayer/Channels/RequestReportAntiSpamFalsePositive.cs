@@ -38,9 +38,9 @@ public sealed class RequestReportAntiSpamFalsePositive : IRequest<IBool>
         writer.Write(MsgId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        MsgId = reader.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        MsgId = buffer.ReadInt32();
     }
 }

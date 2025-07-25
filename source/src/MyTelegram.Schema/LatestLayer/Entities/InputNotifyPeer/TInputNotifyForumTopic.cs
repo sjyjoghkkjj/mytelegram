@@ -35,9 +35,9 @@ public sealed class TInputNotifyForumTopic : IInputNotifyPeer
         writer.Write(TopMsgId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        TopMsgId = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        TopMsgId = buffer.ReadInt32();
     }
 }

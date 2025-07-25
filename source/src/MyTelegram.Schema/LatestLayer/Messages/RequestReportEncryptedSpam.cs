@@ -32,8 +32,8 @@ public sealed class RequestReportEncryptedSpam : IRequest<IBool>
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputEncryptedChat>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputEncryptedChat>();
     }
 }

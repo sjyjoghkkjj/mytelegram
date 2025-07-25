@@ -14,7 +14,7 @@ public sealed class TChannelMessages : IMessages
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, returned results may be inexact
@@ -59,8 +59,8 @@ public sealed class TChannelMessages : IMessages
 
     public void ComputeFlag()
     {
-        if (Inexact) { Flags[1] = true; }
-        if (/*OffsetIdOffset != 0 && */OffsetIdOffset.HasValue) { Flags[2] = true; }
+        if (Inexact) { Flags = Flags.SetBit(1); }
+        if (/*OffsetIdOffset != 0 && */OffsetIdOffset.HasValue) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -71,23 +71,23 @@ public sealed class TChannelMessages : IMessages
         writer.Write(Flags);
         writer.Write(Pts);
         writer.Write(Count);
-        if (Flags[2]) { writer.Write(OffsetIdOffset.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(OffsetIdOffset.Value); }
         writer.Write(Messages);
         writer.Write(Topics);
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Inexact = true; }
-        Pts = reader.ReadInt32();
-        Count = reader.ReadInt32();
-        if (Flags[2]) { OffsetIdOffset = reader.ReadInt32(); }
-        Messages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        Topics = reader.Read<TVector<MyTelegram.Schema.IForumTopic>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Inexact = true; }
+        Pts = buffer.ReadInt32();
+        Count = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { OffsetIdOffset = buffer.ReadInt32(); }
+        Messages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        Topics = buffer.Read<TVector<MyTelegram.Schema.IForumTopic>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

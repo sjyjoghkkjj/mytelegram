@@ -28,8 +28,8 @@ public sealed class RequestGetChatThemes : IRequest<MyTelegram.Schema.Account.IT
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
+        Hash = buffer.ReadInt64();
     }
 }

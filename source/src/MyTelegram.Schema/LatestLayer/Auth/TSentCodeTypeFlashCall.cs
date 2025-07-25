@@ -28,8 +28,8 @@ public sealed class TSentCodeTypeFlashCall : ISentCodeType
         writer.Write(Pattern);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Pattern = reader.ReadString();
+        Pattern = buffer.ReadString();
     }
 }

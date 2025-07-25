@@ -44,10 +44,10 @@ public sealed class RequestGetAuthorizationForm : IRequest<MyTelegram.Schema.Acc
         writer.Write(PublicKey);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        BotId = reader.ReadInt64();
-        Scope = reader.ReadString();
-        PublicKey = reader.ReadString();
+        BotId = buffer.ReadInt64();
+        Scope = buffer.ReadString();
+        PublicKey = buffer.ReadString();
     }
 }

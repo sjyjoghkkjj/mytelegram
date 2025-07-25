@@ -18,7 +18,7 @@ public sealed class RequestRequestAppWebView : IRequest<MyTelegram.Schema.IWebVi
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Set this flag if the bot is asking permission to send messages to the user as specified in the <a href="https://corefork.telegram.org/api/links#direct-mini-app-links">direct Mini App deep link</a> docs, and the user agreed.
@@ -68,11 +68,11 @@ public sealed class RequestRequestAppWebView : IRequest<MyTelegram.Schema.IWebVi
 
     public void ComputeFlag()
     {
-        if (WriteAllowed) { Flags[0] = true; }
-        if (Compact) { Flags[7] = true; }
-        if (Fullscreen) { Flags[8] = true; }
-        if (StartParam != null) { Flags[1] = true; }
-        if (ThemeParams != null) { Flags[2] = true; }
+        if (WriteAllowed) { Flags = Flags.SetBit(0); }
+        if (Compact) { Flags = Flags.SetBit(7); }
+        if (Fullscreen) { Flags = Flags.SetBit(8); }
+        if (StartParam != null) { Flags = Flags.SetBit(1); }
+        if (ThemeParams != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -83,21 +83,21 @@ public sealed class RequestRequestAppWebView : IRequest<MyTelegram.Schema.IWebVi
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(App);
-        if (Flags[1]) { writer.Write(StartParam); }
-        if (Flags[2]) { writer.Write(ThemeParams); }
+        if (Flags.IsBitSet(1)) { writer.Write(StartParam); }
+        if (Flags.IsBitSet(2)) { writer.Write(ThemeParams); }
         writer.Write(Platform);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { WriteAllowed = true; }
-        if (Flags[7]) { Compact = true; }
-        if (Flags[8]) { Fullscreen = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        App = reader.Read<MyTelegram.Schema.IInputBotApp>();
-        if (Flags[1]) { StartParam = reader.ReadString(); }
-        if (Flags[2]) { ThemeParams = reader.Read<MyTelegram.Schema.IDataJSON>(); }
-        Platform = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { WriteAllowed = true; }
+        if (Flags.IsBitSet(7)) { Compact = true; }
+        if (Flags.IsBitSet(8)) { Fullscreen = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        App = buffer.Read<MyTelegram.Schema.IInputBotApp>();
+        if (Flags.IsBitSet(1)) { StartParam = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { ThemeParams = buffer.Read<MyTelegram.Schema.IDataJSON>(); }
+        Platform = buffer.ReadString();
     }
 }

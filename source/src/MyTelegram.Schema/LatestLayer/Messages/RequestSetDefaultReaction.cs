@@ -32,8 +32,8 @@ public sealed class RequestSetDefaultReaction : IRequest<IBool>
         writer.Write(Reaction);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Reaction = reader.Read<MyTelegram.Schema.IReaction>();
+        Reaction = buffer.Read<MyTelegram.Schema.IReaction>();
     }
 }

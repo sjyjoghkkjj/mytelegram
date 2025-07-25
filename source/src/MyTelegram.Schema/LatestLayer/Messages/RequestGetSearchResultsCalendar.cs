@@ -19,7 +19,7 @@ public sealed class RequestGetSearchResultsCalendar : IRequest<MyTelegram.Schema
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Peer where to search
@@ -51,7 +51,7 @@ public sealed class RequestGetSearchResultsCalendar : IRequest<MyTelegram.Schema
 
     public void ComputeFlag()
     {
-        if (SavedPeerId != null) { Flags[2] = true; }
+        if (SavedPeerId != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -61,19 +61,19 @@ public sealed class RequestGetSearchResultsCalendar : IRequest<MyTelegram.Schema
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[2]) { writer.Write(SavedPeerId); }
+        if (Flags.IsBitSet(2)) { writer.Write(SavedPeerId); }
         writer.Write(Filter);
         writer.Write(OffsetId);
         writer.Write(OffsetDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[2]) { SavedPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        Filter = reader.Read<MyTelegram.Schema.IMessagesFilter>();
-        OffsetId = reader.ReadInt32();
-        OffsetDate = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(2)) { SavedPeerId = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        Filter = buffer.Read<MyTelegram.Schema.IMessagesFilter>();
+        OffsetId = buffer.ReadInt32();
+        OffsetDate = buffer.ReadInt32();
     }
 }

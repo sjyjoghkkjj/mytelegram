@@ -52,10 +52,10 @@ public sealed class RequestSendVote : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Options);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.ReadInt32();
-        Options = reader.Read<TVector<byte[]>>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.ReadInt32();
+        Options = buffer.Read<TVector<byte[]>>();
     }
 }

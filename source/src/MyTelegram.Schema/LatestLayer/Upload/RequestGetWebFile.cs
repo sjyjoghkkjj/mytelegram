@@ -45,10 +45,10 @@ public sealed class RequestGetWebFile : IRequest<MyTelegram.Schema.Upload.IWebFi
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Location = reader.Read<MyTelegram.Schema.IInputWebFileLocation>();
-        Offset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Location = buffer.Read<MyTelegram.Schema.IInputWebFileLocation>();
+        Offset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

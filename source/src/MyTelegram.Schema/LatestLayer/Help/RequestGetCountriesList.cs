@@ -34,9 +34,9 @@ public sealed class RequestGetCountriesList : IRequest<MyTelegram.Schema.Help.IC
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangCode = reader.ReadString();
-        Hash = reader.ReadInt32();
+        LangCode = buffer.ReadString();
+        Hash = buffer.ReadInt32();
     }
 }

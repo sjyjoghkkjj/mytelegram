@@ -52,12 +52,12 @@ public sealed class TUpdateChatParticipantAdd : IUpdate
         writer.Write(Version);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt64();
-        UserId = reader.ReadInt64();
-        InviterId = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        Version = reader.ReadInt32();
+        ChatId = buffer.ReadInt64();
+        UserId = buffer.ReadInt64();
+        InviterId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        Version = buffer.ReadInt32();
     }
 }

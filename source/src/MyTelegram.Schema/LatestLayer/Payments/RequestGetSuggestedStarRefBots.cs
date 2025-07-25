@@ -13,7 +13,7 @@ public sealed class RequestGetSuggestedStarRefBots : IRequest<MyTelegram.Schema.
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -45,8 +45,8 @@ public sealed class RequestGetSuggestedStarRefBots : IRequest<MyTelegram.Schema.
 
     public void ComputeFlag()
     {
-        if (OrderByRevenue) { Flags[0] = true; }
-        if (OrderByDate) { Flags[1] = true; }
+        if (OrderByRevenue) { Flags = Flags.SetBit(0); }
+        if (OrderByDate) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -60,13 +60,13 @@ public sealed class RequestGetSuggestedStarRefBots : IRequest<MyTelegram.Schema.
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { OrderByRevenue = true; }
-        if (Flags[1]) { OrderByDate = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { OrderByRevenue = true; }
+        if (Flags.IsBitSet(1)) { OrderByDate = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

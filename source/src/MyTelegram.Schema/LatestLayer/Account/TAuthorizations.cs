@@ -34,9 +34,9 @@ public sealed class TAuthorizations : IAuthorizations
         writer.Write(Authorizations);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        AuthorizationTtlDays = reader.ReadInt32();
-        Authorizations = reader.Read<TVector<MyTelegram.Schema.IAuthorization>>();
+        AuthorizationTtlDays = buffer.ReadInt32();
+        Authorizations = buffer.Read<TVector<MyTelegram.Schema.IAuthorization>>();
     }
 }

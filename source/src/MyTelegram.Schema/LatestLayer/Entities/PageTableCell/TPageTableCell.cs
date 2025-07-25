@@ -14,7 +14,7 @@ public sealed class TPageTableCell : IPageTableCell
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Is this element part of the column header
@@ -64,14 +64,14 @@ public sealed class TPageTableCell : IPageTableCell
 
     public void ComputeFlag()
     {
-        if (Header) { Flags[0] = true; }
-        if (AlignCenter) { Flags[3] = true; }
-        if (AlignRight) { Flags[4] = true; }
-        if (ValignMiddle) { Flags[5] = true; }
-        if (ValignBottom) { Flags[6] = true; }
-        if (Text != null) { Flags[7] = true; }
-        if (/*Colspan != 0 && */Colspan.HasValue) { Flags[1] = true; }
-        if (/*Rowspan != 0 && */Rowspan.HasValue) { Flags[2] = true; }
+        if (Header) { Flags = Flags.SetBit(0); }
+        if (AlignCenter) { Flags = Flags.SetBit(3); }
+        if (AlignRight) { Flags = Flags.SetBit(4); }
+        if (ValignMiddle) { Flags = Flags.SetBit(5); }
+        if (ValignBottom) { Flags = Flags.SetBit(6); }
+        if (Text != null) { Flags = Flags.SetBit(7); }
+        if (/*Colspan != 0 && */Colspan.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*Rowspan != 0 && */Rowspan.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -79,21 +79,21 @@ public sealed class TPageTableCell : IPageTableCell
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[7]) { writer.Write(Text); }
-        if (Flags[1]) { writer.Write(Colspan.Value); }
-        if (Flags[2]) { writer.Write(Rowspan.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(Text); }
+        if (Flags.IsBitSet(1)) { writer.Write(Colspan.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(Rowspan.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Header = true; }
-        if (Flags[3]) { AlignCenter = true; }
-        if (Flags[4]) { AlignRight = true; }
-        if (Flags[5]) { ValignMiddle = true; }
-        if (Flags[6]) { ValignBottom = true; }
-        if (Flags[7]) { Text = reader.Read<MyTelegram.Schema.IRichText>(); }
-        if (Flags[1]) { Colspan = reader.ReadInt32(); }
-        if (Flags[2]) { Rowspan = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Header = true; }
+        if (Flags.IsBitSet(3)) { AlignCenter = true; }
+        if (Flags.IsBitSet(4)) { AlignRight = true; }
+        if (Flags.IsBitSet(5)) { ValignMiddle = true; }
+        if (Flags.IsBitSet(6)) { ValignBottom = true; }
+        if (Flags.IsBitSet(7)) { Text = buffer.Read<MyTelegram.Schema.IRichText>(); }
+        if (Flags.IsBitSet(1)) { Colspan = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { Rowspan = buffer.ReadInt32(); }
     }
 }

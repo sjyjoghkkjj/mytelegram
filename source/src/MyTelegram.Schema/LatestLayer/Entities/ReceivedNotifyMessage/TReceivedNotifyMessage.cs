@@ -34,9 +34,9 @@ public sealed class TReceivedNotifyMessage : IReceivedNotifyMessage
         writer.Write(Flags);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt32();
-        Flags = reader.ReadInt32();
+        Id = buffer.ReadInt32();
+        Flags = buffer.ReadInt32();
     }
 }

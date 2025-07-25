@@ -27,7 +27,6 @@ public class AckCacheService(IScheduleAppService scheduleAppService) : IAckCache
     public void AddRpcMsgIdToCache(long msgId,
             long reqMsgId)
     {
-        //Console.WriteLine($"Add Rpc msgId to cache,msgId:{msgId} reqMsgId:{reqMsgId}");
         _msgIdToReqMsgIdDict.TryAdd(msgId, reqMsgId);
         scheduleAppService.Execute(() => _msgIdToReqMsgIdDict.TryRemove(msgId, out _), TimeSpan.FromSeconds(50));
     }

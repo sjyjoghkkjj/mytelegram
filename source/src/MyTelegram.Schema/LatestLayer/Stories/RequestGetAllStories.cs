@@ -14,7 +14,7 @@ public sealed class RequestGetAllStories : IRequest<MyTelegram.Schema.Stories.IA
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If <code>next</code> and <code>state</code> are both set, uses the passed <code>state</code> to paginate to the next results; if neither <code>state</code> nor <code>next</code> are set, fetches the initial page; if <code>state</code> is set and <code>next</code> is not set, check for changes in the active/hidden peerset, see <a href="https://corefork.telegram.org/api/stories#watching-stories">here »</a> for more info on the full flow.
@@ -35,9 +35,9 @@ public sealed class RequestGetAllStories : IRequest<MyTelegram.Schema.Stories.IA
 
     public void ComputeFlag()
     {
-        if (Next) { Flags[1] = true; }
-        if (Hidden) { Flags[2] = true; }
-        if (State != null) { Flags[0] = true; }
+        if (Next) { Flags = Flags.SetBit(1); }
+        if (Hidden) { Flags = Flags.SetBit(2); }
+        if (State != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -45,14 +45,14 @@ public sealed class RequestGetAllStories : IRequest<MyTelegram.Schema.Stories.IA
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(State); }
+        if (Flags.IsBitSet(0)) { writer.Write(State); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Next = true; }
-        if (Flags[2]) { Hidden = true; }
-        if (Flags[0]) { State = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Next = true; }
+        if (Flags.IsBitSet(2)) { Hidden = true; }
+        if (Flags.IsBitSet(0)) { State = buffer.ReadString(); }
     }
 }

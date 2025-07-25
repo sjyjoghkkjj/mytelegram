@@ -19,7 +19,7 @@ public sealed class RequestDiscardCall : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a video call
@@ -51,7 +51,7 @@ public sealed class RequestDiscardCall : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (Video) { Flags[0] = true; }
+        if (Video) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -66,13 +66,13 @@ public sealed class RequestDiscardCall : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(ConnectionId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Video = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPhoneCall>();
-        Duration = reader.ReadInt32();
-        Reason = reader.Read<MyTelegram.Schema.IPhoneCallDiscardReason>();
-        ConnectionId = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Video = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPhoneCall>();
+        Duration = buffer.ReadInt32();
+        Reason = buffer.Read<MyTelegram.Schema.IPhoneCallDiscardReason>();
+        ConnectionId = buffer.ReadInt64();
     }
 }

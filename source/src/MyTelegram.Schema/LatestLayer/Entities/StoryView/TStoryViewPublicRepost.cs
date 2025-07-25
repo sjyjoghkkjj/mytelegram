@@ -14,7 +14,7 @@ public sealed class TStoryViewPublicRepost : IStoryView
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether we have <a href="https://corefork.telegram.org/api/block">completely blocked</a> this user, including from viewing more of our stories.
@@ -42,8 +42,8 @@ public sealed class TStoryViewPublicRepost : IStoryView
 
     public void ComputeFlag()
     {
-        if (Blocked) { Flags[0] = true; }
-        if (BlockedMyStoriesFrom) { Flags[1] = true; }
+        if (Blocked) { Flags = Flags.SetBit(0); }
+        if (BlockedMyStoriesFrom) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -56,12 +56,12 @@ public sealed class TStoryViewPublicRepost : IStoryView
         writer.Write(Story);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Blocked = true; }
-        if (Flags[1]) { BlockedMyStoriesFrom = true; }
-        PeerId = reader.Read<MyTelegram.Schema.IPeer>();
-        Story = reader.Read<MyTelegram.Schema.IStoryItem>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Blocked = true; }
+        if (Flags.IsBitSet(1)) { BlockedMyStoriesFrom = true; }
+        PeerId = buffer.Read<MyTelegram.Schema.IPeer>();
+        Story = buffer.Read<MyTelegram.Schema.IStoryItem>();
     }
 }

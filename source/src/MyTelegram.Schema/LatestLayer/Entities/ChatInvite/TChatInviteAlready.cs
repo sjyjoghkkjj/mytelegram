@@ -29,8 +29,8 @@ public sealed class TChatInviteAlready : IChatInvite
         writer.Write(Chat);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Chat = reader.Read<MyTelegram.Schema.IChat>();
+        Chat = buffer.Read<MyTelegram.Schema.IChat>();
     }
 }

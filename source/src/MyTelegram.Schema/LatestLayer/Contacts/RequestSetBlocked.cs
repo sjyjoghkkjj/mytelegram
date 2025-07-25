@@ -14,7 +14,7 @@ public sealed class RequestSetBlocked : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to edit the story blocklist; if not set, will edit the main blocklist. See <a href="https://corefork.telegram.org/api/block">here »</a> for differences between the two.
@@ -34,7 +34,7 @@ public sealed class RequestSetBlocked : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (MyStoriesFrom) { Flags[0] = true; }
+        if (MyStoriesFrom) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class RequestSetBlocked : IRequest<IBool>
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { MyStoriesFrom = true; }
-        Id = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { MyStoriesFrom = true; }
+        Id = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Limit = buffer.ReadInt32();
     }
 }

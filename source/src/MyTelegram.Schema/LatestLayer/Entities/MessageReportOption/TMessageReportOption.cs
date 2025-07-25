@@ -19,7 +19,7 @@ public sealed class TMessageReportOption : IMessageReportOption
     ///<summary>
     /// Option identifier: if the user selects this option, re-invoke <a href="https://corefork.telegram.org/method/messages.report">messages.report</a>, passing this option to <code>option</code>
     ///</summary>
-    public byte[] Option { get; set; }
+    public ReadOnlyMemory<byte> Option { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,9 +34,9 @@ public sealed class TMessageReportOption : IMessageReportOption
         writer.Write(Option);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        Option = reader.ReadBytes();
+        Text = buffer.ReadString();
+        Option = buffer.ReadBytes();
     }
 }

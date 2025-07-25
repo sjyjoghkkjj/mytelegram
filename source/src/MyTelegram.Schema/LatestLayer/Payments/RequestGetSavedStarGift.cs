@@ -24,8 +24,8 @@ public sealed class RequestGetSavedStarGift : IRequest<MyTelegram.Schema.Payment
         writer.Write(Stargift);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stargift = reader.Read<TVector<MyTelegram.Schema.IInputSavedStarGift>>();
+        Stargift = buffer.Read<TVector<MyTelegram.Schema.IInputSavedStarGift>>();
     }
 }

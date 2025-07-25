@@ -12,7 +12,7 @@ public interface IChannelAdminLogEventsFilter : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/constructor/channelAdminLogEventActionParticipantJoin">Join events</a>, including <a href="https://corefork.telegram.org/constructor/channelAdminLogEventActionParticipantJoinByInvite">joins using invite links</a> and <a href="https://corefork.telegram.org/constructor/channelAdminLogEventActionParticipantJoinByRequest">join requests</a>.

@@ -34,9 +34,9 @@ public sealed class TKeyboardButtonUserProfile : IKeyboardButton
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        UserId = reader.ReadInt64();
+        Text = buffer.ReadString();
+        UserId = buffer.ReadInt64();
     }
 }

@@ -52,12 +52,12 @@ public sealed class TWebDocument : IWebDocument
         writer.Write(Attributes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        AccessHash = reader.ReadInt64();
-        Size = reader.ReadInt32();
-        MimeType = reader.ReadString();
-        Attributes = reader.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
+        Url = buffer.ReadString();
+        AccessHash = buffer.ReadInt64();
+        Size = buffer.ReadInt32();
+        MimeType = buffer.ReadString();
+        Attributes = buffer.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
     }
 }

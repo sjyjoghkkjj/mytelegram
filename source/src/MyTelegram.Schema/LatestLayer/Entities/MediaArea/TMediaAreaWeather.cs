@@ -47,11 +47,11 @@ public sealed class TMediaAreaWeather : IMediaArea
         writer.Write(Color);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Coordinates = reader.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
-        Emoji = reader.ReadString();
-        TemperatureC = reader.ReadDouble();
-        Color = reader.ReadInt32();
+        Coordinates = buffer.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
+        Emoji = buffer.ReadString();
+        TemperatureC = buffer.ReadDouble();
+        Color = buffer.ReadInt32();
     }
 }

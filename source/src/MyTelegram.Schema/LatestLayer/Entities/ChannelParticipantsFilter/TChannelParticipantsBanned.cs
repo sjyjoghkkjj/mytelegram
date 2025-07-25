@@ -28,8 +28,8 @@ public sealed class TChannelParticipantsBanned : IChannelParticipantsFilter
         writer.Write(Q);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Q = reader.ReadString();
+        Q = buffer.ReadString();
     }
 }

@@ -21,7 +21,7 @@ public sealed class RequestCreateForumTopic : IRequest<MyTelegram.Schema.IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/forum">The forum</a>
@@ -57,9 +57,9 @@ public sealed class RequestCreateForumTopic : IRequest<MyTelegram.Schema.IUpdate
 
     public void ComputeFlag()
     {
-        if (/*IconColor != 0 && */IconColor.HasValue) { Flags[0] = true; }
-        if (/*IconEmojiId != 0 &&*/ IconEmojiId.HasValue) { Flags[3] = true; }
-        if (SendAs != null) { Flags[2] = true; }
+        if (/*IconColor != 0 && */IconColor.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*IconEmojiId != 0 &&*/ IconEmojiId.HasValue) { Flags = Flags.SetBit(3); }
+        if (SendAs != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -69,20 +69,20 @@ public sealed class RequestCreateForumTopic : IRequest<MyTelegram.Schema.IUpdate
         writer.Write(Flags);
         writer.Write(Channel);
         writer.Write(Title);
-        if (Flags[0]) { writer.Write(IconColor.Value); }
-        if (Flags[3]) { writer.Write(IconEmojiId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(IconColor.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(IconEmojiId.Value); }
         writer.Write(RandomId);
-        if (Flags[2]) { writer.Write(SendAs); }
+        if (Flags.IsBitSet(2)) { writer.Write(SendAs); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Title = reader.ReadString();
-        if (Flags[0]) { IconColor = reader.ReadInt32(); }
-        if (Flags[3]) { IconEmojiId = reader.ReadInt64(); }
-        RandomId = reader.ReadInt64();
-        if (Flags[2]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
+        Flags = buffer.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Title = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { IconColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { IconEmojiId = buffer.ReadInt64(); }
+        RandomId = buffer.ReadInt64();
+        if (Flags.IsBitSet(2)) { SendAs = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

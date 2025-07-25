@@ -21,8 +21,6 @@ public class MessageIdGenerator : IMessageIdGenerator, ISingletonDependency
 
         _lastMessageId = messageId;
 
-        // Console.WriteLine($"New server message id:{messageId}");
-
         return Task.FromResult(messageId);
     }
 }

@@ -22,8 +22,8 @@ public sealed class TChangeSetGroupState : IChange
         writer.Write(GroupState);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        GroupState = reader.Read<MyTelegram.Schema.E2e.IGroupState>();
+        GroupState = buffer.Read<MyTelegram.Schema.E2e.IGroupState>();
     }
 }

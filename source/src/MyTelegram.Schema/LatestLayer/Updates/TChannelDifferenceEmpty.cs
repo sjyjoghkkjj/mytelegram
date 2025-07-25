@@ -14,7 +14,7 @@ public sealed class TChannelDifferenceEmpty : IChannelDifference,IEmpty
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether there are more updates that must be fetched (always false)
@@ -34,8 +34,8 @@ public sealed class TChannelDifferenceEmpty : IChannelDifference,IEmpty
 
     public void ComputeFlag()
     {
-        if (Final) { Flags[0] = true; }
-        if (/*Timeout != 0 && */Timeout.HasValue) { Flags[1] = true; }
+        if (Final) { Flags = Flags.SetBit(0); }
+        if (/*Timeout != 0 && */Timeout.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -44,14 +44,14 @@ public sealed class TChannelDifferenceEmpty : IChannelDifference,IEmpty
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Pts);
-        if (Flags[1]) { writer.Write(Timeout.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Timeout.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Final = true; }
-        Pts = reader.ReadInt32();
-        if (Flags[1]) { Timeout = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Final = true; }
+        Pts = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Timeout = buffer.ReadInt32(); }
     }
 }

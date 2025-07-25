@@ -14,7 +14,7 @@ public sealed class TSentCode : ISentCode
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Phone code type
@@ -40,8 +40,8 @@ public sealed class TSentCode : ISentCode
 
     public void ComputeFlag()
     {
-        if (NextType != null) { Flags[1] = true; }
-        if (/*Timeout != 0 && */Timeout.HasValue) { Flags[2] = true; }
+        if (NextType != null) { Flags = Flags.SetBit(1); }
+        if (/*Timeout != 0 && */Timeout.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -51,16 +51,16 @@ public sealed class TSentCode : ISentCode
         writer.Write(Flags);
         writer.Write(Type);
         writer.Write(PhoneCodeHash);
-        if (Flags[1]) { writer.Write(NextType); }
-        if (Flags[2]) { writer.Write(Timeout.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(NextType); }
+        if (Flags.IsBitSet(2)) { writer.Write(Timeout.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Type = reader.Read<MyTelegram.Schema.Auth.ISentCodeType>();
-        PhoneCodeHash = reader.ReadString();
-        if (Flags[1]) { NextType = reader.Read<MyTelegram.Schema.Auth.ICodeType>(); }
-        if (Flags[2]) { Timeout = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Type = buffer.Read<MyTelegram.Schema.Auth.ISentCodeType>();
+        PhoneCodeHash = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { NextType = buffer.Read<MyTelegram.Schema.Auth.ICodeType>(); }
+        if (Flags.IsBitSet(2)) { Timeout = buffer.ReadInt32(); }
     }
 }

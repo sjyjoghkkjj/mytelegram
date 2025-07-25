@@ -33,9 +33,9 @@ public sealed class TBotPreparedInlineMessage : IBotPreparedInlineMessage
         writer.Write(ExpireDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadString();
-        ExpireDate = reader.ReadInt32();
+        Id = buffer.ReadString();
+        ExpireDate = buffer.ReadInt32();
     }
 }

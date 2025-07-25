@@ -8,8 +8,8 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TSponsoredPeer), nameof(TSponsoredPeer))]
 public interface ISponsoredPeer : IObject
 {
-    BitArray Flags { get; set; }
-    byte[] RandomId { get; set; }
+    int Flags { get; set; }
+    ReadOnlyMemory<byte> RandomId { get; set; }
     MyTelegram.Schema.IPeer Peer { get; set; }
     string? SponsorInfo { get; set; }
     string? AdditionalInfo { get; set; }

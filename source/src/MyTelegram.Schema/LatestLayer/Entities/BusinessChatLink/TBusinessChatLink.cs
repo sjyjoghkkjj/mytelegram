@@ -14,7 +14,7 @@ public sealed class TBusinessChatLink : IBusinessChatLink
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/links#business-chat-links">Business chat deep link</a>.
@@ -43,8 +43,8 @@ public sealed class TBusinessChatLink : IBusinessChatLink
 
     public void ComputeFlag()
     {
-        if (Entities?.Count > 0) { Flags[0] = true; }
-        if (Title != null) { Flags[1] = true; }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(0); }
+        if (Title != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -55,18 +55,18 @@ public sealed class TBusinessChatLink : IBusinessChatLink
         writer.Write(Flags);
         writer.Write(Link);
         writer.Write(Message);
-        if (Flags[0]) { writer.Write(Entities); }
-        if (Flags[1]) { writer.Write(Title); }
+        if (Flags.IsBitSet(0)) { writer.Write(Entities); }
+        if (Flags.IsBitSet(1)) { writer.Write(Title); }
         writer.Write(Views);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Link = reader.ReadString();
-        Message = reader.ReadString();
-        if (Flags[0]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        if (Flags[1]) { Title = reader.ReadString(); }
-        Views = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        Link = buffer.ReadString();
+        Message = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        if (Flags.IsBitSet(1)) { Title = buffer.ReadString(); }
+        Views = buffer.ReadInt32();
     }
 }

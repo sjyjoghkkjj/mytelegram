@@ -40,9 +40,9 @@ public sealed class RequestGetForumTopicsByID : IRequest<MyTelegram.Schema.Messa
         writer.Write(Topics);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Topics = reader.Read<TVector<int>>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Topics = buffer.Read<TVector<int>>();
     }
 }

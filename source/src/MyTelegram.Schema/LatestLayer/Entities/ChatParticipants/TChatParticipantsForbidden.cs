@@ -14,7 +14,7 @@ public sealed class TChatParticipantsForbidden : IChatParticipants
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Group ID
@@ -29,7 +29,7 @@ public sealed class TChatParticipantsForbidden : IChatParticipants
 
     public void ComputeFlag()
     {
-        if (SelfParticipant != null) { Flags[0] = true; }
+        if (SelfParticipant != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -38,13 +38,13 @@ public sealed class TChatParticipantsForbidden : IChatParticipants
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ChatId);
-        if (Flags[0]) { writer.Write(SelfParticipant); }
+        if (Flags.IsBitSet(0)) { writer.Write(SelfParticipant); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ChatId = reader.ReadInt64();
-        if (Flags[0]) { SelfParticipant = reader.Read<MyTelegram.Schema.IChatParticipant>(); }
+        Flags = buffer.ReadInt32();
+        ChatId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { SelfParticipant = buffer.Read<MyTelegram.Schema.IChatParticipant>(); }
     }
 }

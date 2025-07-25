@@ -38,9 +38,9 @@ public sealed class RequestGetLanguage : IRequest<MyTelegram.Schema.ILangPackLan
         writer.Write(LangCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangPack = reader.ReadString();
-        LangCode = reader.ReadString();
+        LangPack = buffer.ReadString();
+        LangCode = buffer.ReadString();
     }
 }

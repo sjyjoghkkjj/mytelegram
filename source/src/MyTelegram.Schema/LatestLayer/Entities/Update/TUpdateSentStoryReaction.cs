@@ -42,10 +42,10 @@ public sealed class TUpdateSentStoryReaction : IUpdate
         writer.Write(Reaction);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        StoryId = reader.ReadInt32();
-        Reaction = reader.Read<MyTelegram.Schema.IReaction>();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        StoryId = buffer.ReadInt32();
+        Reaction = buffer.Read<MyTelegram.Schema.IReaction>();
     }
 }

@@ -40,10 +40,10 @@ public sealed class TInputEncryptedFileBigUploaded : IInputEncryptedFile
         writer.Write(KeyFingerprint);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Parts = reader.ReadInt32();
-        KeyFingerprint = reader.ReadInt32();
+        Id = buffer.ReadInt64();
+        Parts = buffer.ReadInt32();
+        KeyFingerprint = buffer.ReadInt32();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TMessageActionPaymentSentMe : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is the first payment of a recurring payment we just subscribed to
@@ -41,7 +41,7 @@ public sealed class TMessageActionPaymentSentMe : IMessageAction
     ///<summary>
     /// Bot specified invoice payload
     ///</summary>
-    public byte[] Payload { get; set; }
+    public ReadOnlyMemory<byte> Payload { get; set; }
 
     ///<summary>
     /// Order info provided by the user
@@ -67,11 +67,11 @@ public sealed class TMessageActionPaymentSentMe : IMessageAction
 
     public void ComputeFlag()
     {
-        if (RecurringInit) { Flags[2] = true; }
-        if (RecurringUsed) { Flags[3] = true; }
-        if (Info != null) { Flags[0] = true; }
-        if (ShippingOptionId != null) { Flags[1] = true; }
-        if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags[4] = true; }
+        if (RecurringInit) { Flags = Flags.SetBit(2); }
+        if (RecurringUsed) { Flags = Flags.SetBit(3); }
+        if (Info != null) { Flags = Flags.SetBit(0); }
+        if (ShippingOptionId != null) { Flags = Flags.SetBit(1); }
+        if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -82,23 +82,23 @@ public sealed class TMessageActionPaymentSentMe : IMessageAction
         writer.Write(Currency);
         writer.Write(TotalAmount);
         writer.Write(Payload);
-        if (Flags[0]) { writer.Write(Info); }
-        if (Flags[1]) { writer.Write(ShippingOptionId); }
+        if (Flags.IsBitSet(0)) { writer.Write(Info); }
+        if (Flags.IsBitSet(1)) { writer.Write(ShippingOptionId); }
         writer.Write(Charge);
-        if (Flags[4]) { writer.Write(SubscriptionUntilDate.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(SubscriptionUntilDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { RecurringInit = true; }
-        if (Flags[3]) { RecurringUsed = true; }
-        Currency = reader.ReadString();
-        TotalAmount = reader.ReadInt64();
-        Payload = reader.ReadBytes();
-        if (Flags[0]) { Info = reader.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
-        if (Flags[1]) { ShippingOptionId = reader.ReadString(); }
-        Charge = reader.Read<MyTelegram.Schema.IPaymentCharge>();
-        if (Flags[4]) { SubscriptionUntilDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { RecurringInit = true; }
+        if (Flags.IsBitSet(3)) { RecurringUsed = true; }
+        Currency = buffer.ReadString();
+        TotalAmount = buffer.ReadInt64();
+        Payload = buffer.ReadBytes();
+        if (Flags.IsBitSet(0)) { Info = buffer.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
+        if (Flags.IsBitSet(1)) { ShippingOptionId = buffer.ReadString(); }
+        Charge = buffer.Read<MyTelegram.Schema.IPaymentCharge>();
+        if (Flags.IsBitSet(4)) { SubscriptionUntilDate = buffer.ReadInt32(); }
     }
 }

@@ -28,8 +28,8 @@ public sealed class TJsonArray : IJSONValue
         writer.Write(Value);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Value = reader.Read<TVector<MyTelegram.Schema.IJSONValue>>();
+        Value = buffer.Read<TVector<MyTelegram.Schema.IJSONValue>>();
     }
 }

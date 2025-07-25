@@ -43,10 +43,10 @@ public sealed class RequestReportMissingCode : IRequest<IBool>
         writer.Write(Mnc);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
-        Mnc = reader.ReadString();
+        PhoneNumber = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
+        Mnc = buffer.ReadString();
     }
 }

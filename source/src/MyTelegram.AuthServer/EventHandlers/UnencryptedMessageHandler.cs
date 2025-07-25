@@ -33,7 +33,7 @@ public class UnencryptedMessageHandler(
             }
 
             var obj = eventData.MessageData.ToTObject<IObject>();
-
+      
             var r = await handler.HandleAsync(
                 new RequestInput(
                     eventData.ConnectionId,
@@ -54,11 +54,13 @@ public class UnencryptedMessageHandler(
                 obj
             );
 
-            if (r != null)
+            if (r != null!)
             {
+                using var writer = new ArrayPoolBufferWriter<byte>();
+                r.Serialize(writer);
                 var unencryptedResponse = new UnencryptedMessageResponse(
                     eventData.AuthKeyId,
-                    r.ToBytes(),
+                    writer.WrittenMemory,
                     eventData.ConnectionId,
                     eventData.MessageId
                 );
@@ -73,6 +75,10 @@ public class UnencryptedMessageHandler(
                 eventData.MessageId,
                 ex
             );
+        }
+        finally
+        {
+            eventData.MemoryOwner?.Dispose();
         }
 
         if (logger.IsEnabled(LogLevel.Trace))

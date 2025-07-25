@@ -2,5 +2,5 @@
 
 public interface IUnencryptedMessageParser
 {
-    UnencryptedMessage Parse(ReadOnlySpan<byte> data);
+    UnencryptedMessage Parse(ReadOnlyMemory<byte> data);
 }

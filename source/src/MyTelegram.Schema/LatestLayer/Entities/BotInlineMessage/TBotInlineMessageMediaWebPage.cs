@@ -14,7 +14,7 @@ public sealed class TBotInlineMessageMediaWebPage : IBotInlineMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, any eventual webpage preview will be shown on top of the message instead of at the bottom.
@@ -69,13 +69,13 @@ public sealed class TBotInlineMessageMediaWebPage : IBotInlineMessage
 
     public void ComputeFlag()
     {
-        if (InvertMedia) { Flags[3] = true; }
-        if (ForceLargeMedia) { Flags[4] = true; }
-        if (ForceSmallMedia) { Flags[5] = true; }
-        if (Manual) { Flags[7] = true; }
-        if (Safe) { Flags[8] = true; }
-        if (Entities?.Count > 0) { Flags[1] = true; }
-        if (ReplyMarkup != null) { Flags[2] = true; }
+        if (InvertMedia) { Flags = Flags.SetBit(3); }
+        if (ForceLargeMedia) { Flags = Flags.SetBit(4); }
+        if (ForceSmallMedia) { Flags = Flags.SetBit(5); }
+        if (Manual) { Flags = Flags.SetBit(7); }
+        if (Safe) { Flags = Flags.SetBit(8); }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (ReplyMarkup != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -84,22 +84,22 @@ public sealed class TBotInlineMessageMediaWebPage : IBotInlineMessage
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Message);
-        if (Flags[1]) { writer.Write(Entities); }
+        if (Flags.IsBitSet(1)) { writer.Write(Entities); }
         writer.Write(Url);
-        if (Flags[2]) { writer.Write(ReplyMarkup); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { InvertMedia = true; }
-        if (Flags[4]) { ForceLargeMedia = true; }
-        if (Flags[5]) { ForceSmallMedia = true; }
-        if (Flags[7]) { Manual = true; }
-        if (Flags[8]) { Safe = true; }
-        Message = reader.ReadString();
-        if (Flags[1]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        Url = reader.ReadString();
-        if (Flags[2]) { ReplyMarkup = reader.Read<MyTelegram.Schema.IReplyMarkup>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { InvertMedia = true; }
+        if (Flags.IsBitSet(4)) { ForceLargeMedia = true; }
+        if (Flags.IsBitSet(5)) { ForceSmallMedia = true; }
+        if (Flags.IsBitSet(7)) { Manual = true; }
+        if (Flags.IsBitSet(8)) { Safe = true; }
+        Message = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        Url = buffer.ReadString();
+        if (Flags.IsBitSet(2)) { ReplyMarkup = buffer.Read<MyTelegram.Schema.IReplyMarkup>(); }
     }
 }

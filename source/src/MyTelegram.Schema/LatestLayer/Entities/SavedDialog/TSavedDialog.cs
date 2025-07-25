@@ -14,7 +14,7 @@ public sealed class TSavedDialog : ISavedDialog
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Is the dialog pinned
@@ -35,7 +35,7 @@ public sealed class TSavedDialog : ISavedDialog
 
     public void ComputeFlag()
     {
-        if (Pinned) { Flags[2] = true; }
+        if (Pinned) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class TSavedDialog : ISavedDialog
         writer.Write(TopMessage);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Pinned = true; }
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        TopMessage = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Pinned = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        TopMessage = buffer.ReadInt32();
     }
 }

@@ -38,9 +38,9 @@ public sealed class RequestSetBoostsToUnblockRestrictions : IRequest<MyTelegram.
         writer.Write(Boosts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Boosts = reader.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Boosts = buffer.ReadInt32();
     }
 }

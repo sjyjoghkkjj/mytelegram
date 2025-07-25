@@ -17,7 +17,7 @@ public sealed class RequestBlockFromReplies : IRequest<MyTelegram.Schema.IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to delete the specified message as well
@@ -44,9 +44,9 @@ public sealed class RequestBlockFromReplies : IRequest<MyTelegram.Schema.IUpdate
 
     public void ComputeFlag()
     {
-        if (DeleteMessage) { Flags[0] = true; }
-        if (DeleteHistory) { Flags[1] = true; }
-        if (ReportSpam) { Flags[2] = true; }
+        if (DeleteMessage) { Flags = Flags.SetBit(0); }
+        if (DeleteHistory) { Flags = Flags.SetBit(1); }
+        if (ReportSpam) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -58,12 +58,12 @@ public sealed class RequestBlockFromReplies : IRequest<MyTelegram.Schema.IUpdate
         writer.Write(MsgId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { DeleteMessage = true; }
-        if (Flags[1]) { DeleteHistory = true; }
-        if (Flags[2]) { ReportSpam = true; }
-        MsgId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { DeleteMessage = true; }
+        if (Flags.IsBitSet(1)) { DeleteHistory = true; }
+        if (Flags.IsBitSet(2)) { ReportSpam = true; }
+        MsgId = buffer.ReadInt32();
     }
 }

@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionChangeAvailableReactions : IChann
         writer.Write(NewValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevValue = reader.Read<MyTelegram.Schema.IChatReactions>();
-        NewValue = reader.Read<MyTelegram.Schema.IChatReactions>();
+        PrevValue = buffer.Read<MyTelegram.Schema.IChatReactions>();
+        NewValue = buffer.Read<MyTelegram.Schema.IChatReactions>();
     }
 }

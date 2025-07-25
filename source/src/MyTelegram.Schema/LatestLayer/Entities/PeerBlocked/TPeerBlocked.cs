@@ -35,9 +35,9 @@ public sealed class TPeerBlocked : IPeerBlocked
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PeerId = reader.Read<MyTelegram.Schema.IPeer>();
-        Date = reader.ReadInt32();
+        PeerId = buffer.Read<MyTelegram.Schema.IPeer>();
+        Date = buffer.ReadInt32();
     }
 }

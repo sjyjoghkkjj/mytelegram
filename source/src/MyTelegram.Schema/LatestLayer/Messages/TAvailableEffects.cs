@@ -40,10 +40,10 @@ public sealed class TAvailableEffects : IAvailableEffects
         writer.Write(Documents);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt32();
-        Effects = reader.Read<TVector<MyTelegram.Schema.IAvailableEffect>>();
-        Documents = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
+        Hash = buffer.ReadInt32();
+        Effects = buffer.Read<TVector<MyTelegram.Schema.IAvailableEffect>>();
+        Documents = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
     }
 }

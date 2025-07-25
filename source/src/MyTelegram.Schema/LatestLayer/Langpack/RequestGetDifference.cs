@@ -43,10 +43,10 @@ public sealed class RequestGetDifference : IRequest<MyTelegram.Schema.ILangPackD
         writer.Write(FromVersion);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangPack = reader.ReadString();
-        LangCode = reader.ReadString();
-        FromVersion = reader.ReadInt32();
+        LangPack = buffer.ReadString();
+        LangCode = buffer.ReadString();
+        FromVersion = buffer.ReadInt32();
     }
 }

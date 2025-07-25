@@ -28,7 +28,7 @@ public sealed class RequestGetFile : IRequest<MyTelegram.Schema.Upload.IFile>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Disable some checks on limit and offset values, useful for example to stream videos by keyframes
@@ -60,8 +60,8 @@ public sealed class RequestGetFile : IRequest<MyTelegram.Schema.Upload.IFile>
 
     public void ComputeFlag()
     {
-        if (Precise) { Flags[0] = true; }
-        if (CdnSupported) { Flags[1] = true; }
+        if (Precise) { Flags = Flags.SetBit(0); }
+        if (CdnSupported) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -75,13 +75,13 @@ public sealed class RequestGetFile : IRequest<MyTelegram.Schema.Upload.IFile>
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Precise = true; }
-        if (Flags[1]) { CdnSupported = true; }
-        Location = reader.Read<MyTelegram.Schema.IInputFileLocation>();
-        Offset = reader.ReadInt64();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Precise = true; }
+        if (Flags.IsBitSet(1)) { CdnSupported = true; }
+        Location = buffer.Read<MyTelegram.Schema.IInputFileLocation>();
+        Offset = buffer.ReadInt64();
+        Limit = buffer.ReadInt32();
     }
 }

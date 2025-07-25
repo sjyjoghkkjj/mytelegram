@@ -46,10 +46,10 @@ public sealed class RequestEditFactCheck : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.ReadInt32();
-        Text = reader.Read<MyTelegram.Schema.ITextWithEntities>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.ReadInt32();
+        Text = buffer.Read<MyTelegram.Schema.ITextWithEntities>();
     }
 }

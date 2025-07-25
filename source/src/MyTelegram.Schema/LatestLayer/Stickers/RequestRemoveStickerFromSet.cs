@@ -32,8 +32,8 @@ public sealed class RequestRemoveStickerFromSet : IRequest<MyTelegram.Schema.Mes
         writer.Write(Sticker);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Sticker = reader.Read<MyTelegram.Schema.IInputDocument>();
+        Sticker = buffer.Read<MyTelegram.Schema.IInputDocument>();
     }
 }

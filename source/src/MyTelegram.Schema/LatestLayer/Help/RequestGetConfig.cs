@@ -24,7 +24,7 @@ public sealed class RequestGetConfig : IRequest<MyTelegram.Schema.IConfig>
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

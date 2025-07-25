@@ -39,9 +39,9 @@ public sealed class RequestDeleteTopicHistory : IRequest<MyTelegram.Schema.Messa
         writer.Write(TopMsgId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        TopMsgId = reader.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        TopMsgId = buffer.ReadInt32();
     }
 }

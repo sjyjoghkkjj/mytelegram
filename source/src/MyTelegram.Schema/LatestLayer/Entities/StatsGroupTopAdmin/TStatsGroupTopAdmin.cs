@@ -46,11 +46,11 @@ public sealed class TStatsGroupTopAdmin : IStatsGroupTopAdmin
         writer.Write(Banned);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        Deleted = reader.ReadInt32();
-        Kicked = reader.ReadInt32();
-        Banned = reader.ReadInt32();
+        UserId = buffer.ReadInt64();
+        Deleted = buffer.ReadInt32();
+        Kicked = buffer.ReadInt32();
+        Banned = buffer.ReadInt32();
     }
 }

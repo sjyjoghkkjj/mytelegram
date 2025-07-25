@@ -27,7 +27,7 @@ public sealed class RequestGetDifference : IRequest<MyTelegram.Schema.Updates.ID
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// PTS, see <a href="https://corefork.telegram.org/api/updates">updates</a>.
@@ -53,9 +53,8 @@ public sealed class RequestGetDifference : IRequest<MyTelegram.Schema.Updates.ID
 
     public void ComputeFlag()
     {
-        //if (/*PtsLimit != 0 && */PtsLimit.HasValue) { Flags[1] = true; }
-        if (/*PtsTotalLimit != 0 && */PtsTotalLimit.HasValue) { Flags[0] = true; }
-        //if (/*QtsLimit != 0 && */QtsLimit.HasValue) { Flags[2] = true; }
+        if (/*PtsTotalLimit != 0 && */PtsTotalLimit.HasValue) { Flags = Flags.SetBit(0); }
+
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -64,21 +63,18 @@ public sealed class RequestGetDifference : IRequest<MyTelegram.Schema.Updates.ID
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Pts);
-        //if (Flags[1]) { writer.Write(PtsLimit.Value); }
-        if (Flags[0]) { writer.Write(PtsTotalLimit.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(PtsTotalLimit.Value); }
         writer.Write(Date);
         writer.Write(Qts);
         //if (Flags[2]) { writer.Write(QtsLimit.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Pts = reader.ReadInt32();
-        //if (Flags[1]) { PtsLimit = reader.ReadInt32(); }
-        if (Flags[0]) { PtsTotalLimit = reader.ReadInt32(); }
-        Date = reader.ReadInt32();
-        Qts = reader.ReadInt32();
-        //if (Flags[2]) { QtsLimit = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Pts = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { PtsTotalLimit = buffer.ReadInt32(); }
+        Date = buffer.ReadInt32();
+        Qts = buffer.ReadInt32();
     }
 }

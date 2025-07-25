@@ -35,9 +35,9 @@ public sealed class TExportedChatInvite : IExportedChatInvite
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Invite = reader.Read<MyTelegram.Schema.IExportedChatInvite>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Invite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

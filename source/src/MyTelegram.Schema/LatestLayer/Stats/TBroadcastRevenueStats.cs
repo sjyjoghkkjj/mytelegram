@@ -49,11 +49,11 @@ public sealed class TBroadcastRevenueStats : IBroadcastRevenueStats
         writer.Write(UsdRate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        TopHoursGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        RevenueGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        Balances = reader.Read<MyTelegram.Schema.IBroadcastRevenueBalances>();
-        UsdRate = reader.ReadDouble();
+        TopHoursGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        RevenueGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        Balances = buffer.Read<MyTelegram.Schema.IBroadcastRevenueBalances>();
+        UsdRate = buffer.ReadDouble();
     }
 }

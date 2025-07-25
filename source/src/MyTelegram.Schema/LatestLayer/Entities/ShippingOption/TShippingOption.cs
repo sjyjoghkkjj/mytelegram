@@ -40,10 +40,10 @@ public sealed class TShippingOption : IShippingOption
         writer.Write(Prices);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadString();
-        Title = reader.ReadString();
-        Prices = reader.Read<TVector<MyTelegram.Schema.ILabeledPrice>>();
+        Id = buffer.ReadString();
+        Title = buffer.ReadString();
+        Prices = buffer.Read<TVector<MyTelegram.Schema.ILabeledPrice>>();
     }
 }

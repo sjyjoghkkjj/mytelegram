@@ -60,13 +60,13 @@ public sealed class TPremiumPromo : IPremiumPromo
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        StatusText = reader.ReadString();
-        StatusEntities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
-        VideoSections = reader.Read<TVector<string>>();
-        Videos = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
-        PeriodOptions = reader.Read<TVector<MyTelegram.Schema.IPremiumSubscriptionOption>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        StatusText = buffer.ReadString();
+        StatusEntities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
+        VideoSections = buffer.Read<TVector<string>>();
+        Videos = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
+        PeriodOptions = buffer.Read<TVector<MyTelegram.Schema.IPremiumSubscriptionOption>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

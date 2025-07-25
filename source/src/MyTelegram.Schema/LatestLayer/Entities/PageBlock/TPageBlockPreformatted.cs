@@ -35,9 +35,9 @@ public sealed class TPageBlockPreformatted : IPageBlock
         writer.Write(Language);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.Read<MyTelegram.Schema.IRichText>();
-        Language = reader.ReadString();
+        Text = buffer.Read<MyTelegram.Schema.IRichText>();
+        Language = buffer.ReadString();
     }
 }

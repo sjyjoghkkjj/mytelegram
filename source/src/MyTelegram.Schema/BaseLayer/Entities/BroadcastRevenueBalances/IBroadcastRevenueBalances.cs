@@ -6,13 +6,12 @@ namespace MyTelegram.Schema;
 /// <a href="https://corefork.telegram.org/api/revenue">Channel ad revenue balance »</a> information.
 /// See <a href="https://corefork.telegram.org/constructor/BroadcastRevenueBalances" />
 ///</summary>
-[JsonDerivedType(typeof(TBroadcastRevenueBalances), nameof(TBroadcastRevenueBalances))]
 public interface IBroadcastRevenueBalances : IObject
 {
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// If set, the available balance can be <a href="https://corefork.telegram.org/api/revenue#withdrawing-revenue">withdrawn »</a>.

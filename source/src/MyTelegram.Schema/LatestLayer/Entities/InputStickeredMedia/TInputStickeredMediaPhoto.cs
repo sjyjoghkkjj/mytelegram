@@ -29,8 +29,8 @@ public sealed class TInputStickeredMediaPhoto : IInputStickeredMedia
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<MyTelegram.Schema.IInputPhoto>();
+        Id = buffer.Read<MyTelegram.Schema.IInputPhoto>();
     }
 }

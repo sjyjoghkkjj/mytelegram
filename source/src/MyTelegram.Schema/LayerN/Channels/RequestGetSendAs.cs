@@ -34,8 +34,8 @@ public sealed class RequestGetSendAs : IRequest<ISendAsPeers>
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<IInputPeer>();
+        Peer = buffer.Read<IInputPeer>();
     }
 }

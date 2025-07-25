@@ -14,7 +14,7 @@ public sealed class TSentCodeTypeSmsWord : ISentCodeType
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the secret word in the sent SMS (which may contain multiple words) starts with this letter.
@@ -23,7 +23,7 @@ public sealed class TSentCodeTypeSmsWord : ISentCodeType
 
     public void ComputeFlag()
     {
-        if (Beginning != null) { Flags[0] = true; }
+        if (Beginning != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -31,12 +31,12 @@ public sealed class TSentCodeTypeSmsWord : ISentCodeType
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Beginning); }
+        if (Flags.IsBitSet(0)) { writer.Write(Beginning); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Beginning = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Beginning = buffer.ReadString(); }
     }
 }

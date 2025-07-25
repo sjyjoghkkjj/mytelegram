@@ -12,7 +12,7 @@ public interface IBusinessWorkHours : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Ignored if set while invoking <a href="https://corefork.telegram.org/method/account.updateBusinessWorkHours">account.updateBusinessWorkHours</a>, only returned by the server in <a href="https://corefork.telegram.org/constructor/userFull">userFull</a>.<code>business_work_hours</code>, indicating whether the business is currently open according to the current time and the values in <code>weekly_open</code> and <code>timezone</code>.

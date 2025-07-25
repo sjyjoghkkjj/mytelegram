@@ -35,9 +35,9 @@ public sealed class TRecentMeUrlStickerSet : IRecentMeUrl
         writer.Write(Set);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        Set = reader.Read<MyTelegram.Schema.IStickerSetCovered>();
+        Url = buffer.ReadString();
+        Set = buffer.Read<MyTelegram.Schema.IStickerSetCovered>();
     }
 }

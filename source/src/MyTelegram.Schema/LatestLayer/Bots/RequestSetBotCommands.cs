@@ -49,10 +49,10 @@ public sealed class RequestSetBotCommands : IRequest<IBool>
         writer.Write(Commands);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Scope = reader.Read<MyTelegram.Schema.IBotCommandScope>();
-        LangCode = reader.ReadString();
-        Commands = reader.Read<TVector<MyTelegram.Schema.IBotCommand>>();
+        Scope = buffer.Read<MyTelegram.Schema.IBotCommandScope>();
+        LangCode = buffer.ReadString();
+        Commands = buffer.Read<TVector<MyTelegram.Schema.IBotCommand>>();
     }
 }

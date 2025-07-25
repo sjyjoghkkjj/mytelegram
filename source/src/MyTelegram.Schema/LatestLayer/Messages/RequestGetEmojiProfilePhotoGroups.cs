@@ -28,8 +28,8 @@ public sealed class RequestGetEmojiProfilePhotoGroups : IRequest<MyTelegram.Sche
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt32();
+        Hash = buffer.ReadInt32();
     }
 }

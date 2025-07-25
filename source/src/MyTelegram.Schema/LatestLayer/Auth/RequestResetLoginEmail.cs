@@ -38,9 +38,9 @@ public sealed class RequestResetLoginEmail : IRequest<MyTelegram.Schema.Auth.ISe
         writer.Write(PhoneCodeHash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
+        PhoneNumber = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
     }
 }

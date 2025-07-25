@@ -46,11 +46,11 @@ public sealed class TUserInfo : IUserInfo
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Message = reader.ReadString();
-        Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
-        Author = reader.ReadString();
-        Date = reader.ReadInt32();
+        Message = buffer.ReadString();
+        Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
+        Author = buffer.ReadString();
+        Date = buffer.ReadInt32();
     }
 }

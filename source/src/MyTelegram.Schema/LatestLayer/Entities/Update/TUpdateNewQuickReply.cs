@@ -29,8 +29,8 @@ public sealed class TUpdateNewQuickReply : IUpdate
         writer.Write(QuickReply);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        QuickReply = reader.Read<MyTelegram.Schema.IQuickReply>();
+        QuickReply = buffer.Read<MyTelegram.Schema.IQuickReply>();
     }
 }

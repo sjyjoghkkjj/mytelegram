@@ -29,8 +29,8 @@ public sealed class TChannelAdminLogEventActionDeleteTopic : IChannelAdminLogEve
         writer.Write(Topic);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Topic = reader.Read<MyTelegram.Schema.IForumTopic>();
+        Topic = buffer.Read<MyTelegram.Schema.IForumTopic>();
     }
 }

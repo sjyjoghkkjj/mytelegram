@@ -7,14 +7,14 @@ namespace MyTelegram.Schema;
 /// Represents a message <a href="https://corefork.telegram.org/api/drafts">draft</a>.
 /// See <a href="https://corefork.telegram.org/constructor/draftMessage" />
 ///</summary>
-[TlObject(0x2d65321f)]
+[TlObject(0x96eaa5eb)]
 public sealed class TDraftMessage : IDraftMessage
 {
-    public uint ConstructorId => 0x2d65321f;
+    public uint ConstructorId => 0x96eaa5eb;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether no webpage preview will be generated
@@ -59,15 +59,17 @@ public sealed class TDraftMessage : IDraftMessage
     /// A <a href="https://corefork.telegram.org/api/effects">message effect that should be played as specified here »</a>.
     ///</summary>
     public long? Effect { get; set; }
+    public MyTelegram.Schema.ISuggestedPost? SuggestedPost { get; set; }
 
     public void ComputeFlag()
     {
-        if (NoWebpage) { Flags[1] = true; }
-        if (InvertMedia) { Flags[6] = true; }
-        if (ReplyTo != null) { Flags[4] = true; }
-        if (Entities?.Count > 0) { Flags[3] = true; }
-        if (Media != null) { Flags[5] = true; }
-        if (/*Effect != 0 &&*/ Effect.HasValue) { Flags[7] = true; }
+        if (NoWebpage) { Flags = Flags.SetBit(1); }
+        if (InvertMedia) { Flags = Flags.SetBit(6); }
+        if (ReplyTo != null) { Flags = Flags.SetBit(4); }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (Media != null) { Flags = Flags.SetBit(5); }
+        if (/*Effect != 0 &&*/ Effect.HasValue) { Flags = Flags.SetBit(7); }
+        if (SuggestedPost != null) { Flags = Flags.SetBit(8); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -75,24 +77,26 @@ public sealed class TDraftMessage : IDraftMessage
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[4]) { writer.Write(ReplyTo); }
+        if (Flags.IsBitSet(4)) { writer.Write(ReplyTo); }
         writer.Write(Message);
-        if (Flags[3]) { writer.Write(Entities); }
-        if (Flags[5]) { writer.Write(Media); }
+        if (Flags.IsBitSet(3)) { writer.Write(Entities); }
+        if (Flags.IsBitSet(5)) { writer.Write(Media); }
         writer.Write(Date);
-        if (Flags[7]) { writer.Write(Effect.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(Effect.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(SuggestedPost); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { NoWebpage = true; }
-        if (Flags[6]) { InvertMedia = true; }
-        if (Flags[4]) { ReplyTo = reader.Read<MyTelegram.Schema.IInputReplyTo>(); }
-        Message = reader.ReadString();
-        if (Flags[3]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        if (Flags[5]) { Media = reader.Read<MyTelegram.Schema.IInputMedia>(); }
-        Date = reader.ReadInt32();
-        if (Flags[7]) { Effect = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { NoWebpage = true; }
+        if (Flags.IsBitSet(6)) { InvertMedia = true; }
+        if (Flags.IsBitSet(4)) { ReplyTo = buffer.Read<MyTelegram.Schema.IInputReplyTo>(); }
+        Message = buffer.ReadString();
+        if (Flags.IsBitSet(3)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        if (Flags.IsBitSet(5)) { Media = buffer.Read<MyTelegram.Schema.IInputMedia>(); }
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(7)) { Effect = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(8)) { SuggestedPost = buffer.Read<MyTelegram.Schema.ISuggestedPost>(); }
     }
 }

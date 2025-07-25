@@ -10,13 +10,13 @@ namespace MyTelegram.Schema;
 public sealed class TMessageActionPaidMessagesPrice : IMessageAction
 {
     public uint ConstructorId => 0x84b88578;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool BroadcastMessagesAllowed { get; set; }
     public long Stars { get; set; }
 
     public void ComputeFlag()
     {
-        if (BroadcastMessagesAllowed) { Flags[0] = true; }
+        if (BroadcastMessagesAllowed) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -28,10 +28,10 @@ public sealed class TMessageActionPaidMessagesPrice : IMessageAction
         writer.Write(Stars);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { BroadcastMessagesAllowed = true; }
-        Stars = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { BroadcastMessagesAllowed = true; }
+        Stars = buffer.ReadInt64();
     }
 }

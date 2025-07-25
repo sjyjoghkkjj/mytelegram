@@ -43,9 +43,9 @@ public sealed class RequestUpdateNotifySettings : IRequest<IBool>
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputNotifyPeer>();
-        Settings = reader.Read<MyTelegram.Schema.IInputPeerNotifySettings>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputNotifyPeer>();
+        Settings = buffer.Read<MyTelegram.Schema.IInputPeerNotifySettings>();
     }
 }

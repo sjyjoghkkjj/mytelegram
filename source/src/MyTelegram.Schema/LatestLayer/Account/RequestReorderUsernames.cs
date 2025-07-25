@@ -32,8 +32,8 @@ public sealed class RequestReorderUsernames : IRequest<IBool>
         writer.Write(Order);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Order = reader.Read<TVector<string>>();
+        Order = buffer.Read<TVector<string>>();
     }
 }

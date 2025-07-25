@@ -40,10 +40,10 @@ public sealed class TChatParticipants : IChatParticipants
         writer.Write(Version);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt64();
-        Participants = reader.Read<TVector<MyTelegram.Schema.IChatParticipant>>();
-        Version = reader.ReadInt32();
+        ChatId = buffer.ReadInt64();
+        Participants = buffer.Read<TVector<MyTelegram.Schema.IChatParticipant>>();
+        Version = buffer.ReadInt32();
     }
 }

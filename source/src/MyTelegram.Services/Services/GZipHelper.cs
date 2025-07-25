@@ -1,83 +1,160 @@
-﻿using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 
 namespace MyTelegram.Services.Services;
 
 public class GZipHelper : IGZipHelper, ITransientDependency
 {
-    public byte[] Decompress(byte[] data)
+    public void Compress(ReadOnlySpan<byte> source, IBufferWriter<byte> writer)
     {
-        //return UnGzip(data);
-        if (IsGzipPacked(data))
+        using var stream = new BufferWriterStream(writer);
+        using var gzip = new GZipStream(stream, CompressionLevel.Optimal, leaveOpen: true);
+        gzip.Write(source);
+    }
+
+    public void Decompress(ReadOnlyMemory<byte> source, IBufferWriter<byte> writer)
+    {
+        using var input = new ReadOnlyMemoryStream(source);
+        using var gzip = new GZipStream(input, CompressionMode.Decompress, leaveOpen: true);
+
+        var bufferSize = 8192 * 10;
+        var buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+        var span = buffer.AsSpan(0, bufferSize);
+        try
         {
-            return UnGzip(data);
+            while (true)
+            {
+                int bytesRead = gzip.Read(buffer);
+                if (bytesRead == 0) break;
+
+                var destSpan = writer.GetSpan(bytesRead);
+                span.Slice(0, bytesRead).CopyTo(destSpan);
+                writer.Advance(bytesRead);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
+    public sealed class BufferWriterStream(IBufferWriter<byte> writer) : Stream
+    {
+        private readonly IBufferWriter<byte> _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+        private Memory<byte> _currentMemory = writer.GetMemory();
+        private int _position = 0;
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
+            if ((uint)offset > (uint)buffer.Length || (uint)count > (uint)(buffer.Length - offset))
+                throw new ArgumentOutOfRangeException();
+
+            Write(buffer.AsSpan(offset, count));
         }
 
-        return Unzip(data);
-    }
-
-    public byte[] Compress(byte[] data)
-    {
-        //data.Dump("compress data");
-        var stream = new MemoryStream(data);
-        using var compressedStream = new MemoryStream();
-        GZip.Compress(stream, compressedStream, true);
-        return compressedStream.ToArray();
-        //using var compressor = new GZipStream(compressedStream, CompressionMode.Compress);
-        //compressor.Write(data, 0, data.Length);
-        //return compressedStream.ToArray();
-
-        ////using var compressedStream = new MemoryStream();
-        ////using var stream = new MemoryStream(data);
-        ////using var zipStream = new GZipStream(stream, CompressionMode.Compress);
-        ////zipStream.CopyTo(compressedStream);
-
-        ////return compressedStream.ToArray();
-    }
-
-    private static bool IsGzipPacked(byte[] data)
-    {
-        //gzip header
-        if (data[0] == 0x1f && data[1] == 0x8b && data[2] == 0x8)
+        public override void Write(ReadOnlySpan<byte> buffer)
         {
-            return true;
+            while (!buffer.IsEmpty)
+            {
+                if (_position >= _currentMemory.Length)
+                    FlushInternal();
+
+                int writable = Math.Min(_currentMemory.Length - _position, buffer.Length);
+                buffer.Slice(0, writable).CopyTo(_currentMemory.Span.Slice(_position));
+                _position += writable;
+                buffer = buffer.Slice(writable);
+            }
         }
 
-        return false;
+        public override void WriteByte(byte value)
+        {
+            if (_position >= _currentMemory.Length)
+                FlushInternal();
+
+            _currentMemory.Span[_position++] = value;
+        }
+
+        private void FlushInternal()
+        {
+            if (_position > 0)
+            {
+                _writer.Advance(_position);
+                _currentMemory = _writer.GetMemory();
+                _position = 0;
+            }
+        }
+
+        public override void Flush()
+        {
+            FlushInternal();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                FlushInternal();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Stream abstract members
+        public override bool CanRead => false;
+        public override bool CanSeek => false;
+        public override bool CanWrite => true;
+
+        public override long Length => throw new NotSupportedException();
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+            => throw new NotSupportedException();
+
+        public override long Seek(long offset, SeekOrigin origin)
+            => throw new NotSupportedException();
+
+        public override void SetLength(long value)
+            => throw new NotSupportedException();
+        #endregion
     }
-
-    private static byte[] UnGzip(byte[] data)
+    /// <summary>
+    /// Wraps a ReadOnlyMemory<byte> as a Stream for input.
+    /// </summary>
+    private sealed class ReadOnlyMemoryStream(ReadOnlyMemory<byte> span) : Stream
     {
-        //data.Dump("UnGzip data");
+        private int _position = 0;
 
-        using var decompressedStream = new MemoryStream();
-        using var stream = new MemoryStream(data);
-        using var zipStream = new GZipStream(stream, CompressionMode.Decompress);
-        zipStream.CopyTo(decompressedStream);
-        return decompressedStream.ToArray();
-        //var decompressedStream = new MemoryStream();
-        //using var stream = new MemoryStream(data);
-        //using var gzipStream=new GZipOutputStream(stream);
-        //gzipStream.CopyTo(decompressedStream);
+        public override int Read(byte[] buffer, int offset, int count)
+            => Read(buffer.AsSpan(offset, count));
 
-        //return decompressedStream.ToArray();
-        //using var decompressedStream = new MemoryStream();
-        //using var stream = new MemoryStream(data);
-        //using var zipStream = new GZipStream(stream, CompressionMode.Decompress);
-        //zipStream.CopyTo(decompressedStream);
+        public override int Read(Span<byte> buffer)
+        {
+            int remaining = span.Length - _position;
+            if (remaining <= 0) return 0;
 
-        //return decompressedStream.ToArray();
-    }
+            int toCopy = Math.Min(buffer.Length, remaining);
+            span.Span.Slice(_position, toCopy).CopyTo(buffer);
+            _position += toCopy;
+            return toCopy;
+        }
 
-    private static byte[] Unzip(byte[] packedData)
-    {
-        //packedData.Dump("Unzip data");
-        var outputStream = new MemoryStream();
-        using var compressedStream = new MemoryStream(packedData);
-        using var inputStream = new InflaterInputStream(compressedStream);
-        inputStream.CopyTo(outputStream);
-        outputStream.Position = 0;
-        return outputStream.ToArray();
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => span.Length;
+        public override long Position
+        {
+            get => _position;
+            set => throw new NotSupportedException();
+        }
+
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
 }

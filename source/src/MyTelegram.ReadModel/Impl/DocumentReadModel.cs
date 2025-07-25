@@ -18,7 +18,7 @@ public class DocumentReadModel : IDocumentReadModel,
     public int Date { get; private set; }
     public int DcId { get; private set; }
     public long DocumentId { get; private set; }
-    public byte[] FileReference { get; private set; } = null!;
+    public ReadOnlyMemory<byte> FileReference { get; private set; } = null!;
     public int? Fingerprint { get; private set; }
     public string Id { get; private set; } = null!;
     public string? Md5CheckSum { get; private set; }

@@ -28,8 +28,8 @@ public sealed class RequestDropTempAuthKeys : IRequest<IBool>
         writer.Write(ExceptAuthKeys);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ExceptAuthKeys = reader.Read<TVector<long>>();
+        ExceptAuthKeys = buffer.Read<TVector<long>>();
     }
 }

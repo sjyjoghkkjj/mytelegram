@@ -13,5 +13,5 @@ public interface IDhConfig : IObject
     ///<summary>
     /// Random sequence of bytes of assigned length
     ///</summary>
-    byte[] Random { get; set; }
+    ReadOnlyMemory<byte> Random { get; set; }
 }

@@ -32,8 +32,8 @@ public sealed class RequestSetAuthorizationTTL : IRequest<IBool>
         writer.Write(AuthorizationTtlDays);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        AuthorizationTtlDays = reader.ReadInt32();
+        AuthorizationTtlDays = buffer.ReadInt32();
     }
 }

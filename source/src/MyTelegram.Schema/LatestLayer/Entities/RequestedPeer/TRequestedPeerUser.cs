@@ -14,7 +14,7 @@ public sealed class TRequestedPeerUser : IRequestedPeer
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// User ID.
@@ -44,10 +44,10 @@ public sealed class TRequestedPeerUser : IRequestedPeer
 
     public void ComputeFlag()
     {
-        if (FirstName != null) { Flags[0] = true; }
-        if (LastName != null) { Flags[0] = true; }
-        if (Username != null) { Flags[1] = true; }
-        if (Photo != null) { Flags[2] = true; }
+        if (FirstName != null) { Flags = Flags.SetBit(0); }
+        if (LastName != null) { Flags = Flags.SetBit(0); }
+        if (Username != null) { Flags = Flags.SetBit(1); }
+        if (Photo != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -56,19 +56,19 @@ public sealed class TRequestedPeerUser : IRequestedPeer
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(UserId);
-        if (Flags[0]) { writer.Write(FirstName); }
-        if (Flags[0]) { writer.Write(LastName); }
-        if (Flags[1]) { writer.Write(Username); }
-        if (Flags[2]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(0)) { writer.Write(FirstName); }
+        if (Flags.IsBitSet(0)) { writer.Write(LastName); }
+        if (Flags.IsBitSet(1)) { writer.Write(Username); }
+        if (Flags.IsBitSet(2)) { writer.Write(Photo); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        UserId = reader.ReadInt64();
-        if (Flags[0]) { FirstName = reader.ReadString(); }
-        if (Flags[0]) { LastName = reader.ReadString(); }
-        if (Flags[1]) { Username = reader.ReadString(); }
-        if (Flags[2]) { Photo = reader.Read<MyTelegram.Schema.IPhoto>(); }
+        Flags = buffer.ReadInt32();
+        UserId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { FirstName = buffer.ReadString(); }
+        if (Flags.IsBitSet(0)) { LastName = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Username = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Photo = buffer.Read<MyTelegram.Schema.IPhoto>(); }
     }
 }

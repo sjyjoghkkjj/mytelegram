@@ -3,4 +3,4 @@
 public record ChatMemberChangedEvent(
     long ChatId,
     MemberStateChangeType MemberStateChangeType,
-    IReadOnlyList<long> MemberUidList);
+    IReadOnlyCollection<long> MemberUidList);

@@ -17,7 +17,9 @@ public static class CertificateHelper
             // https://github.com/dotnet/runtime/issues/27493
             if (OperatingSystem.IsWindows())
             {
+#pragma warning disable SYSLIB0057
                 return new X509Certificate2(cert.Export(X509ContentType.Pfx));
+#pragma warning restore SYSLIB0057
             }
 
             return cert;

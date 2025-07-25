@@ -45,10 +45,10 @@ public sealed class RequestTogglePinned : IRequest<TVector<int>>
         writer.Write(Pinned);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.Read<TVector<int>>();
-        Pinned = reader.Read();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.Read<TVector<int>>();
+        Pinned = buffer.Read();
     }
 }

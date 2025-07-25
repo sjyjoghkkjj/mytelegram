@@ -14,7 +14,7 @@ public sealed class TPhoto : IPhoto
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the photo has mask stickers attached to it
@@ -59,8 +59,8 @@ public sealed class TPhoto : IPhoto
 
     public void ComputeFlag()
     {
-        if (HasStickers) { Flags[0] = true; }
-        if (VideoSizes?.Count > 0) { Flags[1] = true; }
+        if (HasStickers) { Flags = Flags.SetBit(0); }
+        if (VideoSizes?.Count > 0) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -74,20 +74,20 @@ public sealed class TPhoto : IPhoto
         writer.Write(FileReference);
         writer.Write(Date);
         writer.Write(Sizes);
-        if (Flags[1]) { writer.Write(VideoSizes); }
+        if (Flags.IsBitSet(1)) { writer.Write(VideoSizes); }
         writer.Write(DcId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { HasStickers = true; }
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        FileReference = reader.ReadBytes();
-        Date = reader.ReadInt32();
-        Sizes = reader.Read<TVector<MyTelegram.Schema.IPhotoSize>>();
-        if (Flags[1]) { VideoSizes = reader.Read<TVector<MyTelegram.Schema.IVideoSize>>(); }
-        DcId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { HasStickers = true; }
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        FileReference = buffer.ReadBytes();
+        Date = buffer.ReadInt32();
+        Sizes = buffer.Read<TVector<MyTelegram.Schema.IPhotoSize>>();
+        if (Flags.IsBitSet(1)) { VideoSizes = buffer.Read<TVector<MyTelegram.Schema.IVideoSize>>(); }
+        DcId = buffer.ReadInt32();
     }
 }

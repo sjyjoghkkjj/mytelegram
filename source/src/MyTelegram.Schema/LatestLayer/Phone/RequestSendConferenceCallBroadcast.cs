@@ -11,7 +11,7 @@ public sealed class RequestSendConferenceCallBroadcast : IRequest<MyTelegram.Sch
 {
     public uint ConstructorId => 0xc6701900;
     public MyTelegram.Schema.IInputGroupCall Call { get; set; }
-    public byte[] Block { get; set; }
+    public ReadOnlyMemory<byte> Block { get; set; }
 
     public void ComputeFlag()
     {
@@ -26,9 +26,9 @@ public sealed class RequestSendConferenceCallBroadcast : IRequest<MyTelegram.Sch
         writer.Write(Block);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Block = reader.ReadBytes();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Block = buffer.ReadBytes();
     }
 }

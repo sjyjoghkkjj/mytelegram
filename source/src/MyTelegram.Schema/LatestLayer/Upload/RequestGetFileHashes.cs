@@ -38,9 +38,9 @@ public sealed class RequestGetFileHashes : IRequest<TVector<MyTelegram.Schema.IF
         writer.Write(Offset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Location = reader.Read<MyTelegram.Schema.IInputFileLocation>();
-        Offset = reader.ReadInt64();
+        Location = buffer.Read<MyTelegram.Schema.IInputFileLocation>();
+        Offset = buffer.ReadInt64();
     }
 }

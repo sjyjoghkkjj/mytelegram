@@ -34,9 +34,9 @@ public sealed class TInputChannel : IInputChannel
         writer.Write(AccessHash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
+        ChannelId = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
     }
 }

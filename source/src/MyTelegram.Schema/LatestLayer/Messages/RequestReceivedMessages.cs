@@ -28,8 +28,8 @@ public sealed class RequestReceivedMessages : IRequest<TVector<MyTelegram.Schema
         writer.Write(MaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MaxId = reader.ReadInt32();
+        MaxId = buffer.ReadInt32();
     }
 }

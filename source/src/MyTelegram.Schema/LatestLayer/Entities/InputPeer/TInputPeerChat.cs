@@ -28,8 +28,8 @@ public sealed class TInputPeerChat : IInputPeer
         writer.Write(ChatId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt64();
+        ChatId = buffer.ReadInt64();
     }
 }

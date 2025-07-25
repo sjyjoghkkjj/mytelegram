@@ -46,11 +46,11 @@ public sealed class TMaskCoords : IMaskCoords
         writer.Write(Zoom);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        N = reader.ReadInt32();
-        X = reader.ReadDouble();
-        Y = reader.ReadDouble();
-        Zoom = reader.ReadDouble();
+        N = buffer.ReadInt32();
+        X = buffer.ReadDouble();
+        Y = buffer.ReadDouble();
+        Zoom = buffer.ReadDouble();
     }
 }

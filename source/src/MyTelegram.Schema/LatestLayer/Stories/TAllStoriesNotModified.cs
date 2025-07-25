@@ -14,7 +14,7 @@ public sealed class TAllStoriesNotModified : IAllStories
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// State to use to ask for updates
@@ -41,10 +41,10 @@ public sealed class TAllStoriesNotModified : IAllStories
         writer.Write(StealthMode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        State = reader.ReadString();
-        StealthMode = reader.Read<MyTelegram.Schema.IStoriesStealthMode>();
+        Flags = buffer.ReadInt32();
+        State = buffer.ReadString();
+        StealthMode = buffer.Read<MyTelegram.Schema.IStoriesStealthMode>();
     }
 }

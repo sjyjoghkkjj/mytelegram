@@ -39,9 +39,9 @@ public sealed class RequestReplaceSticker : IRequest<MyTelegram.Schema.Messages.
         writer.Write(NewSticker);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Sticker = reader.Read<MyTelegram.Schema.IInputDocument>();
-        NewSticker = reader.Read<MyTelegram.Schema.IInputStickerSetItem>();
+        Sticker = buffer.Read<MyTelegram.Schema.IInputDocument>();
+        NewSticker = buffer.Read<MyTelegram.Schema.IInputStickerSetItem>();
     }
 }

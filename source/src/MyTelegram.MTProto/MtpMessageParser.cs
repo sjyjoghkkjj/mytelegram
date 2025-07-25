@@ -30,30 +30,28 @@ public class MtpMessageParser(
         if (TryParseData(ref buffer, clientData, out var data))
         {
             var length = (int)data.Length;
-            var bytes = ArrayPool<byte>.Shared.Rent(length);
+            var memoryOwner = MemoryPool<byte>.Shared.Rent(length);
+            var tempMemory = memoryOwner.Memory[..length];
 
-            try
+            var span = tempMemory.Span;
+            data.CopyTo(span);
+
+
+            DecryptBytes(span[..length], clientData);
+            var decryptedMemory = tempMemory;
+            var authKeyId = BinaryPrimitives.ReadInt64LittleEndian(span);
+            if (authKeyId == 0)
             {
-                Span<byte> span = bytes;
-                data.CopyTo(span);
-
-                DecryptBytes(span[..length], clientData);
-                var authKeyId = BinaryPrimitives.ReadInt64LittleEndian(span);
-                if (authKeyId == 0)
-                {
-                    message = unencryptedMessageParser.Parse(span[..length]);
-                }
-                else
-                {
-                    message = encryptedMessageParser.Parse(span[..length]);
-                }
-
-                return true;
+                message = unencryptedMessageParser.Parse(decryptedMemory);
             }
-            finally
+            else
             {
-                ArrayPool<byte>.Shared.Return(bytes);
+                message = encryptedMessageParser.Parse(decryptedMemory);
             }
+            message.MemoryOwner = memoryOwner;
+
+            return true;
+
         }
 
         message = default;
@@ -66,6 +64,7 @@ public class MtpMessageParser(
         if (d.ObfuscationEnabled)
         {
             aesHelper.CtrEncrypt(encryptedBytes, encryptedBytes, d.SendKey, d.SendIv, d.SendCount);
+
             d.SendCount += (uint)encryptedBytes.Length;
         }
     }
@@ -162,8 +161,7 @@ public class MtpMessageParser(
            Length: payload length encoded as 4 length bytes (little endian)
            Payload: the MTProto payload
          */
-        Span<byte> lengthBytes = stackalloc byte[4]
-            { data.FirstSpan[0], data.FirstSpan[1], data.FirstSpan[2], data.FirstSpan[3] };
+        Span<byte> lengthBytes = [data.FirstSpan[0], data.FirstSpan[1], data.FirstSpan[2], data.FirstSpan[3]];
         DecryptBytes(lengthBytes, d);
         var packetLength = BinaryPrimitives.ReadInt32LittleEndian(lengthBytes);
 

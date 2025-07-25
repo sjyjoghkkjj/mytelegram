@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyTelegram.Core\MyTelegram.Core.csproj" />
-    <ProjectReference Include="..\MyTelegram.EventBus.Rebus\MyTelegram.EventBus.Rebus.csproj" />
+    <ProjectReference Include="..\MyTelegram.EventBus.RabbitMQ\MyTelegram.EventBus.RabbitMQ.csproj" />
     <ProjectReference Include="..\MyTelegram.Services\MyTelegram.Services.csproj" />
   </ItemGroup>
 

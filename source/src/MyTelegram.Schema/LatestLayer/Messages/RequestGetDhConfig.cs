@@ -37,9 +37,9 @@ public sealed class RequestGetDhConfig : IRequest<MyTelegram.Schema.Messages.IDh
         writer.Write(RandomLength);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Version = reader.ReadInt32();
-        RandomLength = reader.ReadInt32();
+        Version = buffer.ReadInt32();
+        RandomLength = buffer.ReadInt32();
     }
 }

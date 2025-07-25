@@ -35,9 +35,9 @@ public sealed class RequestInvokeWithMessagesRange : IRequest<IObject>, IHasSubQ
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Range = reader.Read<MyTelegram.Schema.IMessageRange>();
-        Query = reader.Read<IObject>();
+        Range = buffer.Read<MyTelegram.Schema.IMessageRange>();
+        Query = buffer.Read<IObject>();
     }
 }

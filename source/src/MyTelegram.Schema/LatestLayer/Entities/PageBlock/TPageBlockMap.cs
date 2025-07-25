@@ -54,12 +54,12 @@ public sealed class TPageBlockMap : IPageBlock
         writer.Write(Caption);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Geo = reader.Read<MyTelegram.Schema.IGeoPoint>();
-        Zoom = reader.ReadInt32();
-        W = reader.ReadInt32();
-        H = reader.ReadInt32();
-        Caption = reader.Read<MyTelegram.Schema.IPageCaption>();
+        Geo = buffer.Read<MyTelegram.Schema.IGeoPoint>();
+        Zoom = buffer.ReadInt32();
+        W = buffer.ReadInt32();
+        H = buffer.ReadInt32();
+        Caption = buffer.Read<MyTelegram.Schema.IPageCaption>();
     }
 }

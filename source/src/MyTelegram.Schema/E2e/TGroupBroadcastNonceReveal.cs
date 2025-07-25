@@ -8,11 +8,11 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TGroupBroadcastNonceReveal : IGroupBroadcast
 {
     public uint ConstructorId => 0x83f4f9d8;
-    public byte[] Signature { get; set; }
+    public ReadOnlyMemory<byte> Signature { get; set; }
     public long UserId { get; set; }
     public int ChainHeight { get; set; }
-    public byte[] ChainHash { get; set; }
-    public byte[] Nonce { get; set; }
+    public ReadOnlyMemory<byte> ChainHash { get; set; }
+    public ReadOnlyMemory<byte> Nonce { get; set; }
 
     public void ComputeFlag()
     {
@@ -30,12 +30,12 @@ public sealed class TGroupBroadcastNonceReveal : IGroupBroadcast
         writer.WriteRawBytes(Nonce);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Signature = reader.ReadInt512();
-        UserId = reader.ReadInt64();
-        ChainHeight = reader.ReadInt32();
-        ChainHash = reader.ReadInt256();
-        Nonce = reader.ReadInt256();
+        Signature = buffer.ReadInt512();
+        UserId = buffer.ReadInt64();
+        ChainHeight = buffer.ReadInt32();
+        ChainHash = buffer.ReadInt256();
+        Nonce = buffer.ReadInt256();
     }
 }

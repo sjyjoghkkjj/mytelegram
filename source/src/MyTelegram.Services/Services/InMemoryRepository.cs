@@ -16,20 +16,15 @@ public class
     {
         return _entities.TryRemove(id, out entity);
     }
-	
-	public IEnumerable<TEntity> GetAll()
+
+    public IEnumerable<TEntity> GetAll()
     {
         return _entities.Values;
     }
 
     public TEntity? Find(TPrimaryKey id)
     {
-        if (_entities.TryGetValue(id, out var entity))
-        {
-            return entity;
-        }
-
-        return default;
+        return _entities.GetValueOrDefault(id);
     }
 
     public TEntity Get(TPrimaryKey id)

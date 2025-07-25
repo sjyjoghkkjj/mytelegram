@@ -51,11 +51,11 @@ public sealed class RequestSendQuickReplyMessages : IRequest<MyTelegram.Schema.I
         writer.Write(RandomId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        ShortcutId = reader.ReadInt32();
-        Id = reader.Read<TVector<int>>();
-        RandomId = reader.Read<TVector<long>>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        ShortcutId = buffer.ReadInt32();
+        Id = buffer.Read<TVector<int>>();
+        RandomId = buffer.Read<TVector<long>>();
     }
 }

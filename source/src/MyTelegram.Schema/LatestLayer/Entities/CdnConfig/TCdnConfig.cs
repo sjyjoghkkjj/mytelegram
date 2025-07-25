@@ -28,8 +28,8 @@ public sealed class TCdnConfig : ICdnConfig
         writer.Write(PublicKeys);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PublicKeys = reader.Read<TVector<MyTelegram.Schema.ICdnPublicKey>>();
+        PublicKeys = buffer.Read<TVector<MyTelegram.Schema.ICdnPublicKey>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TEncryptedChatRequested : IEncryptedChat
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/folders#peer-folders">Peer folder ID, for more info click here</a>
@@ -49,11 +49,11 @@ public sealed class TEncryptedChatRequested : IEncryptedChat
     ///<summary>
     /// <code>A = g ^ a mod p</code>, see <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Wikipedia</a>
     ///</summary>
-    public byte[] GA { get; set; }
+    public ReadOnlyMemory<byte> GA { get; set; }
 
     public void ComputeFlag()
     {
-        if (/*FolderId != 0 && */FolderId.HasValue) { Flags[0] = true; }
+        if (/*FolderId != 0 && */FolderId.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -62,7 +62,7 @@ public sealed class TEncryptedChatRequested : IEncryptedChat
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(FolderId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(FolderId.Value); }
         writer.Write(Id);
         writer.Write(AccessHash);
         writer.Write(Date);
@@ -71,15 +71,15 @@ public sealed class TEncryptedChatRequested : IEncryptedChat
         writer.Write(GA);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { FolderId = reader.ReadInt32(); }
-        Id = reader.ReadInt32();
-        AccessHash = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        AdminId = reader.ReadInt64();
-        ParticipantId = reader.ReadInt64();
-        GA = reader.ReadBytes();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { FolderId = buffer.ReadInt32(); }
+        Id = buffer.ReadInt32();
+        AccessHash = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        AdminId = buffer.ReadInt64();
+        ParticipantId = buffer.ReadInt64();
+        GA = buffer.ReadBytes();
     }
 }

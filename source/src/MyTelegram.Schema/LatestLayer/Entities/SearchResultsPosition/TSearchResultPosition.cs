@@ -40,10 +40,10 @@ public sealed class TSearchResultPosition : ISearchResultsPosition
         writer.Write(Offset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MsgId = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        Offset = reader.ReadInt32();
+        MsgId = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        Offset = buffer.ReadInt32();
     }
 }

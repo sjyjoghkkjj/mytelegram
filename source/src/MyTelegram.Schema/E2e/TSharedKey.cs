@@ -8,10 +8,10 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TSharedKey : ISharedKey
 {
     public uint ConstructorId => 0x8A847E7F;
-    public byte[] Ek { get; set; }
+    public ReadOnlyMemory<byte> Ek { get; set; }
     public string EncryptedSharedKey { get; set; }
     public TVector<long> DestUserId { get; set; }
-    public TVector<byte[]> DestHeader { get; set; }
+    public TVector<ReadOnlyMemory<byte>> DestHeader { get; set; }
 
     public void ComputeFlag()
     {
@@ -28,11 +28,11 @@ public sealed class TSharedKey : ISharedKey
         writer.WriteVector(DestHeader);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Ek = reader.ReadInt256();
-        EncryptedSharedKey = reader.ReadString();
-        DestUserId = reader.ReadVector<long>();
-        DestHeader = reader.ReadVector<byte[]>();
+        Ek = buffer.ReadInt256();
+        EncryptedSharedKey = buffer.ReadString();
+        DestUserId = buffer.ReadVector<long>();
+        DestHeader = buffer.ReadVector<ReadOnlyMemory<byte>>();
     }
 }

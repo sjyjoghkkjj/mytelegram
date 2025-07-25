@@ -45,10 +45,10 @@ public sealed class RequestExportLoginToken : IRequest<MyTelegram.Schema.Auth.IL
         writer.Write(ExceptIds);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ApiId = reader.ReadInt32();
-        ApiHash = reader.ReadString();
-        ExceptIds = reader.Read<TVector<long>>();
+        ApiId = buffer.ReadInt32();
+        ApiHash = buffer.ReadString();
+        ExceptIds = buffer.Read<TVector<long>>();
     }
 }

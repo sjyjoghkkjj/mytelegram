@@ -28,8 +28,8 @@ public sealed class TMessageActionSecureValuesSent : IMessageAction
         writer.Write(Types);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Types = reader.Read<TVector<MyTelegram.Schema.ISecureValueType>>();
+        Types = buffer.Read<TVector<MyTelegram.Schema.ISecureValueType>>();
     }
 }

@@ -41,9 +41,9 @@ public sealed class RequestAnswerWebhookJSONQuery : IRequest<IBool>
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        QueryId = reader.ReadInt64();
-        Data = reader.Read<MyTelegram.Schema.IDataJSON>();
+        QueryId = buffer.ReadInt64();
+        Data = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

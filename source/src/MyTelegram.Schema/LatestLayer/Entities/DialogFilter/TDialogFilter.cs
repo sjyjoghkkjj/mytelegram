@@ -14,7 +14,7 @@ public sealed class TDialogFilter : IDialogFilter
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to include all contacts in this <a href="https://corefork.telegram.org/api/folders">folder</a>
@@ -103,17 +103,17 @@ public sealed class TDialogFilter : IDialogFilter
 
     public void ComputeFlag()
     {
-        if (Contacts) { Flags[0] = true; }
-        if (NonContacts) { Flags[1] = true; }
-        if (Groups) { Flags[2] = true; }
-        if (Broadcasts) { Flags[3] = true; }
-        if (Bots) { Flags[4] = true; }
-        if (ExcludeMuted) { Flags[11] = true; }
-        if (ExcludeRead) { Flags[12] = true; }
-        if (ExcludeArchived) { Flags[13] = true; }
-        if (TitleNoanimate) { Flags[28] = true; }
-        if (Emoticon != null) { Flags[25] = true; }
-        if (/*Color != 0 && */Color.HasValue) { Flags[27] = true; }
+        if (Contacts) { Flags = Flags.SetBit(0); }
+        if (NonContacts) { Flags = Flags.SetBit(1); }
+        if (Groups) { Flags = Flags.SetBit(2); }
+        if (Broadcasts) { Flags = Flags.SetBit(3); }
+        if (Bots) { Flags = Flags.SetBit(4); }
+        if (ExcludeMuted) { Flags = Flags.SetBit(11); }
+        if (ExcludeRead) { Flags = Flags.SetBit(12); }
+        if (ExcludeArchived) { Flags = Flags.SetBit(13); }
+        if (TitleNoanimate) { Flags = Flags.SetBit(28); }
+        if (Emoticon != null) { Flags = Flags.SetBit(25); }
+        if (/*Color != 0 && */Color.HasValue) { Flags = Flags.SetBit(27); }
 
     }
 
@@ -124,31 +124,31 @@ public sealed class TDialogFilter : IDialogFilter
         writer.Write(Flags);
         writer.Write(Id);
         writer.Write(Title);
-        if (Flags[25]) { writer.Write(Emoticon); }
-        if (Flags[27]) { writer.Write(Color.Value); }
+        if (Flags.IsBitSet(25)) { writer.Write(Emoticon); }
+        if (Flags.IsBitSet(27)) { writer.Write(Color.Value); }
         writer.Write(PinnedPeers);
         writer.Write(IncludePeers);
         writer.Write(ExcludePeers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Contacts = true; }
-        if (Flags[1]) { NonContacts = true; }
-        if (Flags[2]) { Groups = true; }
-        if (Flags[3]) { Broadcasts = true; }
-        if (Flags[4]) { Bots = true; }
-        if (Flags[11]) { ExcludeMuted = true; }
-        if (Flags[12]) { ExcludeRead = true; }
-        if (Flags[13]) { ExcludeArchived = true; }
-        if (Flags[28]) { TitleNoanimate = true; }
-        Id = reader.ReadInt32();
-        Title = reader.Read<MyTelegram.Schema.ITextWithEntities>();
-        if (Flags[25]) { Emoticon = reader.ReadString(); }
-        if (Flags[27]) { Color = reader.ReadInt32(); }
-        PinnedPeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
-        IncludePeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
-        ExcludePeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Contacts = true; }
+        if (Flags.IsBitSet(1)) { NonContacts = true; }
+        if (Flags.IsBitSet(2)) { Groups = true; }
+        if (Flags.IsBitSet(3)) { Broadcasts = true; }
+        if (Flags.IsBitSet(4)) { Bots = true; }
+        if (Flags.IsBitSet(11)) { ExcludeMuted = true; }
+        if (Flags.IsBitSet(12)) { ExcludeRead = true; }
+        if (Flags.IsBitSet(13)) { ExcludeArchived = true; }
+        if (Flags.IsBitSet(28)) { TitleNoanimate = true; }
+        Id = buffer.ReadInt32();
+        Title = buffer.Read<MyTelegram.Schema.ITextWithEntities>();
+        if (Flags.IsBitSet(25)) { Emoticon = buffer.ReadString(); }
+        if (Flags.IsBitSet(27)) { Color = buffer.ReadInt32(); }
+        PinnedPeers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        IncludePeers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        ExcludePeers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
     }
 }

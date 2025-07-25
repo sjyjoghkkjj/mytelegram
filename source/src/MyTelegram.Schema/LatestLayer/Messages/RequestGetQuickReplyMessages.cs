@@ -17,7 +17,7 @@ public sealed class RequestGetQuickReplyMessages : IRequest<MyTelegram.Schema.Me
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Quick reply shortcut ID.
@@ -36,7 +36,7 @@ public sealed class RequestGetQuickReplyMessages : IRequest<MyTelegram.Schema.Me
 
     public void ComputeFlag()
     {
-        if (Id?.Count > 0) { Flags[0] = true; }
+        if (Id?.Count > 0) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -46,15 +46,15 @@ public sealed class RequestGetQuickReplyMessages : IRequest<MyTelegram.Schema.Me
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ShortcutId);
-        if (Flags[0]) { writer.Write(Id); }
+        if (Flags.IsBitSet(0)) { writer.Write(Id); }
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ShortcutId = reader.ReadInt32();
-        if (Flags[0]) { Id = reader.Read<TVector<int>>(); }
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        ShortcutId = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Id = buffer.Read<TVector<int>>(); }
+        Hash = buffer.ReadInt64();
     }
 }

@@ -1,10 +1,7 @@
 ﻿namespace MyTelegram.EventBus;
 
-public interface IEventHandler<in TEvent> : IEventHandler
+public interface IEventHandler<in TEvent>
+    where TEvent : class
 {
     Task HandleEventAsync(TEvent eventData);
-}
-
-public interface IEventHandler //:Volo.Abp.EventBus.IEventHandler
-{
 }

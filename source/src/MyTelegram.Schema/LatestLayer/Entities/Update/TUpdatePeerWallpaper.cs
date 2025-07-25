@@ -14,7 +14,7 @@ public sealed class TUpdatePeerWallpaper : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the other user has chosen a custom wallpaper for us using <a href="https://corefork.telegram.org/method/messages.setChatWallPaper">messages.setChatWallPaper</a> and the <code>for_both</code> flag, see <a href="https://corefork.telegram.org/api/wallpapers#installing-wallpapers-in-a-specific-chat-or-channel">here »</a> for more info.
@@ -36,8 +36,8 @@ public sealed class TUpdatePeerWallpaper : IUpdate
 
     public void ComputeFlag()
     {
-        if (WallpaperOverridden) { Flags[1] = true; }
-        if (Wallpaper != null) { Flags[0] = true; }
+        if (WallpaperOverridden) { Flags = Flags.SetBit(1); }
+        if (Wallpaper != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -46,14 +46,14 @@ public sealed class TUpdatePeerWallpaper : IUpdate
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(Wallpaper); }
+        if (Flags.IsBitSet(0)) { writer.Write(Wallpaper); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { WallpaperOverridden = true; }
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        if (Flags[0]) { Wallpaper = reader.Read<MyTelegram.Schema.IWallPaper>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { WallpaperOverridden = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        if (Flags.IsBitSet(0)) { Wallpaper = buffer.Read<MyTelegram.Schema.IWallPaper>(); }
     }
 }

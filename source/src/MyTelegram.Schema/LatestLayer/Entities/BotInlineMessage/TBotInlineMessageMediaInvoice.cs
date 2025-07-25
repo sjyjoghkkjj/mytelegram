@@ -14,7 +14,7 @@ public sealed class TBotInlineMessageMediaInvoice : IBotInlineMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Set this flag if you require the user's shipping address to complete the order
@@ -62,10 +62,10 @@ public sealed class TBotInlineMessageMediaInvoice : IBotInlineMessage
 
     public void ComputeFlag()
     {
-        if (ShippingAddressRequested) { Flags[1] = true; }
-        if (Test) { Flags[3] = true; }
-        if (Photo != null) { Flags[0] = true; }
-        if (ReplyMarkup != null) { Flags[2] = true; }
+        if (ShippingAddressRequested) { Flags = Flags.SetBit(1); }
+        if (Test) { Flags = Flags.SetBit(3); }
+        if (Photo != null) { Flags = Flags.SetBit(0); }
+        if (ReplyMarkup != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -75,22 +75,22 @@ public sealed class TBotInlineMessageMediaInvoice : IBotInlineMessage
         writer.Write(Flags);
         writer.Write(Title);
         writer.Write(Description);
-        if (Flags[0]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(0)) { writer.Write(Photo); }
         writer.Write(Currency);
         writer.Write(TotalAmount);
-        if (Flags[2]) { writer.Write(ReplyMarkup); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { ShippingAddressRequested = true; }
-        if (Flags[3]) { Test = true; }
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        if (Flags[0]) { Photo = reader.Read<MyTelegram.Schema.IWebDocument>(); }
-        Currency = reader.ReadString();
-        TotalAmount = reader.ReadInt64();
-        if (Flags[2]) { ReplyMarkup = reader.Read<MyTelegram.Schema.IReplyMarkup>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { ShippingAddressRequested = true; }
+        if (Flags.IsBitSet(3)) { Test = true; }
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Photo = buffer.Read<MyTelegram.Schema.IWebDocument>(); }
+        Currency = buffer.ReadString();
+        TotalAmount = buffer.ReadInt64();
+        if (Flags.IsBitSet(2)) { ReplyMarkup = buffer.Read<MyTelegram.Schema.IReplyMarkup>(); }
     }
 }

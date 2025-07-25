@@ -29,8 +29,8 @@ public sealed class TUpdateBotWebhookJSON : IUpdate
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Data = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Data = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

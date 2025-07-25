@@ -14,7 +14,7 @@ public sealed class TInputThemeSettings : IInputThemeSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the freeform gradient fill needs to be animated on every sent message
@@ -57,11 +57,11 @@ public sealed class TInputThemeSettings : IInputThemeSettings
 
     public void ComputeFlag()
     {
-        if (MessageColorsAnimated) { Flags[2] = true; }
-        if (/*OutboxAccentColor != 0 && */OutboxAccentColor.HasValue) { Flags[3] = true; }
-        if (MessageColors?.Count > 0) { Flags[0] = true; }
-        if (Wallpaper != null) { Flags[1] = true; }
-        if (WallpaperSettings != null) { Flags[1] = true; }
+        if (MessageColorsAnimated) { Flags = Flags.SetBit(2); }
+        if (/*OutboxAccentColor != 0 && */OutboxAccentColor.HasValue) { Flags = Flags.SetBit(3); }
+        if (MessageColors?.Count > 0) { Flags = Flags.SetBit(0); }
+        if (Wallpaper != null) { Flags = Flags.SetBit(1); }
+        if (WallpaperSettings != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -71,21 +71,21 @@ public sealed class TInputThemeSettings : IInputThemeSettings
         writer.Write(Flags);
         writer.Write(BaseTheme);
         writer.Write(AccentColor);
-        if (Flags[3]) { writer.Write(OutboxAccentColor.Value); }
-        if (Flags[0]) { writer.Write(MessageColors); }
-        if (Flags[1]) { writer.Write(Wallpaper); }
-        if (Flags[1]) { writer.Write(WallpaperSettings); }
+        if (Flags.IsBitSet(3)) { writer.Write(OutboxAccentColor.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(MessageColors); }
+        if (Flags.IsBitSet(1)) { writer.Write(Wallpaper); }
+        if (Flags.IsBitSet(1)) { writer.Write(WallpaperSettings); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { MessageColorsAnimated = true; }
-        BaseTheme = reader.Read<MyTelegram.Schema.IBaseTheme>();
-        AccentColor = reader.ReadInt32();
-        if (Flags[3]) { OutboxAccentColor = reader.ReadInt32(); }
-        if (Flags[0]) { MessageColors = reader.Read<TVector<int>>(); }
-        if (Flags[1]) { Wallpaper = reader.Read<MyTelegram.Schema.IInputWallPaper>(); }
-        if (Flags[1]) { WallpaperSettings = reader.Read<MyTelegram.Schema.IWallPaperSettings>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { MessageColorsAnimated = true; }
+        BaseTheme = buffer.Read<MyTelegram.Schema.IBaseTheme>();
+        AccentColor = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { OutboxAccentColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { MessageColors = buffer.Read<TVector<int>>(); }
+        if (Flags.IsBitSet(1)) { Wallpaper = buffer.Read<MyTelegram.Schema.IInputWallPaper>(); }
+        if (Flags.IsBitSet(1)) { WallpaperSettings = buffer.Read<MyTelegram.Schema.IWallPaperSettings>(); }
     }
 }

@@ -14,7 +14,7 @@ public sealed class TSecurePasswordKdfAlgoSHA512 : ISecurePasswordKdfAlgo
     ///<summary>
     /// Salt
     ///</summary>
-    public byte[] Salt { get; set; }
+    public ReadOnlyMemory<byte> Salt { get; set; }
 
     public void ComputeFlag()
     {
@@ -28,8 +28,8 @@ public sealed class TSecurePasswordKdfAlgoSHA512 : ISecurePasswordKdfAlgo
         writer.Write(Salt);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Salt = reader.ReadBytes();
+        Salt = buffer.ReadBytes();
     }
 }

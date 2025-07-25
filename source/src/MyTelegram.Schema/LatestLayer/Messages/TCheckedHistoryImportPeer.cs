@@ -28,8 +28,8 @@ public sealed class TCheckedHistoryImportPeer : ICheckedHistoryImportPeer
         writer.Write(ConfirmText);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ConfirmText = reader.ReadString();
+        ConfirmText = buffer.ReadString();
     }
 }

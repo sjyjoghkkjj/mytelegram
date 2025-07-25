@@ -7,14 +7,14 @@ namespace MyTelegram.Schema;
 /// Represents a <a href="https://corefork.telegram.org/api/stars">Telegram Stars transaction »</a>.
 /// See <a href="https://corefork.telegram.org/constructor/starsTransaction" />
 ///</summary>
-[TlObject(0xa39fd94a)]
+[TlObject(0x13659eb0)]
 public sealed class TStarsTransaction : IStarsTransaction
 {
-    public uint ConstructorId => 0xa39fd94a;
+    public uint ConstructorId => 0x13659eb0;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this transaction is a refund.
@@ -53,12 +53,7 @@ public sealed class TStarsTransaction : IStarsTransaction
     /// Transaction ID.
     ///</summary>
     public string Id { get; set; }
-
-    ///<summary>
-    /// Amount of Stars (negative for outgoing transactions).
-    /// See <a href="https://corefork.telegram.org/type/StarsAmount" />
-    ///</summary>
-    public MyTelegram.Schema.IStarsAmount Stars { get; set; }
+    public MyTelegram.Schema.IStarsAmount Amount { get; set; }
 
     ///<summary>
     /// Date of the transaction (unixtime).
@@ -100,7 +95,7 @@ public sealed class TStarsTransaction : IStarsTransaction
     ///<summary>
     /// Bot specified invoice payload (i.e. the <code>payload</code> passed to <a href="https://corefork.telegram.org/constructor/inputMediaInvoice">inputMediaInvoice</a> when <a href="https://corefork.telegram.org/api/payments">creating the invoice</a>).
     ///</summary>
-    public byte[]? BotPayload { get; set; }
+    public ReadOnlyMemory<byte>? BotPayload { get; set; }
 
     ///<summary>
     /// For <a href="https://corefork.telegram.org/api/paid-media">paid media transactions »</a>, message ID of the paid media posted to <code>peer.peer</code> (can point to a deleted message; either way, <code>extended_media</code> will always contain the bought media).
@@ -151,34 +146,38 @@ public sealed class TStarsTransaction : IStarsTransaction
     public MyTelegram.Schema.IStarsAmount? StarrefAmount { get; set; }
     public int? PaidMessages { get; set; }
     public int? PremiumGiftMonths { get; set; }
+    public int? AdsProceedsFromDate { get; set; }
+    public int? AdsProceedsToDate { get; set; }
 
     public void ComputeFlag()
     {
-        if (Refund) { Flags[3] = true; }
-        if (Pending) { Flags[4] = true; }
-        if (Failed) { Flags[6] = true; }
-        if (Gift) { Flags[10] = true; }
-        if (Reaction) { Flags[11] = true; }
-        if (StargiftUpgrade) { Flags[18] = true; }
-        if (BusinessTransfer) { Flags[21] = true; }
-        if (StargiftResale) { Flags[22] = true; }
-        if (Title != null) { Flags[0] = true; }
-        if (Description != null) { Flags[1] = true; }
-        if (Photo != null) { Flags[2] = true; }
-        if (/*TransactionDate != 0 && */TransactionDate.HasValue) { Flags[5] = true; }
-        if (TransactionUrl != null) { Flags[5] = true; }
-        if (BotPayload != null) { Flags[7] = true; }
-        if (/*MsgId != 0 && */MsgId.HasValue) { Flags[8] = true; }
-        if (ExtendedMedia?.Count > 0) { Flags[9] = true; }
-        if (/*SubscriptionPeriod != 0 && */SubscriptionPeriod.HasValue) { Flags[12] = true; }
-        if (/*GiveawayPostId != 0 && */GiveawayPostId.HasValue) { Flags[13] = true; }
-        if (Stargift != null) { Flags[14] = true; }
-        if (/*FloodskipNumber != 0 && */FloodskipNumber.HasValue) { Flags[15] = true; }
-        if (/*StarrefCommissionPermille != 0 && */StarrefCommissionPermille.HasValue) { Flags[16] = true; }
-        if (StarrefPeer != null) { Flags[17] = true; }
-        if (StarrefAmount != null) { Flags[17] = true; }
-        if (/*PaidMessages != 0 && */PaidMessages.HasValue) { Flags[19] = true; }
-        if (/*PremiumGiftMonths != 0 && */PremiumGiftMonths.HasValue) { Flags[20] = true; }
+        if (Refund) { Flags = Flags.SetBit(3); }
+        if (Pending) { Flags = Flags.SetBit(4); }
+        if (Failed) { Flags = Flags.SetBit(6); }
+        if (Gift) { Flags = Flags.SetBit(10); }
+        if (Reaction) { Flags = Flags.SetBit(11); }
+        if (StargiftUpgrade) { Flags = Flags.SetBit(18); }
+        if (BusinessTransfer) { Flags = Flags.SetBit(21); }
+        if (StargiftResale) { Flags = Flags.SetBit(22); }
+        if (Title != null) { Flags = Flags.SetBit(0); }
+        if (Description != null) { Flags = Flags.SetBit(1); }
+        if (Photo != null) { Flags = Flags.SetBit(2); }
+        if (/*TransactionDate != 0 && */TransactionDate.HasValue) { Flags = Flags.SetBit(5); }
+        if (TransactionUrl != null) { Flags = Flags.SetBit(5); }
+        if (BotPayload != null) { Flags = Flags.SetBit(7); }
+        if (/*MsgId != 0 && */MsgId.HasValue) { Flags = Flags.SetBit(8); }
+        if (ExtendedMedia?.Count > 0) { Flags = Flags.SetBit(9); }
+        if (/*SubscriptionPeriod != 0 && */SubscriptionPeriod.HasValue) { Flags = Flags.SetBit(12); }
+        if (/*GiveawayPostId != 0 && */GiveawayPostId.HasValue) { Flags = Flags.SetBit(13); }
+        if (Stargift != null) { Flags = Flags.SetBit(14); }
+        if (/*FloodskipNumber != 0 && */FloodskipNumber.HasValue) { Flags = Flags.SetBit(15); }
+        if (/*StarrefCommissionPermille != 0 && */StarrefCommissionPermille.HasValue) { Flags = Flags.SetBit(16); }
+        if (StarrefPeer != null) { Flags = Flags.SetBit(17); }
+        if (StarrefAmount != null) { Flags = Flags.SetBit(17); }
+        if (/*PaidMessages != 0 && */PaidMessages.HasValue) { Flags = Flags.SetBit(19); }
+        if (/*PremiumGiftMonths != 0 && */PremiumGiftMonths.HasValue) { Flags = Flags.SetBit(20); }
+        if (/*AdsProceedsFromDate != 0 && */AdsProceedsFromDate.HasValue) { Flags = Flags.SetBit(23); }
+        if (/*AdsProceedsToDate != 0 && */AdsProceedsToDate.HasValue) { Flags = Flags.SetBit(23); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -187,59 +186,63 @@ public sealed class TStarsTransaction : IStarsTransaction
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Id);
-        writer.Write(Stars);
+        writer.Write(Amount);
         writer.Write(Date);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(Title); }
-        if (Flags[1]) { writer.Write(Description); }
-        if (Flags[2]) { writer.Write(Photo); }
-        if (Flags[5]) { writer.Write(TransactionDate.Value); }
-        if (Flags[5]) { writer.Write(TransactionUrl); }
-        if (Flags[7]) { writer.Write(BotPayload); }
-        if (Flags[8]) { writer.Write(MsgId.Value); }
-        if (Flags[9]) { writer.Write(ExtendedMedia); }
-        if (Flags[12]) { writer.Write(SubscriptionPeriod.Value); }
-        if (Flags[13]) { writer.Write(GiveawayPostId.Value); }
-        if (Flags[14]) { writer.Write(Stargift); }
-        if (Flags[15]) { writer.Write(FloodskipNumber.Value); }
-        if (Flags[16]) { writer.Write(StarrefCommissionPermille.Value); }
-        if (Flags[17]) { writer.Write(StarrefPeer); }
-        if (Flags[17]) { writer.Write(StarrefAmount); }
-        if (Flags[19]) { writer.Write(PaidMessages.Value); }
-        if (Flags[20]) { writer.Write(PremiumGiftMonths.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Title); }
+        if (Flags.IsBitSet(1)) { writer.Write(Description); }
+        if (Flags.IsBitSet(2)) { writer.Write(Photo); }
+        if (Flags.IsBitSet(5)) { writer.Write(TransactionDate.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(TransactionUrl); }
+        if (Flags.IsBitSet(7)) { writer.Write(BotPayload); }
+        if (Flags.IsBitSet(8)) { writer.Write(MsgId.Value); }
+        if (Flags.IsBitSet(9)) { writer.Write(ExtendedMedia); }
+        if (Flags.IsBitSet(12)) { writer.Write(SubscriptionPeriod.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(GiveawayPostId.Value); }
+        if (Flags.IsBitSet(14)) { writer.Write(Stargift); }
+        if (Flags.IsBitSet(15)) { writer.Write(FloodskipNumber.Value); }
+        if (Flags.IsBitSet(16)) { writer.Write(StarrefCommissionPermille.Value); }
+        if (Flags.IsBitSet(17)) { writer.Write(StarrefPeer); }
+        if (Flags.IsBitSet(17)) { writer.Write(StarrefAmount); }
+        if (Flags.IsBitSet(19)) { writer.Write(PaidMessages.Value); }
+        if (Flags.IsBitSet(20)) { writer.Write(PremiumGiftMonths.Value); }
+        if (Flags.IsBitSet(23)) { writer.Write(AdsProceedsFromDate.Value); }
+        if (Flags.IsBitSet(23)) { writer.Write(AdsProceedsToDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { Refund = true; }
-        if (Flags[4]) { Pending = true; }
-        if (Flags[6]) { Failed = true; }
-        if (Flags[10]) { Gift = true; }
-        if (Flags[11]) { Reaction = true; }
-        if (Flags[18]) { StargiftUpgrade = true; }
-        if (Flags[21]) { BusinessTransfer = true; }
-        if (Flags[22]) { StargiftResale = true; }
-        Id = reader.ReadString();
-        Stars = reader.Read<MyTelegram.Schema.IStarsAmount>();
-        Date = reader.ReadInt32();
-        Peer = reader.Read<MyTelegram.Schema.IStarsTransactionPeer>();
-        if (Flags[0]) { Title = reader.ReadString(); }
-        if (Flags[1]) { Description = reader.ReadString(); }
-        if (Flags[2]) { Photo = reader.Read<MyTelegram.Schema.IWebDocument>(); }
-        if (Flags[5]) { TransactionDate = reader.ReadInt32(); }
-        if (Flags[5]) { TransactionUrl = reader.ReadString(); }
-        if (Flags[7]) { BotPayload = reader.ReadBytes(); }
-        if (Flags[8]) { MsgId = reader.ReadInt32(); }
-        if (Flags[9]) { ExtendedMedia = reader.Read<TVector<MyTelegram.Schema.IMessageMedia>>(); }
-        if (Flags[12]) { SubscriptionPeriod = reader.ReadInt32(); }
-        if (Flags[13]) { GiveawayPostId = reader.ReadInt32(); }
-        if (Flags[14]) { Stargift = reader.Read<MyTelegram.Schema.IStarGift>(); }
-        if (Flags[15]) { FloodskipNumber = reader.ReadInt32(); }
-        if (Flags[16]) { StarrefCommissionPermille = reader.ReadInt32(); }
-        if (Flags[17]) { StarrefPeer = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[17]) { StarrefAmount = reader.Read<MyTelegram.Schema.IStarsAmount>(); }
-        if (Flags[19]) { PaidMessages = reader.ReadInt32(); }
-        if (Flags[20]) { PremiumGiftMonths = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Refund = true; }
+        if (Flags.IsBitSet(4)) { Pending = true; }
+        if (Flags.IsBitSet(6)) { Failed = true; }
+        if (Flags.IsBitSet(10)) { Gift = true; }
+        if (Flags.IsBitSet(11)) { Reaction = true; }
+        if (Flags.IsBitSet(18)) { StargiftUpgrade = true; }
+        if (Flags.IsBitSet(21)) { BusinessTransfer = true; }
+        if (Flags.IsBitSet(22)) { StargiftResale = true; }
+        Id = buffer.ReadString();
+        Amount = buffer.Read<MyTelegram.Schema.IStarsAmount>();
+        Date = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IStarsTransactionPeer>();
+        if (Flags.IsBitSet(0)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Description = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Photo = buffer.Read<MyTelegram.Schema.IWebDocument>(); }
+        if (Flags.IsBitSet(5)) { TransactionDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { TransactionUrl = buffer.ReadString(); }
+        if (Flags.IsBitSet(7)) { BotPayload = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(8)) { MsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(9)) { ExtendedMedia = buffer.Read<TVector<MyTelegram.Schema.IMessageMedia>>(); }
+        if (Flags.IsBitSet(12)) { SubscriptionPeriod = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(13)) { GiveawayPostId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(14)) { Stargift = buffer.Read<MyTelegram.Schema.IStarGift>(); }
+        if (Flags.IsBitSet(15)) { FloodskipNumber = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(16)) { StarrefCommissionPermille = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(17)) { StarrefPeer = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(17)) { StarrefAmount = buffer.Read<MyTelegram.Schema.IStarsAmount>(); }
+        if (Flags.IsBitSet(19)) { PaidMessages = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(20)) { PremiumGiftMonths = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(23)) { AdsProceedsFromDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(23)) { AdsProceedsToDate = buffer.ReadInt32(); }
     }
 }

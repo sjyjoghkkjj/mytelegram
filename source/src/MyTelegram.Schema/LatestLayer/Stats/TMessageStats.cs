@@ -36,9 +36,9 @@ public sealed class TMessageStats : IMessageStats
         writer.Write(ReactionsByEmotionGraph);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ViewsGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        ReactionsByEmotionGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
+        ViewsGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        ReactionsByEmotionGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TReplyKeyboardForceReply : IReplyMarkup
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Requests clients to hide the keyboard as soon as it's been used. The keyboard will still be available, but clients will automatically display the usual letter-keyboard in the chat – the user can press a special button in the input field to see the custom keyboard again.
@@ -35,9 +35,9 @@ public sealed class TReplyKeyboardForceReply : IReplyMarkup
 
     public void ComputeFlag()
     {
-        if (SingleUse) { Flags[1] = true; }
-        if (Selective) { Flags[2] = true; }
-        if (Placeholder != null) { Flags[3] = true; }
+        if (SingleUse) { Flags = Flags.SetBit(1); }
+        if (Selective) { Flags = Flags.SetBit(2); }
+        if (Placeholder != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -45,14 +45,14 @@ public sealed class TReplyKeyboardForceReply : IReplyMarkup
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[3]) { writer.Write(Placeholder); }
+        if (Flags.IsBitSet(3)) { writer.Write(Placeholder); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { SingleUse = true; }
-        if (Flags[2]) { Selective = true; }
-        if (Flags[3]) { Placeholder = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { SingleUse = true; }
+        if (Flags.IsBitSet(2)) { Selective = true; }
+        if (Flags.IsBitSet(3)) { Placeholder = buffer.ReadString(); }
     }
 }

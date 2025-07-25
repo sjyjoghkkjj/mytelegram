@@ -14,7 +14,7 @@ public sealed class TMessagesSlice : IMessages
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, indicates that the results may be inexact
@@ -54,9 +54,9 @@ public sealed class TMessagesSlice : IMessages
 
     public void ComputeFlag()
     {
-        if (Inexact) { Flags[1] = true; }
-        if (/*NextRate != 0 && */NextRate.HasValue) { Flags[0] = true; }
-        if (/*OffsetIdOffset != 0 && */OffsetIdOffset.HasValue) { Flags[2] = true; }
+        if (Inexact) { Flags = Flags.SetBit(1); }
+        if (/*NextRate != 0 && */NextRate.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*OffsetIdOffset != 0 && */OffsetIdOffset.HasValue) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -66,22 +66,22 @@ public sealed class TMessagesSlice : IMessages
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Count);
-        if (Flags[0]) { writer.Write(NextRate.Value); }
-        if (Flags[2]) { writer.Write(OffsetIdOffset.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextRate.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(OffsetIdOffset.Value); }
         writer.Write(Messages);
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Inexact = true; }
-        Count = reader.ReadInt32();
-        if (Flags[0]) { NextRate = reader.ReadInt32(); }
-        if (Flags[2]) { OffsetIdOffset = reader.ReadInt32(); }
-        Messages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Inexact = true; }
+        Count = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NextRate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { OffsetIdOffset = buffer.ReadInt32(); }
+        Messages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

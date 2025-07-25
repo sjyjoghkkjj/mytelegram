@@ -14,7 +14,7 @@ public sealed class TChannelParticipantBanned : IChannelParticipant
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user has left the group
@@ -46,7 +46,7 @@ public sealed class TChannelParticipantBanned : IChannelParticipant
 
     public void ComputeFlag()
     {
-        if (Left) { Flags[0] = true; }
+        if (Left) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -61,13 +61,13 @@ public sealed class TChannelParticipantBanned : IChannelParticipant
         writer.Write(BannedRights);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Left = true; }
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        KickedBy = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        BannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Left = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        KickedBy = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        BannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>();
     }
 }

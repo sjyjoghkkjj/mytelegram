@@ -14,7 +14,7 @@ public sealed class TInputPeerNotifySettings : IInputPeerNotifySettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If the text of the message shall be displayed in notification
@@ -59,13 +59,13 @@ public sealed class TInputPeerNotifySettings : IInputPeerNotifySettings
 
     public void ComputeFlag()
     {
-        if (ShowPreviews !=null) { Flags[0] = true; }
-        if (Silent !=null) { Flags[1] = true; }
-        if (/*MuteUntil != 0 && */MuteUntil.HasValue) { Flags[2] = true; }
-        if (Sound != null) { Flags[3] = true; }
-        if (StoriesMuted !=null) { Flags[6] = true; }
-        if (StoriesHideSender !=null) { Flags[7] = true; }
-        if (StoriesSound != null) { Flags[8] = true; }
+        if (ShowPreviews !=null) { Flags = Flags.SetBit(0); }
+        if (Silent !=null) { Flags = Flags.SetBit(1); }
+        if (/*MuteUntil != 0 && */MuteUntil.HasValue) { Flags = Flags.SetBit(2); }
+        if (Sound != null) { Flags = Flags.SetBit(3); }
+        if (StoriesMuted !=null) { Flags = Flags.SetBit(6); }
+        if (StoriesHideSender !=null) { Flags = Flags.SetBit(7); }
+        if (StoriesSound != null) { Flags = Flags.SetBit(8); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -73,24 +73,24 @@ public sealed class TInputPeerNotifySettings : IInputPeerNotifySettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(ShowPreviews.Value); }
-        if (Flags[1]) { writer.Write(Silent.Value); }
-        if (Flags[2]) { writer.Write(MuteUntil.Value); }
-        if (Flags[3]) { writer.Write(Sound); }
-        if (Flags[6]) { writer.Write(StoriesMuted.Value); }
-        if (Flags[7]) { writer.Write(StoriesHideSender.Value); }
-        if (Flags[8]) { writer.Write(StoriesSound); }
+        if (Flags.IsBitSet(0)) { writer.Write(ShowPreviews.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Silent.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(MuteUntil.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Sound); }
+        if (Flags.IsBitSet(6)) { writer.Write(StoriesMuted.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(StoriesHideSender.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(StoriesSound); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ShowPreviews = reader.Read(); }
-        if (Flags[1]) { Silent = reader.Read(); }
-        if (Flags[2]) { MuteUntil = reader.ReadInt32(); }
-        if (Flags[3]) { Sound = reader.Read<MyTelegram.Schema.INotificationSound>(); }
-        if (Flags[6]) { StoriesMuted = reader.Read(); }
-        if (Flags[7]) { StoriesHideSender = reader.Read(); }
-        if (Flags[8]) { StoriesSound = reader.Read<MyTelegram.Schema.INotificationSound>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ShowPreviews = buffer.Read(); }
+        if (Flags.IsBitSet(1)) { Silent = buffer.Read(); }
+        if (Flags.IsBitSet(2)) { MuteUntil = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { Sound = buffer.Read<MyTelegram.Schema.INotificationSound>(); }
+        if (Flags.IsBitSet(6)) { StoriesMuted = buffer.Read(); }
+        if (Flags.IsBitSet(7)) { StoriesHideSender = buffer.Read(); }
+        if (Flags.IsBitSet(8)) { StoriesSound = buffer.Read<MyTelegram.Schema.INotificationSound>(); }
     }
 }

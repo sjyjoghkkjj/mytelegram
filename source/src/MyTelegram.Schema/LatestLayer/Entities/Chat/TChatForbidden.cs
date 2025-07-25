@@ -34,9 +34,9 @@ public sealed class TChatForbidden : IChat
         writer.Write(Title);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Title = reader.ReadString();
+        Id = buffer.ReadInt64();
+        Title = buffer.ReadString();
     }
 }

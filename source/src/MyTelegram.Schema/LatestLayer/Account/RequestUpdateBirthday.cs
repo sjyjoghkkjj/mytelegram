@@ -17,7 +17,7 @@ public sealed class RequestUpdateBirthday : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Birthday.
@@ -27,7 +27,7 @@ public sealed class RequestUpdateBirthday : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Birthday != null) { Flags[0] = true; }
+        if (Birthday != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -35,12 +35,12 @@ public sealed class RequestUpdateBirthday : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Birthday); }
+        if (Flags.IsBitSet(0)) { writer.Write(Birthday); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Birthday = reader.Read<MyTelegram.Schema.IBirthday>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Birthday = buffer.Read<MyTelegram.Schema.IBirthday>(); }
     }
 }

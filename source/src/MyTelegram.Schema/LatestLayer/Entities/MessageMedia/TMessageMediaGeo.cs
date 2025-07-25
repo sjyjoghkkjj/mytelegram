@@ -29,8 +29,8 @@ public sealed class TMessageMediaGeo : IMessageMedia
         writer.Write(Geo);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Geo = reader.Read<MyTelegram.Schema.IGeoPoint>();
+        Geo = buffer.Read<MyTelegram.Schema.IGeoPoint>();
     }
 }

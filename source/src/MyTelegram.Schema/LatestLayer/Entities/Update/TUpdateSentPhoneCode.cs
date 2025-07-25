@@ -24,8 +24,8 @@ public sealed class TUpdateSentPhoneCode : IUpdate
         writer.Write(SentCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        SentCode = reader.Read<MyTelegram.Schema.Auth.ISentCode>();
+        SentCode = buffer.Read<MyTelegram.Schema.Auth.ISentCode>();
     }
 }

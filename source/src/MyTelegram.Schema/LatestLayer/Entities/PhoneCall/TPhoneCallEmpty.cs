@@ -28,8 +28,8 @@ public sealed class TPhoneCallEmpty : IPhoneCall,IEmpty
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
+        Id = buffer.ReadInt64();
     }
 }

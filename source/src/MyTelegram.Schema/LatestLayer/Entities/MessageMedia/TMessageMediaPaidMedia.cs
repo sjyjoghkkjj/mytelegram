@@ -34,9 +34,9 @@ public sealed class TMessageMediaPaidMedia : IMessageMedia
         writer.Write(ExtendedMedia);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        StarsAmount = reader.ReadInt64();
-        ExtendedMedia = reader.Read<TVector<MyTelegram.Schema.IMessageExtendedMedia>>();
+        StarsAmount = buffer.ReadInt64();
+        ExtendedMedia = buffer.Read<TVector<MyTelegram.Schema.IMessageExtendedMedia>>();
     }
 }

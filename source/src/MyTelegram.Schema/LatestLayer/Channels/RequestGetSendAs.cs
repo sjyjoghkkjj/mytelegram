@@ -17,7 +17,7 @@ namespace MyTelegram.Schema.Channels;
 public sealed class RequestGetSendAs : IRequest<MyTelegram.Schema.Channels.ISendAsPeers>
 {
     public uint ConstructorId => 0xe785a43f;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool ForPaidReactions { get; set; }
 
     ///<summary>
@@ -28,7 +28,7 @@ public sealed class RequestGetSendAs : IRequest<MyTelegram.Schema.Channels.ISend
 
     public void ComputeFlag()
     {
-        if (ForPaidReactions) { Flags[0] = true; }
+        if (ForPaidReactions) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -40,10 +40,10 @@ public sealed class RequestGetSendAs : IRequest<MyTelegram.Schema.Channels.ISend
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ForPaidReactions = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ForPaidReactions = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

@@ -6,14 +6,17 @@ namespace MyTelegram.Schema.Account;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/account.getPaidMessagesRevenue" />
 ///</summary>
-[TlObject(0xf1266f38)]
+[TlObject(0x19ba4a67)]
 public sealed class RequestGetPaidMessagesRevenue : IRequest<MyTelegram.Schema.Account.IPaidMessagesRevenue>
 {
-    public uint ConstructorId => 0xf1266f38;
+    public uint ConstructorId => 0x19ba4a67;
+    public int Flags { get; set; }
+    public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
     public MyTelegram.Schema.IInputUser UserId { get; set; }
 
     public void ComputeFlag()
     {
+        if (ParentPeer != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -21,11 +24,15 @@ public sealed class RequestGetPaidMessagesRevenue : IRequest<MyTelegram.Schema.A
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
+        if (Flags.IsBitSet(0)) { writer.Write(ParentPeer); }
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ParentPeer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

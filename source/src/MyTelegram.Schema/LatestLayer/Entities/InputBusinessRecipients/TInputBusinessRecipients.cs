@@ -14,7 +14,7 @@ public sealed class TInputBusinessRecipients : IInputBusinessRecipients
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// All existing private chats.
@@ -53,12 +53,12 @@ public sealed class TInputBusinessRecipients : IInputBusinessRecipients
 
     public void ComputeFlag()
     {
-        if (ExistingChats) { Flags[0] = true; }
-        if (NewChats) { Flags[1] = true; }
-        if (Contacts) { Flags[2] = true; }
-        if (NonContacts) { Flags[3] = true; }
-        if (ExcludeSelected) { Flags[5] = true; }
-        if (Users?.Count > 0) { Flags[4] = true; }
+        if (ExistingChats) { Flags = Flags.SetBit(0); }
+        if (NewChats) { Flags = Flags.SetBit(1); }
+        if (Contacts) { Flags = Flags.SetBit(2); }
+        if (NonContacts) { Flags = Flags.SetBit(3); }
+        if (ExcludeSelected) { Flags = Flags.SetBit(5); }
+        if (Users?.Count > 0) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -66,17 +66,17 @@ public sealed class TInputBusinessRecipients : IInputBusinessRecipients
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[4]) { writer.Write(Users); }
+        if (Flags.IsBitSet(4)) { writer.Write(Users); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ExistingChats = true; }
-        if (Flags[1]) { NewChats = true; }
-        if (Flags[2]) { Contacts = true; }
-        if (Flags[3]) { NonContacts = true; }
-        if (Flags[5]) { ExcludeSelected = true; }
-        if (Flags[4]) { Users = reader.Read<TVector<MyTelegram.Schema.IInputUser>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ExistingChats = true; }
+        if (Flags.IsBitSet(1)) { NewChats = true; }
+        if (Flags.IsBitSet(2)) { Contacts = true; }
+        if (Flags.IsBitSet(3)) { NonContacts = true; }
+        if (Flags.IsBitSet(5)) { ExcludeSelected = true; }
+        if (Flags.IsBitSet(4)) { Users = buffer.Read<TVector<MyTelegram.Schema.IInputUser>>(); }
     }
 }

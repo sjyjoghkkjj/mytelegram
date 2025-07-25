@@ -11,12 +11,12 @@ namespace MyTelegram.Schema.Messages;
 public sealed class RequestGetDialogUnreadMarks : IRequest<TVector<MyTelegram.Schema.IDialogPeer>>
 {
     public uint ConstructorId => 0x21202222;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
 
     public void ComputeFlag()
     {
-        if (ParentPeer != null) { Flags[0] = true; }
+        if (ParentPeer != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -24,12 +24,12 @@ public sealed class RequestGetDialogUnreadMarks : IRequest<TVector<MyTelegram.Sc
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(ParentPeer); }
+        if (Flags.IsBitSet(0)) { writer.Write(ParentPeer); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ParentPeer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

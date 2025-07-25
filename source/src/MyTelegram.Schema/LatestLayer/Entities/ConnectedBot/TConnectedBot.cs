@@ -14,7 +14,7 @@ public sealed class TConnectedBot : IConnectedBot
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// ID of the connected bot
@@ -43,11 +43,11 @@ public sealed class TConnectedBot : IConnectedBot
         writer.Write(Rights);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        BotId = reader.ReadInt64();
-        Recipients = reader.Read<MyTelegram.Schema.IBusinessBotRecipients>();
-        Rights = reader.Read<MyTelegram.Schema.IBusinessBotRights>();
+        Flags = buffer.ReadInt32();
+        BotId = buffer.ReadInt64();
+        Recipients = buffer.Read<MyTelegram.Schema.IBusinessBotRecipients>();
+        Rights = buffer.Read<MyTelegram.Schema.IBusinessBotRights>();
     }
 }

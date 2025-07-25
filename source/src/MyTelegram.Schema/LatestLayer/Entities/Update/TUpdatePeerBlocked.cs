@@ -14,7 +14,7 @@ public sealed class TUpdatePeerBlocked : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the peer was blocked or unblocked
@@ -36,8 +36,8 @@ public sealed class TUpdatePeerBlocked : IUpdate
 
     public void ComputeFlag()
     {
-        if (Blocked) { Flags[0] = true; }
-        if (BlockedMyStoriesFrom) { Flags[1] = true; }
+        if (Blocked) { Flags = Flags.SetBit(0); }
+        if (BlockedMyStoriesFrom) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -49,11 +49,11 @@ public sealed class TUpdatePeerBlocked : IUpdate
         writer.Write(PeerId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Blocked = true; }
-        if (Flags[1]) { BlockedMyStoriesFrom = true; }
-        PeerId = reader.Read<MyTelegram.Schema.IPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Blocked = true; }
+        if (Flags.IsBitSet(1)) { BlockedMyStoriesFrom = true; }
+        PeerId = buffer.Read<MyTelegram.Schema.IPeer>();
     }
 }

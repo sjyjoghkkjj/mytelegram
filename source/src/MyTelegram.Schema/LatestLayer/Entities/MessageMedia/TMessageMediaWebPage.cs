@@ -14,7 +14,7 @@ public sealed class TMessageMediaWebPage : IMessageMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, specifies that a large media preview should be used.
@@ -48,10 +48,10 @@ public sealed class TMessageMediaWebPage : IMessageMedia
 
     public void ComputeFlag()
     {
-        if (ForceLargeMedia) { Flags[0] = true; }
-        if (ForceSmallMedia) { Flags[1] = true; }
-        if (Manual) { Flags[3] = true; }
-        if (Safe) { Flags[4] = true; }
+        if (ForceLargeMedia) { Flags = Flags.SetBit(0); }
+        if (ForceSmallMedia) { Flags = Flags.SetBit(1); }
+        if (Manual) { Flags = Flags.SetBit(3); }
+        if (Safe) { Flags = Flags.SetBit(4); }
 
     }
 
@@ -63,13 +63,13 @@ public sealed class TMessageMediaWebPage : IMessageMedia
         writer.Write(Webpage);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ForceLargeMedia = true; }
-        if (Flags[1]) { ForceSmallMedia = true; }
-        if (Flags[3]) { Manual = true; }
-        if (Flags[4]) { Safe = true; }
-        Webpage = reader.Read<MyTelegram.Schema.IWebPage>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ForceLargeMedia = true; }
+        if (Flags.IsBitSet(1)) { ForceSmallMedia = true; }
+        if (Flags.IsBitSet(3)) { Manual = true; }
+        if (Flags.IsBitSet(4)) { Safe = true; }
+        Webpage = buffer.Read<MyTelegram.Schema.IWebPage>();
     }
 }

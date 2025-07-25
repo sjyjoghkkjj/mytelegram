@@ -28,8 +28,8 @@ public sealed class RequestGetAppUpdate : IRequest<MyTelegram.Schema.Help.IAppUp
         writer.Write(Source);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Source = reader.ReadString();
+        Source = buffer.ReadString();
     }
 }

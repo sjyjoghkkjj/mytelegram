@@ -14,7 +14,7 @@ public sealed class RequestReorderStickerSets : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Reorder mask stickersets
@@ -35,8 +35,8 @@ public sealed class RequestReorderStickerSets : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Masks) { Flags[0] = true; }
-        if (Emojis) { Flags[1] = true; }
+        if (Masks) { Flags = Flags.SetBit(0); }
+        if (Emojis) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class RequestReorderStickerSets : IRequest<IBool>
         writer.Write(Order);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Masks = true; }
-        if (Flags[1]) { Emojis = true; }
-        Order = reader.Read<TVector<long>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Masks = true; }
+        if (Flags.IsBitSet(1)) { Emojis = true; }
+        Order = buffer.Read<TVector<long>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TUser : IUser, ILayeredUser
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this user indicates the currently logged in user
@@ -127,7 +127,7 @@ public sealed class TUser : IUser, ILayeredUser
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags2 { get; set; } = new BitArray(32);
+    public int Flags2 { get; set; }
 
     ///<summary>
     /// Whether we can edit the profile picture, name, about text and description of this bot because we own it. <br>When updating the <a href="https://corefork.telegram.org/api/peers">local peer database</a>, do not apply changes to this field if the <code>min</code> flag is set. <br>Changes to this flag (if <code>min</code> is not set) should invalidate the local <a href="https://corefork.telegram.org/constructor/userFull">userFull</a> cache for this user ID.
@@ -270,50 +270,50 @@ public sealed class TUser : IUser, ILayeredUser
 
     public void ComputeFlag()
     {
-        if (Self) { Flags[10] = true; }
-        if (Contact) { Flags[11] = true; }
-        if (MutualContact) { Flags[12] = true; }
-        if (Deleted) { Flags[13] = true; }
-        if (Bot) { Flags[14] = true; }
-        if (BotChatHistory) { Flags[15] = true; }
-        if (BotNochats) { Flags[16] = true; }
-        if (Verified) { Flags[17] = true; }
-        if (Restricted) { Flags[18] = true; }
-        if (Min) { Flags[20] = true; }
-        if (BotInlineGeo) { Flags[21] = true; }
-        if (Support) { Flags[23] = true; }
-        if (Scam) { Flags[24] = true; }
-        if (ApplyMinPhoto) { Flags[25] = true; }
-        if (Fake) { Flags[26] = true; }
-        if (BotAttachMenu) { Flags[27] = true; }
-        if (Premium) { Flags[28] = true; }
-        if (AttachMenuEnabled) { Flags[29] = true; }
-        if (BotCanEdit) { Flags2[1] = true; }
-        if (CloseFriend) { Flags2[2] = true; }
-        if (StoriesHidden) { Flags2[3] = true; }
-        if (StoriesUnavailable) { Flags2[4] = true; }
-        if (ContactRequirePremium) { Flags2[10] = true; }
-        if (BotBusiness) { Flags2[11] = true; }
-        if (BotHasMainApp) { Flags2[13] = true; }
-        if (/*AccessHash != 0 &&*/ AccessHash.HasValue) { Flags[0] = true; }
-        if (FirstName != null) { Flags[1] = true; }
-        if (LastName != null) { Flags[2] = true; }
-        if (Username != null) { Flags[3] = true; }
-        if (Phone != null) { Flags[4] = true; }
-        if (Photo != null) { Flags[5] = true; }
-        if (Status != null) { Flags[6] = true; }
-        if (/*BotInfoVersion != 0 && */BotInfoVersion.HasValue) { Flags[14] = true; }
-        if (RestrictionReason?.Count > 0) { Flags[18] = true; }
-        if (BotInlinePlaceholder != null) { Flags[19] = true; }
-        if (LangCode != null) { Flags[22] = true; }
-        if (EmojiStatus != null) { Flags[30] = true; }
-        if (Usernames?.Count > 0) { Flags2[0] = true; }
-        if (/*StoriesMaxId != 0 && */StoriesMaxId.HasValue) { Flags2[5] = true; }
-        if (Color != null) { Flags2[8] = true; }
-        if (ProfileColor != null) { Flags2[9] = true; }
-        if (/*BotActiveUsers != 0 && */BotActiveUsers.HasValue) { Flags2[12] = true; }
-        if (/*BotVerificationIcon != 0 &&*/ BotVerificationIcon.HasValue) { Flags2[14] = true; }
-        if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2[15] = true; }
+        if (Self) { Flags = Flags.SetBit(10); }
+        if (Contact) { Flags = Flags.SetBit(11); }
+        if (MutualContact) { Flags = Flags.SetBit(12); }
+        if (Deleted) { Flags = Flags.SetBit(13); }
+        if (Bot) { Flags = Flags.SetBit(14); }
+        if (BotChatHistory) { Flags = Flags.SetBit(15); }
+        if (BotNochats) { Flags = Flags.SetBit(16); }
+        if (Verified) { Flags = Flags.SetBit(17); }
+        if (Restricted) { Flags = Flags.SetBit(18); }
+        if (Min) { Flags = Flags.SetBit(20); }
+        if (BotInlineGeo) { Flags = Flags.SetBit(21); }
+        if (Support) { Flags = Flags.SetBit(23); }
+        if (Scam) { Flags = Flags.SetBit(24); }
+        if (ApplyMinPhoto) { Flags = Flags.SetBit(25); }
+        if (Fake) { Flags = Flags.SetBit(26); }
+        if (BotAttachMenu) { Flags = Flags.SetBit(27); }
+        if (Premium) { Flags = Flags.SetBit(28); }
+        if (AttachMenuEnabled) { Flags = Flags.SetBit(29); }
+        if (BotCanEdit) { Flags2 = Flags2.SetBit(1); }
+        if (CloseFriend) { Flags2 = Flags2.SetBit(2); }
+        if (StoriesHidden) { Flags2 = Flags2.SetBit(3); }
+        if (StoriesUnavailable) { Flags2 = Flags2.SetBit(4); }
+        if (ContactRequirePremium) { Flags2 = Flags2.SetBit(10); }
+        if (BotBusiness) { Flags2 = Flags2.SetBit(11); }
+        if (BotHasMainApp) { Flags2 = Flags2.SetBit(13); }
+        if (/*AccessHash != 0 &&*/ AccessHash.HasValue) { Flags = Flags.SetBit(0); }
+        if (FirstName != null) { Flags = Flags.SetBit(1); }
+        if (LastName != null) { Flags = Flags.SetBit(2); }
+        if (Username != null) { Flags = Flags.SetBit(3); }
+        if (Phone != null) { Flags = Flags.SetBit(4); }
+        if (Photo != null) { Flags = Flags.SetBit(5); }
+        if (Status != null) { Flags = Flags.SetBit(6); }
+        if (/*BotInfoVersion != 0 && */BotInfoVersion.HasValue) { Flags = Flags.SetBit(14); }
+        if (RestrictionReason?.Count > 0) { Flags = Flags.SetBit(18); }
+        if (BotInlinePlaceholder != null) { Flags = Flags.SetBit(19); }
+        if (LangCode != null) { Flags = Flags.SetBit(22); }
+        if (EmojiStatus != null) { Flags = Flags.SetBit(30); }
+        if (Usernames?.Count > 0) { Flags2 = Flags2.SetBit(0); }
+        if (/*StoriesMaxId != 0 && */StoriesMaxId.HasValue) { Flags2 = Flags2.SetBit(5); }
+        if (Color != null) { Flags2 = Flags2.SetBit(8); }
+        if (ProfileColor != null) { Flags2 = Flags2.SetBit(9); }
+        if (/*BotActiveUsers != 0 && */BotActiveUsers.HasValue) { Flags2 = Flags2.SetBit(12); }
+        if (/*BotVerificationIcon != 0 &&*/ BotVerificationIcon.HasValue) { Flags2 = Flags2.SetBit(14); }
+        if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2 = Flags2.SetBit(15); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -323,75 +323,75 @@ public sealed class TUser : IUser, ILayeredUser
         writer.Write(Flags);
         writer.Write(Flags2);
         writer.Write(Id);
-        if (Flags[0]) { writer.Write(AccessHash.Value); }
-        if (Flags[1]) { writer.Write(FirstName); }
-        if (Flags[2]) { writer.Write(LastName); }
-        if (Flags[3]) { writer.Write(Username); }
-        if (Flags[4]) { writer.Write(Phone); }
-        if (Flags[5]) { writer.Write(Photo); }
-        if (Flags[6]) { writer.Write(Status); }
-        if (Flags[14]) { writer.Write(BotInfoVersion.Value); }
-        if (Flags[18]) { writer.Write(RestrictionReason); }
-        if (Flags[19]) { writer.Write(BotInlinePlaceholder); }
-        if (Flags[22]) { writer.Write(LangCode); }
-        if (Flags[30]) { writer.Write(EmojiStatus); }
-        if (Flags2[0]) { writer.Write(Usernames); }
-        if (Flags2[5]) { writer.Write(StoriesMaxId.Value); }
-        if (Flags2[8]) { writer.Write(Color); }
-        if (Flags2[9]) { writer.Write(ProfileColor); }
-        if (Flags2[12]) { writer.Write(BotActiveUsers.Value); }
-        if (Flags2[14]) { writer.Write(BotVerificationIcon.Value); }
-        if (Flags2[15]) { writer.Write(SendPaidMessagesStars.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(AccessHash.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(FirstName); }
+        if (Flags.IsBitSet(2)) { writer.Write(LastName); }
+        if (Flags.IsBitSet(3)) { writer.Write(Username); }
+        if (Flags.IsBitSet(4)) { writer.Write(Phone); }
+        if (Flags.IsBitSet(5)) { writer.Write(Photo); }
+        if (Flags.IsBitSet(6)) { writer.Write(Status); }
+        if (Flags.IsBitSet(14)) { writer.Write(BotInfoVersion.Value); }
+        if (Flags.IsBitSet(18)) { writer.Write(RestrictionReason); }
+        if (Flags.IsBitSet(19)) { writer.Write(BotInlinePlaceholder); }
+        if (Flags.IsBitSet(22)) { writer.Write(LangCode); }
+        if (Flags.IsBitSet(30)) { writer.Write(EmojiStatus); }
+        if (Flags2.IsBitSet(0)) { writer.Write(Usernames); }
+        if (Flags2.IsBitSet(5)) { writer.Write(StoriesMaxId.Value); }
+        if (Flags2.IsBitSet(8)) { writer.Write(Color); }
+        if (Flags2.IsBitSet(9)) { writer.Write(ProfileColor); }
+        if (Flags2.IsBitSet(12)) { writer.Write(BotActiveUsers.Value); }
+        if (Flags2.IsBitSet(14)) { writer.Write(BotVerificationIcon.Value); }
+        if (Flags2.IsBitSet(15)) { writer.Write(SendPaidMessagesStars.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[10]) { Self = true; }
-        if (Flags[11]) { Contact = true; }
-        if (Flags[12]) { MutualContact = true; }
-        if (Flags[13]) { Deleted = true; }
-        if (Flags[14]) { Bot = true; }
-        if (Flags[15]) { BotChatHistory = true; }
-        if (Flags[16]) { BotNochats = true; }
-        if (Flags[17]) { Verified = true; }
-        if (Flags[18]) { Restricted = true; }
-        if (Flags[20]) { Min = true; }
-        if (Flags[21]) { BotInlineGeo = true; }
-        if (Flags[23]) { Support = true; }
-        if (Flags[24]) { Scam = true; }
-        if (Flags[25]) { ApplyMinPhoto = true; }
-        if (Flags[26]) { Fake = true; }
-        if (Flags[27]) { BotAttachMenu = true; }
-        if (Flags[28]) { Premium = true; }
-        if (Flags[29]) { AttachMenuEnabled = true; }
-        Flags2 = reader.ReadBitArray();
-        if (Flags2[1]) { BotCanEdit = true; }
-        if (Flags2[2]) { CloseFriend = true; }
-        if (Flags2[3]) { StoriesHidden = true; }
-        if (Flags2[4]) { StoriesUnavailable = true; }
-        if (Flags2[10]) { ContactRequirePremium = true; }
-        if (Flags2[11]) { BotBusiness = true; }
-        if (Flags2[13]) { BotHasMainApp = true; }
-        Id = reader.ReadInt64();
-        if (Flags[0]) { AccessHash = reader.ReadInt64(); }
-        if (Flags[1]) { FirstName = reader.ReadString(); }
-        if (Flags[2]) { LastName = reader.ReadString(); }
-        if (Flags[3]) { Username = reader.ReadString(); }
-        if (Flags[4]) { Phone = reader.ReadString(); }
-        if (Flags[5]) { Photo = reader.Read<MyTelegram.Schema.IUserProfilePhoto>(); }
-        if (Flags[6]) { Status = reader.Read<MyTelegram.Schema.IUserStatus>(); }
-        if (Flags[14]) { BotInfoVersion = reader.ReadInt32(); }
-        if (Flags[18]) { RestrictionReason = reader.Read<TVector<MyTelegram.Schema.IRestrictionReason>>(); }
-        if (Flags[19]) { BotInlinePlaceholder = reader.ReadString(); }
-        if (Flags[22]) { LangCode = reader.ReadString(); }
-        if (Flags[30]) { EmojiStatus = reader.Read<MyTelegram.Schema.IEmojiStatus>(); }
-        if (Flags2[0]) { Usernames = reader.Read<TVector<MyTelegram.Schema.IUsername>>(); }
-        if (Flags2[5]) { StoriesMaxId = reader.ReadInt32(); }
-        if (Flags2[8]) { Color = reader.Read<MyTelegram.Schema.IPeerColor>(); }
-        if (Flags2[9]) { ProfileColor = reader.Read<MyTelegram.Schema.IPeerColor>(); }
-        if (Flags2[12]) { BotActiveUsers = reader.ReadInt32(); }
-        if (Flags2[14]) { BotVerificationIcon = reader.ReadInt64(); }
-        if (Flags2[15]) { SendPaidMessagesStars = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(10)) { Self = true; }
+        if (Flags.IsBitSet(11)) { Contact = true; }
+        if (Flags.IsBitSet(12)) { MutualContact = true; }
+        if (Flags.IsBitSet(13)) { Deleted = true; }
+        if (Flags.IsBitSet(14)) { Bot = true; }
+        if (Flags.IsBitSet(15)) { BotChatHistory = true; }
+        if (Flags.IsBitSet(16)) { BotNochats = true; }
+        if (Flags.IsBitSet(17)) { Verified = true; }
+        if (Flags.IsBitSet(18)) { Restricted = true; }
+        if (Flags.IsBitSet(20)) { Min = true; }
+        if (Flags.IsBitSet(21)) { BotInlineGeo = true; }
+        if (Flags.IsBitSet(23)) { Support = true; }
+        if (Flags.IsBitSet(24)) { Scam = true; }
+        if (Flags.IsBitSet(25)) { ApplyMinPhoto = true; }
+        if (Flags.IsBitSet(26)) { Fake = true; }
+        if (Flags.IsBitSet(27)) { BotAttachMenu = true; }
+        if (Flags.IsBitSet(28)) { Premium = true; }
+        if (Flags.IsBitSet(29)) { AttachMenuEnabled = true; }
+        Flags2 = buffer.ReadInt32();
+        if (Flags2.IsBitSet(1)) { BotCanEdit = true; }
+        if (Flags2.IsBitSet(2)) { CloseFriend = true; }
+        if (Flags2.IsBitSet(3)) { StoriesHidden = true; }
+        if (Flags2.IsBitSet(4)) { StoriesUnavailable = true; }
+        if (Flags2.IsBitSet(10)) { ContactRequirePremium = true; }
+        if (Flags2.IsBitSet(11)) { BotBusiness = true; }
+        if (Flags2.IsBitSet(13)) { BotHasMainApp = true; }
+        Id = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { AccessHash = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(1)) { FirstName = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { LastName = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { Username = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { Phone = buffer.ReadString(); }
+        if (Flags.IsBitSet(5)) { Photo = buffer.Read<MyTelegram.Schema.IUserProfilePhoto>(); }
+        if (Flags.IsBitSet(6)) { Status = buffer.Read<MyTelegram.Schema.IUserStatus>(); }
+        if (Flags.IsBitSet(14)) { BotInfoVersion = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(18)) { RestrictionReason = buffer.Read<TVector<MyTelegram.Schema.IRestrictionReason>>(); }
+        if (Flags.IsBitSet(19)) { BotInlinePlaceholder = buffer.ReadString(); }
+        if (Flags.IsBitSet(22)) { LangCode = buffer.ReadString(); }
+        if (Flags.IsBitSet(30)) { EmojiStatus = buffer.Read<MyTelegram.Schema.IEmojiStatus>(); }
+        if (Flags2.IsBitSet(0)) { Usernames = buffer.Read<TVector<MyTelegram.Schema.IUsername>>(); }
+        if (Flags2.IsBitSet(5)) { StoriesMaxId = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(8)) { Color = buffer.Read<MyTelegram.Schema.IPeerColor>(); }
+        if (Flags2.IsBitSet(9)) { ProfileColor = buffer.Read<MyTelegram.Schema.IPeerColor>(); }
+        if (Flags2.IsBitSet(12)) { BotActiveUsers = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(14)) { BotVerificationIcon = buffer.ReadInt64(); }
+        if (Flags2.IsBitSet(15)) { SendPaidMessagesStars = buffer.ReadInt64(); }
     }
 }

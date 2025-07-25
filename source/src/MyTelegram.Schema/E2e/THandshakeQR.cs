@@ -8,8 +8,8 @@ namespace MyTelegram.Schema.E2e;
 public sealed class THandshakeQR : IHandshakePublic
 {
     public uint ConstructorId => 0xD37DA15A;
-    public byte[] BobEphemeralPK { get; set; }
-    public byte[] BobNonce { get; set; }
+    public ReadOnlyMemory<byte> BobEphemeralPK { get; set; }
+    public ReadOnlyMemory<byte> BobNonce { get; set; }
 
     public void ComputeFlag()
     {
@@ -24,9 +24,9 @@ public sealed class THandshakeQR : IHandshakePublic
         writer.WriteRawBytes(BobNonce);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        BobEphemeralPK = reader.ReadInt256();
-        BobNonce = reader.ReadInt256();
+        BobEphemeralPK = buffer.ReadInt256();
+        BobNonce = buffer.ReadInt256();
     }
 }

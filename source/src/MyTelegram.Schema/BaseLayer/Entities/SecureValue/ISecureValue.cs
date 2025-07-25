@@ -12,7 +12,7 @@ public interface ISecureValue : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Secure <a href="https://corefork.telegram.org/passport">passport</a> value type
@@ -65,5 +65,5 @@ public interface ISecureValue : IObject
     ///<summary>
     /// Data hash
     ///</summary>
-    byte[] Hash { get; set; }
+    ReadOnlyMemory<byte> Hash { get; set; }
 }

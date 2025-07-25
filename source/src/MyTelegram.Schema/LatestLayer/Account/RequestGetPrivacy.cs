@@ -32,8 +32,8 @@ public sealed class RequestGetPrivacy : IRequest<MyTelegram.Schema.Account.IPriv
         writer.Write(Key);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Key = reader.Read<MyTelegram.Schema.IInputPrivacyKey>();
+        Key = buffer.Read<MyTelegram.Schema.IInputPrivacyKey>();
     }
 }

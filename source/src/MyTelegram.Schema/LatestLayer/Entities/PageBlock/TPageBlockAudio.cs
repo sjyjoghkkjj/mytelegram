@@ -35,9 +35,9 @@ public sealed class TPageBlockAudio : IPageBlock
         writer.Write(Caption);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        AudioId = reader.ReadInt64();
-        Caption = reader.Read<MyTelegram.Schema.IPageCaption>();
+        AudioId = buffer.ReadInt64();
+        Caption = buffer.Read<MyTelegram.Schema.IPageCaption>();
     }
 }

@@ -25,7 +25,7 @@ public sealed class TInputNotifyUsers : IInputNotifyPeer
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

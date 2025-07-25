@@ -34,9 +34,9 @@ public sealed class TGroupCallParticipantVideoSourceGroup : IGroupCallParticipan
         writer.Write(Sources);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Semantics = reader.ReadString();
-        Sources = reader.Read<TVector<int>>();
+        Semantics = buffer.ReadString();
+        Sources = buffer.Read<TVector<int>>();
     }
 }

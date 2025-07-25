@@ -34,9 +34,9 @@ public sealed class TPageListOrderedItemBlocks : IPageListOrderedItem
         writer.Write(Blocks);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Num = reader.ReadString();
-        Blocks = reader.Read<TVector<MyTelegram.Schema.IPageBlock>>();
+        Num = buffer.ReadString();
+        Blocks = buffer.Read<TVector<MyTelegram.Schema.IPageBlock>>();
     }
 }

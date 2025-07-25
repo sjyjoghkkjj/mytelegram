@@ -24,9 +24,9 @@ public sealed class TGroupState : IGroupState
         writer.Write(ExternalPermissions);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Participants = reader.ReadVector<MyTelegram.Schema.E2e.IGroupParticipant>();
-        ExternalPermissions = reader.ReadInt32();
+        Participants = buffer.ReadVector<MyTelegram.Schema.E2e.IGroupParticipant>();
+        ExternalPermissions = buffer.ReadInt32();
     }
 }

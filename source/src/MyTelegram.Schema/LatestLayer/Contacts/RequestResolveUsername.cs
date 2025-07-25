@@ -19,7 +19,7 @@ public sealed class RequestResolveUsername : IRequest<MyTelegram.Schema.Contacts
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// @username to resolve
@@ -33,7 +33,7 @@ public sealed class RequestResolveUsername : IRequest<MyTelegram.Schema.Contacts
 
     public void ComputeFlag()
     {
-        if (Referer != null) { Flags[0] = true; }
+        if (Referer != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,13 +42,13 @@ public sealed class RequestResolveUsername : IRequest<MyTelegram.Schema.Contacts
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Username);
-        if (Flags[0]) { writer.Write(Referer); }
+        if (Flags.IsBitSet(0)) { writer.Write(Referer); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Username = reader.ReadString();
-        if (Flags[0]) { Referer = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Username = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Referer = buffer.ReadString(); }
     }
 }

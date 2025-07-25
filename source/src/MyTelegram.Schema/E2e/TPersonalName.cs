@@ -24,9 +24,9 @@ public sealed class TPersonalName : IPersonal
         writer.Write(LastName);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
     }
 }

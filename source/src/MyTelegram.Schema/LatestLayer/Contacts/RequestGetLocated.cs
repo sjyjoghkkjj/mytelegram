@@ -20,7 +20,7 @@ public sealed class RequestGetLocated : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// While the geolocation of the current user is public, clients should update it in the background every half-an-hour or so, while setting this flag. <br>Do this only if the new location is more than 1 KM away from the previous one, or if the previous location is unknown.
@@ -41,8 +41,8 @@ public sealed class RequestGetLocated : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (Background) { Flags[1] = true; }
-        if (/*SelfExpires != 0 && */SelfExpires.HasValue) { Flags[0] = true; }
+        if (Background) { Flags = Flags.SetBit(1); }
+        if (/*SelfExpires != 0 && */SelfExpires.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -51,14 +51,14 @@ public sealed class RequestGetLocated : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(GeoPoint);
-        if (Flags[0]) { writer.Write(SelfExpires.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(SelfExpires.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Background = true; }
-        GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>();
-        if (Flags[0]) { SelfExpires = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Background = true; }
+        GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>();
+        if (Flags.IsBitSet(0)) { SelfExpires = buffer.ReadInt32(); }
     }
 }

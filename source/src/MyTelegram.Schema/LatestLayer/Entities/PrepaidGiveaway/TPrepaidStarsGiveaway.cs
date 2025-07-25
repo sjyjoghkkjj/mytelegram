@@ -52,12 +52,12 @@ public sealed class TPrepaidStarsGiveaway : IPrepaidGiveaway
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Stars = reader.ReadInt64();
-        Quantity = reader.ReadInt32();
-        Boosts = reader.ReadInt32();
-        Date = reader.ReadInt32();
+        Id = buffer.ReadInt64();
+        Stars = buffer.ReadInt64();
+        Quantity = buffer.ReadInt32();
+        Boosts = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
     }
 }

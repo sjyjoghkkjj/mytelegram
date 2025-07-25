@@ -13,7 +13,7 @@ public sealed class TFoundStickers : IFoundStickers
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -32,7 +32,7 @@ public sealed class TFoundStickers : IFoundStickers
 
     public void ComputeFlag()
     {
-        if (/*NextOffset != 0 && */NextOffset.HasValue) { Flags[0] = true; }
+        if (/*NextOffset != 0 && */NextOffset.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -41,16 +41,16 @@ public sealed class TFoundStickers : IFoundStickers
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(NextOffset.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextOffset.Value); }
         writer.Write(Hash);
         writer.Write(Stickers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NextOffset = reader.ReadInt32(); }
-        Hash = reader.ReadInt64();
-        Stickers = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NextOffset = buffer.ReadInt32(); }
+        Hash = buffer.ReadInt64();
+        Stickers = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
     }
 }

@@ -35,7 +35,7 @@ public sealed class TWebFile : IWebFile
     ///<summary>
     /// Data
     ///</summary>
-    public byte[] Bytes { get; set; }
+    public ReadOnlyMemory<byte> Bytes { get; set; }
 
     public void ComputeFlag()
     {
@@ -53,12 +53,12 @@ public sealed class TWebFile : IWebFile
         writer.Write(Bytes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Size = reader.ReadInt32();
-        MimeType = reader.ReadString();
-        FileType = reader.Read<MyTelegram.Schema.Storage.IFileType>();
-        Mtime = reader.ReadInt32();
-        Bytes = reader.ReadBytes();
+        Size = buffer.ReadInt32();
+        MimeType = buffer.ReadString();
+        FileType = buffer.Read<MyTelegram.Schema.Storage.IFileType>();
+        Mtime = buffer.ReadInt32();
+        Bytes = buffer.ReadBytes();
     }
 }

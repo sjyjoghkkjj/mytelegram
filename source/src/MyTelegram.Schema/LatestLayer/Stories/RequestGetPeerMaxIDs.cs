@@ -28,8 +28,8 @@ public sealed class RequestGetPeerMaxIDs : IRequest<TVector<int>>
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Id = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
     }
 }

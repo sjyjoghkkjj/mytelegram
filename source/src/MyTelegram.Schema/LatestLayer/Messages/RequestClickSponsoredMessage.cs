@@ -14,7 +14,7 @@ public sealed class RequestClickSponsoredMessage : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The user clicked on the media
@@ -31,12 +31,12 @@ public sealed class RequestClickSponsoredMessage : IRequest<IBool>
     ///<summary>
     /// The ad's unique ID.
     ///</summary>
-    public byte[] RandomId { get; set; }
+    public ReadOnlyMemory<byte> RandomId { get; set; }
 
     public void ComputeFlag()
     {
-        if (Media) { Flags[0] = true; }
-        if (Fullscreen) { Flags[1] = true; }
+        if (Media) { Flags = Flags.SetBit(0); }
+        if (Fullscreen) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class RequestClickSponsoredMessage : IRequest<IBool>
         writer.Write(RandomId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Media = true; }
-        if (Flags[1]) { Fullscreen = true; }
-        RandomId = reader.ReadBytes();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Media = true; }
+        if (Flags.IsBitSet(1)) { Fullscreen = true; }
+        RandomId = buffer.ReadBytes();
     }
 }

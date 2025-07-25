@@ -10,7 +10,7 @@ namespace MyTelegram.Schema.Payments;
 public sealed class RequestGetResaleStarGifts : IRequest<MyTelegram.Schema.Payments.IResaleStarGifts>
 {
     public uint ConstructorId => 0x7a5fa236;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool SortByPrice { get; set; }
     public bool SortByNum { get; set; }
     public long? AttributesHash { get; set; }
@@ -21,10 +21,10 @@ public sealed class RequestGetResaleStarGifts : IRequest<MyTelegram.Schema.Payme
 
     public void ComputeFlag()
     {
-        if (SortByPrice) { Flags[1] = true; }
-        if (SortByNum) { Flags[2] = true; }
-        if (/*AttributesHash != 0 &&*/ AttributesHash.HasValue) { Flags[0] = true; }
-        if (Attributes?.Count > 0) { Flags[3] = true; }
+        if (SortByPrice) { Flags = Flags.SetBit(1); }
+        if (SortByNum) { Flags = Flags.SetBit(2); }
+        if (/*AttributesHash != 0 &&*/ AttributesHash.HasValue) { Flags = Flags.SetBit(0); }
+        if (Attributes?.Count > 0) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -33,22 +33,22 @@ public sealed class RequestGetResaleStarGifts : IRequest<MyTelegram.Schema.Payme
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(AttributesHash.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(AttributesHash.Value); }
         writer.Write(GiftId);
-        if (Flags[3]) { writer.Write(Attributes); }
+        if (Flags.IsBitSet(3)) { writer.Write(Attributes); }
         writer.Write(Offset);
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { SortByPrice = true; }
-        if (Flags[2]) { SortByNum = true; }
-        if (Flags[0]) { AttributesHash = reader.ReadInt64(); }
-        GiftId = reader.ReadInt64();
-        if (Flags[3]) { Attributes = reader.Read<TVector<MyTelegram.Schema.IStarGiftAttributeId>>(); }
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { SortByPrice = true; }
+        if (Flags.IsBitSet(2)) { SortByNum = true; }
+        if (Flags.IsBitSet(0)) { AttributesHash = buffer.ReadInt64(); }
+        GiftId = buffer.ReadInt64();
+        if (Flags.IsBitSet(3)) { Attributes = buffer.Read<TVector<MyTelegram.Schema.IStarGiftAttributeId>>(); }
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

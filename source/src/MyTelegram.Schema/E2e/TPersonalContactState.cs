@@ -8,12 +8,12 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TPersonalContactState : IPersonal
 {
     public uint ConstructorId => 0xC14AC456;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool IsContact { get; set; }
 
     public void ComputeFlag()
     {
-        if (IsContact) { Flags[0] = true; }
+        if (IsContact) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -24,9 +24,9 @@ public sealed class TPersonalContactState : IPersonal
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { IsContact = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { IsContact = true; }
     }
 }

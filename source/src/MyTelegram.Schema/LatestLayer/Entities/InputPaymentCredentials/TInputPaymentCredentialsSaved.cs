@@ -19,7 +19,7 @@ public sealed class TInputPaymentCredentialsSaved : IInputPaymentCredentials
     ///<summary>
     /// Temporary password
     ///</summary>
-    public byte[] TmpPassword { get; set; }
+    public ReadOnlyMemory<byte> TmpPassword { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,9 +34,9 @@ public sealed class TInputPaymentCredentialsSaved : IInputPaymentCredentials
         writer.Write(TmpPassword);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadString();
-        TmpPassword = reader.ReadBytes();
+        Id = buffer.ReadString();
+        TmpPassword = buffer.ReadBytes();
     }
 }

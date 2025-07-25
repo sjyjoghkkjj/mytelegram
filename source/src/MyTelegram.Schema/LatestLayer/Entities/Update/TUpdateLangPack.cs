@@ -29,8 +29,8 @@ public sealed class TUpdateLangPack : IUpdate
         writer.Write(Difference);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Difference = reader.Read<MyTelegram.Schema.ILangPackDifference>();
+        Difference = buffer.Read<MyTelegram.Schema.ILangPackDifference>();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TGroupCallStreamChannels : IGroupCallStreamChannels
         writer.Write(Channels);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channels = reader.Read<TVector<MyTelegram.Schema.IGroupCallStreamChannel>>();
+        Channels = buffer.Read<TVector<MyTelegram.Schema.IGroupCallStreamChannel>>();
     }
 }

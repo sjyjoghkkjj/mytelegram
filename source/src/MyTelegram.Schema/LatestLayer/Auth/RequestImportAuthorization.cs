@@ -38,9 +38,9 @@ public sealed class RequestImportAuthorization : IRequest<MyTelegram.Schema.Auth
         writer.Write(Bytes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Bytes = reader.ReadBytes();
+        Id = buffer.ReadInt64();
+        Bytes = buffer.ReadBytes();
     }
 }

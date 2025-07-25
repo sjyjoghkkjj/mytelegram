@@ -14,7 +14,7 @@ public sealed class TForumTopic : IForumTopic
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the topic was created by the current user
@@ -121,13 +121,13 @@ public sealed class TForumTopic : IForumTopic
 
     public void ComputeFlag()
     {
-        if (My) { Flags[1] = true; }
-        if (Closed) { Flags[2] = true; }
-        if (Pinned) { Flags[3] = true; }
-        if (Short) { Flags[5] = true; }
-        if (Hidden) { Flags[6] = true; }
-        if (/*IconEmojiId != 0 &&*/ IconEmojiId.HasValue) { Flags[0] = true; }
-        if (Draft != null) { Flags[4] = true; }
+        if (My) { Flags = Flags.SetBit(1); }
+        if (Closed) { Flags = Flags.SetBit(2); }
+        if (Pinned) { Flags = Flags.SetBit(3); }
+        if (Short) { Flags = Flags.SetBit(5); }
+        if (Hidden) { Flags = Flags.SetBit(6); }
+        if (/*IconEmojiId != 0 &&*/ IconEmojiId.HasValue) { Flags = Flags.SetBit(0); }
+        if (Draft != null) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -139,7 +139,7 @@ public sealed class TForumTopic : IForumTopic
         writer.Write(Date);
         writer.Write(Title);
         writer.Write(IconColor);
-        if (Flags[0]) { writer.Write(IconEmojiId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(IconEmojiId.Value); }
         writer.Write(TopMessage);
         writer.Write(ReadInboxMaxId);
         writer.Write(ReadOutboxMaxId);
@@ -148,30 +148,30 @@ public sealed class TForumTopic : IForumTopic
         writer.Write(UnreadReactionsCount);
         writer.Write(FromId);
         writer.Write(NotifySettings);
-        if (Flags[4]) { writer.Write(Draft); }
+        if (Flags.IsBitSet(4)) { writer.Write(Draft); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { My = true; }
-        if (Flags[2]) { Closed = true; }
-        if (Flags[3]) { Pinned = true; }
-        if (Flags[5]) { Short = true; }
-        if (Flags[6]) { Hidden = true; }
-        Id = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        Title = reader.ReadString();
-        IconColor = reader.ReadInt32();
-        if (Flags[0]) { IconEmojiId = reader.ReadInt64(); }
-        TopMessage = reader.ReadInt32();
-        ReadInboxMaxId = reader.ReadInt32();
-        ReadOutboxMaxId = reader.ReadInt32();
-        UnreadCount = reader.ReadInt32();
-        UnreadMentionsCount = reader.ReadInt32();
-        UnreadReactionsCount = reader.ReadInt32();
-        FromId = reader.Read<MyTelegram.Schema.IPeer>();
-        NotifySettings = reader.Read<MyTelegram.Schema.IPeerNotifySettings>();
-        if (Flags[4]) { Draft = reader.Read<MyTelegram.Schema.IDraftMessage>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { My = true; }
+        if (Flags.IsBitSet(2)) { Closed = true; }
+        if (Flags.IsBitSet(3)) { Pinned = true; }
+        if (Flags.IsBitSet(5)) { Short = true; }
+        if (Flags.IsBitSet(6)) { Hidden = true; }
+        Id = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        Title = buffer.ReadString();
+        IconColor = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { IconEmojiId = buffer.ReadInt64(); }
+        TopMessage = buffer.ReadInt32();
+        ReadInboxMaxId = buffer.ReadInt32();
+        ReadOutboxMaxId = buffer.ReadInt32();
+        UnreadCount = buffer.ReadInt32();
+        UnreadMentionsCount = buffer.ReadInt32();
+        UnreadReactionsCount = buffer.ReadInt32();
+        FromId = buffer.Read<MyTelegram.Schema.IPeer>();
+        NotifySettings = buffer.Read<MyTelegram.Schema.IPeerNotifySettings>();
+        if (Flags.IsBitSet(4)) { Draft = buffer.Read<MyTelegram.Schema.IDraftMessage>(); }
     }
 }

@@ -35,9 +35,9 @@ public sealed class TUpdateUserStatus : IUpdate
         writer.Write(Status);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        Status = reader.Read<MyTelegram.Schema.IUserStatus>();
+        UserId = buffer.ReadInt64();
+        Status = buffer.Read<MyTelegram.Schema.IUserStatus>();
     }
 }

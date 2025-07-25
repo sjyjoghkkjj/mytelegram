@@ -35,9 +35,9 @@ public sealed class TPageBlockSlideshow : IPageBlock
         writer.Write(Caption);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Items = reader.Read<TVector<MyTelegram.Schema.IPageBlock>>();
-        Caption = reader.Read<MyTelegram.Schema.IPageCaption>();
+        Items = buffer.Read<TVector<MyTelegram.Schema.IPageBlock>>();
+        Caption = buffer.Read<MyTelegram.Schema.IPageCaption>();
     }
 }

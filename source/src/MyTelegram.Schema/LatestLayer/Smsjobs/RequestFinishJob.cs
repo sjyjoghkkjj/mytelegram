@@ -17,7 +17,7 @@ public sealed class RequestFinishJob : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Job ID.
@@ -31,7 +31,7 @@ public sealed class RequestFinishJob : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Error != null) { Flags[0] = true; }
+        if (Error != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -40,13 +40,13 @@ public sealed class RequestFinishJob : IRequest<IBool>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(JobId);
-        if (Flags[0]) { writer.Write(Error); }
+        if (Flags.IsBitSet(0)) { writer.Write(Error); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        JobId = reader.ReadString();
-        if (Flags[0]) { Error = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        JobId = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Error = buffer.ReadString(); }
     }
 }

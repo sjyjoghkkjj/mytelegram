@@ -44,10 +44,10 @@ public sealed class RequestReorderPreviewMedias : IRequest<IBool>
         writer.Write(Order);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        LangCode = reader.ReadString();
-        Order = reader.Read<TVector<MyTelegram.Schema.IInputMedia>>();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        LangCode = buffer.ReadString();
+        Order = buffer.Read<TVector<MyTelegram.Schema.IInputMedia>>();
     }
 }

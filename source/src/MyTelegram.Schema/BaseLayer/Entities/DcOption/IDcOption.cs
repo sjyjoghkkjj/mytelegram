@@ -12,7 +12,7 @@ public interface IDcOption : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether the specified IP is an IPv6 address
@@ -62,5 +62,5 @@ public interface IDcOption : IObject
     ///<summary>
     /// If the <code>tcpo_only</code> flag is set, specifies the secret to use when connecting using <a href="https://corefork.telegram.org/mtproto/mtproto-transports#transport-obfuscation">transport obfuscation</a>
     ///</summary>
-    byte[]? Secret { get; set; }
+    ReadOnlyMemory<byte>? Secret { get; set; }
 }

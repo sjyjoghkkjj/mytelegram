@@ -8,17 +8,17 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TBlock : IBlock
 {
     public uint ConstructorId => 0x639a3db6;
-    public byte[] Signature { get; set; }
-    public BitArray Flags { get; set; } = new BitArray(32);
-    public byte[] PrevBlockHash { get; set; }
+    public ReadOnlyMemory<byte> Signature { get; set; }
+    public int Flags { get; set; }
+    public ReadOnlyMemory<byte> PrevBlockHash { get; set; }
     public TVector<MyTelegram.Schema.E2e.IChange> Changes { get; set; }
     public int Height { get; set; }
     public MyTelegram.Schema.E2e.IStateProof StateProof { get; set; }
-    public byte[]? SignaturePublicKey { get; set; }
+    public ReadOnlyMemory<byte>? SignaturePublicKey { get; set; }
 
     public void ComputeFlag()
     {
-        if (SignaturePublicKey != null) { Flags[0] = true; }
+        if (SignaturePublicKey != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -31,17 +31,17 @@ public sealed class TBlock : IBlock
         writer.WriteVector(Changes);
         writer.Write(Height);
         writer.Write(StateProof);
-        if (Flags[0]) { writer.WriteRawBytes(SignaturePublicKey); }
+        if (Flags.IsBitSet(0)) { writer.WriteRawBytes(SignaturePublicKey.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Signature = reader.ReadInt512();
-        Flags = reader.ReadBitArray();
-        PrevBlockHash = reader.ReadInt256();
-        Changes = reader.ReadVector<MyTelegram.Schema.E2e.IChange>();
-        Height = reader.ReadInt32();
-        StateProof = reader.Read<MyTelegram.Schema.E2e.IStateProof>();
-        if (Flags[0]) { SignaturePublicKey = reader.ReadInt256(); }
+        Signature = buffer.ReadInt512();
+        Flags = buffer.ReadInt32();
+        PrevBlockHash = buffer.ReadInt256();
+        Changes = buffer.ReadVector<MyTelegram.Schema.E2e.IChange>();
+        Height = buffer.ReadInt32();
+        StateProof = buffer.Read<MyTelegram.Schema.E2e.IStateProof>();
+        if (Flags.IsBitSet(0)) { SignaturePublicKey = buffer.ReadInt256(); }
     }
 }

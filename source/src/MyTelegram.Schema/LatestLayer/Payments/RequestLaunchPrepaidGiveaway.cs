@@ -45,10 +45,10 @@ public sealed class RequestLaunchPrepaidGiveaway : IRequest<MyTelegram.Schema.IU
         writer.Write(Purpose);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        GiveawayId = reader.ReadInt64();
-        Purpose = reader.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        GiveawayId = buffer.ReadInt64();
+        Purpose = buffer.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
     }
 }

@@ -29,8 +29,8 @@ public sealed class TChannelAdminLogEventActionToggleForum : IChannelAdminLogEve
         writer.Write(NewValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        NewValue = reader.Read();
+        NewValue = buffer.Read();
     }
 }

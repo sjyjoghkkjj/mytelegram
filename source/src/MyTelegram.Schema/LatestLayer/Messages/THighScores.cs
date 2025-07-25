@@ -34,9 +34,9 @@ public sealed class THighScores : IHighScores
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Scores = reader.Read<TVector<MyTelegram.Schema.IHighScore>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Scores = buffer.Read<TVector<MyTelegram.Schema.IHighScore>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

@@ -23,7 +23,7 @@ public sealed class RequestEditGroupCallParticipant : IRequest<MyTelegram.Schema
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The group call
@@ -74,12 +74,12 @@ public sealed class RequestEditGroupCallParticipant : IRequest<MyTelegram.Schema
 
     public void ComputeFlag()
     {
-        if (Muted !=null) { Flags[0] = true; }
-        if (/*Volume != 0 && */Volume.HasValue) { Flags[1] = true; }
-        if (RaiseHand !=null) { Flags[2] = true; }
-        if (VideoStopped !=null) { Flags[3] = true; }
-        if (VideoPaused !=null) { Flags[4] = true; }
-        if (PresentationPaused !=null) { Flags[5] = true; }
+        if (Muted !=null) { Flags = Flags.SetBit(0); }
+        if (/*Volume != 0 && */Volume.HasValue) { Flags = Flags.SetBit(1); }
+        if (RaiseHand !=null) { Flags = Flags.SetBit(2); }
+        if (VideoStopped !=null) { Flags = Flags.SetBit(3); }
+        if (VideoPaused !=null) { Flags = Flags.SetBit(4); }
+        if (PresentationPaused !=null) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -89,24 +89,24 @@ public sealed class RequestEditGroupCallParticipant : IRequest<MyTelegram.Schema
         writer.Write(Flags);
         writer.Write(Call);
         writer.Write(Participant);
-        if (Flags[0]) { writer.Write(Muted.Value); }
-        if (Flags[1]) { writer.Write(Volume.Value); }
-        if (Flags[2]) { writer.Write(RaiseHand.Value); }
-        if (Flags[3]) { writer.Write(VideoStopped.Value); }
-        if (Flags[4]) { writer.Write(VideoPaused.Value); }
-        if (Flags[5]) { writer.Write(PresentationPaused.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Muted.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Volume.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(RaiseHand.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(VideoStopped.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(VideoPaused.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(PresentationPaused.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Participant = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[0]) { Muted = reader.Read(); }
-        if (Flags[1]) { Volume = reader.ReadInt32(); }
-        if (Flags[2]) { RaiseHand = reader.Read(); }
-        if (Flags[3]) { VideoStopped = reader.Read(); }
-        if (Flags[4]) { VideoPaused = reader.Read(); }
-        if (Flags[5]) { PresentationPaused = reader.Read(); }
+        Flags = buffer.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Participant = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(0)) { Muted = buffer.Read(); }
+        if (Flags.IsBitSet(1)) { Volume = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { RaiseHand = buffer.Read(); }
+        if (Flags.IsBitSet(3)) { VideoStopped = buffer.Read(); }
+        if (Flags.IsBitSet(4)) { VideoPaused = buffer.Read(); }
+        if (Flags.IsBitSet(5)) { PresentationPaused = buffer.Read(); }
     }
 }

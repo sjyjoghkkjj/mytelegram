@@ -19,7 +19,7 @@ public sealed class TPoll : IPoll
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the poll is closed and doesn't accept any more answers
@@ -68,12 +68,12 @@ public sealed class TPoll : IPoll
 
     public void ComputeFlag()
     {
-        if (Closed) { Flags[0] = true; }
-        if (PublicVoters) { Flags[1] = true; }
-        if (MultipleChoice) { Flags[2] = true; }
-        if (Quiz) { Flags[3] = true; }
-        if (/*ClosePeriod != 0 && */ClosePeriod.HasValue) { Flags[4] = true; }
-        if (/*CloseDate != 0 && */CloseDate.HasValue) { Flags[5] = true; }
+        if (Closed) { Flags = Flags.SetBit(0); }
+        if (PublicVoters) { Flags = Flags.SetBit(1); }
+        if (MultipleChoice) { Flags = Flags.SetBit(2); }
+        if (Quiz) { Flags = Flags.SetBit(3); }
+        if (/*ClosePeriod != 0 && */ClosePeriod.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*CloseDate != 0 && */CloseDate.HasValue) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -84,21 +84,21 @@ public sealed class TPoll : IPoll
         writer.Write(Flags);
         writer.Write(Question);
         writer.Write(Answers);
-        if (Flags[4]) { writer.Write(ClosePeriod.Value); }
-        if (Flags[5]) { writer.Write(CloseDate.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(ClosePeriod.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(CloseDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Closed = true; }
-        if (Flags[1]) { PublicVoters = true; }
-        if (Flags[2]) { MultipleChoice = true; }
-        if (Flags[3]) { Quiz = true; }
-        Question = reader.Read<MyTelegram.Schema.ITextWithEntities>();
-        Answers = reader.Read<TVector<MyTelegram.Schema.IPollAnswer>>();
-        if (Flags[4]) { ClosePeriod = reader.ReadInt32(); }
-        if (Flags[5]) { CloseDate = reader.ReadInt32(); }
+        Id = buffer.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Closed = true; }
+        if (Flags.IsBitSet(1)) { PublicVoters = true; }
+        if (Flags.IsBitSet(2)) { MultipleChoice = true; }
+        if (Flags.IsBitSet(3)) { Quiz = true; }
+        Question = buffer.Read<MyTelegram.Schema.ITextWithEntities>();
+        Answers = buffer.Read<TVector<MyTelegram.Schema.IPollAnswer>>();
+        if (Flags.IsBitSet(4)) { ClosePeriod = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { CloseDate = buffer.ReadInt32(); }
     }
 }

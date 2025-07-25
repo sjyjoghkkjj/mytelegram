@@ -17,7 +17,7 @@ public sealed class RequestGetTopPeers : IRequest<MyTelegram.Schema.Contacts.ITo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Users we've chatted most frequently with
@@ -90,15 +90,15 @@ public sealed class RequestGetTopPeers : IRequest<MyTelegram.Schema.Contacts.ITo
 
     public void ComputeFlag()
     {
-        if (Correspondents) { Flags[0] = true; }
-        if (BotsPm) { Flags[1] = true; }
-        if (BotsInline) { Flags[2] = true; }
-        if (PhoneCalls) { Flags[3] = true; }
-        if (ForwardUsers) { Flags[4] = true; }
-        if (ForwardChats) { Flags[5] = true; }
-        if (Groups) { Flags[10] = true; }
-        if (Channels) { Flags[15] = true; }
-        if (BotsApp) { Flags[16] = true; }
+        if (Correspondents) { Flags = Flags.SetBit(0); }
+        if (BotsPm) { Flags = Flags.SetBit(1); }
+        if (BotsInline) { Flags = Flags.SetBit(2); }
+        if (PhoneCalls) { Flags = Flags.SetBit(3); }
+        if (ForwardUsers) { Flags = Flags.SetBit(4); }
+        if (ForwardChats) { Flags = Flags.SetBit(5); }
+        if (Groups) { Flags = Flags.SetBit(10); }
+        if (Channels) { Flags = Flags.SetBit(15); }
+        if (BotsApp) { Flags = Flags.SetBit(16); }
 
     }
 
@@ -112,20 +112,20 @@ public sealed class RequestGetTopPeers : IRequest<MyTelegram.Schema.Contacts.ITo
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Correspondents = true; }
-        if (Flags[1]) { BotsPm = true; }
-        if (Flags[2]) { BotsInline = true; }
-        if (Flags[3]) { PhoneCalls = true; }
-        if (Flags[4]) { ForwardUsers = true; }
-        if (Flags[5]) { ForwardChats = true; }
-        if (Flags[10]) { Groups = true; }
-        if (Flags[15]) { Channels = true; }
-        if (Flags[16]) { BotsApp = true; }
-        Offset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Correspondents = true; }
+        if (Flags.IsBitSet(1)) { BotsPm = true; }
+        if (Flags.IsBitSet(2)) { BotsInline = true; }
+        if (Flags.IsBitSet(3)) { PhoneCalls = true; }
+        if (Flags.IsBitSet(4)) { ForwardUsers = true; }
+        if (Flags.IsBitSet(5)) { ForwardChats = true; }
+        if (Flags.IsBitSet(10)) { Groups = true; }
+        if (Flags.IsBitSet(15)) { Channels = true; }
+        if (Flags.IsBitSet(16)) { BotsApp = true; }
+        Offset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

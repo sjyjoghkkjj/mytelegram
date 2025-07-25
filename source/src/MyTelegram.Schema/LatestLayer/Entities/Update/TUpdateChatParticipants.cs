@@ -29,8 +29,8 @@ public sealed class TUpdateChatParticipants : IUpdate
         writer.Write(Participants);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Participants = reader.Read<MyTelegram.Schema.IChatParticipants>();
+        Participants = buffer.Read<MyTelegram.Schema.IChatParticipants>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TMessageActionPhoneCall : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Is this a video call?
@@ -40,9 +40,9 @@ public sealed class TMessageActionPhoneCall : IMessageAction
 
     public void ComputeFlag()
     {
-        if (Video) { Flags[2] = true; }
-        if (Reason != null) { Flags[0] = true; }
-        if (/*Duration != 0 && */Duration.HasValue) { Flags[1] = true; }
+        if (Video) { Flags = Flags.SetBit(2); }
+        if (Reason != null) { Flags = Flags.SetBit(0); }
+        if (/*Duration != 0 && */Duration.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -51,16 +51,16 @@ public sealed class TMessageActionPhoneCall : IMessageAction
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(CallId);
-        if (Flags[0]) { writer.Write(Reason); }
-        if (Flags[1]) { writer.Write(Duration.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Reason); }
+        if (Flags.IsBitSet(1)) { writer.Write(Duration.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Video = true; }
-        CallId = reader.ReadInt64();
-        if (Flags[0]) { Reason = reader.Read<MyTelegram.Schema.IPhoneCallDiscardReason>(); }
-        if (Flags[1]) { Duration = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Video = true; }
+        CallId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Reason = buffer.Read<MyTelegram.Schema.IPhoneCallDiscardReason>(); }
+        if (Flags.IsBitSet(1)) { Duration = buffer.ReadInt32(); }
     }
 }

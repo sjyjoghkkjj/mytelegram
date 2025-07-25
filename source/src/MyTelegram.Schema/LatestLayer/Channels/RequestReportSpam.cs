@@ -49,10 +49,10 @@ public sealed class RequestReportSpam : IRequest<IBool>
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Participant = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.Read<TVector<int>>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Participant = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.Read<TVector<int>>();
     }
 }

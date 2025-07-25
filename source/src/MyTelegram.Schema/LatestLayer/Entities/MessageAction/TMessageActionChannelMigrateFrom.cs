@@ -34,9 +34,9 @@ public sealed class TMessageActionChannelMigrateFrom : IMessageAction
         writer.Write(ChatId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
-        ChatId = reader.ReadInt64();
+        Title = buffer.ReadString();
+        ChatId = buffer.ReadInt64();
     }
 }

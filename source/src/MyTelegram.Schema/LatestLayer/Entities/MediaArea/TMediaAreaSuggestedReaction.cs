@@ -14,7 +14,7 @@ public sealed class TMediaAreaSuggestedReaction : IMediaArea
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the reaction bubble has a dark background.
@@ -42,8 +42,8 @@ public sealed class TMediaAreaSuggestedReaction : IMediaArea
 
     public void ComputeFlag()
     {
-        if (Dark) { Flags[0] = true; }
-        if (Flipped) { Flags[1] = true; }
+        if (Dark) { Flags = Flags.SetBit(0); }
+        if (Flipped) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -56,12 +56,12 @@ public sealed class TMediaAreaSuggestedReaction : IMediaArea
         writer.Write(Reaction);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Dark = true; }
-        if (Flags[1]) { Flipped = true; }
-        Coordinates = reader.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
-        Reaction = reader.Read<MyTelegram.Schema.IReaction>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Dark = true; }
+        if (Flags.IsBitSet(1)) { Flipped = true; }
+        Coordinates = buffer.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
+        Reaction = buffer.Read<MyTelegram.Schema.IReaction>();
     }
 }

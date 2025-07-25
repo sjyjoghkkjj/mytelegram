@@ -24,7 +24,7 @@ public sealed class TInputPhotoLegacyFileLocation : IInputFileLocation
     ///<summary>
     /// File reference
     ///</summary>
-    public byte[] FileReference { get; set; }
+    public ReadOnlyMemory<byte> FileReference { get; set; }
 
     ///<summary>
     /// Volume ID
@@ -58,13 +58,13 @@ public sealed class TInputPhotoLegacyFileLocation : IInputFileLocation
         writer.Write(Secret);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        FileReference = reader.ReadBytes();
-        VolumeId = reader.ReadInt64();
-        LocalId = reader.ReadInt32();
-        Secret = reader.ReadInt64();
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        FileReference = buffer.ReadBytes();
+        VolumeId = buffer.ReadInt64();
+        LocalId = buffer.ReadInt32();
+        Secret = buffer.ReadInt64();
     }
 }

@@ -17,7 +17,7 @@ public sealed class RequestGetCdnFile : IRequest<MyTelegram.Schema.Upload.ICdnFi
     ///<summary>
     /// File token
     ///</summary>
-    public byte[] FileToken { get; set; }
+    public ReadOnlyMemory<byte> FileToken { get; set; }
 
     ///<summary>
     /// Offset of chunk to download
@@ -43,10 +43,10 @@ public sealed class RequestGetCdnFile : IRequest<MyTelegram.Schema.Upload.ICdnFi
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FileToken = reader.ReadBytes();
-        Offset = reader.ReadInt64();
-        Limit = reader.ReadInt32();
+        FileToken = buffer.ReadBytes();
+        Offset = buffer.ReadInt64();
+        Limit = buffer.ReadInt32();
     }
 }

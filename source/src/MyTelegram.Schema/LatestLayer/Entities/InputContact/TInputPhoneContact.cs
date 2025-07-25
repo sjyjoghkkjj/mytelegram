@@ -46,11 +46,11 @@ public sealed class TInputPhoneContact : IInputContact
         writer.Write(LastName);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ClientId = reader.ReadInt64();
-        Phone = reader.ReadString();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
+        ClientId = buffer.ReadInt64();
+        Phone = buffer.ReadString();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
     }
 }

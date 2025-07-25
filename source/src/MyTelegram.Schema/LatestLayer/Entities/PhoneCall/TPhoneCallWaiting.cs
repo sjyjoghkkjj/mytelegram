@@ -14,7 +14,7 @@ public sealed class TPhoneCallWaiting : IPhoneCall
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Is this a video call
@@ -60,8 +60,8 @@ public sealed class TPhoneCallWaiting : IPhoneCall
 
     public void ComputeFlag()
     {
-        if (Video) { Flags[6] = true; }
-        if (/*ReceiveDate != 0 && */ReceiveDate.HasValue) { Flags[0] = true; }
+        if (Video) { Flags = Flags.SetBit(6); }
+        if (/*ReceiveDate != 0 && */ReceiveDate.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -75,19 +75,19 @@ public sealed class TPhoneCallWaiting : IPhoneCall
         writer.Write(AdminId);
         writer.Write(ParticipantId);
         writer.Write(Protocol);
-        if (Flags[0]) { writer.Write(ReceiveDate.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(ReceiveDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[6]) { Video = true; }
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        AdminId = reader.ReadInt64();
-        ParticipantId = reader.ReadInt64();
-        Protocol = reader.Read<MyTelegram.Schema.IPhoneCallProtocol>();
-        if (Flags[0]) { ReceiveDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(6)) { Video = true; }
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        AdminId = buffer.ReadInt64();
+        ParticipantId = buffer.ReadInt64();
+        Protocol = buffer.Read<MyTelegram.Schema.IPhoneCallProtocol>();
+        if (Flags.IsBitSet(0)) { ReceiveDate = buffer.ReadInt32(); }
     }
 }

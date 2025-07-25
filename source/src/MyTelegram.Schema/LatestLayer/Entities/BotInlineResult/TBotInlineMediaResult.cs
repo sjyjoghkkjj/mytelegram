@@ -14,7 +14,7 @@ public sealed class TBotInlineMediaResult : IBotInlineResult
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Result ID
@@ -56,10 +56,10 @@ public sealed class TBotInlineMediaResult : IBotInlineResult
 
     public void ComputeFlag()
     {
-        if (Photo != null) { Flags[0] = true; }
-        if (Document != null) { Flags[1] = true; }
-        if (Title != null) { Flags[2] = true; }
-        if (Description != null) { Flags[3] = true; }
+        if (Photo != null) { Flags = Flags.SetBit(0); }
+        if (Document != null) { Flags = Flags.SetBit(1); }
+        if (Title != null) { Flags = Flags.SetBit(2); }
+        if (Description != null) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -70,22 +70,22 @@ public sealed class TBotInlineMediaResult : IBotInlineResult
         writer.Write(Flags);
         writer.Write(Id);
         writer.Write(Type);
-        if (Flags[0]) { writer.Write(Photo); }
-        if (Flags[1]) { writer.Write(Document); }
-        if (Flags[2]) { writer.Write(Title); }
-        if (Flags[3]) { writer.Write(Description); }
+        if (Flags.IsBitSet(0)) { writer.Write(Photo); }
+        if (Flags.IsBitSet(1)) { writer.Write(Document); }
+        if (Flags.IsBitSet(2)) { writer.Write(Title); }
+        if (Flags.IsBitSet(3)) { writer.Write(Description); }
         writer.Write(SendMessage);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Id = reader.ReadString();
-        Type = reader.ReadString();
-        if (Flags[0]) { Photo = reader.Read<MyTelegram.Schema.IPhoto>(); }
-        if (Flags[1]) { Document = reader.Read<MyTelegram.Schema.IDocument>(); }
-        if (Flags[2]) { Title = reader.ReadString(); }
-        if (Flags[3]) { Description = reader.ReadString(); }
-        SendMessage = reader.Read<MyTelegram.Schema.IBotInlineMessage>();
+        Flags = buffer.ReadInt32();
+        Id = buffer.ReadString();
+        Type = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Photo = buffer.Read<MyTelegram.Schema.IPhoto>(); }
+        if (Flags.IsBitSet(1)) { Document = buffer.Read<MyTelegram.Schema.IDocument>(); }
+        if (Flags.IsBitSet(2)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { Description = buffer.ReadString(); }
+        SendMessage = buffer.Read<MyTelegram.Schema.IBotInlineMessage>();
     }
 }

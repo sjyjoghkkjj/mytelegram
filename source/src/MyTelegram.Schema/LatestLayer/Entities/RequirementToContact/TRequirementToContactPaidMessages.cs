@@ -24,8 +24,8 @@ public sealed class TRequirementToContactPaidMessages : IRequirementToContact
         writer.Write(StarsAmount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        StarsAmount = reader.ReadInt64();
+        StarsAmount = buffer.ReadInt64();
     }
 }

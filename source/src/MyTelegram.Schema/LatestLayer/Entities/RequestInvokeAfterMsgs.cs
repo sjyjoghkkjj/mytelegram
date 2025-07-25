@@ -34,9 +34,9 @@ public sealed class RequestInvokeAfterMsgs : IRequest<IObject>, IHasSubQuery
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MsgIds = reader.Read<TVector<long>>();
-        Query = reader.Read<IObject>();
+        MsgIds = buffer.Read<TVector<long>>();
+        Query = buffer.Read<IObject>();
     }
 }

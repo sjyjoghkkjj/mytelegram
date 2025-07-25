@@ -14,7 +14,7 @@ public sealed class TChat : MyTelegram.Schema.IChat, ILayeredChat
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the current user is the creator of the group
@@ -103,15 +103,15 @@ public sealed class TChat : MyTelegram.Schema.IChat, ILayeredChat
 
     public void ComputeFlag()
     {
-        if (Creator) { Flags[0] = true; }
-        if (Left) { Flags[2] = true; }
-        if (Deactivated) { Flags[5] = true; }
-        if (CallActive) { Flags[23] = true; }
-        if (CallNotEmpty) { Flags[24] = true; }
-        if (Noforwards) { Flags[25] = true; }
-        if (MigratedTo != null) { Flags[6] = true; }
-        if (AdminRights != null) { Flags[14] = true; }
-        if (DefaultBannedRights != null) { Flags[18] = true; }
+        if (Creator) { Flags = Flags.SetBit(0); }
+        if (Left) { Flags = Flags.SetBit(2); }
+        if (Deactivated) { Flags = Flags.SetBit(5); }
+        if (CallActive) { Flags = Flags.SetBit(23); }
+        if (CallNotEmpty) { Flags = Flags.SetBit(24); }
+        if (Noforwards) { Flags = Flags.SetBit(25); }
+        if (MigratedTo != null) { Flags = Flags.SetBit(6); }
+        if (AdminRights != null) { Flags = Flags.SetBit(14); }
+        if (DefaultBannedRights != null) { Flags = Flags.SetBit(18); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -125,28 +125,28 @@ public sealed class TChat : MyTelegram.Schema.IChat, ILayeredChat
         writer.Write(ParticipantsCount);
         writer.Write(Date);
         writer.Write(Version);
-        if (Flags[6]) { writer.Write(MigratedTo); }
-        if (Flags[14]) { writer.Write(AdminRights); }
-        if (Flags[18]) { writer.Write(DefaultBannedRights); }
+        if (Flags.IsBitSet(6)) { writer.Write(MigratedTo); }
+        if (Flags.IsBitSet(14)) { writer.Write(AdminRights); }
+        if (Flags.IsBitSet(18)) { writer.Write(DefaultBannedRights); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Creator = true; }
-        if (Flags[2]) { Left = true; }
-        if (Flags[5]) { Deactivated = true; }
-        if (Flags[23]) { CallActive = true; }
-        if (Flags[24]) { CallNotEmpty = true; }
-        if (Flags[25]) { Noforwards = true; }
-        Id = reader.ReadInt64();
-        Title = reader.ReadString();
-        Photo = reader.Read<MyTelegram.Schema.IChatPhoto>();
-        ParticipantsCount = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        Version = reader.ReadInt32();
-        if (Flags[6]) { MigratedTo = reader.Read<MyTelegram.Schema.IInputChannel>(); }
-        if (Flags[14]) { AdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>(); }
-        if (Flags[18]) { DefaultBannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Creator = true; }
+        if (Flags.IsBitSet(2)) { Left = true; }
+        if (Flags.IsBitSet(5)) { Deactivated = true; }
+        if (Flags.IsBitSet(23)) { CallActive = true; }
+        if (Flags.IsBitSet(24)) { CallNotEmpty = true; }
+        if (Flags.IsBitSet(25)) { Noforwards = true; }
+        Id = buffer.ReadInt64();
+        Title = buffer.ReadString();
+        Photo = buffer.Read<MyTelegram.Schema.IChatPhoto>();
+        ParticipantsCount = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        Version = buffer.ReadInt32();
+        if (Flags.IsBitSet(6)) { MigratedTo = buffer.Read<MyTelegram.Schema.IInputChannel>(); }
+        if (Flags.IsBitSet(14)) { AdminRights = buffer.Read<MyTelegram.Schema.IChatAdminRights>(); }
+        if (Flags.IsBitSet(18)) { DefaultBannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>(); }
     }
 }

@@ -19,7 +19,7 @@ public sealed class RequestToggleGroupCallRecord : IRequest<MyTelegram.Schema.IU
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to start or stop recording
@@ -52,10 +52,10 @@ public sealed class RequestToggleGroupCallRecord : IRequest<MyTelegram.Schema.IU
 
     public void ComputeFlag()
     {
-        if (Start) { Flags[0] = true; }
-        if (Video) { Flags[2] = true; }
-        if (Title != null) { Flags[1] = true; }
-        if (VideoPortrait !=null) { Flags[2] = true; }
+        if (Start) { Flags = Flags.SetBit(0); }
+        if (Video) { Flags = Flags.SetBit(2); }
+        if (Title != null) { Flags = Flags.SetBit(1); }
+        if (VideoPortrait !=null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -64,17 +64,17 @@ public sealed class RequestToggleGroupCallRecord : IRequest<MyTelegram.Schema.IU
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Call);
-        if (Flags[1]) { writer.Write(Title); }
-        if (Flags[2]) { writer.Write(VideoPortrait.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Title); }
+        if (Flags.IsBitSet(2)) { writer.Write(VideoPortrait.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Start = true; }
-        if (Flags[2]) { Video = true; }
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        if (Flags[1]) { Title = reader.ReadString(); }
-        if (Flags[2]) { VideoPortrait = reader.Read(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Start = true; }
+        if (Flags.IsBitSet(2)) { Video = true; }
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        if (Flags.IsBitSet(1)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { VideoPortrait = buffer.Read(); }
     }
 }

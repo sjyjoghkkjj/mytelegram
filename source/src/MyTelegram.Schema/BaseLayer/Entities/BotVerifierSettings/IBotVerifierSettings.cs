@@ -8,7 +8,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TBotVerifierSettings), nameof(TBotVerifierSettings))]
 public interface IBotVerifierSettings : IObject
 {
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
     bool CanModifyCustomDescription { get; set; }
     long Icon { get; set; }
     string Company { get; set; }

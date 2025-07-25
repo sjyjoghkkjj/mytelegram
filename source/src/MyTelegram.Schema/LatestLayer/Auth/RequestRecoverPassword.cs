@@ -18,7 +18,7 @@ public sealed class RequestRecoverPassword : IRequest<MyTelegram.Schema.Auth.IAu
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Code received via email
@@ -33,7 +33,7 @@ public sealed class RequestRecoverPassword : IRequest<MyTelegram.Schema.Auth.IAu
 
     public void ComputeFlag()
     {
-        if (NewSettings != null) { Flags[0] = true; }
+        if (NewSettings != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,13 +42,13 @@ public sealed class RequestRecoverPassword : IRequest<MyTelegram.Schema.Auth.IAu
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Code);
-        if (Flags[0]) { writer.Write(NewSettings); }
+        if (Flags.IsBitSet(0)) { writer.Write(NewSettings); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Code = reader.ReadString();
-        if (Flags[0]) { NewSettings = reader.Read<MyTelegram.Schema.Account.IPasswordInputSettings>(); }
+        Flags = buffer.ReadInt32();
+        Code = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { NewSettings = buffer.Read<MyTelegram.Schema.Account.IPasswordInputSettings>(); }
     }
 }

@@ -23,7 +23,7 @@ public sealed class RequestSendSignalingData : IRequest<IBool>
     ///<summary>
     /// Signaling payload
     ///</summary>
-    public byte[] Data { get; set; }
+    public ReadOnlyMemory<byte> Data { get; set; }
 
     public void ComputeFlag()
     {
@@ -38,9 +38,9 @@ public sealed class RequestSendSignalingData : IRequest<IBool>
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPhoneCall>();
-        Data = reader.ReadBytes();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPhoneCall>();
+        Data = buffer.ReadBytes();
     }
 }

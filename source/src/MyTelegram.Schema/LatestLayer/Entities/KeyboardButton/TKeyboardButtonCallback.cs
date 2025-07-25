@@ -14,7 +14,7 @@ public sealed class TKeyboardButtonCallback : IKeyboardButton
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user should verify his identity by entering his <a href="https://corefork.telegram.org/api/srp">2FA SRP parameters</a> to the <a href="https://corefork.telegram.org/method/messages.getBotCallbackAnswer">messages.getBotCallbackAnswer</a> method. NOTE: telegram and the bot WILL NOT have access to the plaintext password, thanks to <a href="https://corefork.telegram.org/api/srp">SRP</a>. This button is mainly used by the official <a href="https://t.me/botfather">@botfather</a> bot, for verifying the user's identity before transferring ownership of a bot to another user.
@@ -30,12 +30,12 @@ public sealed class TKeyboardButtonCallback : IKeyboardButton
     ///<summary>
     /// Callback data
     ///</summary>
-    //public byte[] Data { get; set; }
+    //public ReadOnlyMemory<byte> Data { get; set; }
     public string Data { get; set; }
 
     public void ComputeFlag()
     {
-        if (RequiresPassword) { Flags[0] = true; }
+        if (RequiresPassword) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -48,12 +48,12 @@ public sealed class TKeyboardButtonCallback : IKeyboardButton
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { RequiresPassword = true; }
-        Text = reader.ReadString();
-        //Data = reader.ReadBytes();
-        Data = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { RequiresPassword = true; }
+        Text = buffer.ReadString();
+        //Data = buffer.ReadBytes();
+        Data = buffer.ReadString();
     }
 }

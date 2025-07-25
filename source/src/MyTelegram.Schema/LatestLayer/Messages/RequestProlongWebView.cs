@@ -17,7 +17,7 @@ public sealed class RequestProlongWebView : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the inline message that will be sent by the bot on behalf of the user once the web app interaction is <a href="https://corefork.telegram.org/method/messages.sendWebViewResultMessage">terminated</a> should be sent silently (no notifications for the receivers).
@@ -56,9 +56,9 @@ public sealed class RequestProlongWebView : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Silent) { Flags[5] = true; }
-        if (ReplyTo != null) { Flags[0] = true; }
-        if (SendAs != null) { Flags[13] = true; }
+        if (Silent) { Flags = Flags.SetBit(5); }
+        if (ReplyTo != null) { Flags = Flags.SetBit(0); }
+        if (SendAs != null) { Flags = Flags.SetBit(13); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -69,18 +69,18 @@ public sealed class RequestProlongWebView : IRequest<IBool>
         writer.Write(Peer);
         writer.Write(Bot);
         writer.Write(QueryId);
-        if (Flags[0]) { writer.Write(ReplyTo); }
-        if (Flags[13]) { writer.Write(SendAs); }
+        if (Flags.IsBitSet(0)) { writer.Write(ReplyTo); }
+        if (Flags.IsBitSet(13)) { writer.Write(SendAs); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[5]) { Silent = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        QueryId = reader.ReadInt64();
-        if (Flags[0]) { ReplyTo = reader.Read<MyTelegram.Schema.IInputReplyTo>(); }
-        if (Flags[13]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(5)) { Silent = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        QueryId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { ReplyTo = buffer.Read<MyTelegram.Schema.IInputReplyTo>(); }
+        if (Flags.IsBitSet(13)) { SendAs = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

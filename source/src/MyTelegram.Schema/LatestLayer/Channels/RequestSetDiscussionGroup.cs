@@ -45,9 +45,9 @@ public sealed class RequestSetDiscussionGroup : IRequest<IBool>
         writer.Write(Group);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Broadcast = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Group = reader.Read<MyTelegram.Schema.IInputChannel>();
+        Broadcast = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Group = buffer.Read<MyTelegram.Schema.IInputChannel>();
     }
 }

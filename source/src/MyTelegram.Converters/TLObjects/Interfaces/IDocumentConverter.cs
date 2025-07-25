@@ -2,5 +2,5 @@
 
 public interface IDocumentConverter : ILayeredConverter
 {
-    IDocument ToDocument(IDocumentReadModel documentReadModel);
+    ILayeredDocument ToDocument(IDocumentReadModel documentReadModel);
 }

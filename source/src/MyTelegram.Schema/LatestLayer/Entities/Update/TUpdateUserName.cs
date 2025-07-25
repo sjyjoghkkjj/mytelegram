@@ -46,11 +46,11 @@ public sealed class TUpdateUserName : IUpdate
         writer.Write(Usernames);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
-        Usernames = reader.Read<TVector<MyTelegram.Schema.IUsername>>();
+        UserId = buffer.ReadInt64();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
+        Usernames = buffer.Read<TVector<MyTelegram.Schema.IUsername>>();
     }
 }

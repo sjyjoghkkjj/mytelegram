@@ -47,11 +47,11 @@ public sealed class TInputAppEvent : IInputAppEvent
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Time = reader.ReadDouble();
-        Type = reader.ReadString();
-        Peer = reader.ReadInt64();
-        Data = reader.Read<MyTelegram.Schema.IJSONValue>();
+        Time = buffer.ReadDouble();
+        Type = buffer.ReadString();
+        Peer = buffer.ReadInt64();
+        Data = buffer.Read<MyTelegram.Schema.IJSONValue>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TUpdateNewAuthorization : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the session is <a href="https://corefork.telegram.org/api/auth#confirming-login">unconfirmed, see here »</a> for more info.
@@ -44,10 +44,10 @@ public sealed class TUpdateNewAuthorization : IUpdate
 
     public void ComputeFlag()
     {
-        if (Unconfirmed) { Flags[0] = true; }
-        if (/*Date != 0 && */Date.HasValue) { Flags[0] = true; }
-        if (Device != null) { Flags[0] = true; }
-        if (Location != null) { Flags[0] = true; }
+        if (Unconfirmed) { Flags = Flags.SetBit(0); }
+        if (/*Date != 0 && */Date.HasValue) { Flags = Flags.SetBit(0); }
+        if (Device != null) { Flags = Flags.SetBit(0); }
+        if (Location != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -56,18 +56,18 @@ public sealed class TUpdateNewAuthorization : IUpdate
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Hash);
-        if (Flags[0]) { writer.Write(Date.Value); }
-        if (Flags[0]) { writer.Write(Device); }
-        if (Flags[0]) { writer.Write(Location); }
+        if (Flags.IsBitSet(0)) { writer.Write(Date.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Device); }
+        if (Flags.IsBitSet(0)) { writer.Write(Location); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Unconfirmed = true; }
-        Hash = reader.ReadInt64();
-        if (Flags[0]) { Date = reader.ReadInt32(); }
-        if (Flags[0]) { Device = reader.ReadString(); }
-        if (Flags[0]) { Location = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Unconfirmed = true; }
+        Hash = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Date = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { Device = buffer.ReadString(); }
+        if (Flags.IsBitSet(0)) { Location = buffer.ReadString(); }
     }
 }

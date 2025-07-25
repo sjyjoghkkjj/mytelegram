@@ -34,9 +34,9 @@ public sealed class TSentCodeTypeFragmentSms : ISentCodeType
         writer.Write(Length);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        Length = reader.ReadInt32();
+        Url = buffer.ReadString();
+        Length = buffer.ReadInt32();
     }
 }

@@ -38,9 +38,9 @@ public sealed class RequestGetStrings : IRequest<TVector<MyTelegram.Schema.ILang
         writer.Write(Keys);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangCode = reader.ReadString();
-        Keys = reader.Read<TVector<string>>();
+        LangCode = buffer.ReadString();
+        Keys = buffer.Read<TVector<string>>();
     }
 }

@@ -35,9 +35,9 @@ public sealed class TPageListOrderedItemText : IPageListOrderedItem
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Num = reader.ReadString();
-        Text = reader.Read<MyTelegram.Schema.IRichText>();
+        Num = buffer.ReadString();
+        Text = buffer.Read<MyTelegram.Schema.IRichText>();
     }
 }

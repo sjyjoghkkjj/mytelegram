@@ -28,8 +28,8 @@ public sealed class TEmailVerified : IEmailVerified
         writer.Write(Email);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Email = reader.ReadString();
+        Email = buffer.ReadString();
     }
 }

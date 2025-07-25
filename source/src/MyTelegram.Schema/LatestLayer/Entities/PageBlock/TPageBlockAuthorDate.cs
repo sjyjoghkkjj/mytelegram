@@ -35,9 +35,9 @@ public sealed class TPageBlockAuthorDate : IPageBlock
         writer.Write(PublishedDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Author = reader.Read<MyTelegram.Schema.IRichText>();
-        PublishedDate = reader.ReadInt32();
+        Author = buffer.Read<MyTelegram.Schema.IRichText>();
+        PublishedDate = buffer.ReadInt32();
     }
 }

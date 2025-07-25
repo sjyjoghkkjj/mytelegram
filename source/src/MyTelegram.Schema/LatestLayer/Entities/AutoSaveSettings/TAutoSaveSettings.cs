@@ -14,7 +14,7 @@ public sealed class TAutoSaveSettings : IAutoSaveSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether photos should be autosaved to the gallery.
@@ -35,9 +35,9 @@ public sealed class TAutoSaveSettings : IAutoSaveSettings
 
     public void ComputeFlag()
     {
-        if (Photos) { Flags[0] = true; }
-        if (Videos) { Flags[1] = true; }
-        if (/*VideoMaxSize != 0 &&*/ VideoMaxSize.HasValue) { Flags[2] = true; }
+        if (Photos) { Flags = Flags.SetBit(0); }
+        if (Videos) { Flags = Flags.SetBit(1); }
+        if (/*VideoMaxSize != 0 &&*/ VideoMaxSize.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -45,14 +45,14 @@ public sealed class TAutoSaveSettings : IAutoSaveSettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[2]) { writer.Write(VideoMaxSize.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(VideoMaxSize.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Photos = true; }
-        if (Flags[1]) { Videos = true; }
-        if (Flags[2]) { VideoMaxSize = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Photos = true; }
+        if (Flags.IsBitSet(1)) { Videos = true; }
+        if (Flags.IsBitSet(2)) { VideoMaxSize = buffer.ReadInt64(); }
     }
 }

@@ -52,11 +52,11 @@ public sealed class RequestConfirmCall : IRequest<MyTelegram.Schema.Phone.IPhone
         writer.Write(Protocol);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPhoneCall>();
-        GA = reader.ReadBytes();
-        KeyFingerprint = reader.ReadInt64();
-        Protocol = reader.Read<MyTelegram.Schema.IPhoneCallProtocol>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPhoneCall>();
+        GA = buffer.ReadBytes();
+        KeyFingerprint = buffer.ReadInt64();
+        Protocol = buffer.Read<MyTelegram.Schema.IPhoneCallProtocol>();
     }
 }

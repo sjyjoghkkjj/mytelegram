@@ -13,7 +13,7 @@ public sealed class RequestSearchStickers : IRequest<MyTelegram.Schema.Messages.
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -53,7 +53,7 @@ public sealed class RequestSearchStickers : IRequest<MyTelegram.Schema.Messages.
 
     public void ComputeFlag()
     {
-        if (Emojis) { Flags[0] = true; }
+        if (Emojis) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -70,15 +70,15 @@ public sealed class RequestSearchStickers : IRequest<MyTelegram.Schema.Messages.
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Emojis = true; }
-        Q = reader.ReadString();
-        Emoticon = reader.ReadString();
-        LangCode = reader.Read<TVector<string>>();
-        Offset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Emojis = true; }
+        Q = buffer.ReadString();
+        Emoticon = buffer.ReadString();
+        LangCode = buffer.Read<TVector<string>>();
+        Offset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

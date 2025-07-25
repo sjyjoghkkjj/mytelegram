@@ -34,7 +34,7 @@ public sealed class RequestCreateStickerSet : IRequest<MyTelegram.Schema.Message
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a mask stickerset
@@ -88,11 +88,11 @@ public sealed class RequestCreateStickerSet : IRequest<MyTelegram.Schema.Message
 
     public void ComputeFlag()
     {
-        if (Masks) { Flags[0] = true; }
-        if (Emojis) { Flags[5] = true; }
-        if (TextColor) { Flags[6] = true; }
-        if (Thumb != null) { Flags[2] = true; }
-        if (Software != null) { Flags[3] = true; }
+        if (Masks) { Flags = Flags.SetBit(0); }
+        if (Emojis) { Flags = Flags.SetBit(5); }
+        if (TextColor) { Flags = Flags.SetBit(6); }
+        if (Thumb != null) { Flags = Flags.SetBit(2); }
+        if (Software != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -103,22 +103,22 @@ public sealed class RequestCreateStickerSet : IRequest<MyTelegram.Schema.Message
         writer.Write(UserId);
         writer.Write(Title);
         writer.Write(ShortName);
-        if (Flags[2]) { writer.Write(Thumb); }
+        if (Flags.IsBitSet(2)) { writer.Write(Thumb); }
         writer.Write(Stickers);
-        if (Flags[3]) { writer.Write(Software); }
+        if (Flags.IsBitSet(3)) { writer.Write(Software); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Masks = true; }
-        if (Flags[5]) { Emojis = true; }
-        if (Flags[6]) { TextColor = true; }
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        Title = reader.ReadString();
-        ShortName = reader.ReadString();
-        if (Flags[2]) { Thumb = reader.Read<MyTelegram.Schema.IInputDocument>(); }
-        Stickers = reader.Read<TVector<MyTelegram.Schema.IInputStickerSetItem>>();
-        if (Flags[3]) { Software = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Masks = true; }
+        if (Flags.IsBitSet(5)) { Emojis = true; }
+        if (Flags.IsBitSet(6)) { TextColor = true; }
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Title = buffer.ReadString();
+        ShortName = buffer.ReadString();
+        if (Flags.IsBitSet(2)) { Thumb = buffer.Read<MyTelegram.Schema.IInputDocument>(); }
+        Stickers = buffer.Read<TVector<MyTelegram.Schema.IInputStickerSetItem>>();
+        if (Flags.IsBitSet(3)) { Software = buffer.ReadString(); }
     }
 }

@@ -25,7 +25,7 @@ public sealed class TUpdateMessagePollVote : IUpdate
     ///<summary>
     /// Chosen option(s)
     ///</summary>
-    public TVector<byte[]> Options { get; set; }
+    public TVector<ReadOnlyMemory<byte>> Options { get; set; }
 
     ///<summary>
     /// New <strong>qts</strong> value, see <a href="https://corefork.telegram.org/api/updates">updates »</a> for more info.
@@ -47,11 +47,11 @@ public sealed class TUpdateMessagePollVote : IUpdate
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PollId = reader.ReadInt64();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Options = reader.Read<TVector<byte[]>>();
-        Qts = reader.ReadInt32();
+        PollId = buffer.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Options = buffer.Read<TVector<ReadOnlyMemory<byte>>>();
+        Qts = buffer.ReadInt32();
     }
 }

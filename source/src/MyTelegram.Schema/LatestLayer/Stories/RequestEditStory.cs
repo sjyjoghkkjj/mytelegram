@@ -18,7 +18,7 @@ public sealed class RequestEditStory : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Peer where the story was posted.
@@ -59,11 +59,11 @@ public sealed class RequestEditStory : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (Media != null) { Flags[0] = true; }
-        if (MediaAreas?.Count > 0) { Flags[3] = true; }
-        if (Caption != null) { Flags[1] = true; }
-        if (Entities?.Count > 0) { Flags[1] = true; }
-        if (PrivacyRules?.Count > 0) { Flags[2] = true; }
+        if (Media != null) { Flags = Flags.SetBit(0); }
+        if (MediaAreas?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (Caption != null) { Flags = Flags.SetBit(1); }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (PrivacyRules?.Count > 0) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -73,22 +73,22 @@ public sealed class RequestEditStory : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Id);
-        if (Flags[0]) { writer.Write(Media); }
-        if (Flags[3]) { writer.Write(MediaAreas); }
-        if (Flags[1]) { writer.Write(Caption); }
-        if (Flags[1]) { writer.Write(Entities); }
-        if (Flags[2]) { writer.Write(PrivacyRules); }
+        if (Flags.IsBitSet(0)) { writer.Write(Media); }
+        if (Flags.IsBitSet(3)) { writer.Write(MediaAreas); }
+        if (Flags.IsBitSet(1)) { writer.Write(Caption); }
+        if (Flags.IsBitSet(1)) { writer.Write(Entities); }
+        if (Flags.IsBitSet(2)) { writer.Write(PrivacyRules); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.ReadInt32();
-        if (Flags[0]) { Media = reader.Read<MyTelegram.Schema.IInputMedia>(); }
-        if (Flags[3]) { MediaAreas = reader.Read<TVector<MyTelegram.Schema.IMediaArea>>(); }
-        if (Flags[1]) { Caption = reader.ReadString(); }
-        if (Flags[1]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        if (Flags[2]) { PrivacyRules = reader.Read<TVector<MyTelegram.Schema.IInputPrivacyRule>>(); }
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Media = buffer.Read<MyTelegram.Schema.IInputMedia>(); }
+        if (Flags.IsBitSet(3)) { MediaAreas = buffer.Read<TVector<MyTelegram.Schema.IMediaArea>>(); }
+        if (Flags.IsBitSet(1)) { Caption = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        if (Flags.IsBitSet(2)) { PrivacyRules = buffer.Read<TVector<MyTelegram.Schema.IInputPrivacyRule>>(); }
     }
 }

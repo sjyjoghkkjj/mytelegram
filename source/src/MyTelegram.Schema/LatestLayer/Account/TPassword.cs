@@ -14,7 +14,7 @@ public sealed class TPassword : IPassword
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user has a recovery method configured
@@ -43,7 +43,7 @@ public sealed class TPassword : IPassword
     ///<summary>
     /// Srp B param for <a href="https://corefork.telegram.org/api/srp">SRP authorization</a>
     ///</summary>
-    public byte[]? SrpB { get; set; }
+    public ReadOnlyMemory<byte>? SrpB { get; set; }
 
     ///<summary>
     /// Srp ID param for <a href="https://corefork.telegram.org/api/srp">SRP authorization</a>
@@ -75,7 +75,7 @@ public sealed class TPassword : IPassword
     ///<summary>
     /// Secure random string
     ///</summary>
-    public byte[] SecureRandom { get; set; }
+    public ReadOnlyMemory<byte> SecureRandom { get; set; }
 
     ///<summary>
     /// The 2FA password will be automatically removed at this date, unless the user cancels the operation
@@ -89,16 +89,16 @@ public sealed class TPassword : IPassword
 
     public void ComputeFlag()
     {
-        if (HasRecovery) { Flags[0] = true; }
-        if (HasSecureValues) { Flags[1] = true; }
-        if (HasPassword) { Flags[2] = true; }
-        if (CurrentAlgo != null) { Flags[2] = true; }
-        if (SrpB != null) { Flags[2] = true; }
-        if (/*SrpId != 0 &&*/ SrpId.HasValue) { Flags[2] = true; }
-        if (Hint != null) { Flags[3] = true; }
-        if (EmailUnconfirmedPattern != null) { Flags[4] = true; }
-        if (/*PendingResetDate != 0 && */PendingResetDate.HasValue) { Flags[5] = true; }
-        if (LoginEmailPattern != null) { Flags[6] = true; }
+        if (HasRecovery) { Flags = Flags.SetBit(0); }
+        if (HasSecureValues) { Flags = Flags.SetBit(1); }
+        if (HasPassword) { Flags = Flags.SetBit(2); }
+        if (CurrentAlgo != null) { Flags = Flags.SetBit(2); }
+        if (SrpB != null) { Flags = Flags.SetBit(2); }
+        if (/*SrpId != 0 &&*/ SrpId.HasValue) { Flags = Flags.SetBit(2); }
+        if (Hint != null) { Flags = Flags.SetBit(3); }
+        if (EmailUnconfirmedPattern != null) { Flags = Flags.SetBit(4); }
+        if (/*PendingResetDate != 0 && */PendingResetDate.HasValue) { Flags = Flags.SetBit(5); }
+        if (LoginEmailPattern != null) { Flags = Flags.SetBit(6); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -106,33 +106,33 @@ public sealed class TPassword : IPassword
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[2]) { writer.Write(CurrentAlgo); }
-        if (Flags[2]) { writer.Write(SrpB); }
-        if (Flags[2]) { writer.Write(SrpId.Value); }
-        if (Flags[3]) { writer.Write(Hint); }
-        if (Flags[4]) { writer.Write(EmailUnconfirmedPattern); }
+        if (Flags.IsBitSet(2)) { writer.Write(CurrentAlgo); }
+        if (Flags.IsBitSet(2)) { writer.Write(SrpB); }
+        if (Flags.IsBitSet(2)) { writer.Write(SrpId.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Hint); }
+        if (Flags.IsBitSet(4)) { writer.Write(EmailUnconfirmedPattern); }
         writer.Write(NewAlgo);
         writer.Write(NewSecureAlgo);
         writer.Write(SecureRandom);
-        if (Flags[5]) { writer.Write(PendingResetDate.Value); }
-        if (Flags[6]) { writer.Write(LoginEmailPattern); }
+        if (Flags.IsBitSet(5)) { writer.Write(PendingResetDate.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(LoginEmailPattern); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { HasRecovery = true; }
-        if (Flags[1]) { HasSecureValues = true; }
-        if (Flags[2]) { HasPassword = true; }
-        if (Flags[2]) { CurrentAlgo = reader.Read<MyTelegram.Schema.IPasswordKdfAlgo>(); }
-        if (Flags[2]) { SrpB = reader.ReadBytes(); }
-        if (Flags[2]) { SrpId = reader.ReadInt64(); }
-        if (Flags[3]) { Hint = reader.ReadString(); }
-        if (Flags[4]) { EmailUnconfirmedPattern = reader.ReadString(); }
-        NewAlgo = reader.Read<MyTelegram.Schema.IPasswordKdfAlgo>();
-        NewSecureAlgo = reader.Read<MyTelegram.Schema.ISecurePasswordKdfAlgo>();
-        SecureRandom = reader.ReadBytes();
-        if (Flags[5]) { PendingResetDate = reader.ReadInt32(); }
-        if (Flags[6]) { LoginEmailPattern = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { HasRecovery = true; }
+        if (Flags.IsBitSet(1)) { HasSecureValues = true; }
+        if (Flags.IsBitSet(2)) { HasPassword = true; }
+        if (Flags.IsBitSet(2)) { CurrentAlgo = buffer.Read<MyTelegram.Schema.IPasswordKdfAlgo>(); }
+        if (Flags.IsBitSet(2)) { SrpB = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(2)) { SrpId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(3)) { Hint = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { EmailUnconfirmedPattern = buffer.ReadString(); }
+        NewAlgo = buffer.Read<MyTelegram.Schema.IPasswordKdfAlgo>();
+        NewSecureAlgo = buffer.Read<MyTelegram.Schema.ISecurePasswordKdfAlgo>();
+        SecureRandom = buffer.ReadBytes();
+        if (Flags.IsBitSet(5)) { PendingResetDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(6)) { LoginEmailPattern = buffer.ReadString(); }
     }
 }

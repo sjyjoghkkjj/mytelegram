@@ -59,13 +59,13 @@ public sealed class TInputWebFileGeoPointLocation : IInputWebFileLocation
         writer.Write(Scale);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>();
-        AccessHash = reader.ReadInt64();
-        W = reader.ReadInt32();
-        H = reader.ReadInt32();
-        Zoom = reader.ReadInt32();
-        Scale = reader.ReadInt32();
+        GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>();
+        AccessHash = buffer.ReadInt64();
+        W = buffer.ReadInt32();
+        H = buffer.ReadInt32();
+        Zoom = buffer.ReadInt32();
+        Scale = buffer.ReadInt32();
     }
 }

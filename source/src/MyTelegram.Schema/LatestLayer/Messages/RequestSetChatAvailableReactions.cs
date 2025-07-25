@@ -19,7 +19,7 @@ public sealed class RequestSetChatAvailableReactions : IRequest<MyTelegram.Schem
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Group where to apply changes
@@ -46,8 +46,8 @@ public sealed class RequestSetChatAvailableReactions : IRequest<MyTelegram.Schem
 
     public void ComputeFlag()
     {
-        if (/*ReactionsLimit != 0 && */ReactionsLimit.HasValue) { Flags[0] = true; }
-        if (PaidEnabled !=null) { Flags[1] = true; }
+        if (/*ReactionsLimit != 0 && */ReactionsLimit.HasValue) { Flags = Flags.SetBit(0); }
+        if (PaidEnabled !=null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -57,16 +57,16 @@ public sealed class RequestSetChatAvailableReactions : IRequest<MyTelegram.Schem
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(AvailableReactions);
-        if (Flags[0]) { writer.Write(ReactionsLimit.Value); }
-        if (Flags[1]) { writer.Write(PaidEnabled.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(ReactionsLimit.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(PaidEnabled.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        AvailableReactions = reader.Read<MyTelegram.Schema.IChatReactions>();
-        if (Flags[0]) { ReactionsLimit = reader.ReadInt32(); }
-        if (Flags[1]) { PaidEnabled = reader.Read(); }
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        AvailableReactions = buffer.Read<MyTelegram.Schema.IChatReactions>();
+        if (Flags.IsBitSet(0)) { ReactionsLimit = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { PaidEnabled = buffer.Read(); }
     }
 }

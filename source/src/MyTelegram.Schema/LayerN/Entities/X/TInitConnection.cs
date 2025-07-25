@@ -8,13 +8,13 @@ namespace MyTelegram.Schema.LayerN;
 /// See <a href="https://corefork.telegram.org/constructor/initConnection" />
 ///</summary>
 [TlObject(0x785188b8)]
-public sealed class RequestInitConnection:IObject //: IX
+public sealed class RequestInitConnection : IRequest<IObject>, IHasSubQuery
 {
     public uint ConstructorId => 0x785188b8;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Application identifier (see. <a href="https://corefork.telegram.org/myapp">App configuration</a>)
@@ -63,7 +63,7 @@ public sealed class RequestInitConnection:IObject //: IX
 
     public void ComputeFlag()
     {
-        if (Proxy != null) { Flags[0] = true; }
+        if (Proxy != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -79,21 +79,21 @@ public sealed class RequestInitConnection:IObject //: IX
         writer.Write(SystemLangCode);
         writer.Write(LangPack);
         writer.Write(LangCode);
-        if (Flags[0]) { writer.Write(Proxy); }
+        if (Flags.IsBitSet(0)) { writer.Write(Proxy); }
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ApiId = reader.ReadInt32();
-        DeviceModel = reader.ReadString();
-        SystemVersion = reader.ReadString();
-        AppVersion = reader.ReadString();
-        SystemLangCode = reader.ReadString();
-        LangPack = reader.ReadString();
-        LangCode = reader.ReadString();
-        if (Flags[0]) { Proxy = reader.Read<IInputClientProxy>(); }
-        Query = reader.Read<IObject>();
+        Flags = buffer.ReadInt32();
+        ApiId = buffer.ReadInt32();
+        DeviceModel = buffer.ReadString();
+        SystemVersion = buffer.ReadString();
+        AppVersion = buffer.ReadString();
+        SystemLangCode = buffer.ReadString();
+        LangPack = buffer.ReadString();
+        LangCode = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Proxy = buffer.Read<IInputClientProxy>(); }
+        Query = buffer.Read<IObject>();
     }
 }

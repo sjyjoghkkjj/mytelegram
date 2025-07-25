@@ -56,11 +56,11 @@ public sealed class RequestSignUp : IRequest<MyTelegram.Schema.Auth.IAuthorizati
         writer.Write(LastName);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
+        PhoneNumber = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
     }
 }

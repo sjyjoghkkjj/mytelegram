@@ -24,8 +24,8 @@ public sealed class RequestGetStarGiftUpgradePreview : IRequest<MyTelegram.Schem
         writer.Write(GiftId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        GiftId = reader.ReadInt64();
+        GiftId = buffer.ReadInt64();
     }
 }

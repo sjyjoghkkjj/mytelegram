@@ -14,7 +14,7 @@ public sealed class TForumTopics : IForumTopics
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the returned topics are ordered by creation date; if set, pagination by <code>offset_date</code> should use <a href="https://corefork.telegram.org/constructor/forumTopic">forumTopic</a>.<code>date</code>; otherwise topics are ordered by the last message date, so paginate by the <code>date</code> of the <a href="https://corefork.telegram.org/type/Message">message</a> referenced by <a href="https://corefork.telegram.org/constructor/forumTopic">forumTopic</a>.<code>top_message</code>.
@@ -54,7 +54,7 @@ public sealed class TForumTopics : IForumTopics
 
     public void ComputeFlag()
     {
-        if (OrderByCreateDate) { Flags[0] = true; }
+        if (OrderByCreateDate) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -71,15 +71,15 @@ public sealed class TForumTopics : IForumTopics
         writer.Write(Pts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { OrderByCreateDate = true; }
-        Count = reader.ReadInt32();
-        Topics = reader.Read<TVector<MyTelegram.Schema.IForumTopic>>();
-        Messages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
-        Pts = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { OrderByCreateDate = true; }
+        Count = buffer.ReadInt32();
+        Topics = buffer.Read<TVector<MyTelegram.Schema.IForumTopic>>();
+        Messages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
+        Pts = buffer.ReadInt32();
     }
 }

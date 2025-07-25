@@ -34,9 +34,9 @@ public sealed class TEmojiGroupPremium : IEmojiGroup
         writer.Write(IconEmojiId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
-        IconEmojiId = reader.ReadInt64();
+        Title = buffer.ReadString();
+        IconEmojiId = buffer.ReadInt64();
     }
 }

@@ -14,7 +14,7 @@ public sealed class RequestSaveAutoDownloadSettings : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to save media in the low data usage preset
@@ -36,8 +36,8 @@ public sealed class RequestSaveAutoDownloadSettings : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Low) { Flags[0] = true; }
-        if (High) { Flags[1] = true; }
+        if (Low) { Flags = Flags.SetBit(0); }
+        if (High) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -49,11 +49,11 @@ public sealed class RequestSaveAutoDownloadSettings : IRequest<IBool>
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Low = true; }
-        if (Flags[1]) { High = true; }
-        Settings = reader.Read<MyTelegram.Schema.IAutoDownloadSettings>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Low = true; }
+        if (Flags.IsBitSet(1)) { High = true; }
+        Settings = buffer.Read<MyTelegram.Schema.IAutoDownloadSettings>();
     }
 }

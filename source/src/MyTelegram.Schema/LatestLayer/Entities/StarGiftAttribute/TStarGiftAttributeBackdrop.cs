@@ -36,14 +36,14 @@ public sealed class TStarGiftAttributeBackdrop : IStarGiftAttribute
         writer.Write(RarityPermille);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Name = reader.ReadString();
-        BackdropId = reader.ReadInt32();
-        CenterColor = reader.ReadInt32();
-        EdgeColor = reader.ReadInt32();
-        PatternColor = reader.ReadInt32();
-        TextColor = reader.ReadInt32();
-        RarityPermille = reader.ReadInt32();
+        Name = buffer.ReadString();
+        BackdropId = buffer.ReadInt32();
+        CenterColor = buffer.ReadInt32();
+        EdgeColor = buffer.ReadInt32();
+        PatternColor = buffer.ReadInt32();
+        TextColor = buffer.ReadInt32();
+        RarityPermille = buffer.ReadInt32();
     }
 }

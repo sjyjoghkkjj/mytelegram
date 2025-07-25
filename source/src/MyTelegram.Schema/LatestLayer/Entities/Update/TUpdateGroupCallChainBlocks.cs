@@ -12,7 +12,7 @@ public sealed class TUpdateGroupCallChainBlocks : IUpdate
     public uint ConstructorId => 0xa477288f;
     public MyTelegram.Schema.IInputGroupCall Call { get; set; }
     public int SubChainId { get; set; }
-    public TVector<byte[]> Blocks { get; set; }
+    public TVector<ReadOnlyMemory<byte>> Blocks { get; set; }
     public int NextOffset { get; set; }
 
     public void ComputeFlag()
@@ -30,11 +30,11 @@ public sealed class TUpdateGroupCallChainBlocks : IUpdate
         writer.Write(NextOffset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        SubChainId = reader.ReadInt32();
-        Blocks = reader.Read<TVector<byte[]>>();
-        NextOffset = reader.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        SubChainId = buffer.ReadInt32();
+        Blocks = buffer.Read<TVector<ReadOnlyMemory<byte>>>();
+        NextOffset = buffer.ReadInt32();
     }
 }

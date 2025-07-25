@@ -14,7 +14,7 @@ public sealed class TDhConfigNotModified : IDhConfig
     ///<summary>
     /// Random sequence of bytes of assigned length
     ///</summary>
-    public byte[] Random { get; set; }
+    public ReadOnlyMemory<byte> Random { get; set; }
 
     public void ComputeFlag()
     {
@@ -28,8 +28,8 @@ public sealed class TDhConfigNotModified : IDhConfig
         writer.Write(Random);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Random = reader.ReadBytes();
+        Random = buffer.ReadBytes();
     }
 }

@@ -32,13 +32,13 @@ public sealed class TPQInnerData : IPQInnerData
         writer.WriteRawBytes(NewNonce);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Pq = reader.ReadBytes();
-        P = reader.ReadBytes();
-        Q = reader.ReadBytes();
-        Nonce = reader.ReadInt128();
-        ServerNonce = reader.ReadInt128();
-        NewNonce = reader.ReadInt256();
+        Pq = buffer.ReadBytes();
+        P = buffer.ReadBytes();
+        Q = buffer.ReadBytes();
+        Nonce = buffer.ReadInt128();
+        ServerNonce = buffer.ReadInt128();
+        NewNonce = buffer.ReadInt256();
     }
 }

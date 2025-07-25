@@ -25,7 +25,7 @@ public sealed class RequestExportChatInvite : IRequest<MyTelegram.Schema.IExport
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Legacy flag, reproducing legacy behavior of this method: if set, revokes all previous links before creating a new one. Kept for bot API BC, should not be used by modern clients.
@@ -68,12 +68,12 @@ public sealed class RequestExportChatInvite : IRequest<MyTelegram.Schema.IExport
 
     public void ComputeFlag()
     {
-        if (LegacyRevokePermanent) { Flags[2] = true; }
-        if (RequestNeeded) { Flags[3] = true; }
-        if (/*ExpireDate != 0 && */ExpireDate.HasValue) { Flags[0] = true; }
-        if (/*UsageLimit != 0 && */UsageLimit.HasValue) { Flags[1] = true; }
-        if (Title != null) { Flags[4] = true; }
-        if (SubscriptionPricing != null) { Flags[5] = true; }
+        if (LegacyRevokePermanent) { Flags = Flags.SetBit(2); }
+        if (RequestNeeded) { Flags = Flags.SetBit(3); }
+        if (/*ExpireDate != 0 && */ExpireDate.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*UsageLimit != 0 && */UsageLimit.HasValue) { Flags = Flags.SetBit(1); }
+        if (Title != null) { Flags = Flags.SetBit(4); }
+        if (SubscriptionPricing != null) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -82,21 +82,21 @@ public sealed class RequestExportChatInvite : IRequest<MyTelegram.Schema.IExport
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(ExpireDate.Value); }
-        if (Flags[1]) { writer.Write(UsageLimit.Value); }
-        if (Flags[4]) { writer.Write(Title); }
-        if (Flags[5]) { writer.Write(SubscriptionPricing); }
+        if (Flags.IsBitSet(0)) { writer.Write(ExpireDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(UsageLimit.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(Title); }
+        if (Flags.IsBitSet(5)) { writer.Write(SubscriptionPricing); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { LegacyRevokePermanent = true; }
-        if (Flags[3]) { RequestNeeded = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[0]) { ExpireDate = reader.ReadInt32(); }
-        if (Flags[1]) { UsageLimit = reader.ReadInt32(); }
-        if (Flags[4]) { Title = reader.ReadString(); }
-        if (Flags[5]) { SubscriptionPricing = reader.Read<MyTelegram.Schema.IStarsSubscriptionPricing>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { LegacyRevokePermanent = true; }
+        if (Flags.IsBitSet(3)) { RequestNeeded = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(0)) { ExpireDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { UsageLimit = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(5)) { SubscriptionPricing = buffer.Read<MyTelegram.Schema.IStarsSubscriptionPricing>(); }
     }
 }

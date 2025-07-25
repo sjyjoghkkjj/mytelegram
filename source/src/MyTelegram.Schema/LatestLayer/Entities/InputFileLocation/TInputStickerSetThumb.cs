@@ -35,9 +35,9 @@ public sealed class TInputStickerSetThumb : IInputFileLocation
         writer.Write(ThumbVersion);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
-        ThumbVersion = reader.ReadInt32();
+        Stickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
+        ThumbVersion = buffer.ReadInt32();
     }
 }

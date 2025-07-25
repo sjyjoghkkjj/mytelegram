@@ -40,10 +40,10 @@ public sealed class TUpdateEncryptedMessagesRead : IUpdate
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt32();
-        MaxDate = reader.ReadInt32();
-        Date = reader.ReadInt32();
+        ChatId = buffer.ReadInt32();
+        MaxDate = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
     }
 }

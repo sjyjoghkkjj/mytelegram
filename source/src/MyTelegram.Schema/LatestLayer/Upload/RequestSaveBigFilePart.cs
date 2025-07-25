@@ -37,7 +37,7 @@ public sealed class RequestSaveBigFilePart : IRequest<IBool>
     ///<summary>
     /// Binary data, part contents
     ///</summary>
-    public byte[] Bytes { get; set; }
+    public ReadOnlyMemory<byte> Bytes { get; set; }
 
     public void ComputeFlag()
     {
@@ -54,11 +54,11 @@ public sealed class RequestSaveBigFilePart : IRequest<IBool>
         writer.Write(Bytes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FileId = reader.ReadInt64();
-        FilePart = reader.ReadInt32();
-        FileTotalParts = reader.ReadInt32();
-        Bytes = reader.ReadBytes();
+        FileId = buffer.ReadInt64();
+        FilePart = buffer.ReadInt32();
+        FileTotalParts = buffer.ReadInt32();
+        Bytes = buffer.ReadMemory();
     }
 }

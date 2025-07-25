@@ -14,7 +14,7 @@ public sealed class TChatlistInvite : IChatlistInvite
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool TitleNoanimate { get; set; }
 
     ///<summary>
@@ -45,8 +45,8 @@ public sealed class TChatlistInvite : IChatlistInvite
 
     public void ComputeFlag()
     {
-        if (TitleNoanimate) { Flags[1] = true; }
-        if (Emoticon != null) { Flags[0] = true; }
+        if (TitleNoanimate) { Flags = Flags.SetBit(1); }
+        if (Emoticon != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -56,20 +56,20 @@ public sealed class TChatlistInvite : IChatlistInvite
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Title);
-        if (Flags[0]) { writer.Write(Emoticon); }
+        if (Flags.IsBitSet(0)) { writer.Write(Emoticon); }
         writer.Write(Peers);
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { TitleNoanimate = true; }
-        Title = reader.Read<MyTelegram.Schema.ITextWithEntities>();
-        if (Flags[0]) { Emoticon = reader.ReadString(); }
-        Peers = reader.Read<TVector<MyTelegram.Schema.IPeer>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { TitleNoanimate = true; }
+        Title = buffer.Read<MyTelegram.Schema.ITextWithEntities>();
+        if (Flags.IsBitSet(0)) { Emoticon = buffer.ReadString(); }
+        Peers = buffer.Read<TVector<MyTelegram.Schema.IPeer>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

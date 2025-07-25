@@ -26,9 +26,9 @@ public sealed class RequestTransferStarGift : IRequest<MyTelegram.Schema.IUpdate
         writer.Write(ToId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stargift = reader.Read<MyTelegram.Schema.IInputSavedStarGift>();
-        ToId = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Stargift = buffer.Read<MyTelegram.Schema.IInputSavedStarGift>();
+        ToId = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

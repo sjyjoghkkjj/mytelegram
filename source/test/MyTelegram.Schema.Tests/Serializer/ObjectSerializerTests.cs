@@ -1,17 +1,236 @@
 ﻿using MyTelegram.Schema.Upload;
 using MyTelegram.Schema.Users;
+using System;
 using System.Reflection;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 
 #pragma warning disable CS8618
 
 namespace MyTelegram.Schema.Serializer;
 
+public class TestM : IObject
+{
+    public uint ConstructorId => 0x73f1f8dc;
+
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
+    {
+        MsgId = buffer.ReadInt64();
+        SeqNo = buffer.ReadInt32();
+        Bytes = buffer.ReadInt32();
+        Body = new byte[Bytes];
+        buffer.TryCopyTo(Body);
+        //reader.Advance(Bytes);
+        buffer = buffer[Bytes..];
+    }
+
+    public void Serialize(IBufferWriter<byte> writer)
+    {
+        writer.Write(MsgId);
+        writer.Write(SeqNo);
+        writer.Write(Bytes);
+        //Body.Serialize(writer);
+    }
+
+    public long MsgId { get; set; }
+
+    public int SeqNo { get; set; }
+
+    public int Bytes { get; set; }
+
+    //public IObject Body { get; set; }
+    public byte[] Body { get; set; }
+}
+
+[TlObject(0x73f1f8dc)]
+// ReSharper disable once InconsistentNaming
+public class TestMC : IRequest<IObject>
+{
+    public uint ConstructorId => 0x73f1f8dc;
+    public TestM[] Messages { get; set; }
+
+    public void Serialize(IBufferWriter<byte> writer)
+    {
+        writer.Write(ConstructorId);
+        writer.Write(Messages.Length);
+        foreach (var containerMessage in Messages)
+        {
+            writer.Write(containerMessage);
+        }
+    }
+
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
+    {
+        //if (reader.TryReadLittleEndian(out int length))
+        var length = buffer.ReadInt32();
+        if (length > 0)
+        {
+            Messages = new TestM[length];
+            for (int i = 0; i < length; i++)
+            {
+                var item = new TestM();
+                item.Deserialize(ref buffer);
+                Messages[i] = item;
+            }
+        }
+    }
+}
+
 public class ObjectSerializerTests
 {
-    public ObjectSerializerTests()
+    private readonly ITestOutputHelper _outputHelper;
+    public ObjectSerializerTests(ITestOutputHelper outputHelper)
     {
+        _outputHelper = outputHelper;
         // Only need this code when tl object and serializer in different assembly
-        SerializerObjectMappings.CreateConstructIdToTypeMappingsFromAssembly(Assembly.GetExecutingAssembly());
+        //SerializerObjectMappings.CreateConstructIdToTypeMappingsFromAssembly(Assembly.GetExecutingAssembly());
+    }
+
+    //    [Fact]
+    //    public void Deserialize_Test3333()
+    //    {
+    //        var bytes =
+    //            @"0D-0D-9B-DA-AE-00-00-00-A9-5E-CD-C1-02-00-00-00-01-00-00-00-10-69-50-68-6F-6E-65-20-53-69-6D-75-6C-61-
+    //74-6F-72-00-00-00-04-31-37-2E-32-00-00-00-0F-31-30-2E-38-2E-31-20-28-31-30-30-30-30-29-20-05-65-6E-2D-43-4E-00-
+    //00-03-69-6F-73-07-7A-68-2D-68-61-6E-73-9D-D4-C1-99-15-C4-B5-1C-02-00-00-00-D9-1B-DE-C0-09-74-7A-5F-6F-66-66-73-
+    //65-74-00-00-A4-DF-E0-2B-00-00-00-00-00-20-DC-40-D9-1B-DE-C0-08-62-75-6E-64-6C-65-49-64-00-00-00-7A-76-1E-B7-14-
+    //70-68-2E-74-65-6C-65-67-72-61-2E-54-65-6C-65-67-72-61-70-68-00-00-00".ToBytes();
+    //        var s = new RequestInvokeWithLayer();
+    //        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(bytes));
+    //        buffer.ReadUInt32();
+
+    //        s.Deserialize(ref reader);
+    //    }
+
+    [Fact]
+    public void Deserialize_E2EBlock()
+    {
+        var bytes = @"B6 3D 9A 63 D8 FD F1 F9 CA 88 71 AD FF 46 D8 65 A4 BE 18 8D 7C 6F 9E 02 F3 8C BD 8C 84 5E DA A4
+A5 04 10 42 D3 97 33 E1 1B 5B 23 09 6C DC 02 BB F3 40 3C 86 C2 F3 85 C8 4C F0 EB 7A C6 40 89 FE
+10 E3 B5 0F 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 02 00 00 00 46 71 F1 2C 84 75 DC 1D 01 00 00 00 1F 97 F3 18 E9 C6 1E 00
+00 00 00 00 4F B0 17 17 E3 15 CB 63 CE 14 76 F5 39 20 A7 A6 A5 38 15 F7 F8 87 58 AC DE 75 EB A8
+FB F6 10 16 03 00 00 00 00 00 00 00 03 00 00 00 58 21 7A 98 7F 7E 84 8A C2 4E DA C9 13 22 FA B0
+EC D8 02 C9 66 3D 59 10 69 D2 4C 80 E4 73 26 C0 51 9C 59 9F 61 47 E1 E7 40 6D A1 9A 6C 2A 5F 1B
+84 69 39 D4 07 B7 69 7F 5B 46 B6 9C E4 DB 8D C6 8A 10 13 67 9D 29 94 5A 83 F0 00 FF 1B 82 D5 D7
+29 05 9D F8 66 64 5B DB EC D4 DA 3D 9A 5E 84 6F 4B 7B CA 72 4F E2 AC 86 0E 00 00 00 01 00 00 00
+E9 C6 1E 00 00 00 00 00 01 00 00 00 20 A3 A4 D8 24 9E 10 99 67 D9 BC 43 64 36 84 0A 1F 3C EF 33
+AD 84 CB BB 56 EA FE 3A 75 7B 48 72 D9 00 00 00 00 00 00 00 E6 79 B6 D6 00 00 00 00 DF 3F 61 98
+04 A9 2F DB 40 57 19 2D C4 3D D7 48 EA 77 8A DC 52 BC 49 8C E8 05 24 C0 14 B8 11 19 4F B0 17 17
+E3 15 CB 63 CE 14 76 F5 39 20 A7 A6 A5 38 15 F7 F8 87 58 AC DE 75 EB A8 FB F6 10 16".ToBytes();
+        //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(bytes));
+        ReadOnlyMemory<byte> buffer = bytes;
+        buffer.ReadInt32();
+        var s = new MyTelegram.Schema.E2e.TBlock();
+        s.Deserialize(ref buffer);
+    }
+
+    [Fact]
+    public void Deserialize_Test2222()
+    {
+        var bytes =
+                            @"0D-0D-9B-DA-AE-00-00-00-A9-5E-CD-C1-02-00-00-00-01-00-00-00-10-69-50-68-6F-6E-65-20-53-69-6D-75-6C-61-74-6F-72-
+                00-00-00-04-31-37-2E-32-00-00-00-0F-31-30-2E-38-2E-31-20-28-31-30-30-30-30-29-20-05-65-6E-2D-43-4E-00-00-03-69-6F-73-02-65-
+                6E-00-9D-D4-C1-99-15-C4-B5-1C-02-00-00-00-D9-1B-DE-C0-08-62-75-6E-64-6C-65-49-64-00-00-00-7A-76-1E-B7-14-70-68-2E-74-65-6C-
+                65-67-72-61-2E-54-65-6C-65-67-72-61-70-68-00-00-00-D9-1B-DE-C0-09-74-7A-5F-6F-66-66-73-65-74-00-00-A4-DF-E0-2B-00-
+                00-00-00-00-20-DC-40-F7-02-E2-C0"
+                .ToBytes();
+
+        var s = new RequestInitConnection();
+        //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(bytes));
+        ReadOnlyMemory<byte> buffer = bytes;
+        buffer.ReadUInt32();
+        buffer.ReadInt32();
+        buffer.ReadUInt32();
+
+        s.Deserialize(ref buffer);
+
+    }
+
+    [Fact]
+    public void Deserialize_Test227()
+    {
+        var bytes = @"DC F8 F1 73 08 00 00 00 00 FC 89 1E CA DB DD 65 45 00 00 00 A8 00 00 00 0D 0D 9B DA AE 00 00 00
+A9 5E CD C1 02 00 00 00 01 00 00 00 10 69 50 68 6F 6E 65 20 53 69 6D 75 6C 61 74 6F 72 00 00 00
+04 31 37 2E 32 00 00 00 0F 31 30 2E 38 2E 31 20 28 31 30 30 30 30 29 20 05 65 6E 2D 43 4E 00 00
+03 69 6F 73 02 65 6E 00 9D D4 C1 99 15 C4 B5 1C 02 00 00 00 D9 1B DE C0 08 62 75 6E 64 6C 65 49
+64 00 00 00 7A 76 1E B7 14 70 68 2E 74 65 6C 65 67 72 61 2E 54 65 6C 65 67 72 61 70 68 00 00 00
+D9 1B DE C0 09 74 7A 5F 6F 66 66 73 65 74 00 00 A4 DF E0 2B 00 00 00 00 00 20 DC 40 F7 02 E2 C0
+00 50 BC 1E CA DB DD 65 47 00 00 00 A8 00 00 00 0D 0D 9B DA AE 00 00 00 A9 5E CD C1 02 00 00 00
+01 00 00 00 10 69 50 68 6F 6E 65 20 53 69 6D 75 6C 61 74 6F 72 00 00 00 04 31 37 2E 32 00 00 00
+0F 31 30 2E 38 2E 31 20 28 31 30 30 30 30 29 20 05 65 6E 2D 43 4E 00 00 03 69 6F 73 02 65 6E 00
+9D D4 C1 99 15 C4 B5 1C 02 00 00 00 D9 1B DE C0 08 62 75 6E 64 6C 65 49 64 00 00 00 7A 76 1E B7
+14 70 68 2E 74 65 6C 65 67 72 61 2E 54 65 6C 65 67 72 61 70 68 00 00 00 D9 1B DE C0 09 74 7A 5F
+6F 66 66 73 65 74 00 00 A4 DF E0 2B 00 00 00 00 00 20 DC 40 F7 02 E2 C0 00 5C E4 1E CA DB DD 65
+49 00 00 00 B4 00 00 00 0D 0D 9B DA AE 00 00 00 A9 5E CD C1 02 00 00 00 01 00 00 00 10 69 50 68
+6F 6E 65 20 53 69 6D 75 6C 61 74 6F 72 00 00 00 04 31 37 2E 32 00 00 00 0F 31 30 2E 38 2E 31 20
+28 31 30 30 30 30 29 20 05 65 6E 2D 43 4E 00 00 03 69 6F 73 02 65 6E 00 9D D4 C1 99 15 C4 B5 1C
+02 00 00 00 D9 1B DE C0 08 62 75 6E 64 6C 65 49 64 00 00 00 7A 76 1E B7 14 70 68 2E 74 65 6C 65
+67 72 61 2E 54 65 6C 65 67 72 61 70 68 00 00 00 D9 1B DE C0 09 74 7A 5F 6F 66 66 73 65 74 00 00
+A4 DF E0 2B 00 00 00 00 00 20 DC 40 3B 40 A9 9D 00 00 00 00 00 00 00 00 00 00 00 00 00 6C 03 1F
+CA DB DD 65 4B 00 00 00 B0 00 00 00 0D 0D 9B DA AE 00 00 00 A9 5E CD C1 02 00 00 00 01 00 00 00
+10 69 50 68 6F 6E 65 20 53 69 6D 75 6C 61 74 6F 72 00 00 00 04 31 37 2E 32 00 00 00 0F 31 30 2E
+38 2E 31 20 28 31 30 30 30 30 29 20 05 65 6E 2D 43 4E 00 00 03 69 6F 73 02 65 6E 00 9D D4 C1 99
+15 C4 B5 1C 02 00 00 00 D9 1B DE C0 08 62 75 6E 64 6C 65 49 64 00 00 00 7A 76 1E B7 14 70 68 2E
+74 65 6C 65 67 72 61 2E 54 65 6C 65 67 72 61 70 68 00 00 00 D9 1B DE C0 09 74 7A 5F 6F 66 66 73
+65 74 00 00 A4 DF E0 2B 00 00 00 00 00 20 DC 40 A9 AA F1 04 00 00 00 00 00 00 00 00 00 DC 1F 1F
+CA DB DD 65 4D 00 00 00 A8 00 00 00 0D 0D 9B DA AE 00 00 00 A9 5E CD C1 02 00 00 00 01 00 00 00
+10 69 50 68 6F 6E 65 20 53 69 6D 75 6C 61 74 6F 72 00 00 00 04 31 37 2E 32 00 00 00 0F 31 30 2E
+38 2E 31 20 28 31 30 30 30 30 29 20 05 65 6E 2D 43 4E 00 00 03 69 6F 73 02 65 6E 00 9D D4 C1 99
+15 C4 B5 1C 02 00 00 00 D9 1B DE C0 08 62 75 6E 64 6C 65 49 64 00 00 00 7A 76 1E B7 14 70 68 2E
+74 65 6C 65 67 72 61 2E 54 65 6C 65 67 72 61 70 68 00 00 00 D9 1B DE C0 09 74 7A 5F 6F 66 66 73
+65 74 00 00 A4 DF E0 2B 00 00 00 00 00 20 DC 40 6B 18 F9 C4 00 A8 3B 1F CA DB DD 65 4F 00 00 00
+A8 00 00 00 0D 0D 9B DA AE 00 00 00 A9 5E CD C1 02 00 00 00 01 00 00 00 10 69 50 68 6F 6E 65 20
+53 69 6D 75 6C 61 74 6F 72 00 00 00 04 31 37 2E 32 00 00 00 0F 31 30 2E 38 2E 31 20 28 31 30 30
+30 30 29 20 05 65 6E 2D 43 4E 00 00 03 69 6F 73 02 65 6E 00 9D D4 C1 99 15 C4 B5 1C 02 00 00 00
+D9 1B DE C0 08 62 75 6E 64 6C 65 49 64 00 00 00 7A 76 1E B7 14 70 68 2E 74 65 6C 65 67 72 61 2E
+54 65 6C 65 67 72 61 70 68 00 00 00 D9 1B DE C0 09 74 7A 5F 6F 66 66 73 65 74 00 00 A4 DF E0 2B
+00 00 00 00 00 20 DC 40 88 71 8B 65 00 28 64 1F CA DB DD 65 51 00 00 00 AC 00 00 00 0D 0D 9B DA
+AE 00 00 00 A9 5E CD C1 02 00 00 00 01 00 00 00 10 69 50 68 6F 6E 65 20 53 69 6D 75 6C 61 74 6F
+72 00 00 00 04 31 37 2E 32 00 00 00 0F 31 30 2E 38 2E 31 20 28 31 30 30 30 30 29 20 05 65 6E 2D
+43 4E 00 00 03 69 6F 73 02 65 6E 00 9D D4 C1 99 15 C4 B5 1C 02 00 00 00 D9 1B DE C0 08 62 75 6E
+64 6C 65 49 64 00 00 00 7A 76 1E B7 14 70 68 2E 74 65 6C 65 67 72 61 2E 54 65 6C 65 67 72 61 70
+68 00 00 00 D9 1B DE C0 09 74 7A 5F 6F 66 66 73 65 74 00 00 A4 DF E0 2B 00 00 00 00 00 20 DC 40
+2F F4 80 DA 00 00 00 00 00 A0 96 1F CA DB DD 65 53 00 00 00 AC 00 00 00 0D 0D 9B DA AE 00 00 00
+A9 5E CD C1 02 00 00 00 01 00 00 00 10 69 50 68 6F 6E 65 20 53 69 6D 75 6C 61 74 6F 72 00 00 00
+04 31 37 2E 32 00 00 00 0F 31 30 2E 38 2E 31 20 28 31 30 30 30 30 29 20 05 65 6E 2D 43 4E 00 00
+03 69 6F 73 02 65 6E 00 9D D4 C1 99 15 C4 B5 1C 02 00 00 00 D9 1B DE C0 08 62 75 6E 64 6C 65 49
+64 00 00 00 7A 76 1E B7 14 70 68 2E 74 65 6C 65 67 72 61 2E 54 65 6C 65 67 72 61 70 68 00 00 00
+D9 1B DE C0 09 74 7A 5F 6F 66 66 73 65 74 00 00 A4 DF E0 2B 00 00 00 00 00 20 DC 40 FD A9 CF AB
+00 00 00 00".ToBytes();
+        //var s = new ObjectSerializer<TMsgContainer>();
+        ReadOnlyMemory<byte> buffer = bytes;
+        buffer.ReadUInt32();
+        var s = new TestMC();
+        s.Deserialize(ref buffer);
+        s.Messages.Length.ShouldBe(8);
+        TestOutputHelper h = new TestOutputHelper();
+
+        var index = 0;
+
+        foreach (var item in s.Messages)
+        {
+            try
+            {
+                //h.WriteLine($"{BitConverter.ToUInt32(item.Body):x2}");
+                //_outputHelper.WriteLine($"#0x{BitConverter.ToUInt32(item.Body):x2}");
+                //var r2 = new SequenceReader<byte>(new ReadOnlySequence<byte>(item.Body));
+                ReadOnlyMemory<byte> r2 = bytes;
+                r2.ReadUInt32();
+
+                var invokeWithLayer = new RequestInvokeWithLayer();
+                invokeWithLayer.Deserialize(ref r2);
+                _outputHelper.WriteLine(System.Text.Json.JsonSerializer.Serialize(invokeWithLayer.Query));
+            }
+            catch (Exception ex)
+            {
+                _outputHelper.WriteLine($"Error:{index}");
+                _outputHelper.WriteLine(ex.ToString());
+            }
+
+            index++;
+        }
+        Console.WriteLine();
     }
 
     [Fact]
@@ -74,7 +293,7 @@ public class ObjectSerializerTests
                 ThumbSize = ""
             }
         };
-        //using var writer = ArrayBufferWriterPool.Rent();
+        //using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
         //var stream = new MemoryStream();
@@ -85,7 +304,7 @@ public class ObjectSerializerTests
         var bytes = obj.ToBytes();
 
         bytes.ShouldBeEquivalentTo(expectedValue);
-        //writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        //writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
     }
 
     [Fact]
@@ -153,12 +372,12 @@ public class ObjectSerializerTests
     //    };
     //    var expectedValue = "0D 0D 9B DA 94 00 00 00 A9 5E CD C1 02 00 00 00 C5 43 00 00 06 53 65 72 76 65 72 00 0A 57 69 6E\r\n64 6F 77 73 20 31 30 00 09 34 2E 33 2E 31 20 78 36 34 00 00 05 65 6E 2D 55 53 00 00 08 74 64 65\r\n73 6B 74 6F 70 00 00 00 02 65 6E 00 9D D4 C1 99 15 C4 B5 1C 01 00 00 00 D9 1B DE C0 09 74 7A 5F\r\n6F 66 66 73 65 74 00 00 A4 DF E0 2B 00 00 00 00 00 20 DC 40 2C 56 28 66 B5 75 72 99".ToBytes();
     //    //var serializer = new ObjectSerializer<IObject>();
-    //    //using var writer = ArrayBufferWriterPool.Rent();
+    //    //using var writer = new ArrayPoolBufferWriter<byte>();
 
-    //    //serializer.Serialize(obj, writer.Writer);
-    //    //var a = writer.Writer.WrittenSpan.ToArray().ToHexString();
+    //    //serializer.Serialize(obj, writer);
+    //    //var a = writer.WrittenSpan.ToArray().ToHexString();
 
-    //    //writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+    //    //writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
 
     //    SerializeTest(obj,expectedValue);
     //}
@@ -188,33 +407,34 @@ public class ObjectSerializerTests
             "6F 66 66 73 65 74 00 00 A4 DF E0 2B 00 00 00 00 00 20 DC 40 2C 56 28 66 B5 75 72 99")
                 .ToBytes();
         var serializer = new ObjectSerializer<IObject>();
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
-        var obj = serializer.Deserialize(ref reader);
+        ReadOnlyMemory<byte> buffer = value;
+        var obj = serializer.Deserialize(ref buffer);
 
         obj.ShouldNotBeNull();
     }
 
-    //    [Fact]
-    //    public void Deserialize_Test3()
-    //    {
-    //        var value = @"84 09 E3 F1 86 5B 77 47 83 29 AC 9B 62 A6 18 6A 2E B3 C3 23 54 B6 43 66 FD 31 F9 FC E7 7E 81 99
-    //08 91 95 6E AE 9F F6 F5 54 62 33 14 7F 75 E3 B3 7D 5A ED 80 03 33 0C 00 00 00 00 00 00 00 00 00
-    //FE FF 00 00 E2 7D BB 37 D0 D1 4F D0 C7 F4 4A 1D AB 32 82 6F DF 0E 4E DC F5 73 AE 8D BE A1 40 85
-    //66 00 87 71 5C F6 2B 48 C7 13 E9 0C 3C 2E 73 43 20 53 C1 3A C1 64 AA 6E BD 2D 08 EB 02 45 36 24
-    //66 FD 39 DB 4F 13 9A B3 43 CC B8 E0 27 A1 D4 9D A1 C2 83 0C E5 AE 48 FF 9F DB 18 36 2E D3 35 84
-    //AA FA 87 DA 16 97 4D 29 71 E2 3F 41 87 F4 79 D8 8F F0 37 8A 48 10 6E 01 BE D3 39 A0 EC B3 0D C1
-    //18 3C 5B C4 4A BD E6 A5 77 DC 2D 81 AB 8C 8D 02 1E 8D 2F 48 B5 01 04 B7 CD 87 CD 96 01 2F 93 C0
-    //77 D8 EF E7 D5 4C D2 B6 16 41 34 5C 07 53 B3 BF 71 39 40 F5 22 51 E7 4C AE C5 BD 8D 74 3E CC BA
-    //67 55 0C 6D 1C 37 46 9F C0 FE AF 02 0D 16 32 6F 95 57 22 60 89 68 72 EE AB A9 61 24 65 C3 39 98
-    //8C 47 EC 50 E4 6D 41 2A 11 41 4B 2E F3 D6 51 E6 38 0E D4 A0 4F 14 79 FF D0 A6 D8 D4 D4 6A 3F 87
-    //F2 60 8B 00 CC 39 62 1A F1 0A AC 25 A6 C7 5F 5D".ToBytes();
-    //        var serializer = new ObjectSerializer<IObject>();
-    //        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value.AsSpan().Slice(20).ToArray()));
-
-    //        //var obj = serializer.Deserialize(ref reader);
-
-    //        reader.Consumed.ShouldBe(value.Length - 12 - 20);
-    //    }
+    [Fact]
+    public void Deserialize_Test3()
+    {
+        var value = @"84 09 E3 F1 86 5B 77 47 83 29 AC 9B 62 A6 18 6A 2E B3 C3 23 54 B6 43 66 FD 31 F9 FC E7 7E 81 99
+08 91 95 6E AE 9F F6 F5 54 62 33 14 7F 75 E3 B3 7D 5A ED 80 03 33 0C 00 00 00 00 00 00 00 00 00
+FE FF 00 00 E2 7D BB 37 D0 D1 4F D0 C7 F4 4A 1D AB 32 82 6F DF 0E 4E DC F5 73 AE 8D BE A1 40 85
+66 00 87 71 5C F6 2B 48 C7 13 E9 0C 3C 2E 73 43 20 53 C1 3A C1 64 AA 6E BD 2D 08 EB 02 45 36 24
+66 FD 39 DB 4F 13 9A B3 43 CC B8 E0 27 A1 D4 9D A1 C2 83 0C E5 AE 48 FF 9F DB 18 36 2E D3 35 84
+AA FA 87 DA 16 97 4D 29 71 E2 3F 41 87 F4 79 D8 8F F0 37 8A 48 10 6E 01 BE D3 39 A0 EC B3 0D C1
+18 3C 5B C4 4A BD E6 A5 77 DC 2D 81 AB 8C 8D 02 1E 8D 2F 48 B5 01 04 B7 CD 87 CD 96 01 2F 93 C0
+77 D8 EF E7 D5 4C D2 B6 16 41 34 5C 07 53 B3 BF 71 39 40 F5 22 51 E7 4C AE C5 BD 8D 74 3E CC BA
+67 55 0C 6D 1C 37 46 9F C0 FE AF 02 0D 16 32 6F 95 57 22 60 89 68 72 EE AB A9 61 24 65 C3 39 98
+8C 47 EC 50 E4 6D 41 2A 11 41 4B 2E F3 D6 51 E6 38 0E D4 A0 4F 14 79 FF D0 A6 D8 D4 D4 6A 3F 87
+F2 60 8B 00 CC 39 62 1A F1 0A AC 25 A6 C7 5F 5D".ToBytes();
+        var serializer = new ObjectSerializer<IObject>();
+        //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value.AsSpan().Slice(20).ToArray()));
+        ReadOnlyMemory<byte> buffer = value.AsMemory().Slice(20);
+        var obj = serializer.Deserialize(ref buffer);
+        var consumed = value.Length - buffer.Length;
+        consumed.ShouldBe(value.Length - 12 - 20);
+        //reader.Consumed.ShouldBe(value.Length - 12 - 20);
+    }
 
     //public void D
     // 0x48a5910d15c4b51c010000004ca5e8dd81841e00000000000
@@ -223,14 +443,9 @@ public class ObjectSerializerTests
     //[Fact]
     //public void Deserialize_TVector_Of_IUpdates()
     //{
-    //    var obj = new TVector<IUpdate>();
-    //    obj.Add(new TUpdateMessageID
-    //    {
-    //        Id = 1
-    //    });
-    //    //var bytes = Convert.FromBase64String(
-    //    //    "FcS1HAEAAADZBLpi4G4ROAABAAARJwAAIhdRWYGEHgAAAAAAHjelogNAt0O6AAAAXNDIZAV3YWZhZgAAEScAAAEAAAA=");
-    //    //var obj = bytes.ToTObject<TVector<IUpdate>>();
+    //    var bytes = Convert.FromBase64String(
+    //        "FcS1HAEAAADZBLpi4G4ROAABAAARJwAAIhdRWYGEHgAAAAAAHjelogNAt0O6AAAAXNDIZAV3YWZhZgAAEScAAAEAAAA=");
+    //    var obj = bytes.ToTObject<TVector<IUpdate>>();
 
     //    obj.Count.ShouldBe(1);
     //}
@@ -247,9 +462,9 @@ public class ObjectSerializerTests
         //var actualObj = serializer.Deserialize(ref buffer);
 
         var serializer = new ObjectSerializer<RequestGetUsers>();
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
+        ReadOnlyMemory<byte> buffer = value;
 
-        var actualObj = serializer.Deserialize(ref reader);
+        var actualObj = serializer.Deserialize(ref buffer);
 
         actualObj.Id.Count.ShouldBe(1);
     }
@@ -402,9 +617,9 @@ public class ObjectSerializerTests
     private void DeserializeTest<TExpectedValue>(byte[] value, TExpectedValue expectedValue)
     {
         var serializer = new ObjectSerializer<TExpectedValue>();
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
-
-        var actualObj = serializer.Deserialize(ref reader);
+        //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
+        ReadOnlyMemory<byte> buffer = value;
+        var actualObj = serializer.Deserialize(ref buffer);
 
         actualObj.ShouldBeEquivalentTo(expectedValue);
     }
@@ -412,9 +627,9 @@ public class ObjectSerializerTests
     private TExpectedValue Deserialize<TExpectedValue>(byte[] value)
     {
         var serializer = new ObjectSerializer<TExpectedValue>();
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
-
-        var actualObj = serializer.Deserialize(ref reader);
+        //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
+        ReadOnlyMemory<byte> buffer = value;
+        var actualObj = serializer.Deserialize(ref buffer);
 
         return actualObj;
     }
@@ -484,17 +699,17 @@ public class ObjectSerializerTests
     [Fact]
     public void Serialize_Object_Contains_Flag_Property()
     {
-        // "050000000403000000000000B57572990A746573742076616C756500"
+        //                        "050000000403000000000000B57572990A746573742076616C756500"
         var expectedValue = "0500000003000000B57572990A746573742076616C756500".ToBytes();
 
         var obj = new TestObjectWithNullableProperty { BoolValue1 = true, StringValue = "test value" };
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -505,7 +720,7 @@ public class ObjectSerializerTests
         using var writer = new ArrayPoolBufferWriter<byte>();
 
         data.Serialize(writer);
-        //var a = writer.Writer.WrittenSpan.ToArray().ToHexString();
+        var a = writer.WrittenSpan.ToArray().ToHexString();
         writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
     }
 
@@ -516,11 +731,11 @@ public class ObjectSerializerTests
         var obj = new TestObjectWithSubObject { SubObject = new SubObject { Id = 1 } };
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -533,11 +748,11 @@ public class ObjectSerializerTests
         var obj = new TestObjectWithSubObject { SubObject = new SubObject2 { Id = 1L } };
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -550,11 +765,11 @@ public class ObjectSerializerTests
         var obj = new TestObjectWithTVectorOfInterface { SubObjects = new TVector<ISubObject>() };
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
         SerializeTest(obj, expectedValue);
     }
@@ -567,7 +782,7 @@ public class ObjectSerializerTests
                 .ToBytes();
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        //using var writer = ArrayBufferWriterPool.Rent();
+        //using var writer = new ArrayPoolBufferWriter<byte>();
 
         var obj = new TRpcResult
         {
@@ -590,7 +805,7 @@ public class ObjectSerializerTests
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -603,11 +818,11 @@ public class ObjectSerializerTests
         var obj = new TestObject { TestId = 1, Name = "test name" };
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -620,11 +835,11 @@ public class ObjectSerializerTests
         var obj = new TVector<ISubObject>();
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -643,11 +858,11 @@ public class ObjectSerializerTests
             5);
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -661,11 +876,11 @@ public class ObjectSerializerTests
             new TestObjectWithNullableProperty { BoolValue1 = true, StringValue = "test value" });
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -678,11 +893,11 @@ public class ObjectSerializerTests
         var obj = new TVector<ISubObject>(new SubObject { Id = 1 }, new SubObject2 { Id = 2 });
         //var stream = new MemoryStream();
         //var writer = new BinaryWriter(stream);
-        ////using var writer = ArrayBufferWriterPool.Rent();
+        ////using var writer = new ArrayPoolBufferWriter<byte>();
 
         //obj.Serialize(writer);
 
-        ////writer.Writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
+        ////writer.WrittenSpan.ToArray().ShouldBeEquivalentTo(expectedValue);
         //stream.ToArray().ShouldBeEquivalentTo(expectedValue);
 
         SerializeTest(obj, expectedValue);
@@ -706,12 +921,12 @@ public class TestObject : IObject
         writer.Write(Name);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
         //TestId = buffer.Deserialize<int>();
         //Name = buffer.Deserialize<string>();
-        TestId = reader.ReadInt32();
-        Name = reader.ReadString();
+        TestId = buffer.ReadInt32();
+        Name = buffer.ReadString();
     }
 
     //public void Serialize(BinaryWriter bw)
@@ -740,10 +955,10 @@ public class TestObjectWithTVectorOfInterface : IObject
         writer.Write(SubObjects);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
         //SubObjects = buffer.Deserialize<TVector<ISubObject>>();
-        SubObjects = reader.Read<TVector<ISubObject>>();
+        SubObjects = buffer.Read<TVector<ISubObject>>();
     }
 
     //public void Serialize(BinaryWriter bw)
@@ -789,26 +1004,31 @@ public class TestObjectWithNullableProperty : IObject
         }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0])
-        {
-            BoolValue1 = reader.Read();
-        }
-
-        if (Flags[1])
-        {
-            StringValue = reader.ReadString();
-        }
-
-        if (Flags[2])
-        {
-            //IntValue = SerializerFactory.CreateSerializer<int>().Deserialize(br);
-            //IntValue = buffer.Deserialize<int>();
-            IntValue = reader.ReadInt32();
-        }
+        throw new NotImplementedException();
     }
+
+    //public void Deserialize(ref ReadOnlyMemory<byte> buffer)
+    //{
+    //    Flags = buffer.ReadBitArray();
+    //    if (Flags[0])
+    //    {
+    //        BoolValue1 = buffer.Read();
+    //    }
+
+    //    if (Flags[1])
+    //    {
+    //        StringValue = buffer.ReadString();
+    //    }
+
+    //    if (Flags[2])
+    //    {
+    //        //IntValue = SerializerFactory.CreateSerializer<int>().Deserialize(br);
+    //        //IntValue = buffer.Deserialize<int>();
+    //        IntValue = buffer.ReadInt32();
+    //    }
+    //}
 
     //public void Serialize(BinaryWriter bw)
     //{
@@ -883,10 +1103,10 @@ public class TestObjectWithSubObject : IObject
         writer.Write(SubObject);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
         //SubObject = buffer.Deserialize<ISubObject>();
-        SubObject = reader.Read<ISubObject>();
+        SubObject = buffer.Read<ISubObject>();
     }
 
     //public void Serialize(BinaryWriter bw)
@@ -916,9 +1136,9 @@ public class SubObject : ISubObject
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt32();
+        Id = buffer.ReadInt32();
         //Id = buffer.Deserialize<int>();
     }
 
@@ -945,10 +1165,10 @@ public class SubObject2 : ISubObject
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
         //Id = buffer.Deserialize<long>();
-        Id = reader.ReadInt64();
+        Id = buffer.ReadInt64();
     }
 
     //public void Serialize(BinaryWriter bw)
@@ -981,12 +1201,12 @@ public class Level2SubObject : ILevel2SubObject
         writer.Write(Level2SubVector);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
         //Id = buffer.Deserialize<int>();
         //Level2SubVector = buffer.Deserialize<TVector<string>>();
-        Id = reader.ReadInt32();
-        Level2SubVector = reader.Read<TVector<string>>();
+        Id = buffer.ReadInt32();
+        Level2SubVector = buffer.Read<TVector<string>>();
     }
 
     //public void Serialize(BinaryWriter bw)
@@ -1006,7 +1226,7 @@ public class Level2SubObject : ILevel2SubObject
 [TlObject(0x23)]
 public class SubObject3WithNullableProperty : ISubObject
 {
-    public BitArray Flags { get; set; } = new(32);
+    public int Flags { get; set; }
     public TVector<ILevel2SubObject> Level2Vector { get; set; }
     public TVector<ILevel2SubObject>? Level2Vector2 { get; set; }
     public uint ConstructorId => 0x23;
@@ -1014,21 +1234,22 @@ public class SubObject3WithNullableProperty : ISubObject
     {
         ComputeFlag();
         writer.Write(ConstructorId);
-        SerializerFactory.CreateSerializer<BitArray>().Serialize(Flags, writer);
+        //SerializerFactory.CreateSerializer<BitArray>().Serialize(Flags, writer);
+        writer.Write(Flags);
         writer.Write(Level2Vector);
-        if (Flags[0])
+        if (Flags.IsBitSet(0))
         {
-            Level2Vector.Serialize(writer);
+            Level2Vector?.Serialize(writer);
         }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Level2Vector = reader.Read<TVector<ILevel2SubObject>>();
-        if (Flags[0])
+        Flags = buffer.ReadInt32();
+        Level2Vector = buffer.Read<TVector<ILevel2SubObject>>();
+        if (Flags.IsBitSet(0))
         {
-            Level2Vector2 = reader.Read<TVector<ILevel2SubObject>>();
+            Level2Vector2 = buffer.Read<TVector<ILevel2SubObject>>();
         }
     }
 
@@ -1060,7 +1281,7 @@ public class SubObject3WithNullableProperty : ISubObject
     {
         if (Level2Vector2?.Count > 0)
         {
-            Flags[0] = true;
+            Flags.SetBit(0);
         }
     }
 }

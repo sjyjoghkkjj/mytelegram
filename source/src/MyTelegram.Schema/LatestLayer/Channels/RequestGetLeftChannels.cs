@@ -31,8 +31,8 @@ public sealed class RequestGetLeftChannels : IRequest<MyTelegram.Schema.Messages
         writer.Write(Offset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offset = reader.ReadInt32();
+        Offset = buffer.ReadInt32();
     }
 }

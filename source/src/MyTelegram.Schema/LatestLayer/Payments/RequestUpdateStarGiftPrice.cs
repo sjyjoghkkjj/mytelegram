@@ -26,9 +26,9 @@ public sealed class RequestUpdateStarGiftPrice : IRequest<MyTelegram.Schema.IUpd
         writer.Write(ResellStars);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stargift = reader.Read<MyTelegram.Schema.IInputSavedStarGift>();
-        ResellStars = reader.ReadInt64();
+        Stargift = buffer.Read<MyTelegram.Schema.IInputSavedStarGift>();
+        ResellStars = buffer.ReadInt64();
     }
 }

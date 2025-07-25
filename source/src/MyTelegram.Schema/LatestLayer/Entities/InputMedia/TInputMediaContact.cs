@@ -46,11 +46,11 @@ public sealed class TInputMediaContact : IInputMedia
         writer.Write(Vcard);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
-        Vcard = reader.ReadString();
+        PhoneNumber = buffer.ReadString();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
+        Vcard = buffer.ReadString();
     }
 }

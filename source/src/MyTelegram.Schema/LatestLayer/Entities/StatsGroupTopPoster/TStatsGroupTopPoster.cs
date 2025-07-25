@@ -40,10 +40,10 @@ public sealed class TStatsGroupTopPoster : IStatsGroupTopPoster
         writer.Write(AvgChars);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        Messages = reader.ReadInt32();
-        AvgChars = reader.ReadInt32();
+        UserId = buffer.ReadInt64();
+        Messages = buffer.ReadInt32();
+        AvgChars = buffer.ReadInt32();
     }
 }

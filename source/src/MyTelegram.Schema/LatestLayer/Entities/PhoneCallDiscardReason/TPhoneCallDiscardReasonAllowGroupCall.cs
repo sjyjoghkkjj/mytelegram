@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TPhoneCallDiscardReasonAllowGroupCall : IPhoneCallDiscardReason
 {
     public uint ConstructorId => 0xafe2b839;
-    public byte[] EncryptedKey { get; set; }
+    public ReadOnlyMemory<byte> EncryptedKey { get; set; }
 
     public void ComputeFlag()
     {
@@ -24,8 +24,8 @@ public sealed class TPhoneCallDiscardReasonAllowGroupCall : IPhoneCallDiscardRea
         writer.Write(EncryptedKey);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        EncryptedKey = reader.ReadBytes();
+        EncryptedKey = buffer.ReadBytes();
     }
 }

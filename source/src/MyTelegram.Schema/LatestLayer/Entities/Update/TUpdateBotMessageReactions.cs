@@ -53,12 +53,12 @@ public sealed class TUpdateBotMessageReactions : IUpdate
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        MsgId = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        Reactions = reader.Read<TVector<MyTelegram.Schema.IReactionCount>>();
-        Qts = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        MsgId = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        Reactions = buffer.Read<TVector<MyTelegram.Schema.IReactionCount>>();
+        Qts = buffer.ReadInt32();
     }
 }

@@ -40,9 +40,9 @@ public sealed class RequestToggleUsername : IRequest<IBool>
         writer.Write(Active);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Username = reader.ReadString();
-        Active = reader.Read();
+        Username = buffer.ReadString();
+        Active = buffer.Read();
     }
 }

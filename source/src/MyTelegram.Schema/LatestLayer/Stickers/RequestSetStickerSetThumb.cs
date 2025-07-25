@@ -19,7 +19,7 @@ public sealed class RequestSetStickerSetThumb : IRequest<MyTelegram.Schema.Messa
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Stickerset
@@ -40,8 +40,8 @@ public sealed class RequestSetStickerSetThumb : IRequest<MyTelegram.Schema.Messa
 
     public void ComputeFlag()
     {
-        if (Thumb != null) { Flags[0] = true; }
-        if (/*ThumbDocumentId != 0 &&*/ ThumbDocumentId.HasValue) { Flags[1] = true; }
+        if (Thumb != null) { Flags = Flags.SetBit(0); }
+        if (/*ThumbDocumentId != 0 &&*/ ThumbDocumentId.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,15 +50,15 @@ public sealed class RequestSetStickerSetThumb : IRequest<MyTelegram.Schema.Messa
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Stickerset);
-        if (Flags[0]) { writer.Write(Thumb); }
-        if (Flags[1]) { writer.Write(ThumbDocumentId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Thumb); }
+        if (Flags.IsBitSet(1)) { writer.Write(ThumbDocumentId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Stickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
-        if (Flags[0]) { Thumb = reader.Read<MyTelegram.Schema.IInputDocument>(); }
-        if (Flags[1]) { ThumbDocumentId = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        Stickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
+        if (Flags.IsBitSet(0)) { Thumb = buffer.Read<MyTelegram.Schema.IInputDocument>(); }
+        if (Flags.IsBitSet(1)) { ThumbDocumentId = buffer.ReadInt64(); }
     }
 }

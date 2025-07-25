@@ -14,7 +14,7 @@ public sealed class TCdnFileReuploadNeeded : ICdnFile
     ///<summary>
     /// Request token (see <a href="https://corefork.telegram.org/cdn">CDN</a>)
     ///</summary>
-    public byte[] RequestToken { get; set; }
+    public ReadOnlyMemory<byte> RequestToken { get; set; }
 
     public void ComputeFlag()
     {
@@ -28,8 +28,8 @@ public sealed class TCdnFileReuploadNeeded : ICdnFile
         writer.Write(RequestToken);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        RequestToken = reader.ReadBytes();
+        RequestToken = buffer.ReadBytes();
     }
 }

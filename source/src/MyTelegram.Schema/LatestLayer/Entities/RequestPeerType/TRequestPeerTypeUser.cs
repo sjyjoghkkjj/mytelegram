@@ -14,7 +14,7 @@ public sealed class TRequestPeerTypeUser : IRequestPeerType
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to allow choosing only bots.
@@ -30,8 +30,8 @@ public sealed class TRequestPeerTypeUser : IRequestPeerType
 
     public void ComputeFlag()
     {
-        if (Bot !=null) { Flags[0] = true; }
-        if (Premium !=null) { Flags[1] = true; }
+        if (Bot !=null) { Flags = Flags.SetBit(0); }
+        if (Premium !=null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -39,14 +39,14 @@ public sealed class TRequestPeerTypeUser : IRequestPeerType
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Bot.Value); }
-        if (Flags[1]) { writer.Write(Premium.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Bot.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Premium.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Bot = reader.Read(); }
-        if (Flags[1]) { Premium = reader.Read(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Bot = buffer.Read(); }
+        if (Flags.IsBitSet(1)) { Premium = buffer.Read(); }
     }
 }

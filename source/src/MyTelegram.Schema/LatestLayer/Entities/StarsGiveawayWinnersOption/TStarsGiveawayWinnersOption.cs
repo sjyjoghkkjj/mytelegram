@@ -14,7 +14,7 @@ public sealed class TStarsGiveawayWinnersOption : IStarsGiveawayWinnersOption
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, this option must be pre-selected by default in the option list.
@@ -34,7 +34,7 @@ public sealed class TStarsGiveawayWinnersOption : IStarsGiveawayWinnersOption
 
     public void ComputeFlag()
     {
-        if (Default) { Flags[0] = true; }
+        if (Default) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class TStarsGiveawayWinnersOption : IStarsGiveawayWinnersOption
         writer.Write(PerUserStars);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Default = true; }
-        Users = reader.ReadInt32();
-        PerUserStars = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Default = true; }
+        Users = buffer.ReadInt32();
+        PerUserStars = buffer.ReadInt64();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TGlobalPrivacySettings : IGlobalPrivacySettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to archive and mute new chats from non-contacts
@@ -51,14 +51,14 @@ public sealed class TGlobalPrivacySettings : IGlobalPrivacySettings
 
     public void ComputeFlag()
     {
-        if (ArchiveAndMuteNewNoncontactPeers) { Flags[0] = true; }
-        if (KeepArchivedUnmuted) { Flags[1] = true; }
-        if (KeepArchivedFolders) { Flags[2] = true; }
-        if (HideReadMarks) { Flags[3] = true; }
-        if (NewNoncontactPeersRequirePremium) { Flags[4] = true; }
-        if (DisplayGiftsButton) { Flags[7] = true; }
-        if (/*NoncontactPeersPaidStars != 0 &&*/ NoncontactPeersPaidStars.HasValue) { Flags[5] = true; }
-        if (DisallowedGifts != null) { Flags[6] = true; }
+        if (ArchiveAndMuteNewNoncontactPeers) { Flags = Flags.SetBit(0); }
+        if (KeepArchivedUnmuted) { Flags = Flags.SetBit(1); }
+        if (KeepArchivedFolders) { Flags = Flags.SetBit(2); }
+        if (HideReadMarks) { Flags = Flags.SetBit(3); }
+        if (NewNoncontactPeersRequirePremium) { Flags = Flags.SetBit(4); }
+        if (DisplayGiftsButton) { Flags = Flags.SetBit(7); }
+        if (/*NoncontactPeersPaidStars != 0 &&*/ NoncontactPeersPaidStars.HasValue) { Flags = Flags.SetBit(5); }
+        if (DisallowedGifts != null) { Flags = Flags.SetBit(6); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -66,20 +66,20 @@ public sealed class TGlobalPrivacySettings : IGlobalPrivacySettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[5]) { writer.Write(NoncontactPeersPaidStars.Value); }
-        if (Flags[6]) { writer.Write(DisallowedGifts); }
+        if (Flags.IsBitSet(5)) { writer.Write(NoncontactPeersPaidStars.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(DisallowedGifts); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ArchiveAndMuteNewNoncontactPeers = true; }
-        if (Flags[1]) { KeepArchivedUnmuted = true; }
-        if (Flags[2]) { KeepArchivedFolders = true; }
-        if (Flags[3]) { HideReadMarks = true; }
-        if (Flags[4]) { NewNoncontactPeersRequirePremium = true; }
-        if (Flags[7]) { DisplayGiftsButton = true; }
-        if (Flags[5]) { NoncontactPeersPaidStars = reader.ReadInt64(); }
-        if (Flags[6]) { DisallowedGifts = reader.Read<MyTelegram.Schema.IDisallowedGiftsSettings>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ArchiveAndMuteNewNoncontactPeers = true; }
+        if (Flags.IsBitSet(1)) { KeepArchivedUnmuted = true; }
+        if (Flags.IsBitSet(2)) { KeepArchivedFolders = true; }
+        if (Flags.IsBitSet(3)) { HideReadMarks = true; }
+        if (Flags.IsBitSet(4)) { NewNoncontactPeersRequirePremium = true; }
+        if (Flags.IsBitSet(7)) { DisplayGiftsButton = true; }
+        if (Flags.IsBitSet(5)) { NoncontactPeersPaidStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(6)) { DisallowedGifts = buffer.Read<MyTelegram.Schema.IDisallowedGiftsSettings>(); }
     }
 }

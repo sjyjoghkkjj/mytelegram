@@ -34,9 +34,9 @@ public sealed class TEmojiGroups : IEmojiGroups
         writer.Write(Groups);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt32();
-        Groups = reader.Read<TVector<MyTelegram.Schema.IEmojiGroup>>();
+        Hash = buffer.ReadInt32();
+        Groups = buffer.Read<TVector<MyTelegram.Schema.IEmojiGroup>>();
     }
 }

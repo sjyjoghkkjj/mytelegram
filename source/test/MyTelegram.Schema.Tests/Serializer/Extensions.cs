@@ -12,7 +12,11 @@ public static class Extensions
 
     private static byte[] HexToBytes(string hex)
     {
-        var text = hex.Replace(" ", string.Empty).Replace("\r\n", string.Empty).Replace("\n", string.Empty);
+        var text = hex.Replace(" ", string.Empty)
+            .Replace("\r\n", string.Empty)
+            .Replace("\n", string.Empty)
+            .Replace("-", string.Empty)
+            ;
         return StringToByteArray(text);
     }
 

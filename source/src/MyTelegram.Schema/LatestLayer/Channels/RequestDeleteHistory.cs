@@ -21,7 +21,7 @@ public sealed class RequestDeleteHistory : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the history should be deleted for everyone
@@ -42,7 +42,7 @@ public sealed class RequestDeleteHistory : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (ForEveryone) { Flags[0] = true; }
+        if (ForEveryone) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -55,11 +55,11 @@ public sealed class RequestDeleteHistory : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(MaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ForEveryone = true; }
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        MaxId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ForEveryone = true; }
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        MaxId = buffer.ReadInt32();
     }
 }

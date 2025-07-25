@@ -39,9 +39,9 @@ public sealed class RequestGetScheduledHistory : IRequest<MyTelegram.Schema.Mess
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Hash = reader.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Hash = buffer.ReadInt64();
     }
 }

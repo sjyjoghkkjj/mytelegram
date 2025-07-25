@@ -34,9 +34,9 @@ public sealed class TChannelAdminLogEventActionToggleSlowMode : IChannelAdminLog
         writer.Write(NewValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevValue = reader.ReadInt32();
-        NewValue = reader.ReadInt32();
+        PrevValue = buffer.ReadInt32();
+        NewValue = buffer.ReadInt32();
     }
 }

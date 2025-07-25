@@ -40,9 +40,9 @@ public sealed class RequestSendStarsForm : IRequest<MyTelegram.Schema.Payments.I
         writer.Write(Invoice);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FormId = reader.ReadInt64();
-        Invoice = reader.Read<MyTelegram.Schema.IInputInvoice>();
+        FormId = buffer.ReadInt64();
+        Invoice = buffer.Read<MyTelegram.Schema.IInputInvoice>();
     }
 }

@@ -17,14 +17,10 @@ public class DuplicateOperationExceptionHandler(
             var rpcResult = rpcResultReadModel.RpcData.ToTObject<IObject>();
             await messageSender.PushMessageToPeerAsync(eventData.UserId.ToUserPeer(), rpcResult,
                 onlySendToThisAuthKeyId: eventData.PermAuthKeyId);
-            //await messageSender.PushSessionMessageToAuthKeyIdAsync(eventData.PermAuthKeyId, rpcResult);
-            
-            //await messageSender.SendRpcMessageToClientAsync(eventData.ReqMsgId,
-            //    rpcResult, permAuthKeyId: eventData.PermAuthKeyId);
         }
         else
         {
             logger.LogWarning("Cannot find rpc result, userId: {UserId}, reqMsgId: {ReqMsgId}", eventData.UserId, eventData.ReqMsgId);
         }
     }
-}   
+}

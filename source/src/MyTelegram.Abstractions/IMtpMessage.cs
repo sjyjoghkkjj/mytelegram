@@ -1,6 +1,6 @@
 ﻿namespace MyTelegram.Abstractions;
 
-public interface IMtpMessage
+public interface IMtpMessage : IMayHaveMemoryOwner
 {
     string ClientIp { get; set; }
     string ConnectionId { get; set; }

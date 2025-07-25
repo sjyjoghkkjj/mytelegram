@@ -14,7 +14,7 @@ public sealed class TInvoice : IInvoice
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Test invoice
@@ -102,19 +102,19 @@ public sealed class TInvoice : IInvoice
 
     public void ComputeFlag()
     {
-        if (Test) { Flags[0] = true; }
-        if (NameRequested) { Flags[1] = true; }
-        if (PhoneRequested) { Flags[2] = true; }
-        if (EmailRequested) { Flags[3] = true; }
-        if (ShippingAddressRequested) { Flags[4] = true; }
-        if (Flexible) { Flags[5] = true; }
-        if (PhoneToProvider) { Flags[6] = true; }
-        if (EmailToProvider) { Flags[7] = true; }
-        if (Recurring) { Flags[9] = true; }
-        if (/*MaxTipAmount != 0 &&*/ MaxTipAmount.HasValue) { Flags[8] = true; }
-        if (SuggestedTipAmounts?.Count > 0) { Flags[8] = true; }
-        if (TermsUrl != null) { Flags[10] = true; }
-        if (/*SubscriptionPeriod != 0 && */SubscriptionPeriod.HasValue) { Flags[11] = true; }
+        if (Test) { Flags = Flags.SetBit(0); }
+        if (NameRequested) { Flags = Flags.SetBit(1); }
+        if (PhoneRequested) { Flags = Flags.SetBit(2); }
+        if (EmailRequested) { Flags = Flags.SetBit(3); }
+        if (ShippingAddressRequested) { Flags = Flags.SetBit(4); }
+        if (Flexible) { Flags = Flags.SetBit(5); }
+        if (PhoneToProvider) { Flags = Flags.SetBit(6); }
+        if (EmailToProvider) { Flags = Flags.SetBit(7); }
+        if (Recurring) { Flags = Flags.SetBit(9); }
+        if (/*MaxTipAmount != 0 &&*/ MaxTipAmount.HasValue) { Flags = Flags.SetBit(8); }
+        if (SuggestedTipAmounts?.Count > 0) { Flags = Flags.SetBit(8); }
+        if (TermsUrl != null) { Flags = Flags.SetBit(10); }
+        if (/*SubscriptionPeriod != 0 && */SubscriptionPeriod.HasValue) { Flags = Flags.SetBit(11); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -124,29 +124,29 @@ public sealed class TInvoice : IInvoice
         writer.Write(Flags);
         writer.Write(Currency);
         writer.Write(Prices);
-        if (Flags[8]) { writer.Write(MaxTipAmount.Value); }
-        if (Flags[8]) { writer.Write(SuggestedTipAmounts); }
-        if (Flags[10]) { writer.Write(TermsUrl); }
-        if (Flags[11]) { writer.Write(SubscriptionPeriod.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(MaxTipAmount.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(SuggestedTipAmounts); }
+        if (Flags.IsBitSet(10)) { writer.Write(TermsUrl); }
+        if (Flags.IsBitSet(11)) { writer.Write(SubscriptionPeriod.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Test = true; }
-        if (Flags[1]) { NameRequested = true; }
-        if (Flags[2]) { PhoneRequested = true; }
-        if (Flags[3]) { EmailRequested = true; }
-        if (Flags[4]) { ShippingAddressRequested = true; }
-        if (Flags[5]) { Flexible = true; }
-        if (Flags[6]) { PhoneToProvider = true; }
-        if (Flags[7]) { EmailToProvider = true; }
-        if (Flags[9]) { Recurring = true; }
-        Currency = reader.ReadString();
-        Prices = reader.Read<TVector<MyTelegram.Schema.ILabeledPrice>>();
-        if (Flags[8]) { MaxTipAmount = reader.ReadInt64(); }
-        if (Flags[8]) { SuggestedTipAmounts = reader.Read<TVector<long>>(); }
-        if (Flags[10]) { TermsUrl = reader.ReadString(); }
-        if (Flags[11]) { SubscriptionPeriod = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Test = true; }
+        if (Flags.IsBitSet(1)) { NameRequested = true; }
+        if (Flags.IsBitSet(2)) { PhoneRequested = true; }
+        if (Flags.IsBitSet(3)) { EmailRequested = true; }
+        if (Flags.IsBitSet(4)) { ShippingAddressRequested = true; }
+        if (Flags.IsBitSet(5)) { Flexible = true; }
+        if (Flags.IsBitSet(6)) { PhoneToProvider = true; }
+        if (Flags.IsBitSet(7)) { EmailToProvider = true; }
+        if (Flags.IsBitSet(9)) { Recurring = true; }
+        Currency = buffer.ReadString();
+        Prices = buffer.Read<TVector<MyTelegram.Schema.ILabeledPrice>>();
+        if (Flags.IsBitSet(8)) { MaxTipAmount = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(8)) { SuggestedTipAmounts = buffer.Read<TVector<long>>(); }
+        if (Flags.IsBitSet(10)) { TermsUrl = buffer.ReadString(); }
+        if (Flags.IsBitSet(11)) { SubscriptionPeriod = buffer.ReadInt32(); }
     }
 }

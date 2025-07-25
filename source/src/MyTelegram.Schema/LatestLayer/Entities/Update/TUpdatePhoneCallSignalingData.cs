@@ -19,7 +19,7 @@ public sealed class TUpdatePhoneCallSignalingData : IUpdate
     ///<summary>
     /// Signaling payload
     ///</summary>
-    public byte[] Data { get; set; }
+    public ReadOnlyMemory<byte> Data { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,9 +34,9 @@ public sealed class TUpdatePhoneCallSignalingData : IUpdate
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneCallId = reader.ReadInt64();
-        Data = reader.ReadBytes();
+        PhoneCallId = buffer.ReadInt64();
+        Data = buffer.ReadBytes();
     }
 }

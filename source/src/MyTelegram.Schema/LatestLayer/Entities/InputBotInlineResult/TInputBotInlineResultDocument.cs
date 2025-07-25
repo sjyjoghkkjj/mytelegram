@@ -14,7 +14,7 @@ public sealed class TInputBotInlineResultDocument : IInputBotInlineResult
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Result ID
@@ -50,8 +50,8 @@ public sealed class TInputBotInlineResultDocument : IInputBotInlineResult
 
     public void ComputeFlag()
     {
-        if (Title != null) { Flags[1] = true; }
-        if (Description != null) { Flags[2] = true; }
+        if (Title != null) { Flags = Flags.SetBit(1); }
+        if (Description != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -62,20 +62,20 @@ public sealed class TInputBotInlineResultDocument : IInputBotInlineResult
         writer.Write(Flags);
         writer.Write(Id);
         writer.Write(Type);
-        if (Flags[1]) { writer.Write(Title); }
-        if (Flags[2]) { writer.Write(Description); }
+        if (Flags.IsBitSet(1)) { writer.Write(Title); }
+        if (Flags.IsBitSet(2)) { writer.Write(Description); }
         writer.Write(Document);
         writer.Write(SendMessage);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Id = reader.ReadString();
-        Type = reader.ReadString();
-        if (Flags[1]) { Title = reader.ReadString(); }
-        if (Flags[2]) { Description = reader.ReadString(); }
-        Document = reader.Read<MyTelegram.Schema.IInputDocument>();
-        SendMessage = reader.Read<MyTelegram.Schema.IInputBotInlineMessage>();
+        Flags = buffer.ReadInt32();
+        Id = buffer.ReadString();
+        Type = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Description = buffer.ReadString(); }
+        Document = buffer.Read<MyTelegram.Schema.IInputDocument>();
+        SendMessage = buffer.Read<MyTelegram.Schema.IInputBotInlineMessage>();
     }
 }

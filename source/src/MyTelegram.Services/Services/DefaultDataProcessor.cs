@@ -51,6 +51,11 @@ public class DefaultDataProcessor<TData>(
 
 
                     var handlerName = handler.GetType().Name;
+                    // Updates.getDifference and langpack.getDifference use the same handler name
+                    if (req.ObjectId == 0xcd984aa5)
+                    {
+                        handlerName = $"{handlerName}(langpack)";
+                    }
 
                     if (data is IHasSubQuery)
                     {
@@ -96,6 +101,13 @@ public class DefaultDataProcessor<TData>(
                 {
                     await exceptionProcessor.HandleExceptionAsync(ex, req, data,
                         handler.GetType().Name);
+                }
+                finally
+                {
+                    if (obj is IMayHaveMemoryOwner mayHaveMemoryOwner)
+                    {
+                        mayHaveMemoryOwner.MemoryOwner?.Dispose();
+                    }
                 }
             }
         });

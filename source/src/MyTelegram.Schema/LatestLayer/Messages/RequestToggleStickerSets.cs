@@ -14,7 +14,7 @@ public sealed class RequestToggleStickerSets : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Uninstall the specified stickersets
@@ -41,9 +41,9 @@ public sealed class RequestToggleStickerSets : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Uninstall) { Flags[0] = true; }
-        if (Archive) { Flags[1] = true; }
-        if (Unarchive) { Flags[2] = true; }
+        if (Uninstall) { Flags = Flags.SetBit(0); }
+        if (Archive) { Flags = Flags.SetBit(1); }
+        if (Unarchive) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -55,12 +55,12 @@ public sealed class RequestToggleStickerSets : IRequest<IBool>
         writer.Write(Stickersets);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Uninstall = true; }
-        if (Flags[1]) { Archive = true; }
-        if (Flags[2]) { Unarchive = true; }
-        Stickersets = reader.Read<TVector<MyTelegram.Schema.IInputStickerSet>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Uninstall = true; }
+        if (Flags.IsBitSet(1)) { Archive = true; }
+        if (Flags.IsBitSet(2)) { Unarchive = true; }
+        Stickersets = buffer.Read<TVector<MyTelegram.Schema.IInputStickerSet>>();
     }
 }

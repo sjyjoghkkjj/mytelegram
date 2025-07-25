@@ -34,9 +34,9 @@ public sealed class TMyStickers : IMyStickers
         writer.Write(Sets);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        Sets = reader.Read<TVector<MyTelegram.Schema.IStickerSetCovered>>();
+        Count = buffer.ReadInt32();
+        Sets = buffer.Read<TVector<MyTelegram.Schema.IStickerSetCovered>>();
     }
 }

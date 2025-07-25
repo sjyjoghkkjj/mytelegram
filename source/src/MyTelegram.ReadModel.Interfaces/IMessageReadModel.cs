@@ -58,4 +58,5 @@ public interface IMessageReadModel : IReadModel, IReactionItem
     bool PublicPosts { get; }
     List<string> Hashtags { get; }
     List<long>? MentionedUserIds { get; }
+    long? TodoId { get; }
 }

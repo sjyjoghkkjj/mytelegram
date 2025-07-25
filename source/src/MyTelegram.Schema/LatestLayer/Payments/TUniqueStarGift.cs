@@ -26,9 +26,9 @@ public sealed class TUniqueStarGift : IUniqueStarGift
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Gift = reader.Read<MyTelegram.Schema.IStarGift>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Gift = buffer.Read<MyTelegram.Schema.IStarGift>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

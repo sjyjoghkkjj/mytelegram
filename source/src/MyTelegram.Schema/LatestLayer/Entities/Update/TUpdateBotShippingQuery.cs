@@ -24,7 +24,7 @@ public sealed class TUpdateBotShippingQuery : IUpdate
     ///<summary>
     /// Bot specified invoice payload
     ///</summary>
-    public byte[] Payload { get; set; }
+    public ReadOnlyMemory<byte> Payload { get; set; }
 
     ///<summary>
     /// User specified shipping address
@@ -47,11 +47,11 @@ public sealed class TUpdateBotShippingQuery : IUpdate
         writer.Write(ShippingAddress);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        QueryId = reader.ReadInt64();
-        UserId = reader.ReadInt64();
-        Payload = reader.ReadBytes();
-        ShippingAddress = reader.Read<MyTelegram.Schema.IPostAddress>();
+        QueryId = buffer.ReadInt64();
+        UserId = buffer.ReadInt64();
+        Payload = buffer.ReadBytes();
+        ShippingAddress = buffer.Read<MyTelegram.Schema.IPostAddress>();
     }
 }

@@ -34,9 +34,9 @@ public sealed class TInputClientProxy : IInputClientProxy
         writer.Write(Port);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Address = reader.ReadString();
-        Port = reader.ReadInt32();
+        Address = buffer.ReadString();
+        Port = buffer.ReadInt32();
     }
 }

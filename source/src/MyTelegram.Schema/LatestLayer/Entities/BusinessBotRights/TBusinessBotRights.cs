@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TBusinessBotRights : IBusinessBotRights
 {
     public uint ConstructorId => 0xa0624cf7;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Reply { get; set; }
     public bool ReadMessages { get; set; }
     public bool DeleteSentMessages { get; set; }
@@ -28,20 +28,20 @@ public sealed class TBusinessBotRights : IBusinessBotRights
 
     public void ComputeFlag()
     {
-        if (Reply) { Flags[0] = true; }
-        if (ReadMessages) { Flags[1] = true; }
-        if (DeleteSentMessages) { Flags[2] = true; }
-        if (DeleteReceivedMessages) { Flags[3] = true; }
-        if (EditName) { Flags[4] = true; }
-        if (EditBio) { Flags[5] = true; }
-        if (EditProfilePhoto) { Flags[6] = true; }
-        if (EditUsername) { Flags[7] = true; }
-        if (ViewGifts) { Flags[8] = true; }
-        if (SellGifts) { Flags[9] = true; }
-        if (ChangeGiftSettings) { Flags[10] = true; }
-        if (TransferAndUpgradeGifts) { Flags[11] = true; }
-        if (TransferStars) { Flags[12] = true; }
-        if (ManageStories) { Flags[13] = true; }
+        if (Reply) { Flags = Flags.SetBit(0); }
+        if (ReadMessages) { Flags = Flags.SetBit(1); }
+        if (DeleteSentMessages) { Flags = Flags.SetBit(2); }
+        if (DeleteReceivedMessages) { Flags = Flags.SetBit(3); }
+        if (EditName) { Flags = Flags.SetBit(4); }
+        if (EditBio) { Flags = Flags.SetBit(5); }
+        if (EditProfilePhoto) { Flags = Flags.SetBit(6); }
+        if (EditUsername) { Flags = Flags.SetBit(7); }
+        if (ViewGifts) { Flags = Flags.SetBit(8); }
+        if (SellGifts) { Flags = Flags.SetBit(9); }
+        if (ChangeGiftSettings) { Flags = Flags.SetBit(10); }
+        if (TransferAndUpgradeGifts) { Flags = Flags.SetBit(11); }
+        if (TransferStars) { Flags = Flags.SetBit(12); }
+        if (ManageStories) { Flags = Flags.SetBit(13); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -52,22 +52,22 @@ public sealed class TBusinessBotRights : IBusinessBotRights
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Reply = true; }
-        if (Flags[1]) { ReadMessages = true; }
-        if (Flags[2]) { DeleteSentMessages = true; }
-        if (Flags[3]) { DeleteReceivedMessages = true; }
-        if (Flags[4]) { EditName = true; }
-        if (Flags[5]) { EditBio = true; }
-        if (Flags[6]) { EditProfilePhoto = true; }
-        if (Flags[7]) { EditUsername = true; }
-        if (Flags[8]) { ViewGifts = true; }
-        if (Flags[9]) { SellGifts = true; }
-        if (Flags[10]) { ChangeGiftSettings = true; }
-        if (Flags[11]) { TransferAndUpgradeGifts = true; }
-        if (Flags[12]) { TransferStars = true; }
-        if (Flags[13]) { ManageStories = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Reply = true; }
+        if (Flags.IsBitSet(1)) { ReadMessages = true; }
+        if (Flags.IsBitSet(2)) { DeleteSentMessages = true; }
+        if (Flags.IsBitSet(3)) { DeleteReceivedMessages = true; }
+        if (Flags.IsBitSet(4)) { EditName = true; }
+        if (Flags.IsBitSet(5)) { EditBio = true; }
+        if (Flags.IsBitSet(6)) { EditProfilePhoto = true; }
+        if (Flags.IsBitSet(7)) { EditUsername = true; }
+        if (Flags.IsBitSet(8)) { ViewGifts = true; }
+        if (Flags.IsBitSet(9)) { SellGifts = true; }
+        if (Flags.IsBitSet(10)) { ChangeGiftSettings = true; }
+        if (Flags.IsBitSet(11)) { TransferAndUpgradeGifts = true; }
+        if (Flags.IsBitSet(12)) { TransferStars = true; }
+        if (Flags.IsBitSet(13)) { ManageStories = true; }
     }
 }

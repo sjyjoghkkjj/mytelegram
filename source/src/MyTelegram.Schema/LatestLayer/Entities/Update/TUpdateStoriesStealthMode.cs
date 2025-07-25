@@ -29,8 +29,8 @@ public sealed class TUpdateStoriesStealthMode : IUpdate
         writer.Write(StealthMode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        StealthMode = reader.Read<MyTelegram.Schema.IStoriesStealthMode>();
+        StealthMode = buffer.Read<MyTelegram.Schema.IStoriesStealthMode>();
     }
 }

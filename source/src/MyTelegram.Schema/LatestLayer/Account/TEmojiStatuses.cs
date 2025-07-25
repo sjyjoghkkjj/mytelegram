@@ -34,9 +34,9 @@ public sealed class TEmojiStatuses : IEmojiStatuses
         writer.Write(Statuses);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Statuses = reader.Read<TVector<MyTelegram.Schema.IEmojiStatus>>();
+        Hash = buffer.ReadInt64();
+        Statuses = buffer.Read<TVector<MyTelegram.Schema.IEmojiStatus>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TPromoData : IPromoData
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// MTProxy-related channel
@@ -58,11 +58,11 @@ public sealed class TPromoData : IPromoData
 
     public void ComputeFlag()
     {
-        if (Proxy) { Flags[0] = true; }
-        if (Peer != null) { Flags[3] = true; }
-        if (PsaType != null) { Flags[1] = true; }
-        if (PsaMessage != null) { Flags[2] = true; }
-        if (CustomPendingSuggestion != null) { Flags[4] = true; }
+        if (Proxy) { Flags = Flags.SetBit(0); }
+        if (Peer != null) { Flags = Flags.SetBit(3); }
+        if (PsaType != null) { Flags = Flags.SetBit(1); }
+        if (PsaMessage != null) { Flags = Flags.SetBit(2); }
+        if (CustomPendingSuggestion != null) { Flags = Flags.SetBit(4); }
 
     }
 
@@ -72,28 +72,28 @@ public sealed class TPromoData : IPromoData
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Expires);
-        if (Flags[3]) { writer.Write(Peer); }
-        if (Flags[1]) { writer.Write(PsaType); }
-        if (Flags[2]) { writer.Write(PsaMessage); }
+        if (Flags.IsBitSet(3)) { writer.Write(Peer); }
+        if (Flags.IsBitSet(1)) { writer.Write(PsaType); }
+        if (Flags.IsBitSet(2)) { writer.Write(PsaMessage); }
         writer.Write(PendingSuggestions);
         writer.Write(DismissedSuggestions);
-        if (Flags[4]) { writer.Write(CustomPendingSuggestion); }
+        if (Flags.IsBitSet(4)) { writer.Write(CustomPendingSuggestion); }
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Proxy = true; }
-        Expires = reader.ReadInt32();
-        if (Flags[3]) { Peer = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[1]) { PsaType = reader.ReadString(); }
-        if (Flags[2]) { PsaMessage = reader.ReadString(); }
-        PendingSuggestions = reader.Read<TVector<string>>();
-        DismissedSuggestions = reader.Read<TVector<string>>();
-        if (Flags[4]) { CustomPendingSuggestion = reader.Read<MyTelegram.Schema.IPendingSuggestion>(); }
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Proxy = true; }
+        Expires = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Peer = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(1)) { PsaType = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { PsaMessage = buffer.ReadString(); }
+        PendingSuggestions = buffer.Read<TVector<string>>();
+        DismissedSuggestions = buffer.Read<TVector<string>>();
+        if (Flags.IsBitSet(4)) { CustomPendingSuggestion = buffer.Read<MyTelegram.Schema.IPendingSuggestion>(); }
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

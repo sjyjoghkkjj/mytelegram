@@ -40,9 +40,9 @@ public sealed class RequestSaveRingtone : IRequest<MyTelegram.Schema.Account.ISa
         writer.Write(Unsave);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<MyTelegram.Schema.IInputDocument>();
-        Unsave = reader.Read();
+        Id = buffer.Read<MyTelegram.Schema.IInputDocument>();
+        Unsave = buffer.Read();
     }
 }

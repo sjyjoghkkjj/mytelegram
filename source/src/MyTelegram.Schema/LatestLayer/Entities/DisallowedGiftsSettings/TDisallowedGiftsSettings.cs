@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TDisallowedGiftsSettings : IDisallowedGiftsSettings
 {
     public uint ConstructorId => 0x71f276c4;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool DisallowUnlimitedStargifts { get; set; }
     public bool DisallowLimitedStargifts { get; set; }
     public bool DisallowUniqueStargifts { get; set; }
@@ -18,10 +18,10 @@ public sealed class TDisallowedGiftsSettings : IDisallowedGiftsSettings
 
     public void ComputeFlag()
     {
-        if (DisallowUnlimitedStargifts) { Flags[0] = true; }
-        if (DisallowLimitedStargifts) { Flags[1] = true; }
-        if (DisallowUniqueStargifts) { Flags[2] = true; }
-        if (DisallowPremiumGifts) { Flags[3] = true; }
+        if (DisallowUnlimitedStargifts) { Flags = Flags.SetBit(0); }
+        if (DisallowLimitedStargifts) { Flags = Flags.SetBit(1); }
+        if (DisallowUniqueStargifts) { Flags = Flags.SetBit(2); }
+        if (DisallowPremiumGifts) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -32,12 +32,12 @@ public sealed class TDisallowedGiftsSettings : IDisallowedGiftsSettings
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { DisallowUnlimitedStargifts = true; }
-        if (Flags[1]) { DisallowLimitedStargifts = true; }
-        if (Flags[2]) { DisallowUniqueStargifts = true; }
-        if (Flags[3]) { DisallowPremiumGifts = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { DisallowUnlimitedStargifts = true; }
+        if (Flags.IsBitSet(1)) { DisallowLimitedStargifts = true; }
+        if (Flags.IsBitSet(2)) { DisallowUniqueStargifts = true; }
+        if (Flags.IsBitSet(3)) { DisallowPremiumGifts = true; }
     }
 }

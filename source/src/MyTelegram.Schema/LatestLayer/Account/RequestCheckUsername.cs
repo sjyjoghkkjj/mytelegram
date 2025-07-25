@@ -33,8 +33,8 @@ public sealed class RequestCheckUsername : IRequest<IBool>
         writer.Write(Username);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Username = reader.ReadString();
+        Username = buffer.ReadString();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TDialogFolder : IDialog
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Is this folder pinned
@@ -61,7 +61,7 @@ public sealed class TDialogFolder : IDialog
 
     public void ComputeFlag()
     {
-        if (Pinned) { Flags[2] = true; }
+        if (Pinned) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -79,16 +79,16 @@ public sealed class TDialogFolder : IDialog
         writer.Write(UnreadUnmutedMessagesCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Pinned = true; }
-        Folder = reader.Read<MyTelegram.Schema.IFolder>();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        TopMessage = reader.ReadInt32();
-        UnreadMutedPeersCount = reader.ReadInt32();
-        UnreadUnmutedPeersCount = reader.ReadInt32();
-        UnreadMutedMessagesCount = reader.ReadInt32();
-        UnreadUnmutedMessagesCount = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Pinned = true; }
+        Folder = buffer.Read<MyTelegram.Schema.IFolder>();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        TopMessage = buffer.ReadInt32();
+        UnreadMutedPeersCount = buffer.ReadInt32();
+        UnreadUnmutedPeersCount = buffer.ReadInt32();
+        UnreadMutedMessagesCount = buffer.ReadInt32();
+        UnreadUnmutedMessagesCount = buffer.ReadInt32();
     }
 }

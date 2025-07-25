@@ -40,10 +40,10 @@ public sealed class TAttachMenuBots : IAttachMenuBots
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Bots = reader.Read<TVector<MyTelegram.Schema.IAttachMenuBot>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Hash = buffer.ReadInt64();
+        Bots = buffer.Read<TVector<MyTelegram.Schema.IAttachMenuBot>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

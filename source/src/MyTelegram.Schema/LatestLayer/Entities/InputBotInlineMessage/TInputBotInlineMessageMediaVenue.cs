@@ -14,7 +14,7 @@ public sealed class TInputBotInlineMessageMediaVenue : IInputBotInlineMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Geolocation
@@ -55,7 +55,7 @@ public sealed class TInputBotInlineMessageMediaVenue : IInputBotInlineMessage
 
     public void ComputeFlag()
     {
-        if (ReplyMarkup != null) { Flags[2] = true; }
+        if (ReplyMarkup != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -69,18 +69,18 @@ public sealed class TInputBotInlineMessageMediaVenue : IInputBotInlineMessage
         writer.Write(Provider);
         writer.Write(VenueId);
         writer.Write(VenueType);
-        if (Flags[2]) { writer.Write(ReplyMarkup); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>();
-        Title = reader.ReadString();
-        Address = reader.ReadString();
-        Provider = reader.ReadString();
-        VenueId = reader.ReadString();
-        VenueType = reader.ReadString();
-        if (Flags[2]) { ReplyMarkup = reader.Read<MyTelegram.Schema.IReplyMarkup>(); }
+        Flags = buffer.ReadInt32();
+        GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>();
+        Title = buffer.ReadString();
+        Address = buffer.ReadString();
+        Provider = buffer.ReadString();
+        VenueId = buffer.ReadString();
+        VenueType = buffer.ReadString();
+        if (Flags.IsBitSet(2)) { ReplyMarkup = buffer.Read<MyTelegram.Schema.IReplyMarkup>(); }
     }
 }

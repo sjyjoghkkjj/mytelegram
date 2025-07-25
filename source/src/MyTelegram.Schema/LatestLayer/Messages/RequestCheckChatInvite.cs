@@ -34,8 +34,8 @@ public sealed class RequestCheckChatInvite : IRequest<MyTelegram.Schema.IChatInv
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadString();
+        Hash = buffer.ReadString();
     }
 }

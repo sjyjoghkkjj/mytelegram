@@ -14,7 +14,7 @@ public sealed class TRequestedPeerChat : IRequestedPeer
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Chat ID.
@@ -34,8 +34,8 @@ public sealed class TRequestedPeerChat : IRequestedPeer
 
     public void ComputeFlag()
     {
-        if (Title != null) { Flags[0] = true; }
-        if (Photo != null) { Flags[2] = true; }
+        if (Title != null) { Flags = Flags.SetBit(0); }
+        if (Photo != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -44,15 +44,15 @@ public sealed class TRequestedPeerChat : IRequestedPeer
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ChatId);
-        if (Flags[0]) { writer.Write(Title); }
-        if (Flags[2]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(0)) { writer.Write(Title); }
+        if (Flags.IsBitSet(2)) { writer.Write(Photo); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ChatId = reader.ReadInt64();
-        if (Flags[0]) { Title = reader.ReadString(); }
-        if (Flags[2]) { Photo = reader.Read<MyTelegram.Schema.IPhoto>(); }
+        Flags = buffer.ReadInt32();
+        ChatId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Photo = buffer.Read<MyTelegram.Schema.IPhoto>(); }
     }
 }

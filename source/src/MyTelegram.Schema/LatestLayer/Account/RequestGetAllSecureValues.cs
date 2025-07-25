@@ -24,7 +24,7 @@ public sealed class RequestGetAllSecureValues : IRequest<TVector<MyTelegram.Sche
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

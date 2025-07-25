@@ -28,8 +28,8 @@ public sealed class TPageTableRow : IPageTableRow
         writer.Write(Cells);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Cells = reader.Read<TVector<MyTelegram.Schema.IPageTableCell>>();
+        Cells = buffer.Read<TVector<MyTelegram.Schema.IPageTableCell>>();
     }
 }

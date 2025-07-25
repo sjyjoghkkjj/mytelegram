@@ -10,7 +10,7 @@ namespace MyTelegram.Schema.Bots;
 public sealed class RequestSetCustomVerification : IRequest<IBool>
 {
     public uint ConstructorId => 0x8b89dfbd;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Enabled { get; set; }
     public MyTelegram.Schema.IInputUser? Bot { get; set; }
     public MyTelegram.Schema.IInputPeer Peer { get; set; }
@@ -18,9 +18,9 @@ public sealed class RequestSetCustomVerification : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Enabled) { Flags[1] = true; }
-        if (Bot != null) { Flags[0] = true; }
-        if (CustomDescription != null) { Flags[2] = true; }
+        if (Enabled) { Flags = Flags.SetBit(1); }
+        if (Bot != null) { Flags = Flags.SetBit(0); }
+        if (CustomDescription != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -28,17 +28,17 @@ public sealed class RequestSetCustomVerification : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Bot); }
+        if (Flags.IsBitSet(0)) { writer.Write(Bot); }
         writer.Write(Peer);
-        if (Flags[2]) { writer.Write(CustomDescription); }
+        if (Flags.IsBitSet(2)) { writer.Write(CustomDescription); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Enabled = true; }
-        if (Flags[0]) { Bot = reader.Read<MyTelegram.Schema.IInputUser>(); }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[2]) { CustomDescription = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Enabled = true; }
+        if (Flags.IsBitSet(0)) { Bot = buffer.Read<MyTelegram.Schema.IInputUser>(); }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(2)) { CustomDescription = buffer.ReadString(); }
     }
 }

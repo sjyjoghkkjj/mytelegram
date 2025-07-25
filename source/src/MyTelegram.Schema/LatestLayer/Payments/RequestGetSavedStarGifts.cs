@@ -10,7 +10,7 @@ namespace MyTelegram.Schema.Payments;
 public sealed class RequestGetSavedStarGifts : IRequest<MyTelegram.Schema.Payments.ISavedStarGifts>
 {
     public uint ConstructorId => 0x23830de9;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool ExcludeUnsaved { get; set; }
     public bool ExcludeSaved { get; set; }
     public bool ExcludeUnlimited { get; set; }
@@ -23,12 +23,12 @@ public sealed class RequestGetSavedStarGifts : IRequest<MyTelegram.Schema.Paymen
 
     public void ComputeFlag()
     {
-        if (ExcludeUnsaved) { Flags[0] = true; }
-        if (ExcludeSaved) { Flags[1] = true; }
-        if (ExcludeUnlimited) { Flags[2] = true; }
-        if (ExcludeLimited) { Flags[3] = true; }
-        if (ExcludeUnique) { Flags[4] = true; }
-        if (SortByValue) { Flags[5] = true; }
+        if (ExcludeUnsaved) { Flags = Flags.SetBit(0); }
+        if (ExcludeSaved) { Flags = Flags.SetBit(1); }
+        if (ExcludeUnlimited) { Flags = Flags.SetBit(2); }
+        if (ExcludeLimited) { Flags = Flags.SetBit(3); }
+        if (ExcludeUnique) { Flags = Flags.SetBit(4); }
+        if (SortByValue) { Flags = Flags.SetBit(5); }
 
     }
 
@@ -42,17 +42,17 @@ public sealed class RequestGetSavedStarGifts : IRequest<MyTelegram.Schema.Paymen
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ExcludeUnsaved = true; }
-        if (Flags[1]) { ExcludeSaved = true; }
-        if (Flags[2]) { ExcludeUnlimited = true; }
-        if (Flags[3]) { ExcludeLimited = true; }
-        if (Flags[4]) { ExcludeUnique = true; }
-        if (Flags[5]) { SortByValue = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ExcludeUnsaved = true; }
+        if (Flags.IsBitSet(1)) { ExcludeSaved = true; }
+        if (Flags.IsBitSet(2)) { ExcludeUnlimited = true; }
+        if (Flags.IsBitSet(3)) { ExcludeLimited = true; }
+        if (Flags.IsBitSet(4)) { ExcludeUnique = true; }
+        if (Flags.IsBitSet(5)) { SortByValue = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

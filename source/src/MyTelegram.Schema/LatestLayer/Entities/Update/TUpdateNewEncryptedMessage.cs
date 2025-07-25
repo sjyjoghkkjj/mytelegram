@@ -35,9 +35,9 @@ public sealed class TUpdateNewEncryptedMessage : IUpdate
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Message = reader.Read<MyTelegram.Schema.IEncryptedMessage>();
-        Qts = reader.ReadInt32();
+        Message = buffer.Read<MyTelegram.Schema.IEncryptedMessage>();
+        Qts = buffer.ReadInt32();
     }
 }

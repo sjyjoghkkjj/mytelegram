@@ -14,7 +14,7 @@ public sealed class TStoryFwdHeader : IStoryFwdHeader
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the story media was modified before reposting it (for example by overlaying a round video with a reaction).
@@ -40,10 +40,10 @@ public sealed class TStoryFwdHeader : IStoryFwdHeader
 
     public void ComputeFlag()
     {
-        if (Modified) { Flags[3] = true; }
-        if (From != null) { Flags[0] = true; }
-        if (FromName != null) { Flags[1] = true; }
-        if (/*StoryId != 0 && */StoryId.HasValue) { Flags[2] = true; }
+        if (Modified) { Flags = Flags.SetBit(3); }
+        if (From != null) { Flags = Flags.SetBit(0); }
+        if (FromName != null) { Flags = Flags.SetBit(1); }
+        if (/*StoryId != 0 && */StoryId.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -51,17 +51,17 @@ public sealed class TStoryFwdHeader : IStoryFwdHeader
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(From); }
-        if (Flags[1]) { writer.Write(FromName); }
-        if (Flags[2]) { writer.Write(StoryId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(From); }
+        if (Flags.IsBitSet(1)) { writer.Write(FromName); }
+        if (Flags.IsBitSet(2)) { writer.Write(StoryId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { Modified = true; }
-        if (Flags[0]) { From = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[1]) { FromName = reader.ReadString(); }
-        if (Flags[2]) { StoryId = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Modified = true; }
+        if (Flags.IsBitSet(0)) { From = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(1)) { FromName = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { StoryId = buffer.ReadInt32(); }
     }
 }

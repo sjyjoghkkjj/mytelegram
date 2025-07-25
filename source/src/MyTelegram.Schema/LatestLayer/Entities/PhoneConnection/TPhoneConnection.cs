@@ -14,7 +14,7 @@ public sealed class TPhoneConnection : IPhoneConnection
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether TCP should be used
@@ -45,11 +45,11 @@ public sealed class TPhoneConnection : IPhoneConnection
     ///<summary>
     /// Our peer tag
     ///</summary>
-    public byte[] PeerTag { get; set; }
+    public ReadOnlyMemory<byte> PeerTag { get; set; }
 
     public void ComputeFlag()
     {
-        if (Tcp) { Flags[0] = true; }
+        if (Tcp) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -65,14 +65,14 @@ public sealed class TPhoneConnection : IPhoneConnection
         writer.Write(PeerTag);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Tcp = true; }
-        Id = reader.ReadInt64();
-        Ip = reader.ReadString();
-        Ipv6 = reader.ReadString();
-        Port = reader.ReadInt32();
-        PeerTag = reader.ReadBytes();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Tcp = true; }
+        Id = buffer.ReadInt64();
+        Ip = buffer.ReadString();
+        Ipv6 = buffer.ReadString();
+        Port = buffer.ReadInt32();
+        PeerTag = buffer.ReadBytes();
     }
 }

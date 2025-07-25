@@ -37,9 +37,9 @@ public sealed class RequestSetBotUpdatesStatus : IRequest<IBool>
         writer.Write(Message);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PendingUpdatesCount = reader.ReadInt32();
-        Message = reader.ReadString();
+        PendingUpdatesCount = buffer.ReadInt32();
+        Message = buffer.ReadString();
     }
 }

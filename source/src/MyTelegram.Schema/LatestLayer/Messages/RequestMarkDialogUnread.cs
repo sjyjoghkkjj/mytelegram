@@ -17,7 +17,7 @@ public sealed class RequestMarkDialogUnread : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Mark as unread/read
@@ -34,8 +34,8 @@ public sealed class RequestMarkDialogUnread : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Unread) { Flags[0] = true; }
-        if (ParentPeer != null) { Flags[1] = true; }
+        if (Unread) { Flags = Flags.SetBit(0); }
+        if (ParentPeer != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -44,15 +44,15 @@ public sealed class RequestMarkDialogUnread : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(ParentPeer); }
+        if (Flags.IsBitSet(1)) { writer.Write(ParentPeer); }
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Unread = true; }
-        if (Flags[1]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        Peer = reader.Read<MyTelegram.Schema.IInputDialogPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Unread = true; }
+        if (Flags.IsBitSet(1)) { ParentPeer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        Peer = buffer.Read<MyTelegram.Schema.IInputDialogPeer>();
     }
 }

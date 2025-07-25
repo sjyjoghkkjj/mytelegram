@@ -39,9 +39,9 @@ public sealed class RequestInstallStickerSet : IRequest<MyTelegram.Schema.Messag
         writer.Write(Archived);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
-        Archived = reader.Read();
+        Stickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
+        Archived = buffer.Read();
     }
 }

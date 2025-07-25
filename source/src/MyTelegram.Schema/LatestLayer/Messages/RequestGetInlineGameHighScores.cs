@@ -40,9 +40,9 @@ public sealed class RequestGetInlineGameHighScores : IRequest<MyTelegram.Schema.
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<MyTelegram.Schema.IInputBotInlineMessageID>();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Id = buffer.Read<MyTelegram.Schema.IInputBotInlineMessageID>();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

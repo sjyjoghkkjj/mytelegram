@@ -34,9 +34,9 @@ public sealed class TEmojiKeyword : IEmojiKeyword
         writer.Write(Emoticons);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Keyword = reader.ReadString();
-        Emoticons = reader.Read<TVector<string>>();
+        Keyword = buffer.ReadString();
+        Emoticons = buffer.Read<TVector<string>>();
     }
 }

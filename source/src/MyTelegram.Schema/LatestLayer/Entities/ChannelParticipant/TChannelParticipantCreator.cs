@@ -14,7 +14,7 @@ public sealed class TChannelParticipantCreator : IChannelParticipant
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// User ID
@@ -34,7 +34,7 @@ public sealed class TChannelParticipantCreator : IChannelParticipant
 
     public void ComputeFlag()
     {
-        if (Rank != null) { Flags[0] = true; }
+        if (Rank != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -44,14 +44,14 @@ public sealed class TChannelParticipantCreator : IChannelParticipant
         writer.Write(Flags);
         writer.Write(UserId);
         writer.Write(AdminRights);
-        if (Flags[0]) { writer.Write(Rank); }
+        if (Flags.IsBitSet(0)) { writer.Write(Rank); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        UserId = reader.ReadInt64();
-        AdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>();
-        if (Flags[0]) { Rank = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        UserId = buffer.ReadInt64();
+        AdminRights = buffer.Read<MyTelegram.Schema.IChatAdminRights>();
+        if (Flags.IsBitSet(0)) { Rank = buffer.ReadString(); }
     }
 }

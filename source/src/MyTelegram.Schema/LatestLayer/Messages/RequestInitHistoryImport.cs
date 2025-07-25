@@ -50,10 +50,10 @@ public sealed class RequestInitHistoryImport : IRequest<MyTelegram.Schema.Messag
         writer.Write(MediaCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        File = reader.Read<MyTelegram.Schema.IInputFile>();
-        MediaCount = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        File = buffer.Read<MyTelegram.Schema.IInputFile>();
+        MediaCount = buffer.ReadInt32();
     }
 }

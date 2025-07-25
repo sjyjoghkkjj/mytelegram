@@ -29,8 +29,8 @@ public sealed class TMessageActionChatEditPhoto : IMessageAction
         writer.Write(Photo);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Photo = reader.Read<MyTelegram.Schema.IPhoto>();
+        Photo = buffer.Read<MyTelegram.Schema.IPhoto>();
     }
 }

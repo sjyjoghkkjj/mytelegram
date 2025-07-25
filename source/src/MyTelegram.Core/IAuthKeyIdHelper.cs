@@ -2,5 +2,5 @@
 
 public interface IAuthKeyIdHelper
 {
-    long GetAuthKeyId(byte[] authKey);
+    long GetAuthKeyId(ReadOnlyMemory<byte> authKey);
 }

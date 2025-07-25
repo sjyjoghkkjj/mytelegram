@@ -35,9 +35,9 @@ public sealed class TRecentMeUrlChatInvite : IRecentMeUrl
         writer.Write(ChatInvite);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        ChatInvite = reader.Read<MyTelegram.Schema.IChatInvite>();
+        Url = buffer.ReadString();
+        ChatInvite = buffer.Read<MyTelegram.Schema.IChatInvite>();
     }
 }

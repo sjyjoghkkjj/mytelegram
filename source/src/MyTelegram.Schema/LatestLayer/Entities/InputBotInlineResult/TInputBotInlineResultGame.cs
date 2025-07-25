@@ -41,10 +41,10 @@ public sealed class TInputBotInlineResultGame : IInputBotInlineResult
         writer.Write(SendMessage);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadString();
-        ShortName = reader.ReadString();
-        SendMessage = reader.Read<MyTelegram.Schema.IInputBotInlineMessage>();
+        Id = buffer.ReadString();
+        ShortName = buffer.ReadString();
+        SendMessage = buffer.Read<MyTelegram.Schema.IInputBotInlineMessage>();
     }
 }

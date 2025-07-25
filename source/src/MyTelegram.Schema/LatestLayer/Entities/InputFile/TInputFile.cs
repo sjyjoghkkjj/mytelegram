@@ -46,11 +46,11 @@ public sealed class TInputFile : IInputFile
         writer.Write(Md5Checksum);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Parts = reader.ReadInt32();
-        Name = reader.ReadString();
-        Md5Checksum = reader.ReadString();
+        Id = buffer.ReadInt64();
+        Parts = buffer.ReadInt32();
+        Name = buffer.ReadString();
+        Md5Checksum = buffer.ReadString();
     }
 }

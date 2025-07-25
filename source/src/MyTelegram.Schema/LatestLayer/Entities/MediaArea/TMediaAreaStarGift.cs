@@ -26,9 +26,9 @@ public sealed class TMediaAreaStarGift : IMediaArea
         writer.Write(Slug);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Coordinates = reader.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
-        Slug = reader.ReadString();
+        Coordinates = buffer.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
+        Slug = buffer.ReadString();
     }
 }

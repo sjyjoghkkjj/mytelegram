@@ -14,7 +14,7 @@ public sealed class TStoryItemSkipped : IStoryItem
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this story can only be viewed by <a href="https://corefork.telegram.org/api/privacy">our close friends, see here »</a> for more info
@@ -39,7 +39,7 @@ public sealed class TStoryItemSkipped : IStoryItem
 
     public void ComputeFlag()
     {
-        if (CloseFriends) { Flags[8] = true; }
+        if (CloseFriends) { Flags = Flags.SetBit(8); }
 
     }
 
@@ -53,12 +53,12 @@ public sealed class TStoryItemSkipped : IStoryItem
         writer.Write(ExpireDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[8]) { CloseFriends = true; }
-        Id = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        ExpireDate = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(8)) { CloseFriends = true; }
+        Id = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        ExpireDate = buffer.ReadInt32();
     }
 }

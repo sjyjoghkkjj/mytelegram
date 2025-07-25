@@ -14,7 +14,7 @@ public sealed class TBotApp : IBotApp
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the web app was never used by the user, and confirmation must be asked from the user before opening it.
@@ -42,9 +42,9 @@ public sealed class TBotApp : IBotApp
 
     public void ComputeFlag()
     {
-        if (Inactive) { Flags[0] = true; }
-        if (RequestWriteAccess) { Flags[1] = true; }
-        if (HasSettings) { Flags[2] = true; }
+        if (Inactive) { Flags = Flags.SetBit(0); }
+        if (RequestWriteAccess) { Flags = Flags.SetBit(1); }
+        if (HasSettings) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -56,12 +56,12 @@ public sealed class TBotApp : IBotApp
         writer.Write(App);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Inactive = true; }
-        if (Flags[1]) { RequestWriteAccess = true; }
-        if (Flags[2]) { HasSettings = true; }
-        App = reader.Read<MyTelegram.Schema.IBotApp>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Inactive = true; }
+        if (Flags.IsBitSet(1)) { RequestWriteAccess = true; }
+        if (Flags.IsBitSet(2)) { HasSettings = true; }
+        App = buffer.Read<MyTelegram.Schema.IBotApp>();
     }
 }

@@ -40,10 +40,10 @@ public sealed class TMessageEntityPre : IMessageEntity
         writer.Write(Language);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offset = reader.ReadInt32();
-        Length = reader.ReadInt32();
-        Language = reader.ReadString();
+        Offset = buffer.ReadInt32();
+        Length = buffer.ReadInt32();
+        Language = buffer.ReadString();
     }
 }

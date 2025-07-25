@@ -14,7 +14,7 @@ public sealed class RequestChangeStarsSubscription : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Always pass <a href="https://corefork.telegram.org/constructor/inputPeerSelf">inputPeerSelf</a>.
@@ -35,7 +35,7 @@ public sealed class RequestChangeStarsSubscription : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Canceled !=null) { Flags[0] = true; }
+        if (Canceled !=null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -45,14 +45,14 @@ public sealed class RequestChangeStarsSubscription : IRequest<IBool>
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(SubscriptionId);
-        if (Flags[0]) { writer.Write(Canceled.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Canceled.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        SubscriptionId = reader.ReadString();
-        if (Flags[0]) { Canceled = reader.Read(); }
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        SubscriptionId = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Canceled = buffer.Read(); }
     }
 }

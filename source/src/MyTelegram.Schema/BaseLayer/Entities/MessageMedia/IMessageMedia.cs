@@ -26,6 +26,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TMessageMediaGiveaway), nameof(TMessageMediaGiveaway))]
 [JsonDerivedType(typeof(TMessageMediaGiveawayResults), nameof(TMessageMediaGiveawayResults))]
 [JsonDerivedType(typeof(TMessageMediaPaidMedia), nameof(TMessageMediaPaidMedia))]
+[JsonDerivedType(typeof(TMessageMediaToDo), nameof(TMessageMediaToDo))]
 public interface IMessageMedia : IObject
 {
 

@@ -8,7 +8,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TSavedStarGift), nameof(TSavedStarGift))]
 public interface ISavedStarGift : IObject
 {
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
     bool NameHidden { get; set; }
     bool Unsaved { get; set; }
     bool Refunded { get; set; }

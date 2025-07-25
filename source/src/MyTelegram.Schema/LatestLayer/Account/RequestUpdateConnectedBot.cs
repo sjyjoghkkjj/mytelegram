@@ -19,7 +19,7 @@ public sealed class RequestUpdateConnectedBot : IRequest<MyTelegram.Schema.IUpda
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to fully disconnect the bot from the current account.
@@ -42,8 +42,8 @@ public sealed class RequestUpdateConnectedBot : IRequest<MyTelegram.Schema.IUpda
 
     public void ComputeFlag()
     {
-        if (Deleted) { Flags[1] = true; }
-        if (Rights != null) { Flags[0] = true; }
+        if (Deleted) { Flags = Flags.SetBit(1); }
+        if (Rights != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -52,17 +52,17 @@ public sealed class RequestUpdateConnectedBot : IRequest<MyTelegram.Schema.IUpda
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Rights); }
+        if (Flags.IsBitSet(0)) { writer.Write(Rights); }
         writer.Write(Bot);
         writer.Write(Recipients);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Deleted = true; }
-        if (Flags[0]) { Rights = reader.Read<MyTelegram.Schema.IBusinessBotRights>(); }
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        Recipients = reader.Read<MyTelegram.Schema.IInputBusinessBotRecipients>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Deleted = true; }
+        if (Flags.IsBitSet(0)) { Rights = buffer.Read<MyTelegram.Schema.IBusinessBotRights>(); }
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Recipients = buffer.Read<MyTelegram.Schema.IInputBusinessBotRecipients>();
     }
 }

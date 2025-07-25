@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionExportedInviteEdit : IChannelAdmi
         writer.Write(NewInvite);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevInvite = reader.Read<MyTelegram.Schema.IExportedChatInvite>();
-        NewInvite = reader.Read<MyTelegram.Schema.IExportedChatInvite>();
+        PrevInvite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>();
+        NewInvite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>();
     }
 }

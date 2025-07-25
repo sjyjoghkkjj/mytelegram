@@ -12,7 +12,7 @@ public interface IPollAnswerVoters : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether we have chosen this answer
@@ -27,7 +27,7 @@ public interface IPollAnswerVoters : IObject
     ///<summary>
     /// The param that has to be passed to <a href="https://corefork.telegram.org/method/messages.sendVote">messages.sendVote</a>.
     ///</summary>
-    byte[] Option { get; set; }
+    ReadOnlyMemory<byte> Option { get; set; }
 
     ///<summary>
     /// How many users voted for this option

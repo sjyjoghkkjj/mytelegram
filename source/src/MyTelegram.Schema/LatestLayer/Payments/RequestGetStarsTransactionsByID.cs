@@ -10,10 +10,13 @@ namespace MyTelegram.Schema.Payments;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/payments.getStarsTransactionsByID" />
 ///</summary>
-[TlObject(0x27842d2e)]
+[TlObject(0x2dca16b8)]
 public sealed class RequestGetStarsTransactionsByID : IRequest<MyTelegram.Schema.Payments.IStarsStatus>
 {
-    public uint ConstructorId => 0x27842d2e;
+    public uint ConstructorId => 0x2dca16b8;
+    public int Flags { get; set; }
+    public bool Ton { get; set; }
+
     ///<summary>
     /// Channel or bot.
     /// See <a href="https://corefork.telegram.org/type/InputPeer" />
@@ -27,6 +30,7 @@ public sealed class RequestGetStarsTransactionsByID : IRequest<MyTelegram.Schema
 
     public void ComputeFlag()
     {
+        if (Ton) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -34,13 +38,16 @@ public sealed class RequestGetStarsTransactionsByID : IRequest<MyTelegram.Schema
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.Read<TVector<MyTelegram.Schema.IInputStarsTransaction>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Ton = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.Read<TVector<MyTelegram.Schema.IInputStarsTransaction>>();
     }
 }

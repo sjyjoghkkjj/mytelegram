@@ -34,9 +34,9 @@ public sealed class RequestGetPopularAppBots : IRequest<MyTelegram.Schema.Bots.I
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

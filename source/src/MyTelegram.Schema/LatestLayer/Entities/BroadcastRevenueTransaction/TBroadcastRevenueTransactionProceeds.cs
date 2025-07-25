@@ -40,10 +40,10 @@ public sealed class TBroadcastRevenueTransactionProceeds : IBroadcastRevenueTran
         writer.Write(ToDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Amount = reader.ReadInt64();
-        FromDate = reader.ReadInt32();
-        ToDate = reader.ReadInt32();
+        Amount = buffer.ReadInt64();
+        FromDate = buffer.ReadInt32();
+        ToDate = buffer.ReadInt32();
     }
 }

@@ -9,7 +9,7 @@ internal sealed class DocumentMapper
         ITransientDependency
 {
     public int Layer => Layers.LayerLatest;
-    
+
 
     public TDocument Map(IDocumentReadModel source)
     {
@@ -100,6 +100,37 @@ internal sealed class DocumentMapper
         destination.VideoThumbs = source.VideoThumbs;
         destination.DcId = source.DcId;
         destination.Attributes = source.Attributes;
+
+        foreach (var documentAttribute in destination.Attributes)
+        {
+            switch (documentAttribute)
+            {
+                case TDocumentAttributeCustomEmoji documentAttributeCustomEmoji:
+                    switch (documentAttributeCustomEmoji.Stickerset)
+                    {
+                        case TInputStickerSetID inputStickerSetId:
+                            documentAttributeCustomEmoji.Stickerset = new TInputStickerSetID
+                            {
+                                Id = inputStickerSetId.Id,
+                                AccessHash = inputStickerSetId.AccessHash
+                            };
+                            break;
+                    }
+                    break;
+                case TDocumentAttributeSticker documentAttributeSticker:
+                    switch (documentAttributeSticker.Stickerset)
+                    {
+                        case TInputStickerSetID inputStickerSetId:
+                            documentAttributeSticker.Stickerset = new TInputStickerSetID
+                            {
+                                Id = inputStickerSetId.Id,
+                                AccessHash = inputStickerSetId.AccessHash
+                            };
+                            break;
+                    }
+                    break;
+            }
+        }
 
         return destination;
     }

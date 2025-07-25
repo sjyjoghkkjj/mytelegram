@@ -25,10 +25,10 @@
 //        writer.Write(MaxWait);
 //    }
 
-//    public void Deserialize(ref SequenceReader<byte> reader)
+//    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
 //    {
-//        MaxDelay = reader.ReadInt32();
-//        WaitAfter = reader.ReadInt32();
-//        MaxWait = reader.ReadInt32();
+//        MaxDelay = buffer.ReadInt32();
+//        WaitAfter = buffer.ReadInt32();
+//        MaxWait = buffer.ReadInt32();
 //    }
 //}

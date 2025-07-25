@@ -19,7 +19,7 @@ public sealed class TLoginToken : ILoginToken
     ///<summary>
     /// Token to render in QR code
     ///</summary>
-    public byte[] Token { get; set; }
+    public ReadOnlyMemory<byte> Token { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,9 +34,9 @@ public sealed class TLoginToken : ILoginToken
         writer.Write(Token);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Expires = reader.ReadInt32();
-        Token = reader.ReadBytes();
+        Expires = buffer.ReadInt32();
+        Token = buffer.ReadBytes();
     }
 }

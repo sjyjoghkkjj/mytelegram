@@ -17,9 +17,5 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TMediaAreaStarGift), nameof(TMediaAreaStarGift))]
 public interface IMediaArea : IObject
 {
-    ///<summary>
-    /// The size and position of the media area corresponding to the location sticker on top of the story media.
-    /// See <a href="https://corefork.telegram.org/type/MediaAreaCoordinates" />
-    ///</summary>
     MyTelegram.Schema.IMediaAreaCoordinates Coordinates { get; set; }
 }

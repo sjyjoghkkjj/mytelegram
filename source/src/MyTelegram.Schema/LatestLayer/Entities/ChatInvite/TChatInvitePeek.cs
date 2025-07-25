@@ -35,9 +35,9 @@ public sealed class TChatInvitePeek : IChatInvite
         writer.Write(Expires);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Chat = reader.Read<MyTelegram.Schema.IChat>();
-        Expires = reader.ReadInt32();
+        Chat = buffer.Read<MyTelegram.Schema.IChat>();
+        Expires = buffer.ReadInt32();
     }
 }

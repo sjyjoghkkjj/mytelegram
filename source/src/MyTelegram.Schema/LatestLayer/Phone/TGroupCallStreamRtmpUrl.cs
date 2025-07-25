@@ -34,9 +34,9 @@ public sealed class TGroupCallStreamRtmpUrl : IGroupCallStreamRtmpUrl
         writer.Write(Key);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        Key = reader.ReadString();
+        Url = buffer.ReadString();
+        Key = buffer.ReadString();
     }
 }

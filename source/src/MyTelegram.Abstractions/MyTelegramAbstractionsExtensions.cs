@@ -1,10 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MyTelegram.Abstractions;
 public static class MyTelegramAbstractionsExtensions
@@ -40,7 +35,6 @@ public static class MyTelegramAbstractionsExtensions
             foreach (var baseInterface in baseInterfaces)
             {
                 services.AddTransient(baseInterface, type);
-                //Console.WriteLine($"Register:{baseInterface.Name}->{type.Name}");
             }
 
             services.AddTransient(type);

@@ -14,7 +14,7 @@ public sealed class TMessageActionPaymentRefunded : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Identifier of the peer that returned the funds.
@@ -35,7 +35,7 @@ public sealed class TMessageActionPaymentRefunded : IMessageAction
     ///<summary>
     /// Bot specified invoice payload (only received by bots).
     ///</summary>
-    public byte[]? Payload { get; set; }
+    public ReadOnlyMemory<byte>? Payload { get; set; }
 
     ///<summary>
     /// Provider payment identifier
@@ -45,7 +45,7 @@ public sealed class TMessageActionPaymentRefunded : IMessageAction
 
     public void ComputeFlag()
     {
-        if (Payload != null) { Flags[0] = true; }
+        if (Payload != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -57,17 +57,17 @@ public sealed class TMessageActionPaymentRefunded : IMessageAction
         writer.Write(Peer);
         writer.Write(Currency);
         writer.Write(TotalAmount);
-        if (Flags[0]) { writer.Write(Payload); }
+        if (Flags.IsBitSet(0)) { writer.Write(Payload); }
         writer.Write(Charge);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Currency = reader.ReadString();
-        TotalAmount = reader.ReadInt64();
-        if (Flags[0]) { Payload = reader.ReadBytes(); }
-        Charge = reader.Read<MyTelegram.Schema.IPaymentCharge>();
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Currency = buffer.ReadString();
+        TotalAmount = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Payload = buffer.ReadBytes(); }
+        Charge = buffer.Read<MyTelegram.Schema.IPaymentCharge>();
     }
 }

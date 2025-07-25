@@ -14,7 +14,7 @@ public sealed class TBotApp : IBotApp
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// bot mini app ID
@@ -60,7 +60,7 @@ public sealed class TBotApp : IBotApp
 
     public void ComputeFlag()
     {
-        if (Document != null) { Flags[0] = true; }
+        if (Document != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -75,20 +75,20 @@ public sealed class TBotApp : IBotApp
         writer.Write(Title);
         writer.Write(Description);
         writer.Write(Photo);
-        if (Flags[0]) { writer.Write(Document); }
+        if (Flags.IsBitSet(0)) { writer.Write(Document); }
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        ShortName = reader.ReadString();
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        Photo = reader.Read<MyTelegram.Schema.IPhoto>();
-        if (Flags[0]) { Document = reader.Read<MyTelegram.Schema.IDocument>(); }
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        ShortName = buffer.ReadString();
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        Photo = buffer.Read<MyTelegram.Schema.IPhoto>();
+        if (Flags.IsBitSet(0)) { Document = buffer.Read<MyTelegram.Schema.IDocument>(); }
+        Hash = buffer.ReadInt64();
     }
 }

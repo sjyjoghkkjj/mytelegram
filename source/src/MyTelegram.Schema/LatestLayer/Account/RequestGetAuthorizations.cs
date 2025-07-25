@@ -24,7 +24,7 @@ public sealed class RequestGetAuthorizations : IRequest<MyTelegram.Schema.Accoun
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

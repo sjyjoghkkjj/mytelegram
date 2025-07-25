@@ -35,9 +35,9 @@ public sealed class TSupport : ISupport
         writer.Write(User);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
-        User = reader.Read<MyTelegram.Schema.IUser>();
+        PhoneNumber = buffer.ReadString();
+        User = buffer.Read<MyTelegram.Schema.IUser>();
     }
 }

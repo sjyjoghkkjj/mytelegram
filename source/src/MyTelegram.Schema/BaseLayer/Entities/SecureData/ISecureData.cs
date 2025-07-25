@@ -12,15 +12,15 @@ public interface ISecureData : IObject
     ///<summary>
     /// Data
     ///</summary>
-    byte[] Data { get; set; }
+    ReadOnlyMemory<byte> Data { get; set; }
 
     ///<summary>
     /// Data hash
     ///</summary>
-    byte[] DataHash { get; set; }
+    ReadOnlyMemory<byte> DataHash { get; set; }
 
     ///<summary>
     /// Secret
     ///</summary>
-    byte[] Secret { get; set; }
+    ReadOnlyMemory<byte> Secret { get; set; }
 }

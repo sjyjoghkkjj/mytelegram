@@ -49,10 +49,10 @@ public sealed class RequestGetMessagesViews : IRequest<MyTelegram.Schema.Message
         writer.Write(Increment);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.Read<TVector<int>>();
-        Increment = reader.Read();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.Read<TVector<int>>();
+        Increment = buffer.Read();
     }
 }

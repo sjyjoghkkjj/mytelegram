@@ -19,12 +19,12 @@ public sealed class TInputCheckPasswordSRP : IInputCheckPasswordSRP
     ///<summary>
     /// <code>A</code> parameter (see <a href="https://corefork.telegram.org/api/srp">SRP</a>)
     ///</summary>
-    public byte[] A { get; set; }
+    public ReadOnlyMemory<byte> A { get; set; }
 
     ///<summary>
     /// <code>M1</code> parameter (see <a href="https://corefork.telegram.org/api/srp">SRP</a>)
     ///</summary>
-    public byte[] M1 { get; set; }
+    public ReadOnlyMemory<byte> M1 { get; set; }
 
     public void ComputeFlag()
     {
@@ -40,10 +40,10 @@ public sealed class TInputCheckPasswordSRP : IInputCheckPasswordSRP
         writer.Write(M1);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        SrpId = reader.ReadInt64();
-        A = reader.ReadBytes();
-        M1 = reader.ReadBytes();
+        SrpId = buffer.ReadInt64();
+        A = buffer.ReadBytes();
+        M1 = buffer.ReadBytes();
     }
 }

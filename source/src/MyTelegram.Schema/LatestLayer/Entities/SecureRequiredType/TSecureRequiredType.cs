@@ -14,7 +14,7 @@ public sealed class TSecureRequiredType : ISecureRequiredType
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Native names
@@ -42,9 +42,9 @@ public sealed class TSecureRequiredType : ISecureRequiredType
 
     public void ComputeFlag()
     {
-        if (NativeNames) { Flags[0] = true; }
-        if (SelfieRequired) { Flags[1] = true; }
-        if (TranslationRequired) { Flags[2] = true; }
+        if (NativeNames) { Flags = Flags.SetBit(0); }
+        if (SelfieRequired) { Flags = Flags.SetBit(1); }
+        if (TranslationRequired) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -56,12 +56,12 @@ public sealed class TSecureRequiredType : ISecureRequiredType
         writer.Write(Type);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NativeNames = true; }
-        if (Flags[1]) { SelfieRequired = true; }
-        if (Flags[2]) { TranslationRequired = true; }
-        Type = reader.Read<MyTelegram.Schema.ISecureValueType>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NativeNames = true; }
+        if (Flags.IsBitSet(1)) { SelfieRequired = true; }
+        if (Flags.IsBitSet(2)) { TranslationRequired = true; }
+        Type = buffer.Read<MyTelegram.Schema.ISecureValueType>();
     }
 }

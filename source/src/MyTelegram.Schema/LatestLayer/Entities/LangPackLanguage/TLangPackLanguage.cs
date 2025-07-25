@@ -14,7 +14,7 @@ public sealed class TLangPackLanguage : ILangPackLanguage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the language pack is official
@@ -76,10 +76,10 @@ public sealed class TLangPackLanguage : ILangPackLanguage
 
     public void ComputeFlag()
     {
-        if (Official) { Flags[0] = true; }
-        if (Rtl) { Flags[2] = true; }
-        if (Beta) { Flags[3] = true; }
-        if (BaseLangCode != null) { Flags[1] = true; }
+        if (Official) { Flags = Flags.SetBit(0); }
+        if (Rtl) { Flags = Flags.SetBit(2); }
+        if (Beta) { Flags = Flags.SetBit(3); }
+        if (BaseLangCode != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -91,26 +91,26 @@ public sealed class TLangPackLanguage : ILangPackLanguage
         writer.Write(Name);
         writer.Write(NativeName);
         writer.Write(LangCode);
-        if (Flags[1]) { writer.Write(BaseLangCode); }
+        if (Flags.IsBitSet(1)) { writer.Write(BaseLangCode); }
         writer.Write(PluralCode);
         writer.Write(StringsCount);
         writer.Write(TranslatedCount);
         writer.Write(TranslationsUrl);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Official = true; }
-        if (Flags[2]) { Rtl = true; }
-        if (Flags[3]) { Beta = true; }
-        Name = reader.ReadString();
-        NativeName = reader.ReadString();
-        LangCode = reader.ReadString();
-        if (Flags[1]) { BaseLangCode = reader.ReadString(); }
-        PluralCode = reader.ReadString();
-        StringsCount = reader.ReadInt32();
-        TranslatedCount = reader.ReadInt32();
-        TranslationsUrl = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Official = true; }
+        if (Flags.IsBitSet(2)) { Rtl = true; }
+        if (Flags.IsBitSet(3)) { Beta = true; }
+        Name = buffer.ReadString();
+        NativeName = buffer.ReadString();
+        LangCode = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { BaseLangCode = buffer.ReadString(); }
+        PluralCode = buffer.ReadString();
+        StringsCount = buffer.ReadInt32();
+        TranslatedCount = buffer.ReadInt32();
+        TranslationsUrl = buffer.ReadString();
     }
 }

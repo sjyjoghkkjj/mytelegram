@@ -25,8 +25,8 @@ public sealed class RequestConvertStarGift : IRequest<IBool>
         writer.Write(Stargift);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stargift = reader.Read<MyTelegram.Schema.IInputSavedStarGift>();
+        Stargift = buffer.Read<MyTelegram.Schema.IInputSavedStarGift>();
     }
 }

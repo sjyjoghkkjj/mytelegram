@@ -24,7 +24,7 @@ public sealed class TFileHash : IFileHash
     ///<summary>
     /// SHA-256 Hash of file chunk, to be checked for validity after download
     ///</summary>
-    public byte[] Hash { get; set; }
+    public ReadOnlyMemory<byte> Hash { get; set; }
 
     public void ComputeFlag()
     {
@@ -40,10 +40,10 @@ public sealed class TFileHash : IFileHash
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offset = reader.ReadInt64();
-        Limit = reader.ReadInt32();
-        Hash = reader.ReadBytes();
+        Offset = buffer.ReadInt64();
+        Limit = buffer.ReadInt32();
+        Hash = buffer.ReadBytes();
     }
 }

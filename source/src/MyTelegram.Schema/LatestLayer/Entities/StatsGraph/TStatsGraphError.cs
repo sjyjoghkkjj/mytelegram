@@ -28,8 +28,8 @@ public sealed class TStatsGraphError : IStatsGraph
         writer.Write(Error);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Error = reader.ReadString();
+        Error = buffer.ReadString();
     }
 }

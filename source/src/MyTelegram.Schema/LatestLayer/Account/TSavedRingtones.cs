@@ -34,9 +34,9 @@ public sealed class TSavedRingtones : ISavedRingtones
         writer.Write(Ringtones);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Ringtones = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
+        Hash = buffer.ReadInt64();
+        Ringtones = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
     }
 }

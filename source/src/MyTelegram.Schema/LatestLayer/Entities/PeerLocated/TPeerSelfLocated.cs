@@ -28,8 +28,8 @@ public sealed class TPeerSelfLocated : IPeerLocated
         writer.Write(Expires);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Expires = reader.ReadInt32();
+        Expires = buffer.ReadInt32();
     }
 }

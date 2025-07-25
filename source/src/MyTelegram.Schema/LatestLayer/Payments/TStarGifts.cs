@@ -34,9 +34,9 @@ public sealed class TStarGifts : IStarGifts
         writer.Write(Gifts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt32();
-        Gifts = reader.Read<TVector<MyTelegram.Schema.IStarGift>>();
+        Hash = buffer.ReadInt32();
+        Gifts = buffer.Read<TVector<MyTelegram.Schema.IStarGift>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class RequestUpdateBusinessLocation : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Optional, contains a set of geographical coordinates.
@@ -29,8 +29,8 @@ public sealed class RequestUpdateBusinessLocation : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (GeoPoint != null) { Flags[1] = true; }
-        if (Address != null) { Flags[0] = true; }
+        if (GeoPoint != null) { Flags = Flags.SetBit(1); }
+        if (Address != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -38,14 +38,14 @@ public sealed class RequestUpdateBusinessLocation : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(GeoPoint); }
-        if (Flags[0]) { writer.Write(Address); }
+        if (Flags.IsBitSet(1)) { writer.Write(GeoPoint); }
+        if (Flags.IsBitSet(0)) { writer.Write(Address); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>(); }
-        if (Flags[0]) { Address = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>(); }
+        if (Flags.IsBitSet(0)) { Address = buffer.ReadString(); }
     }
 }

@@ -24,8 +24,8 @@ public sealed class TWebPageAttributeUniqueStarGift : IWebPageAttribute
         writer.Write(Gift);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Gift = reader.Read<MyTelegram.Schema.IStarGift>();
+        Gift = buffer.Read<MyTelegram.Schema.IStarGift>();
     }
 }

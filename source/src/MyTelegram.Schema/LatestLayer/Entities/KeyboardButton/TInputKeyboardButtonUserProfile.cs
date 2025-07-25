@@ -35,9 +35,9 @@ public sealed class TInputKeyboardButtonUserProfile : IKeyboardButton
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Text = buffer.ReadString();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

@@ -10,14 +10,14 @@ namespace MyTelegram.Schema.Messages;
 public sealed class RequestReportMessagesDelivery : IRequest<IBool>
 {
     public uint ConstructorId => 0x5a6d7395;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Push { get; set; }
     public MyTelegram.Schema.IInputPeer Peer { get; set; }
     public TVector<int> Id { get; set; }
 
     public void ComputeFlag()
     {
-        if (Push) { Flags[0] = true; }
+        if (Push) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -30,11 +30,11 @@ public sealed class RequestReportMessagesDelivery : IRequest<IBool>
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Push = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.Read<TVector<int>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Push = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.Read<TVector<int>>();
     }
 }

@@ -33,8 +33,8 @@ public sealed class RequestEditPeerFolders : IRequest<MyTelegram.Schema.IUpdates
         writer.Write(FolderPeers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FolderPeers = reader.Read<TVector<MyTelegram.Schema.IInputFolderPeer>>();
+        FolderPeers = buffer.Read<TVector<MyTelegram.Schema.IInputFolderPeer>>();
     }
 }

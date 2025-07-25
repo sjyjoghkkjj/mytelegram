@@ -34,9 +34,9 @@ public sealed class TTimezonesList : ITimezonesList
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Timezones = reader.Read<TVector<MyTelegram.Schema.ITimezone>>();
-        Hash = reader.ReadInt32();
+        Timezones = buffer.Read<TVector<MyTelegram.Schema.ITimezone>>();
+        Hash = buffer.ReadInt32();
     }
 }

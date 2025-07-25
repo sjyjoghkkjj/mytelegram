@@ -33,8 +33,8 @@ public sealed class RequestReceivedQueue : IRequest<TVector<long>>
         writer.Write(MaxQts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MaxQts = reader.ReadInt32();
+        MaxQts = buffer.ReadInt32();
     }
 }

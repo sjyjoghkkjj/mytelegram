@@ -29,8 +29,8 @@ public sealed class TInputMediaGeoPoint : IInputMedia
         writer.Write(GeoPoint);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>();
+        GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>();
     }
 }

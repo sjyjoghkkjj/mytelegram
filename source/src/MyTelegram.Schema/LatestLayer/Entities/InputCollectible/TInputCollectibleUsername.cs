@@ -28,8 +28,8 @@ public sealed class TInputCollectibleUsername : IInputCollectible
         writer.Write(Username);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Username = reader.ReadString();
+        Username = buffer.ReadString();
     }
 }

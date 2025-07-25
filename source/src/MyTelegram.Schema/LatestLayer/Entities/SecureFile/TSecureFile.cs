@@ -39,12 +39,12 @@ public sealed class TSecureFile : ISecureFile
     ///<summary>
     /// File hash
     ///</summary>
-    public byte[] FileHash { get; set; }
+    public ReadOnlyMemory<byte> FileHash { get; set; }
 
     ///<summary>
     /// Secret
     ///</summary>
-    public byte[] Secret { get; set; }
+    public ReadOnlyMemory<byte> Secret { get; set; }
 
     public void ComputeFlag()
     {
@@ -64,14 +64,14 @@ public sealed class TSecureFile : ISecureFile
         writer.Write(Secret);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        Size = reader.ReadInt64();
-        DcId = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        FileHash = reader.ReadBytes();
-        Secret = reader.ReadBytes();
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        Size = buffer.ReadInt64();
+        DcId = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        FileHash = buffer.ReadBytes();
+        Secret = buffer.ReadBytes();
     }
 }

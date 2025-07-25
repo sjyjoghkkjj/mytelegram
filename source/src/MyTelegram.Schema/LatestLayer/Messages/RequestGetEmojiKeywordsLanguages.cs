@@ -28,8 +28,8 @@ public sealed class RequestGetEmojiKeywordsLanguages : IRequest<TVector<MyTelegr
         writer.Write(LangCodes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangCodes = reader.Read<TVector<string>>();
+        LangCodes = buffer.Read<TVector<string>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TDcOption : IDcOption
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the specified IP is an IPv6 address
@@ -70,17 +70,17 @@ public sealed class TDcOption : IDcOption
     ///<summary>
     /// If the <code>tcpo_only</code> flag is set, specifies the secret to use when connecting using <a href="https://corefork.telegram.org/mtproto/mtproto-transports#transport-obfuscation">transport obfuscation</a>
     ///</summary>
-    public byte[]? Secret { get; set; }
+    public ReadOnlyMemory<byte>? Secret { get; set; }
 
     public void ComputeFlag()
     {
-        if (Ipv6) { Flags[0] = true; }
-        if (MediaOnly) { Flags[1] = true; }
-        if (TcpoOnly) { Flags[2] = true; }
-        if (Cdn) { Flags[3] = true; }
-        if (Static) { Flags[4] = true; }
-        if (ThisPortOnly) { Flags[5] = true; }
-        if (Secret != null) { Flags[10] = true; }
+        if (Ipv6) { Flags = Flags.SetBit(0); }
+        if (MediaOnly) { Flags = Flags.SetBit(1); }
+        if (TcpoOnly) { Flags = Flags.SetBit(2); }
+        if (Cdn) { Flags = Flags.SetBit(3); }
+        if (Static) { Flags = Flags.SetBit(4); }
+        if (ThisPortOnly) { Flags = Flags.SetBit(5); }
+        if (Secret != null) { Flags = Flags.SetBit(10); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -91,21 +91,21 @@ public sealed class TDcOption : IDcOption
         writer.Write(Id);
         writer.Write(IpAddress);
         writer.Write(Port);
-        if (Flags[10]) { writer.Write(Secret); }
+        if (Flags.IsBitSet(10)) { writer.Write(Secret); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Ipv6 = true; }
-        if (Flags[1]) { MediaOnly = true; }
-        if (Flags[2]) { TcpoOnly = true; }
-        if (Flags[3]) { Cdn = true; }
-        if (Flags[4]) { Static = true; }
-        if (Flags[5]) { ThisPortOnly = true; }
-        Id = reader.ReadInt32();
-        IpAddress = reader.ReadString();
-        Port = reader.ReadInt32();
-        if (Flags[10]) { Secret = reader.ReadBytes(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Ipv6 = true; }
+        if (Flags.IsBitSet(1)) { MediaOnly = true; }
+        if (Flags.IsBitSet(2)) { TcpoOnly = true; }
+        if (Flags.IsBitSet(3)) { Cdn = true; }
+        if (Flags.IsBitSet(4)) { Static = true; }
+        if (Flags.IsBitSet(5)) { ThisPortOnly = true; }
+        Id = buffer.ReadInt32();
+        IpAddress = buffer.ReadString();
+        Port = buffer.ReadInt32();
+        if (Flags.IsBitSet(10)) { Secret = buffer.ReadBytes(); }
     }
 }

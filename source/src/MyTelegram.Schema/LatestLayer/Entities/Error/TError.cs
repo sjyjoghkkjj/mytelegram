@@ -34,9 +34,9 @@ public sealed class TError : IError
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Code = reader.ReadInt32();
-        Text = reader.ReadString();
+        Code = buffer.ReadInt32();
+        Text = buffer.ReadString();
     }
 }

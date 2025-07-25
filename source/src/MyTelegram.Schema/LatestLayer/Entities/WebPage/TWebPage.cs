@@ -14,7 +14,7 @@ public sealed class TWebPage : IWebPage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the size of the media in the preview can be changed.
@@ -118,22 +118,22 @@ public sealed class TWebPage : IWebPage
 
     public void ComputeFlag()
     {
-        if (HasLargeMedia) { Flags[13] = true; }
-        if (VideoCoverPhoto) { Flags[14] = true; }
-        if (Type != null) { Flags[0] = true; }
-        if (SiteName != null) { Flags[1] = true; }
-        if (Title != null) { Flags[2] = true; }
-        if (Description != null) { Flags[3] = true; }
-        if (Photo != null) { Flags[4] = true; }
-        if (EmbedUrl != null) { Flags[5] = true; }
-        if (EmbedType != null) { Flags[5] = true; }
-        if (/*EmbedWidth != 0 && */EmbedWidth.HasValue) { Flags[6] = true; }
-        if (/*EmbedHeight != 0 && */EmbedHeight.HasValue) { Flags[6] = true; }
-        if (/*Duration != 0 && */Duration.HasValue) { Flags[7] = true; }
-        if (Author != null) { Flags[8] = true; }
-        if (Document != null) { Flags[9] = true; }
-        if (CachedPage != null) { Flags[10] = true; }
-        if (Attributes?.Count > 0) { Flags[12] = true; }
+        if (HasLargeMedia) { Flags = Flags.SetBit(13); }
+        if (VideoCoverPhoto) { Flags = Flags.SetBit(14); }
+        if (Type != null) { Flags = Flags.SetBit(0); }
+        if (SiteName != null) { Flags = Flags.SetBit(1); }
+        if (Title != null) { Flags = Flags.SetBit(2); }
+        if (Description != null) { Flags = Flags.SetBit(3); }
+        if (Photo != null) { Flags = Flags.SetBit(4); }
+        if (EmbedUrl != null) { Flags = Flags.SetBit(5); }
+        if (EmbedType != null) { Flags = Flags.SetBit(5); }
+        if (/*EmbedWidth != 0 && */EmbedWidth.HasValue) { Flags = Flags.SetBit(6); }
+        if (/*EmbedHeight != 0 && */EmbedHeight.HasValue) { Flags = Flags.SetBit(6); }
+        if (/*Duration != 0 && */Duration.HasValue) { Flags = Flags.SetBit(7); }
+        if (Author != null) { Flags = Flags.SetBit(8); }
+        if (Document != null) { Flags = Flags.SetBit(9); }
+        if (CachedPage != null) { Flags = Flags.SetBit(10); }
+        if (Attributes?.Count > 0) { Flags = Flags.SetBit(12); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -145,44 +145,44 @@ public sealed class TWebPage : IWebPage
         writer.Write(Url);
         writer.Write(DisplayUrl);
         writer.Write(Hash);
-        if (Flags[0]) { writer.Write(Type); }
-        if (Flags[1]) { writer.Write(SiteName); }
-        if (Flags[2]) { writer.Write(Title); }
-        if (Flags[3]) { writer.Write(Description); }
-        if (Flags[4]) { writer.Write(Photo); }
-        if (Flags[5]) { writer.Write(EmbedUrl); }
-        if (Flags[5]) { writer.Write(EmbedType); }
-        if (Flags[6]) { writer.Write(EmbedWidth.Value); }
-        if (Flags[6]) { writer.Write(EmbedHeight.Value); }
-        if (Flags[7]) { writer.Write(Duration.Value); }
-        if (Flags[8]) { writer.Write(Author); }
-        if (Flags[9]) { writer.Write(Document); }
-        if (Flags[10]) { writer.Write(CachedPage); }
-        if (Flags[12]) { writer.Write(Attributes); }
+        if (Flags.IsBitSet(0)) { writer.Write(Type); }
+        if (Flags.IsBitSet(1)) { writer.Write(SiteName); }
+        if (Flags.IsBitSet(2)) { writer.Write(Title); }
+        if (Flags.IsBitSet(3)) { writer.Write(Description); }
+        if (Flags.IsBitSet(4)) { writer.Write(Photo); }
+        if (Flags.IsBitSet(5)) { writer.Write(EmbedUrl); }
+        if (Flags.IsBitSet(5)) { writer.Write(EmbedType); }
+        if (Flags.IsBitSet(6)) { writer.Write(EmbedWidth.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(EmbedHeight.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(Duration.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(Author); }
+        if (Flags.IsBitSet(9)) { writer.Write(Document); }
+        if (Flags.IsBitSet(10)) { writer.Write(CachedPage); }
+        if (Flags.IsBitSet(12)) { writer.Write(Attributes); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[13]) { HasLargeMedia = true; }
-        if (Flags[14]) { VideoCoverPhoto = true; }
-        Id = reader.ReadInt64();
-        Url = reader.ReadString();
-        DisplayUrl = reader.ReadString();
-        Hash = reader.ReadInt32();
-        if (Flags[0]) { Type = reader.ReadString(); }
-        if (Flags[1]) { SiteName = reader.ReadString(); }
-        if (Flags[2]) { Title = reader.ReadString(); }
-        if (Flags[3]) { Description = reader.ReadString(); }
-        if (Flags[4]) { Photo = reader.Read<MyTelegram.Schema.IPhoto>(); }
-        if (Flags[5]) { EmbedUrl = reader.ReadString(); }
-        if (Flags[5]) { EmbedType = reader.ReadString(); }
-        if (Flags[6]) { EmbedWidth = reader.ReadInt32(); }
-        if (Flags[6]) { EmbedHeight = reader.ReadInt32(); }
-        if (Flags[7]) { Duration = reader.ReadInt32(); }
-        if (Flags[8]) { Author = reader.ReadString(); }
-        if (Flags[9]) { Document = reader.Read<MyTelegram.Schema.IDocument>(); }
-        if (Flags[10]) { CachedPage = reader.Read<MyTelegram.Schema.IPage>(); }
-        if (Flags[12]) { Attributes = reader.Read<TVector<MyTelegram.Schema.IWebPageAttribute>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(13)) { HasLargeMedia = true; }
+        if (Flags.IsBitSet(14)) { VideoCoverPhoto = true; }
+        Id = buffer.ReadInt64();
+        Url = buffer.ReadString();
+        DisplayUrl = buffer.ReadString();
+        Hash = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Type = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { SiteName = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { Description = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { Photo = buffer.Read<MyTelegram.Schema.IPhoto>(); }
+        if (Flags.IsBitSet(5)) { EmbedUrl = buffer.ReadString(); }
+        if (Flags.IsBitSet(5)) { EmbedType = buffer.ReadString(); }
+        if (Flags.IsBitSet(6)) { EmbedWidth = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(6)) { EmbedHeight = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(7)) { Duration = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(8)) { Author = buffer.ReadString(); }
+        if (Flags.IsBitSet(9)) { Document = buffer.Read<MyTelegram.Schema.IDocument>(); }
+        if (Flags.IsBitSet(10)) { CachedPage = buffer.Read<MyTelegram.Schema.IPage>(); }
+        if (Flags.IsBitSet(12)) { Attributes = buffer.Read<TVector<MyTelegram.Schema.IWebPageAttribute>>(); }
     }
 }

@@ -10,16 +10,16 @@ namespace MyTelegram.Schema;
 public sealed class TSponsoredPeer : ISponsoredPeer
 {
     public uint ConstructorId => 0xc69708d3;
-    public BitArray Flags { get; set; } = new BitArray(32);
-    public byte[] RandomId { get; set; }
+    public int Flags { get; set; }
+    public ReadOnlyMemory<byte> RandomId { get; set; }
     public MyTelegram.Schema.IPeer Peer { get; set; }
     public string? SponsorInfo { get; set; }
     public string? AdditionalInfo { get; set; }
 
     public void ComputeFlag()
     {
-        if (SponsorInfo != null) { Flags[0] = true; }
-        if (AdditionalInfo != null) { Flags[1] = true; }
+        if (SponsorInfo != null) { Flags = Flags.SetBit(0); }
+        if (AdditionalInfo != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -29,16 +29,16 @@ public sealed class TSponsoredPeer : ISponsoredPeer
         writer.Write(Flags);
         writer.Write(RandomId);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(SponsorInfo); }
-        if (Flags[1]) { writer.Write(AdditionalInfo); }
+        if (Flags.IsBitSet(0)) { writer.Write(SponsorInfo); }
+        if (Flags.IsBitSet(1)) { writer.Write(AdditionalInfo); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        RandomId = reader.ReadBytes();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        if (Flags[0]) { SponsorInfo = reader.ReadString(); }
-        if (Flags[1]) { AdditionalInfo = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        RandomId = buffer.ReadBytes();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        if (Flags.IsBitSet(0)) { SponsorInfo = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { AdditionalInfo = buffer.ReadString(); }
     }
 }

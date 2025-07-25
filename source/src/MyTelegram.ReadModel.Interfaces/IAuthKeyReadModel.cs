@@ -3,7 +3,7 @@
 public interface IAuthKeyReadModel : IReadModel
 {
     long AuthKeyId { get; }
-    byte[] Data { get; }
+    ReadOnlyMemory<byte> Data { get; }
     string Id { get; }
     bool IsActive { get; }
     DateTime LastUpdateTime { get; }
@@ -11,4 +11,8 @@ public interface IAuthKeyReadModel : IReadModel
     long UserId { get; }
     int Layer { get; }
     DeviceType? DeviceType { get; }
+    //long AccessHashKeyId { get; }
+
+    long AccessHashKeyId { get; }
+    
 }

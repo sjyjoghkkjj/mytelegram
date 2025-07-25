@@ -42,10 +42,10 @@ public sealed class TUpdateChatUserTyping : IUpdate
         writer.Write(Action);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt64();
-        FromId = reader.Read<MyTelegram.Schema.IPeer>();
-        Action = reader.Read<MyTelegram.Schema.ISendMessageAction>();
+        ChatId = buffer.ReadInt64();
+        FromId = buffer.Read<MyTelegram.Schema.IPeer>();
+        Action = buffer.Read<MyTelegram.Schema.ISendMessageAction>();
     }
 }

@@ -21,12 +21,10 @@ public class Int32SerializerTests
     {
         var value = new byte[] { 01, 0, 0, 0 };
         var expectedValue = 1;
-        //var stream = new MemoryStream(value);
-        //var br = new BinaryReader(stream);
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
+        ReadOnlyMemory<byte> buffer = value;
         var serializer = CreateSerializer();
 
-        var actualValue = serializer.Deserialize(ref reader);
+        var actualValue = serializer.Deserialize(ref buffer);
 
         actualValue.ShouldBeEquivalentTo(expectedValue);
     }

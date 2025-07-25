@@ -33,8 +33,8 @@ public sealed class RequestSetBotBroadcastDefaultAdminRights : IRequest<IBool>
         writer.Write(AdminRights);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        AdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>();
+        AdminRights = buffer.Read<MyTelegram.Schema.IChatAdminRights>();
     }
 }

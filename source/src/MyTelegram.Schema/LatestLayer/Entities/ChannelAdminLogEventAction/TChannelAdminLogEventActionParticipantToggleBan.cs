@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionParticipantToggleBan : IChannelAd
         writer.Write(NewParticipant);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevParticipant = reader.Read<MyTelegram.Schema.IChannelParticipant>();
-        NewParticipant = reader.Read<MyTelegram.Schema.IChannelParticipant>();
+        PrevParticipant = buffer.Read<MyTelegram.Schema.IChannelParticipant>();
+        NewParticipant = buffer.Read<MyTelegram.Schema.IChannelParticipant>();
     }
 }

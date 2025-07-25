@@ -34,9 +34,9 @@ public sealed class TPaymentCharge : IPaymentCharge
         writer.Write(ProviderChargeId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadString();
-        ProviderChargeId = reader.ReadString();
+        Id = buffer.ReadString();
+        ProviderChargeId = buffer.ReadString();
     }
 }

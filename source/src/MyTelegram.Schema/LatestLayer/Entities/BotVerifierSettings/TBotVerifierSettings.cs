@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TBotVerifierSettings : IBotVerifierSettings
 {
     public uint ConstructorId => 0xb0cd6617;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool CanModifyCustomDescription { get; set; }
     public long Icon { get; set; }
     public string Company { get; set; }
@@ -18,8 +18,8 @@ public sealed class TBotVerifierSettings : IBotVerifierSettings
 
     public void ComputeFlag()
     {
-        if (CanModifyCustomDescription) { Flags[1] = true; }
-        if (CustomDescription != null) { Flags[0] = true; }
+        if (CanModifyCustomDescription) { Flags = Flags.SetBit(1); }
+        if (CustomDescription != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -29,15 +29,15 @@ public sealed class TBotVerifierSettings : IBotVerifierSettings
         writer.Write(Flags);
         writer.Write(Icon);
         writer.Write(Company);
-        if (Flags[0]) { writer.Write(CustomDescription); }
+        if (Flags.IsBitSet(0)) { writer.Write(CustomDescription); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { CanModifyCustomDescription = true; }
-        Icon = reader.ReadInt64();
-        Company = reader.ReadString();
-        if (Flags[0]) { CustomDescription = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { CanModifyCustomDescription = true; }
+        Icon = buffer.ReadInt64();
+        Company = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { CustomDescription = buffer.ReadString(); }
     }
 }

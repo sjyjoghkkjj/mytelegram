@@ -41,10 +41,10 @@ public sealed class TVideoSizeStickerMarkup : IVideoSize
         writer.Write(BackgroundColors);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
-        StickerId = reader.ReadInt64();
-        BackgroundColors = reader.Read<TVector<int>>();
+        Stickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
+        StickerId = buffer.ReadInt64();
+        BackgroundColors = buffer.Read<TVector<int>>();
     }
 }

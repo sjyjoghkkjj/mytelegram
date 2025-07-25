@@ -10,13 +10,13 @@ namespace MyTelegram.Schema.Messages;
 public sealed class RequestGetSavedDialogsByID : IRequest<MyTelegram.Schema.Messages.ISavedDialogs>
 {
     public uint ConstructorId => 0x6f6f9c96;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
     public TVector<MyTelegram.Schema.IInputPeer> Ids { get; set; }
 
     public void ComputeFlag()
     {
-        if (ParentPeer != null) { Flags[1] = true; }
+        if (ParentPeer != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -25,14 +25,14 @@ public sealed class RequestGetSavedDialogsByID : IRequest<MyTelegram.Schema.Mess
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(ParentPeer); }
+        if (Flags.IsBitSet(1)) { writer.Write(ParentPeer); }
         writer.Write(Ids);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        Ids = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { ParentPeer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        Ids = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
     }
 }

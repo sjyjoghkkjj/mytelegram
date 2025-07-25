@@ -24,6 +24,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TInputMediaStory), nameof(TInputMediaStory))]
 [JsonDerivedType(typeof(TInputMediaWebPage), nameof(TInputMediaWebPage))]
 [JsonDerivedType(typeof(TInputMediaPaidMedia), nameof(TInputMediaPaidMedia))]
+[JsonDerivedType(typeof(TInputMediaTodo), nameof(TInputMediaTodo))]
 public interface IInputMedia : IObject
 {
 

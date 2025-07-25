@@ -33,8 +33,8 @@ public sealed class RequestApplyGiftCode : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Slug);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Slug = reader.ReadString();
+        Slug = buffer.ReadString();
     }
 }

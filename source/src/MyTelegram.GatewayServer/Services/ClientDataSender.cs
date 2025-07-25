@@ -11,22 +11,15 @@ public class ClientDataSender(
     {
         if (!clientManager.TryGetClientData(data.ConnectionId, out var d))
         {
-            logger.LogWarning("[0] Cannot find cached client info, skip sending message, connectionId: {ConnectionId}",
+            logger.LogWarning(
+                "[0] Cannot find cached client info, skip sending message, connectionId: {ConnectionId}",
                 data.ConnectionId);
             return Task.CompletedTask;
         }
 
-        var encodedBytes = ArrayPool<byte>.Shared.Rent(GetEncodedDataMaxLength(data.Data.Length));
-        try
-        {
-            var totalCount = messageEncoder.Encode(d, data, encodedBytes);
+        d.UnencryptedMessageResponseQueue?.Writer.WriteAsync(data);
 
-            return SendAsync(encodedBytes.AsMemory()[..totalCount], d);
-        }
-        finally
-        {
-            ArrayPool<byte>.Shared.Return(encodedBytes, true);
-        }
+        return Task.CompletedTask;
     }
 
     public Task SendAsync(EncryptedMessageResponse data)
@@ -45,12 +38,12 @@ public class ClientDataSender(
             }
         }
 
-        d?.ResponseQueue.Writer.TryWrite(data);
+        d?.EncryptedMessageResponseQueue.Writer.TryWrite(data);
 
         return Task.CompletedTask;
     }
 
-    public int EncodeData(EncryptedMessageResponse data, ClientData d, byte[] encodedBytes)
+    public int EncodeData(EncryptedMessageResponse data, ClientData d, Memory<byte> encodedBytes)
     {
         //if (d.AuthKeyId == 0)
         //{
@@ -62,7 +55,12 @@ public class ClientDataSender(
         //    clientManager.UpdateAuthKeyId(data.AuthKeyId,data.ConnectionId);
         //}
 
-        return messageEncoder.Encode(d, data, encodedBytes);
+        return messageEncoder.Encode(d, data, encodedBytes.Span);
+    }
+
+    public int EncodeData(UnencryptedMessageResponse data, ClientData d, Memory<byte> encodedBytes)
+    {
+        return messageEncoder.Encode(d, data, encodedBytes.Span);
     }
 
     public async Task SendAsync(ReadOnlyMemory<byte> encodedBytes,

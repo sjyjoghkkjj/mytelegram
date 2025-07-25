@@ -39,7 +39,7 @@ public sealed class TEncryptedChat : IEncryptedChat
     ///<summary>
     /// <code>B = g ^ b mod p</code>, if the currently authorized user is the chat's creator,<br>or <code>A = g ^ a mod p</code> otherwise<br>See <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Wikipedia</a> for more info
     ///</summary>
-    public byte[] GAOrB { get; set; }
+    public ReadOnlyMemory<byte> GAOrB { get; set; }
 
     ///<summary>
     /// 64-bit fingerprint of received key
@@ -64,14 +64,14 @@ public sealed class TEncryptedChat : IEncryptedChat
         writer.Write(KeyFingerprint);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt32();
-        AccessHash = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        AdminId = reader.ReadInt64();
-        ParticipantId = reader.ReadInt64();
-        GAOrB = reader.ReadBytes();
-        KeyFingerprint = reader.ReadInt64();
+        Id = buffer.ReadInt32();
+        AccessHash = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        AdminId = buffer.ReadInt64();
+        ParticipantId = buffer.ReadInt64();
+        GAOrB = buffer.ReadBytes();
+        KeyFingerprint = buffer.ReadInt64();
     }
 }

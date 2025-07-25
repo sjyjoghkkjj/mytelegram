@@ -46,11 +46,11 @@ public sealed class TImportedContacts : IImportedContacts
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Imported = reader.Read<TVector<MyTelegram.Schema.IImportedContact>>();
-        PopularInvites = reader.Read<TVector<MyTelegram.Schema.IPopularContact>>();
-        RetryContacts = reader.Read<TVector<long>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Imported = buffer.Read<TVector<MyTelegram.Schema.IImportedContact>>();
+        PopularInvites = buffer.Read<TVector<MyTelegram.Schema.IPopularContact>>();
+        RetryContacts = buffer.Read<TVector<long>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

@@ -13,7 +13,7 @@ public sealed class RequestBotCancelStarsSubscription : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -34,7 +34,7 @@ public sealed class RequestBotCancelStarsSubscription : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Restore) { Flags[0] = true; }
+        if (Restore) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class RequestBotCancelStarsSubscription : IRequest<IBool>
         writer.Write(ChargeId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Restore = true; }
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        ChargeId = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Restore = true; }
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        ChargeId = buffer.ReadString();
     }
 }

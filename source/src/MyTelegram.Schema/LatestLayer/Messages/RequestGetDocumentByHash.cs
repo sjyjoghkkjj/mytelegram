@@ -17,7 +17,7 @@ public sealed class RequestGetDocumentByHash : IRequest<MyTelegram.Schema.IDocum
     ///<summary>
     /// SHA256 of file
     ///</summary>
-    public byte[] Sha256 { get; set; }
+    public ReadOnlyMemory<byte> Sha256 { get; set; }
 
     ///<summary>
     /// Size of the file in bytes
@@ -43,10 +43,10 @@ public sealed class RequestGetDocumentByHash : IRequest<MyTelegram.Schema.IDocum
         writer.Write(MimeType);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Sha256 = reader.ReadBytes();
-        Size = reader.ReadInt64();
-        MimeType = reader.ReadString();
+        Sha256 = buffer.ReadBytes();
+        Size = buffer.ReadInt64();
+        MimeType = buffer.ReadString();
     }
 }

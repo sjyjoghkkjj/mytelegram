@@ -11,31 +11,15 @@ public interface IObjectMessageSender
         int pts = 0,
         int? qts = null,
         long globalSeqNo = 0,
-        LayeredData<TData>? layeredData = null,
         PushData? pushData = null,
         List<long>? excludeUserIds = null) where TData : IObject;
 
-    Task PushMessageToPeerAsync<TData, TExtraData>(Peer peer,
-        TData data,
-        long? excludeAuthKeyId = null,
-        long? excludeUserId = null,
-        long? onlySendToUserId = null,
-        long? onlySendToThisAuthKeyId = null,
-        int pts = 0,
-        int? qts = null,
-        long globalSeqNo = 0,
-        LayeredData<TData>? layeredData = null,
-        TExtraData? extraData = default,
-        PushData? pushData = null,
-        List<long>? excludeUserIds = null
-        ) where TData : IObject;
 
     Task PushSessionMessageToAuthKeyIdAsync<TData>(long authKeyId,
         TData data,
         int pts = 0,
         int? qts = null,
-        long globalSeqNo = 0,
-        LayeredData<TData>? layeredData = null
+        long globalSeqNo = 0
     ) where TData : IObject;
 
     Task SendFileDataToPeerAsync<TData>(RequestInfo requestInfo,

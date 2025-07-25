@@ -14,7 +14,7 @@ public sealed class TInputSingleMedia : IInputSingleMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The media
@@ -39,7 +39,7 @@ public sealed class TInputSingleMedia : IInputSingleMedia
 
     public void ComputeFlag()
     {
-        if (Entities?.Count > 0) { Flags[0] = true; }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,15 +50,15 @@ public sealed class TInputSingleMedia : IInputSingleMedia
         writer.Write(Media);
         writer.Write(RandomId);
         writer.Write(Message);
-        if (Flags[0]) { writer.Write(Entities); }
+        if (Flags.IsBitSet(0)) { writer.Write(Entities); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Media = reader.Read<MyTelegram.Schema.IInputMedia>();
-        RandomId = reader.ReadInt64();
-        Message = reader.ReadString();
-        if (Flags[0]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        Flags = buffer.ReadInt32();
+        Media = buffer.Read<MyTelegram.Schema.IInputMedia>();
+        RandomId = buffer.ReadInt64();
+        Message = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
     }
 }

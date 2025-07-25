@@ -35,9 +35,9 @@ public sealed class TMessageActionInviteToGroupCall : IMessageAction
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Users = reader.Read<TVector<long>>();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Users = buffer.Read<TVector<long>>();
     }
 }

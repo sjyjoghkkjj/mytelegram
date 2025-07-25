@@ -34,9 +34,9 @@ public sealed class TStatsAbsValueAndPrev : IStatsAbsValueAndPrev
         writer.Write(Previous);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Current = reader.ReadDouble();
-        Previous = reader.ReadDouble();
+        Current = buffer.ReadDouble();
+        Previous = buffer.ReadDouble();
     }
 }

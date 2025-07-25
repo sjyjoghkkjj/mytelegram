@@ -14,7 +14,7 @@ public sealed class RequestViewSponsoredMessage : IRequest<IBool>
     ///<summary>
     /// The ad's unique ID.
     ///</summary>
-    public byte[] RandomId { get; set; }
+    public ReadOnlyMemory<byte> RandomId { get; set; }
 
     public void ComputeFlag()
     {
@@ -28,8 +28,8 @@ public sealed class RequestViewSponsoredMessage : IRequest<IBool>
         writer.Write(RandomId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        RandomId = reader.ReadBytes();
+        RandomId = buffer.ReadBytes();
     }
 }

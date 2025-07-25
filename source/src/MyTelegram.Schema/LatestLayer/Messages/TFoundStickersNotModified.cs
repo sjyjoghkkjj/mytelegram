@@ -13,7 +13,7 @@ public sealed class TFoundStickersNotModified : IFoundStickers
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -22,7 +22,7 @@ public sealed class TFoundStickersNotModified : IFoundStickers
 
     public void ComputeFlag()
     {
-        if (/*NextOffset != 0 && */NextOffset.HasValue) { Flags[0] = true; }
+        if (/*NextOffset != 0 && */NextOffset.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -30,12 +30,12 @@ public sealed class TFoundStickersNotModified : IFoundStickers
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(NextOffset.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextOffset.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NextOffset = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NextOffset = buffer.ReadInt32(); }
     }
 }

@@ -14,7 +14,7 @@ public sealed class TMessageActionGiveawayResults : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, this is a <a href="https://corefork.telegram.org/api/stars#star-giveaways">Telegram Star giveaway</a>
@@ -34,7 +34,7 @@ public sealed class TMessageActionGiveawayResults : IMessageAction
 
     public void ComputeFlag()
     {
-        if (Stars) { Flags[0] = true; }
+        if (Stars) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class TMessageActionGiveawayResults : IMessageAction
         writer.Write(UnclaimedCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Stars = true; }
-        WinnersCount = reader.ReadInt32();
-        UnclaimedCount = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Stars = true; }
+        WinnersCount = buffer.ReadInt32();
+        UnclaimedCount = buffer.ReadInt32();
     }
 }

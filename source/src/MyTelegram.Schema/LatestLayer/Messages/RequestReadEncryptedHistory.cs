@@ -40,9 +40,9 @@ public sealed class RequestReadEncryptedHistory : IRequest<IBool>
         writer.Write(MaxDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputEncryptedChat>();
-        MaxDate = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputEncryptedChat>();
+        MaxDate = buffer.ReadInt32();
     }
 }

@@ -38,9 +38,9 @@ public sealed class RequestLeaveGroupCall : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Source);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Source = reader.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Source = buffer.ReadInt32();
     }
 }

@@ -27,7 +27,7 @@ internal sealed class ExportLoginTokenHandler(
         if (cacheHelper.TryRemove(input.AuthKeyId, out var userId))
         {
             await eventBus
-                .PublishAsync(new BindUidToSessionEvent(userId, input.AuthKeyId, input.PermAuthKeyId));
+                .PublishAsync(new BindUserIdToSessionEvent(userId, input.AuthKeyId, input.PermAuthKeyId));
 
             var userReadModel = await userAppService.GetAsync(userId);
             var photos = await photoAppService.GetPhotosAsync(userReadModel);

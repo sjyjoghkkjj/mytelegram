@@ -46,10 +46,10 @@ public sealed class RequestInvokeWebViewCustomMethod : IRequest<MyTelegram.Schem
         writer.Write(Params);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        CustomMethod = reader.ReadString();
-        Params = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        CustomMethod = buffer.ReadString();
+        Params = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

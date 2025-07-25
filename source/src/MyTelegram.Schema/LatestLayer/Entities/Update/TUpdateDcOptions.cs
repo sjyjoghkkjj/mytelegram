@@ -28,8 +28,8 @@ public sealed class TUpdateDcOptions : IUpdate
         writer.Write(DcOptions);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DcOptions = reader.Read<TVector<MyTelegram.Schema.IDcOption>>();
+        DcOptions = buffer.Read<TVector<MyTelegram.Schema.IDcOption>>();
     }
 }

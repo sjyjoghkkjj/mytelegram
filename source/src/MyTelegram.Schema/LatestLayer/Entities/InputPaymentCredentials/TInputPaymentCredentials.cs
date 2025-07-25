@@ -14,7 +14,7 @@ public sealed class TInputPaymentCredentials : IInputPaymentCredentials
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Save payment credential for future use
@@ -30,7 +30,7 @@ public sealed class TInputPaymentCredentials : IInputPaymentCredentials
 
     public void ComputeFlag()
     {
-        if (Save) { Flags[0] = true; }
+        if (Save) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -42,10 +42,10 @@ public sealed class TInputPaymentCredentials : IInputPaymentCredentials
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Save = true; }
-        Data = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Save = true; }
+        Data = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

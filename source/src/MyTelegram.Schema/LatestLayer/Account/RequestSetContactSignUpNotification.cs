@@ -29,8 +29,8 @@ public sealed class RequestSetContactSignUpNotification : IRequest<IBool>
         writer.Write(Silent);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Silent = reader.Read();
+        Silent = buffer.Read();
     }
 }

@@ -66,7 +66,6 @@ public class MtpHelper(IAesHelper aesHelper) : IMtpHelper, ITransientDependency
 
             nsHash.CopyTo(aesKey);
             snHash.Slice(0, 12).CopyTo(aesKey[nsHash.Length..]);
-            // Console.WriteLine($"tempIv.length:{aesIv.Length}  ,nnHash.length {nnHash.Length}");
             snHash.Slice(12, 8).CopyTo(aesIv);
             nnHash.CopyTo(aesIv[8..]);
             newNonce.AsSpan(0, 4).CopyTo(aesIv[(8 + nnHash.Length)..]);

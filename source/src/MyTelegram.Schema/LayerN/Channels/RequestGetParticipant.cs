@@ -40,9 +40,9 @@ public sealed class RequestGetParticipant : IRequest<MyTelegram.Schema.Channels.
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

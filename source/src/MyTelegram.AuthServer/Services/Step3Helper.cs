@@ -80,9 +80,11 @@ public class Step3Helper(
 
             var hash = answerWithHash[..20];
             var answer = answerWithHash[20..];
-            var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(tempBytes, 20, answerWithHash.Length - 20));
-            var obj = reader.Read<TClientDHInnerData>();
-            var paddingCount = (int)(answer.Length - reader.Consumed);
+            ReadOnlyMemory<byte> buffer = tempBytes.AsMemory(20, answerWithHash.Length - 20);
+            var oldLength = buffer.Length;
+            var obj = buffer.Read<TClientDHInnerData>();
+            var consumed = oldLength-buffer.Length;
+            var paddingCount = (int)(answer.Length - consumed);
             var data = answer[..^paddingCount];
             var calcHash = tempSpan[^20..];
             SHA1.HashData(data, calcHash);

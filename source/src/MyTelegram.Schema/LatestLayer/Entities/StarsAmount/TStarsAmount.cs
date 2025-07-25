@@ -33,9 +33,9 @@ public sealed class TStarsAmount : IStarsAmount
         writer.Write(Nanos);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Amount = reader.ReadInt64();
-        Nanos = reader.ReadInt32();
+        Amount = buffer.ReadInt64();
+        Nanos = buffer.ReadInt32();
     }
 }

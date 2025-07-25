@@ -34,9 +34,9 @@ public sealed class TReactions : IReactions
         writer.Write(Reactions);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Reactions = reader.Read<TVector<MyTelegram.Schema.IReaction>>();
+        Hash = buffer.ReadInt64();
+        Reactions = buffer.Read<TVector<MyTelegram.Schema.IReaction>>();
     }
 }

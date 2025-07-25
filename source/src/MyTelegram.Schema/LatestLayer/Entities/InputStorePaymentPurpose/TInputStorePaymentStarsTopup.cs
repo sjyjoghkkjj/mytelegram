@@ -40,10 +40,10 @@ public sealed class TInputStorePaymentStarsTopup : IInputStorePaymentPurpose
         writer.Write(Amount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stars = reader.ReadInt64();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
+        Stars = buffer.ReadInt64();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TMessageMediaStory : IMessageMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, indicates that this someone has mentioned us in this story (i.e. by tagging us in the description) or vice versa, we have mentioned the other peer (if the message is outgoing).
@@ -41,8 +41,8 @@ public sealed class TMessageMediaStory : IMessageMedia
 
     public void ComputeFlag()
     {
-        if (ViaMention) { Flags[1] = true; }
-        if (Story != null) { Flags[0] = true; }
+        if (ViaMention) { Flags = Flags.SetBit(1); }
+        if (Story != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -52,15 +52,15 @@ public sealed class TMessageMediaStory : IMessageMedia
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Id);
-        if (Flags[0]) { writer.Write(Story); }
+        if (Flags.IsBitSet(0)) { writer.Write(Story); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { ViaMention = true; }
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Id = reader.ReadInt32();
-        if (Flags[0]) { Story = reader.Read<MyTelegram.Schema.IStoryItem>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { ViaMention = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Id = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Story = buffer.Read<MyTelegram.Schema.IStoryItem>(); }
     }
 }

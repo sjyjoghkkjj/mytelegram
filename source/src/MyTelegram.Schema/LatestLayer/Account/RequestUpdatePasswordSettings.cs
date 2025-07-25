@@ -47,9 +47,9 @@ public sealed class RequestUpdatePasswordSettings : IRequest<IBool>
         writer.Write(NewSettings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
-        NewSettings = reader.Read<MyTelegram.Schema.Account.IPasswordInputSettings>();
+        Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
+        NewSettings = buffer.Read<MyTelegram.Schema.Account.IPasswordInputSettings>();
     }
 }

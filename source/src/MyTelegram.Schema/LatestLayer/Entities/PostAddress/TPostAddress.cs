@@ -58,13 +58,13 @@ public sealed class TPostAddress : IPostAddress
         writer.Write(PostCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        StreetLine1 = reader.ReadString();
-        StreetLine2 = reader.ReadString();
-        City = reader.ReadString();
-        State = reader.ReadString();
-        CountryIso2 = reader.ReadString();
-        PostCode = reader.ReadString();
+        StreetLine1 = buffer.ReadString();
+        StreetLine2 = buffer.ReadString();
+        City = buffer.ReadString();
+        State = buffer.ReadString();
+        CountryIso2 = buffer.ReadString();
+        PostCode = buffer.ReadString();
     }
 }

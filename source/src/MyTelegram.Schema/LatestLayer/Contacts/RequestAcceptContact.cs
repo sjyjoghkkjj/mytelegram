@@ -35,8 +35,8 @@ public sealed class RequestAcceptContact : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<MyTelegram.Schema.IInputUser>();
+        Id = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

@@ -24,7 +24,7 @@ public sealed class RequestGetSavedInfo : IRequest<MyTelegram.Schema.Payments.IS
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

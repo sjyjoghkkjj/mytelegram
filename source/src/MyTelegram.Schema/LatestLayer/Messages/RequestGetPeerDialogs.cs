@@ -34,8 +34,8 @@ public sealed class RequestGetPeerDialogs : IRequest<MyTelegram.Schema.Messages.
         writer.Write(Peers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peers = reader.Read<TVector<MyTelegram.Schema.IInputDialogPeer>>();
+        Peers = buffer.Read<TVector<MyTelegram.Schema.IInputDialogPeer>>();
     }
 }

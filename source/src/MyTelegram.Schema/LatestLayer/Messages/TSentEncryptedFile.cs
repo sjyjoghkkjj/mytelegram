@@ -35,9 +35,9 @@ public sealed class TSentEncryptedFile : ISentEncryptedMessage
         writer.Write(File);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Date = reader.ReadInt32();
-        File = reader.Read<MyTelegram.Schema.IEncryptedFile>();
+        Date = buffer.ReadInt32();
+        File = buffer.Read<MyTelegram.Schema.IEncryptedFile>();
     }
 }

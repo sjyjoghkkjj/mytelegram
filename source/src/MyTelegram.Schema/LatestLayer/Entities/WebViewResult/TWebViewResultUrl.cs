@@ -14,7 +14,7 @@ public sealed class TWebViewResultUrl : IWebViewResult
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the app must be opened in fullsize mode instead of compact mode.
@@ -40,9 +40,9 @@ public sealed class TWebViewResultUrl : IWebViewResult
 
     public void ComputeFlag()
     {
-        if (Fullsize) { Flags[1] = true; }
-        if (Fullscreen) { Flags[2] = true; }
-        if (/*QueryId != 0 &&*/ QueryId.HasValue) { Flags[0] = true; }
+        if (Fullsize) { Flags = Flags.SetBit(1); }
+        if (Fullscreen) { Flags = Flags.SetBit(2); }
+        if (/*QueryId != 0 &&*/ QueryId.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -51,16 +51,16 @@ public sealed class TWebViewResultUrl : IWebViewResult
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(QueryId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(QueryId.Value); }
         writer.Write(Url);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Fullsize = true; }
-        if (Flags[2]) { Fullscreen = true; }
-        if (Flags[0]) { QueryId = reader.ReadInt64(); }
-        Url = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Fullsize = true; }
+        if (Flags.IsBitSet(2)) { Fullscreen = true; }
+        if (Flags.IsBitSet(0)) { QueryId = buffer.ReadInt64(); }
+        Url = buffer.ReadString();
     }
 }

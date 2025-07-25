@@ -8,7 +8,7 @@ namespace MyTelegram.Schema.Payments;
 [JsonDerivedType(typeof(TResaleStarGifts), nameof(TResaleStarGifts))]
 public interface IResaleStarGifts : IObject
 {
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
     int Count { get; set; }
     TVector<MyTelegram.Schema.IStarGift> Gifts { get; set; }
     string? NextOffset { get; set; }

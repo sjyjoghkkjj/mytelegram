@@ -39,8 +39,8 @@ public sealed class RequestLeaveChannel : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Channel);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
     }
 }

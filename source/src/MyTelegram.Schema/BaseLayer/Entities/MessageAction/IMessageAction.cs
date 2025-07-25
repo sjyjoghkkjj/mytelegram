@@ -57,6 +57,12 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TMessageActionPaidMessagesRefunded), nameof(TMessageActionPaidMessagesRefunded))]
 [JsonDerivedType(typeof(TMessageActionPaidMessagesPrice), nameof(TMessageActionPaidMessagesPrice))]
 [JsonDerivedType(typeof(TMessageActionConferenceCall), nameof(TMessageActionConferenceCall))]
+[JsonDerivedType(typeof(TMessageActionTodoCompletions), nameof(TMessageActionTodoCompletions))]
+[JsonDerivedType(typeof(TMessageActionTodoAppendTasks), nameof(TMessageActionTodoAppendTasks))]
+[JsonDerivedType(typeof(TMessageActionSuggestedPostApproval), nameof(TMessageActionSuggestedPostApproval))]
+[JsonDerivedType(typeof(TMessageActionSuggestedPostSuccess), nameof(TMessageActionSuggestedPostSuccess))]
+[JsonDerivedType(typeof(TMessageActionSuggestedPostRefund), nameof(TMessageActionSuggestedPostRefund))]
+[JsonDerivedType(typeof(TMessageActionGiftTon), nameof(TMessageActionGiftTon))]
 public interface IMessageAction : IObject
 {
 

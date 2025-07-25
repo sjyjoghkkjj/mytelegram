@@ -21,7 +21,7 @@ public sealed class RequestSetGameScore : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Set this flag if the game message should be automatically edited to include the current scoreboard
@@ -59,8 +59,8 @@ public sealed class RequestSetGameScore : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (EditMessage) { Flags[0] = true; }
-        if (Force) { Flags[1] = true; }
+        if (EditMessage) { Flags = Flags.SetBit(0); }
+        if (Force) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -75,14 +75,14 @@ public sealed class RequestSetGameScore : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Score);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { EditMessage = true; }
-        if (Flags[1]) { Force = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.ReadInt32();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        Score = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { EditMessage = true; }
+        if (Flags.IsBitSet(1)) { Force = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.ReadInt32();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Score = buffer.ReadInt32();
     }
 }

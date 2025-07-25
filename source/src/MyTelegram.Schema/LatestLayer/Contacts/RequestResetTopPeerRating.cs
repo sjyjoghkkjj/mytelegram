@@ -39,9 +39,9 @@ public sealed class RequestResetTopPeerRating : IRequest<IBool>
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Category = reader.Read<MyTelegram.Schema.ITopPeerCategory>();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Category = buffer.Read<MyTelegram.Schema.ITopPeerCategory>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

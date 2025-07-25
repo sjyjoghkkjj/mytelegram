@@ -28,8 +28,8 @@ public sealed class RequestSaveAppLog : IRequest<IBool>
         writer.Write(Events);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Events = reader.Read<TVector<MyTelegram.Schema.IInputAppEvent>>();
+        Events = buffer.Read<TVector<MyTelegram.Schema.IInputAppEvent>>();
     }
 }

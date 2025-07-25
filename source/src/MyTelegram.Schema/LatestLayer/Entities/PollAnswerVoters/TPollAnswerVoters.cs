@@ -14,7 +14,7 @@ public sealed class TPollAnswerVoters : IPollAnswerVoters
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether we have chosen this answer
@@ -31,7 +31,7 @@ public sealed class TPollAnswerVoters : IPollAnswerVoters
     ///<summary>
     /// The param that has to be passed to <a href="https://corefork.telegram.org/method/messages.sendVote">messages.sendVote</a>.
     ///</summary>
-    public byte[] Option { get; set; }
+    public ReadOnlyMemory<byte> Option { get; set; }
 
     ///<summary>
     /// How many users voted for this option
@@ -40,8 +40,8 @@ public sealed class TPollAnswerVoters : IPollAnswerVoters
 
     public void ComputeFlag()
     {
-        if (Chosen) { Flags[0] = true; }
-        if (Correct) { Flags[1] = true; }
+        if (Chosen) { Flags = Flags.SetBit(0); }
+        if (Correct) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -54,12 +54,12 @@ public sealed class TPollAnswerVoters : IPollAnswerVoters
         writer.Write(Voters);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Chosen = true; }
-        if (Flags[1]) { Correct = true; }
-        Option = reader.ReadBytes();
-        Voters = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Chosen = true; }
+        if (Flags.IsBitSet(1)) { Correct = true; }
+        Option = buffer.ReadBytes();
+        Voters = buffer.ReadInt32();
     }
 }

@@ -35,9 +35,9 @@ public sealed class TUpdateUserEmojiStatus : IUpdate
         writer.Write(EmojiStatus);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        EmojiStatus = reader.Read<MyTelegram.Schema.IEmojiStatus>();
+        UserId = buffer.ReadInt64();
+        EmojiStatus = buffer.Read<MyTelegram.Schema.IEmojiStatus>();
     }
 }

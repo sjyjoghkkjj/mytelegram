@@ -34,8 +34,8 @@ public sealed class RequestGetBotBusinessConnection : IRequest<MyTelegram.Schema
         writer.Write(ConnectionId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ConnectionId = reader.ReadString();
+        ConnectionId = buffer.ReadString();
     }
 }

@@ -35,9 +35,9 @@ public sealed class TUpdateEncryption : IUpdate
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Chat = reader.Read<MyTelegram.Schema.IEncryptedChat>();
-        Date = reader.ReadInt32();
+        Chat = buffer.Read<MyTelegram.Schema.IEncryptedChat>();
+        Date = buffer.ReadInt32();
     }
 }

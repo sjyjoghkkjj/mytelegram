@@ -14,7 +14,7 @@ public sealed class TUpdateBotEditBusinessMessage : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Business connection ID
@@ -40,7 +40,7 @@ public sealed class TUpdateBotEditBusinessMessage : IUpdate
 
     public void ComputeFlag()
     {
-        if (ReplyToMessage != null) { Flags[0] = true; }
+        if (ReplyToMessage != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -51,16 +51,16 @@ public sealed class TUpdateBotEditBusinessMessage : IUpdate
         writer.Write(Flags);
         writer.Write(ConnectionId);
         writer.Write(Message);
-        if (Flags[0]) { writer.Write(ReplyToMessage); }
+        if (Flags.IsBitSet(0)) { writer.Write(ReplyToMessage); }
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ConnectionId = reader.ReadString();
-        Message = reader.Read<MyTelegram.Schema.IMessage>();
-        if (Flags[0]) { ReplyToMessage = reader.Read<MyTelegram.Schema.IMessage>(); }
-        Qts = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        ConnectionId = buffer.ReadString();
+        Message = buffer.Read<MyTelegram.Schema.IMessage>();
+        if (Flags.IsBitSet(0)) { ReplyToMessage = buffer.Read<MyTelegram.Schema.IMessage>(); }
+        Qts = buffer.ReadInt32();
     }
 }

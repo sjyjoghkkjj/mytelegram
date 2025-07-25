@@ -14,7 +14,7 @@ public sealed class TUpdateChannelPinnedTopic : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the topic was pinned or unpinned
@@ -34,7 +34,7 @@ public sealed class TUpdateChannelPinnedTopic : IUpdate
 
     public void ComputeFlag()
     {
-        if (Pinned) { Flags[0] = true; }
+        if (Pinned) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class TUpdateChannelPinnedTopic : IUpdate
         writer.Write(TopicId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Pinned = true; }
-        ChannelId = reader.ReadInt64();
-        TopicId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Pinned = true; }
+        ChannelId = buffer.ReadInt64();
+        TopicId = buffer.ReadInt32();
     }
 }

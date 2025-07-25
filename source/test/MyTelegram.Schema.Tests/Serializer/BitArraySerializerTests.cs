@@ -1,4 +1,7 @@
-﻿namespace MyTelegram.Schema.Serializer;
+﻿using System.Buffers;
+using MyTelegram.Schema.Extensions;
+
+namespace MyTelegram.Schema.Serializer;
 
 public class BitArraySerializerTests
 {
@@ -30,8 +33,8 @@ public class BitArraySerializerTests
         //var stream = new MemoryStream(value);
         //var br = new BinaryReader(stream);
         var serializer = CreateSerializer();
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
-        var actualValue = serializer.Deserialize(ref reader);
+        ReadOnlyMemory<byte> buffer = value;
+        var actualValue = serializer.Deserialize(ref buffer);
 
         actualValue.ShouldBeEquivalentTo(expectedValue);
     }

@@ -19,7 +19,7 @@ public sealed class TLoginTokenMigrateTo : ILoginToken
     ///<summary>
     /// Token to use for login
     ///</summary>
-    public byte[] Token { get; set; }
+    public ReadOnlyMemory<byte> Token { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,9 +34,9 @@ public sealed class TLoginTokenMigrateTo : ILoginToken
         writer.Write(Token);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DcId = reader.ReadInt32();
-        Token = reader.ReadBytes();
+        DcId = buffer.ReadInt32();
+        Token = buffer.ReadBytes();
     }
 }

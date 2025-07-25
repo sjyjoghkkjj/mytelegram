@@ -8,8 +8,14 @@ public class ClientData : IClientData
     public string ClientIp { get; set; } = null!;
     public long Seq { get; set; }
 
-    public Channel<EncryptedMessageResponse> ResponseQueue { get; set; } =
+    public Channel<EncryptedMessageResponse> EncryptedMessageResponseQueue { get; set; } =
         Channel.CreateUnbounded<EncryptedMessageResponse>();
+
+    public Channel<UnencryptedMessageResponse> UnencryptedMessageResponseQueue { get; set; } =
+        Channel.CreateUnbounded<UnencryptedMessageResponse>();
+
+    public Channel<UnencryptedMessage> UnencryptedMessageQueue { get; set; } =
+        Channel.CreateUnbounded<UnencryptedMessage>();
 
     public ConnectionType ConnectionType { get; set; }
     public ProtocolType MtProtoType { get; set; }

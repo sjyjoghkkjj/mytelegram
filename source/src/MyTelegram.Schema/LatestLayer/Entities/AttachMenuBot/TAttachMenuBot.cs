@@ -14,7 +14,7 @@ public sealed class TAttachMenuBot : IAttachMenuBot
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, before launching the mini app the client should ask the user to add the mini app to the attachment/side menu, and only if the user accepts, after invoking <a href="https://corefork.telegram.org/method/messages.toggleBotInAttachMenu">messages.toggleBotInAttachMenu</a> the app should be opened.
@@ -74,13 +74,13 @@ public sealed class TAttachMenuBot : IAttachMenuBot
 
     public void ComputeFlag()
     {
-        if (Inactive) { Flags[0] = true; }
-        if (HasSettings) { Flags[1] = true; }
-        if (RequestWriteAccess) { Flags[2] = true; }
-        if (ShowInAttachMenu) { Flags[3] = true; }
-        if (ShowInSideMenu) { Flags[4] = true; }
-        if (SideMenuDisclaimerNeeded) { Flags[5] = true; }
-        if (PeerTypes?.Count > 0) { Flags[3] = true; }
+        if (Inactive) { Flags = Flags.SetBit(0); }
+        if (HasSettings) { Flags = Flags.SetBit(1); }
+        if (RequestWriteAccess) { Flags = Flags.SetBit(2); }
+        if (ShowInAttachMenu) { Flags = Flags.SetBit(3); }
+        if (ShowInSideMenu) { Flags = Flags.SetBit(4); }
+        if (SideMenuDisclaimerNeeded) { Flags = Flags.SetBit(5); }
+        if (PeerTypes?.Count > 0) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -91,22 +91,22 @@ public sealed class TAttachMenuBot : IAttachMenuBot
         writer.Write(Flags);
         writer.Write(BotId);
         writer.Write(ShortName);
-        if (Flags[3]) { writer.Write(PeerTypes); }
+        if (Flags.IsBitSet(3)) { writer.Write(PeerTypes); }
         writer.Write(Icons);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Inactive = true; }
-        if (Flags[1]) { HasSettings = true; }
-        if (Flags[2]) { RequestWriteAccess = true; }
-        if (Flags[3]) { ShowInAttachMenu = true; }
-        if (Flags[4]) { ShowInSideMenu = true; }
-        if (Flags[5]) { SideMenuDisclaimerNeeded = true; }
-        BotId = reader.ReadInt64();
-        ShortName = reader.ReadString();
-        if (Flags[3]) { PeerTypes = reader.Read<TVector<MyTelegram.Schema.IAttachMenuPeerType>>(); }
-        Icons = reader.Read<TVector<MyTelegram.Schema.IAttachMenuBotIcon>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Inactive = true; }
+        if (Flags.IsBitSet(1)) { HasSettings = true; }
+        if (Flags.IsBitSet(2)) { RequestWriteAccess = true; }
+        if (Flags.IsBitSet(3)) { ShowInAttachMenu = true; }
+        if (Flags.IsBitSet(4)) { ShowInSideMenu = true; }
+        if (Flags.IsBitSet(5)) { SideMenuDisclaimerNeeded = true; }
+        BotId = buffer.ReadInt64();
+        ShortName = buffer.ReadString();
+        if (Flags.IsBitSet(3)) { PeerTypes = buffer.Read<TVector<MyTelegram.Schema.IAttachMenuPeerType>>(); }
+        Icons = buffer.Read<TVector<MyTelegram.Schema.IAttachMenuBotIcon>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TChatInviteExported : IExportedChatInvite, ILayeredExportedC
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this chat invite was revoked
@@ -92,17 +92,17 @@ public sealed class TChatInviteExported : IExportedChatInvite, ILayeredExportedC
 
     public void ComputeFlag()
     {
-        if (Revoked) { Flags[0] = true; }
-        if (Permanent) { Flags[5] = true; }
-        if (RequestNeeded) { Flags[6] = true; }
-        if (/*StartDate != 0 && */StartDate.HasValue) { Flags[4] = true; }
-        if (/*ExpireDate != 0 && */ExpireDate.HasValue) { Flags[1] = true; }
-        if (/*UsageLimit != 0 && */UsageLimit.HasValue) { Flags[2] = true; }
-        if (/*Usage != 0 && */Usage.HasValue) { Flags[3] = true; }
-        if (/*Requested != 0 && */Requested.HasValue) { Flags[7] = true; }
-        if (/*SubscriptionExpired != 0 && */SubscriptionExpired.HasValue) { Flags[10] = true; }
-        if (Title != null) { Flags[8] = true; }
-        if (SubscriptionPricing != null) { Flags[9] = true; }
+        if (Revoked) { Flags = Flags.SetBit(0); }
+        if (Permanent) { Flags = Flags.SetBit(5); }
+        if (RequestNeeded) { Flags = Flags.SetBit(6); }
+        if (/*StartDate != 0 && */StartDate.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*ExpireDate != 0 && */ExpireDate.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*UsageLimit != 0 && */UsageLimit.HasValue) { Flags = Flags.SetBit(2); }
+        if (/*Usage != 0 && */Usage.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*Requested != 0 && */Requested.HasValue) { Flags = Flags.SetBit(7); }
+        if (/*SubscriptionExpired != 0 && */SubscriptionExpired.HasValue) { Flags = Flags.SetBit(10); }
+        if (Title != null) { Flags = Flags.SetBit(8); }
+        if (SubscriptionPricing != null) { Flags = Flags.SetBit(9); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -113,32 +113,32 @@ public sealed class TChatInviteExported : IExportedChatInvite, ILayeredExportedC
         writer.Write(Link);
         writer.Write(AdminId);
         writer.Write(Date);
-        if (Flags[4]) { writer.Write(StartDate.Value); }
-        if (Flags[1]) { writer.Write(ExpireDate.Value); }
-        if (Flags[2]) { writer.Write(UsageLimit.Value); }
-        if (Flags[3]) { writer.Write(Usage.Value); }
-        if (Flags[7]) { writer.Write(Requested.Value); }
-        if (Flags[10]) { writer.Write(SubscriptionExpired.Value); }
-        if (Flags[8]) { writer.Write(Title); }
-        if (Flags[9]) { writer.Write(SubscriptionPricing); }
+        if (Flags.IsBitSet(4)) { writer.Write(StartDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(ExpireDate.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(UsageLimit.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Usage.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(Requested.Value); }
+        if (Flags.IsBitSet(10)) { writer.Write(SubscriptionExpired.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(Title); }
+        if (Flags.IsBitSet(9)) { writer.Write(SubscriptionPricing); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Revoked = true; }
-        if (Flags[5]) { Permanent = true; }
-        if (Flags[6]) { RequestNeeded = true; }
-        Link = reader.ReadString();
-        AdminId = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        if (Flags[4]) { StartDate = reader.ReadInt32(); }
-        if (Flags[1]) { ExpireDate = reader.ReadInt32(); }
-        if (Flags[2]) { UsageLimit = reader.ReadInt32(); }
-        if (Flags[3]) { Usage = reader.ReadInt32(); }
-        if (Flags[7]) { Requested = reader.ReadInt32(); }
-        if (Flags[10]) { SubscriptionExpired = reader.ReadInt32(); }
-        if (Flags[8]) { Title = reader.ReadString(); }
-        if (Flags[9]) { SubscriptionPricing = reader.Read<MyTelegram.Schema.IStarsSubscriptionPricing>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Revoked = true; }
+        if (Flags.IsBitSet(5)) { Permanent = true; }
+        if (Flags.IsBitSet(6)) { RequestNeeded = true; }
+        Link = buffer.ReadString();
+        AdminId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(4)) { StartDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { ExpireDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { UsageLimit = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { Usage = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(7)) { Requested = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(10)) { SubscriptionExpired = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(8)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(9)) { SubscriptionPricing = buffer.Read<MyTelegram.Schema.IStarsSubscriptionPricing>(); }
     }
 }

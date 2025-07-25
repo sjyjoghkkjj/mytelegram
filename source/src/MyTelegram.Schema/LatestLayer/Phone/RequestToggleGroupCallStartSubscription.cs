@@ -40,9 +40,9 @@ public sealed class RequestToggleGroupCallStartSubscription : IRequest<MyTelegra
         writer.Write(Subscribed);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Subscribed = reader.Read();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Subscribed = buffer.Read();
     }
 }

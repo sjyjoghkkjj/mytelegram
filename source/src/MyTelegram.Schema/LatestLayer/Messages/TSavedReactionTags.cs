@@ -34,9 +34,9 @@ public sealed class TSavedReactionTags : ISavedReactionTags
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Tags = reader.Read<TVector<MyTelegram.Schema.ISavedReactionTag>>();
-        Hash = reader.ReadInt64();
+        Tags = buffer.Read<TVector<MyTelegram.Schema.ISavedReactionTag>>();
+        Hash = buffer.ReadInt64();
     }
 }

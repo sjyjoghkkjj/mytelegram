@@ -19,7 +19,7 @@ public sealed class RequestLoadAsyncGraph : IRequest<MyTelegram.Schema.IStatsGra
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Graph token from <a href="https://corefork.telegram.org/constructor/statsGraphAsync">statsGraphAsync</a> constructor
@@ -33,7 +33,7 @@ public sealed class RequestLoadAsyncGraph : IRequest<MyTelegram.Schema.IStatsGra
 
     public void ComputeFlag()
     {
-        if (/*X != 0 &&*/ X.HasValue) { Flags[0] = true; }
+        if (/*X != 0 &&*/ X.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,13 +42,13 @@ public sealed class RequestLoadAsyncGraph : IRequest<MyTelegram.Schema.IStatsGra
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Token);
-        if (Flags[0]) { writer.Write(X.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(X.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Token = reader.ReadString();
-        if (Flags[0]) { X = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        Token = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { X = buffer.ReadInt64(); }
     }
 }

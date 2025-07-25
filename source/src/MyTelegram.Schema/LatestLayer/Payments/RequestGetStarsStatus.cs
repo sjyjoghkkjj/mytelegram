@@ -10,10 +10,13 @@ namespace MyTelegram.Schema.Payments;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/payments.getStarsStatus" />
 ///</summary>
-[TlObject(0x104fcfa7)]
+[TlObject(0x4ea9b3bf)]
 public sealed class RequestGetStarsStatus : IRequest<MyTelegram.Schema.Payments.IStarsStatus>
 {
-    public uint ConstructorId => 0x104fcfa7;
+    public uint ConstructorId => 0x4ea9b3bf;
+    public int Flags { get; set; }
+    public bool Ton { get; set; }
+
     ///<summary>
     /// Peer of which to get the balance.
     /// See <a href="https://corefork.telegram.org/type/InputPeer" />
@@ -22,6 +25,7 @@ public sealed class RequestGetStarsStatus : IRequest<MyTelegram.Schema.Payments.
 
     public void ComputeFlag()
     {
+        if (Ton) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -29,11 +33,14 @@ public sealed class RequestGetStarsStatus : IRequest<MyTelegram.Schema.Payments.
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Ton = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

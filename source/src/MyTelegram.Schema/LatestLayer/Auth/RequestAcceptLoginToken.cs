@@ -34,8 +34,8 @@ public sealed class RequestAcceptLoginToken : IRequest<MyTelegram.Schema.IAuthor
         writer.Write(Token);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Token = reader.ReadBytes();
+        Token = buffer.ReadBytes();
     }
 }

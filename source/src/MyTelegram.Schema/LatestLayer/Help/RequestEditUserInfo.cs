@@ -45,10 +45,10 @@ public sealed class RequestEditUserInfo : IRequest<MyTelegram.Schema.Help.IUserI
         writer.Write(Entities);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        Message = reader.ReadString();
-        Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Message = buffer.ReadString();
+        Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
     }
 }

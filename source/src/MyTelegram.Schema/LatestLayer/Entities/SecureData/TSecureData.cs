@@ -14,17 +14,17 @@ public sealed class TSecureData : ISecureData
     ///<summary>
     /// Data
     ///</summary>
-    public byte[] Data { get; set; }
+    public ReadOnlyMemory<byte> Data { get; set; }
 
     ///<summary>
     /// Data hash
     ///</summary>
-    public byte[] DataHash { get; set; }
+    public ReadOnlyMemory<byte> DataHash { get; set; }
 
     ///<summary>
     /// Secret
     ///</summary>
-    public byte[] Secret { get; set; }
+    public ReadOnlyMemory<byte> Secret { get; set; }
 
     public void ComputeFlag()
     {
@@ -40,10 +40,10 @@ public sealed class TSecureData : ISecureData
         writer.Write(Secret);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Data = reader.ReadBytes();
-        DataHash = reader.ReadBytes();
-        Secret = reader.ReadBytes();
+        Data = buffer.ReadBytes();
+        DataHash = buffer.ReadBytes();
+        Secret = buffer.ReadBytes();
     }
 }

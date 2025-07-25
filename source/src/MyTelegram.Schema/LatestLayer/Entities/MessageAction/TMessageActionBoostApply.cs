@@ -28,8 +28,8 @@ public sealed class TMessageActionBoostApply : IMessageAction
         writer.Write(Boosts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Boosts = reader.ReadInt32();
+        Boosts = buffer.ReadInt32();
     }
 }

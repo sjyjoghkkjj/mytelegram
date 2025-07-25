@@ -14,7 +14,7 @@ public sealed class TKeyboardButtonRequestPoll : IKeyboardButton
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, only quiz polls can be sent
@@ -29,7 +29,7 @@ public sealed class TKeyboardButtonRequestPoll : IKeyboardButton
 
     public void ComputeFlag()
     {
-        if (Quiz !=null) { Flags[0] = true; }
+        if (Quiz !=null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -38,14 +38,14 @@ public sealed class TKeyboardButtonRequestPoll : IKeyboardButton
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Quiz.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Quiz.Value); }
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Quiz = reader.Read(); }
-        Text = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Quiz = buffer.Read(); }
+        Text = buffer.ReadString();
     }
 }

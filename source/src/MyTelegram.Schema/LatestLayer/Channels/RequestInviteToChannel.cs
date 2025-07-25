@@ -55,9 +55,9 @@ public sealed class RequestInviteToChannel : IRequest<MyTelegram.Schema.Messages
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IInputUser>>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IInputUser>>();
     }
 }

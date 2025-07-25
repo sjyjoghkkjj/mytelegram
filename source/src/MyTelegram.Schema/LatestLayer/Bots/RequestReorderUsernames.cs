@@ -39,9 +39,9 @@ public sealed class RequestReorderUsernames : IRequest<IBool>
         writer.Write(Order);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        Order = reader.Read<TVector<string>>();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Order = buffer.Read<TVector<string>>();
     }
 }

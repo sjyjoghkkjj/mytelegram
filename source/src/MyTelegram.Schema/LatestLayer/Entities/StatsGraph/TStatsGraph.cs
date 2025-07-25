@@ -14,7 +14,7 @@ public sealed class TStatsGraph : IStatsGraph
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Statistics data
@@ -29,7 +29,7 @@ public sealed class TStatsGraph : IStatsGraph
 
     public void ComputeFlag()
     {
-        if (ZoomToken != null) { Flags[0] = true; }
+        if (ZoomToken != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -38,13 +38,13 @@ public sealed class TStatsGraph : IStatsGraph
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Json);
-        if (Flags[0]) { writer.Write(ZoomToken); }
+        if (Flags.IsBitSet(0)) { writer.Write(ZoomToken); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Json = reader.Read<MyTelegram.Schema.IDataJSON>();
-        if (Flags[0]) { ZoomToken = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Json = buffer.Read<MyTelegram.Schema.IDataJSON>();
+        if (Flags.IsBitSet(0)) { ZoomToken = buffer.ReadString(); }
     }
 }

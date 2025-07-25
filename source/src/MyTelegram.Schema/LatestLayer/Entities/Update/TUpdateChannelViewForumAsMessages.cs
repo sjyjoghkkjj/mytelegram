@@ -36,9 +36,9 @@ public sealed class TUpdateChannelViewForumAsMessages : IUpdate
         writer.Write(Enabled);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
-        Enabled = reader.Read();
+        ChannelId = buffer.ReadInt64();
+        Enabled = buffer.Read();
     }
 }

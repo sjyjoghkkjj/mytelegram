@@ -28,8 +28,8 @@ public sealed class TDataJSON : IDataJSON
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Data = reader.ReadString();
+        Data = buffer.ReadString();
     }
 }

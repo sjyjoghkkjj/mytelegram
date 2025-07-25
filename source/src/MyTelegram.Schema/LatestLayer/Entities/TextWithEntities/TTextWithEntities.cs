@@ -34,9 +34,9 @@ public sealed class TTextWithEntities : ITextWithEntities
         writer.Write(Entities);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
+        Text = buffer.ReadString();
+        Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
     }
 }

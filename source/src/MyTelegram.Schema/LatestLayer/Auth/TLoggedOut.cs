@@ -14,16 +14,16 @@ public sealed class TLoggedOut : ILoggedOut
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/auth#future-auth-tokens">Future auth token »</a> to be used on subsequent authorizations
     ///</summary>
-    public byte[]? FutureAuthToken { get; set; }
+    public ReadOnlyMemory<byte>? FutureAuthToken { get; set; }
 
     public void ComputeFlag()
     {
-        if (FutureAuthToken != null) { Flags[0] = true; }
+        if (FutureAuthToken != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -31,12 +31,12 @@ public sealed class TLoggedOut : ILoggedOut
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(FutureAuthToken); }
+        if (Flags.IsBitSet(0)) { writer.Write(FutureAuthToken); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { FutureAuthToken = reader.ReadBytes(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { FutureAuthToken = buffer.ReadBytes(); }
     }
 }

@@ -22,7 +22,7 @@ public sealed class RequestSendEncryptedFile : IRequest<MyTelegram.Schema.Messag
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to send the file without triggering a notification
@@ -54,7 +54,7 @@ public sealed class RequestSendEncryptedFile : IRequest<MyTelegram.Schema.Messag
 
     public void ComputeFlag()
     {
-        if (Silent) { Flags[0] = true; }
+        if (Silent) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -69,13 +69,13 @@ public sealed class RequestSendEncryptedFile : IRequest<MyTelegram.Schema.Messag
         writer.Write(File);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Silent = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputEncryptedChat>();
-        RandomId = reader.ReadInt64();
-        Data = reader.ReadBytes();
-        File = reader.Read<MyTelegram.Schema.IInputEncryptedFile>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Silent = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputEncryptedChat>();
+        RandomId = buffer.ReadInt64();
+        Data = buffer.ReadBytes();
+        File = buffer.Read<MyTelegram.Schema.IInputEncryptedFile>();
     }
 }

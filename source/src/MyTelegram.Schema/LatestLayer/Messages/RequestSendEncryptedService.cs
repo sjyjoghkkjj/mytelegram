@@ -50,10 +50,10 @@ public sealed class RequestSendEncryptedService : IRequest<MyTelegram.Schema.Mes
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputEncryptedChat>();
-        RandomId = reader.ReadInt64();
-        Data = reader.ReadBytes();
+        Peer = buffer.Read<MyTelegram.Schema.IInputEncryptedChat>();
+        RandomId = buffer.ReadInt64();
+        Data = buffer.ReadBytes();
     }
 }

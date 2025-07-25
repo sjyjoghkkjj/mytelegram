@@ -39,9 +39,9 @@ public sealed class RequestDeleteExportedInvite : IRequest<IBool>
         writer.Write(Slug);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Chatlist = reader.Read<MyTelegram.Schema.IInputChatlist>();
-        Slug = reader.ReadString();
+        Chatlist = buffer.Read<MyTelegram.Schema.IInputChatlist>();
+        Slug = buffer.ReadString();
     }
 }

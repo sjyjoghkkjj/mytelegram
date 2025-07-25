@@ -41,10 +41,10 @@ public sealed class RequestGetRecentLocations : IRequest<MyTelegram.Schema.Messa
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Limit = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Limit = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

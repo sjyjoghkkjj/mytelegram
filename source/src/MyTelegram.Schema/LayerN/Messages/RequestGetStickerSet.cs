@@ -32,8 +32,8 @@ public sealed class RequestGetStickerSet : IRequest<MyTelegram.Schema.Messages.I
         writer.Write(Stickerset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stickerset = reader.Read<IInputStickerSet>();
+        Stickerset = buffer.Read<IInputStickerSet>();
     }
 }

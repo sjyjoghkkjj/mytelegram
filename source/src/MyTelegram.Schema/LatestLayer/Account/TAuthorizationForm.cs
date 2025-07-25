@@ -14,7 +14,7 @@ public sealed class TAuthorizationForm : IAuthorizationForm
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Required <a href="https://corefork.telegram.org/passport">Telegram Passport</a> documents
@@ -43,7 +43,7 @@ public sealed class TAuthorizationForm : IAuthorizationForm
 
     public void ComputeFlag()
     {
-        if (PrivacyPolicyUrl != null) { Flags[0] = true; }
+        if (PrivacyPolicyUrl != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,16 +55,16 @@ public sealed class TAuthorizationForm : IAuthorizationForm
         writer.Write(Values);
         writer.Write(Errors);
         writer.Write(Users);
-        if (Flags[0]) { writer.Write(PrivacyPolicyUrl); }
+        if (Flags.IsBitSet(0)) { writer.Write(PrivacyPolicyUrl); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        RequiredTypes = reader.Read<TVector<MyTelegram.Schema.ISecureRequiredType>>();
-        Values = reader.Read<TVector<MyTelegram.Schema.ISecureValue>>();
-        Errors = reader.Read<TVector<MyTelegram.Schema.ISecureValueError>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
-        if (Flags[0]) { PrivacyPolicyUrl = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        RequiredTypes = buffer.Read<TVector<MyTelegram.Schema.ISecureRequiredType>>();
+        Values = buffer.Read<TVector<MyTelegram.Schema.ISecureValue>>();
+        Errors = buffer.Read<TVector<MyTelegram.Schema.ISecureValueError>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
+        if (Flags.IsBitSet(0)) { PrivacyPolicyUrl = buffer.ReadString(); }
     }
 }

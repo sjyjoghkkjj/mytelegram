@@ -34,9 +34,9 @@ public sealed class TPaymentFormMethod : IPaymentFormMethod
         writer.Write(Title);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        Title = reader.ReadString();
+        Url = buffer.ReadString();
+        Title = buffer.ReadString();
     }
 }

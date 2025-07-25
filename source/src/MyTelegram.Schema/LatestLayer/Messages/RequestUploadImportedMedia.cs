@@ -52,11 +52,11 @@ public sealed class RequestUploadImportedMedia : IRequest<MyTelegram.Schema.IMes
         writer.Write(Media);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        ImportId = reader.ReadInt64();
-        FileName = reader.ReadString();
-        Media = reader.Read<MyTelegram.Schema.IInputMedia>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        ImportId = buffer.ReadInt64();
+        FileName = buffer.ReadString();
+        Media = buffer.Read<MyTelegram.Schema.IInputMedia>();
     }
 }

@@ -52,12 +52,12 @@ public sealed class TEncryptedFile : IEncryptedFile
         writer.Write(KeyFingerprint);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        Size = reader.ReadInt64();
-        DcId = reader.ReadInt32();
-        KeyFingerprint = reader.ReadInt32();
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        Size = buffer.ReadInt64();
+        DcId = buffer.ReadInt32();
+        KeyFingerprint = buffer.ReadInt32();
     }
 }

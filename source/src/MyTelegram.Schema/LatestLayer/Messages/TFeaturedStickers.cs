@@ -14,7 +14,7 @@ public sealed class TFeaturedStickers : IFeaturedStickers
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a premium stickerset
@@ -44,7 +44,7 @@ public sealed class TFeaturedStickers : IFeaturedStickers
 
     public void ComputeFlag()
     {
-        if (Premium) { Flags[0] = true; }
+        if (Premium) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -59,13 +59,13 @@ public sealed class TFeaturedStickers : IFeaturedStickers
         writer.Write(Unread);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Premium = true; }
-        Hash = reader.ReadInt64();
-        Count = reader.ReadInt32();
-        Sets = reader.Read<TVector<MyTelegram.Schema.IStickerSetCovered>>();
-        Unread = reader.Read<TVector<long>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Premium = true; }
+        Hash = buffer.ReadInt64();
+        Count = buffer.ReadInt32();
+        Sets = buffer.Read<TVector<MyTelegram.Schema.IStickerSetCovered>>();
+        Unread = buffer.Read<TVector<long>>();
     }
 }

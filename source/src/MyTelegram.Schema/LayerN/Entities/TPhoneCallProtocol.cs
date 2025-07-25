@@ -14,7 +14,7 @@ public sealed class TPhoneCallProtocolLayerN : IPhoneCallProtocol
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to allow P2P connection to the other participant
@@ -42,8 +42,8 @@ public sealed class TPhoneCallProtocolLayerN : IPhoneCallProtocol
 
     public void ComputeFlag()
     {
-        if (UdpP2p) { Flags[0] = true; }
-        if (UdpReflector) { Flags[1] = true; }
+        if (UdpP2p) { Flags = Flags.SetBit(0); }
+        if (UdpReflector) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -56,12 +56,12 @@ public sealed class TPhoneCallProtocolLayerN : IPhoneCallProtocol
         writer.Write(MaxLayer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { UdpP2p = true; }
-        if (Flags[1]) { UdpReflector = true; }
-        MinLayer = reader.ReadInt32();
-        MaxLayer = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { UdpP2p = true; }
+        if (Flags.IsBitSet(1)) { UdpReflector = true; }
+        MinLayer = buffer.ReadInt32();
+        MaxLayer = buffer.ReadInt32();
     }
 }

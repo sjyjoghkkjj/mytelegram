@@ -35,9 +35,9 @@ public sealed class TBotPreviewMedia : IBotPreviewMedia
         writer.Write(Media);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Date = reader.ReadInt32();
-        Media = reader.Read<MyTelegram.Schema.IMessageMedia>();
+        Date = buffer.ReadInt32();
+        Media = buffer.Read<MyTelegram.Schema.IMessageMedia>();
     }
 }

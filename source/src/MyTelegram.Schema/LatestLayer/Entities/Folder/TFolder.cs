@@ -14,7 +14,7 @@ public sealed class TFolder : IFolder
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Automatically add new channels to this folder
@@ -52,10 +52,10 @@ public sealed class TFolder : IFolder
 
     public void ComputeFlag()
     {
-        if (AutofillNewBroadcasts) { Flags[0] = true; }
-        if (AutofillPublicGroups) { Flags[1] = true; }
-        if (AutofillNewCorrespondents) { Flags[2] = true; }
-        if (Photo != null) { Flags[3] = true; }
+        if (AutofillNewBroadcasts) { Flags = Flags.SetBit(0); }
+        if (AutofillPublicGroups) { Flags = Flags.SetBit(1); }
+        if (AutofillNewCorrespondents) { Flags = Flags.SetBit(2); }
+        if (Photo != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -65,17 +65,17 @@ public sealed class TFolder : IFolder
         writer.Write(Flags);
         writer.Write(Id);
         writer.Write(Title);
-        if (Flags[3]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(3)) { writer.Write(Photo); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AutofillNewBroadcasts = true; }
-        if (Flags[1]) { AutofillPublicGroups = true; }
-        if (Flags[2]) { AutofillNewCorrespondents = true; }
-        Id = reader.ReadInt32();
-        Title = reader.ReadString();
-        if (Flags[3]) { Photo = reader.Read<MyTelegram.Schema.IChatPhoto>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AutofillNewBroadcasts = true; }
+        if (Flags.IsBitSet(1)) { AutofillPublicGroups = true; }
+        if (Flags.IsBitSet(2)) { AutofillNewCorrespondents = true; }
+        Id = buffer.ReadInt32();
+        Title = buffer.ReadString();
+        if (Flags.IsBitSet(3)) { Photo = buffer.Read<MyTelegram.Schema.IChatPhoto>(); }
     }
 }

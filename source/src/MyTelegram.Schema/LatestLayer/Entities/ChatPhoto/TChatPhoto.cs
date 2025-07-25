@@ -14,7 +14,7 @@ public sealed class TChatPhoto : IChatPhoto
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user has an animated profile picture
@@ -30,7 +30,7 @@ public sealed class TChatPhoto : IChatPhoto
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/files#stripped-thumbnails">Stripped thumbnail</a>
     ///</summary>
-    public byte[]? StrippedThumb { get; set; }
+    public ReadOnlyMemory<byte>? StrippedThumb { get; set; }
 
     ///<summary>
     /// DC where this photo is stored
@@ -39,8 +39,8 @@ public sealed class TChatPhoto : IChatPhoto
 
     public void ComputeFlag()
     {
-        if (HasVideo) { Flags[0] = true; }
-        if (StrippedThumb != null) { Flags[1] = true; }
+        if (HasVideo) { Flags = Flags.SetBit(0); }
+        if (StrippedThumb != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -50,16 +50,16 @@ public sealed class TChatPhoto : IChatPhoto
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(PhotoId);
-        if (Flags[1]) { writer.Write(StrippedThumb); }
+        if (Flags.IsBitSet(1)) { writer.Write(StrippedThumb); }
         writer.Write(DcId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { HasVideo = true; }
-        PhotoId = reader.ReadInt64();
-        if (Flags[1]) { StrippedThumb = reader.ReadBytes(); }
-        DcId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { HasVideo = true; }
+        PhotoId = buffer.ReadInt64();
+        if (Flags.IsBitSet(1)) { StrippedThumb = buffer.ReadBytes(); }
+        DcId = buffer.ReadInt32();
     }
 }

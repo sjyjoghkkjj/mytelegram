@@ -34,9 +34,9 @@ public sealed class TPhotoPathSize : IPhotoSize
         writer.Write(Bytes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Type = reader.ReadString();
-        Bytes = reader.ReadBytes();
+        Type = buffer.ReadString();
+        Bytes = buffer.ReadBytes();
     }
 }

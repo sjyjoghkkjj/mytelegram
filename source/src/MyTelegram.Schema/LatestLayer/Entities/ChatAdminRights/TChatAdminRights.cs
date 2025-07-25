@@ -14,7 +14,7 @@ public sealed class TChatAdminRights : IChatAdminRights
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, allows the admin to modify the description of the <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a>
@@ -105,24 +105,26 @@ public sealed class TChatAdminRights : IChatAdminRights
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool DeleteStories { get; set; }
+    public bool ManageDirectMessages { get; set; }
 
     public void ComputeFlag()
     {
-        if (ChangeInfo) { Flags[0] = true; }
-        if (PostMessages) { Flags[1] = true; }
-        if (EditMessages) { Flags[2] = true; }
-        if (DeleteMessages) { Flags[3] = true; }
-        if (BanUsers) { Flags[4] = true; }
-        if (InviteUsers) { Flags[5] = true; }
-        if (PinMessages) { Flags[7] = true; }
-        if (AddAdmins) { Flags[9] = true; }
-        if (Anonymous) { Flags[10] = true; }
-        if (ManageCall) { Flags[11] = true; }
-        if (Other) { Flags[12] = true; }
-        if (ManageTopics) { Flags[13] = true; }
-        if (PostStories) { Flags[14] = true; }
-        if (EditStories) { Flags[15] = true; }
-        if (DeleteStories) { Flags[16] = true; }
+        if (ChangeInfo) { Flags = Flags.SetBit(0); }
+        if (PostMessages) { Flags = Flags.SetBit(1); }
+        if (EditMessages) { Flags = Flags.SetBit(2); }
+        if (DeleteMessages) { Flags = Flags.SetBit(3); }
+        if (BanUsers) { Flags = Flags.SetBit(4); }
+        if (InviteUsers) { Flags = Flags.SetBit(5); }
+        if (PinMessages) { Flags = Flags.SetBit(7); }
+        if (AddAdmins) { Flags = Flags.SetBit(9); }
+        if (Anonymous) { Flags = Flags.SetBit(10); }
+        if (ManageCall) { Flags = Flags.SetBit(11); }
+        if (Other) { Flags = Flags.SetBit(12); }
+        if (ManageTopics) { Flags = Flags.SetBit(13); }
+        if (PostStories) { Flags = Flags.SetBit(14); }
+        if (EditStories) { Flags = Flags.SetBit(15); }
+        if (DeleteStories) { Flags = Flags.SetBit(16); }
+        if (ManageDirectMessages) { Flags = Flags.SetBit(17); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -133,23 +135,24 @@ public sealed class TChatAdminRights : IChatAdminRights
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ChangeInfo = true; }
-        if (Flags[1]) { PostMessages = true; }
-        if (Flags[2]) { EditMessages = true; }
-        if (Flags[3]) { DeleteMessages = true; }
-        if (Flags[4]) { BanUsers = true; }
-        if (Flags[5]) { InviteUsers = true; }
-        if (Flags[7]) { PinMessages = true; }
-        if (Flags[9]) { AddAdmins = true; }
-        if (Flags[10]) { Anonymous = true; }
-        if (Flags[11]) { ManageCall = true; }
-        if (Flags[12]) { Other = true; }
-        if (Flags[13]) { ManageTopics = true; }
-        if (Flags[14]) { PostStories = true; }
-        if (Flags[15]) { EditStories = true; }
-        if (Flags[16]) { DeleteStories = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ChangeInfo = true; }
+        if (Flags.IsBitSet(1)) { PostMessages = true; }
+        if (Flags.IsBitSet(2)) { EditMessages = true; }
+        if (Flags.IsBitSet(3)) { DeleteMessages = true; }
+        if (Flags.IsBitSet(4)) { BanUsers = true; }
+        if (Flags.IsBitSet(5)) { InviteUsers = true; }
+        if (Flags.IsBitSet(7)) { PinMessages = true; }
+        if (Flags.IsBitSet(9)) { AddAdmins = true; }
+        if (Flags.IsBitSet(10)) { Anonymous = true; }
+        if (Flags.IsBitSet(11)) { ManageCall = true; }
+        if (Flags.IsBitSet(12)) { Other = true; }
+        if (Flags.IsBitSet(13)) { ManageTopics = true; }
+        if (Flags.IsBitSet(14)) { PostStories = true; }
+        if (Flags.IsBitSet(15)) { EditStories = true; }
+        if (Flags.IsBitSet(16)) { DeleteStories = true; }
+        if (Flags.IsBitSet(17)) { ManageDirectMessages = true; }
     }
 }

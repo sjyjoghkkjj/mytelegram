@@ -24,7 +24,7 @@ public sealed class RequestGetSupportName : IRequest<MyTelegram.Schema.Help.ISup
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

@@ -17,7 +17,7 @@ public sealed class RequestReorderPinnedDialogs : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, dialogs pinned server-side but not present in the <code>order</code> field will be unpinned.
@@ -37,7 +37,7 @@ public sealed class RequestReorderPinnedDialogs : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Force) { Flags[0] = true; }
+        if (Force) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -50,11 +50,11 @@ public sealed class RequestReorderPinnedDialogs : IRequest<IBool>
         writer.Write(Order);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Force = true; }
-        FolderId = reader.ReadInt32();
-        Order = reader.Read<TVector<MyTelegram.Schema.IInputDialogPeer>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Force = true; }
+        FolderId = buffer.ReadInt32();
+        Order = buffer.Read<TVector<MyTelegram.Schema.IInputDialogPeer>>();
     }
 }

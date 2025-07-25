@@ -10,23 +10,23 @@ namespace MyTelegram.Schema.Phone;
 public sealed class RequestCreateConferenceCall : IRequest<MyTelegram.Schema.IUpdates>
 {
     public uint ConstructorId => 0x7d0444bb;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Muted { get; set; }
     public bool VideoStopped { get; set; }
     public bool Join { get; set; }
     public int RandomId { get; set; }
-    public byte[]? PublicKey { get; set; }
+    public ReadOnlyMemory<byte>? PublicKey { get; set; }
     public byte[]? Block { get; set; }
     public MyTelegram.Schema.IDataJSON? Params { get; set; }
 
     public void ComputeFlag()
     {
-        if (Muted) { Flags[0] = true; }
-        if (VideoStopped) { Flags[2] = true; }
-        if (Join) { Flags[3] = true; }
-        if (PublicKey != null) { Flags[3] = true; }
-        if (Block != null) { Flags[3] = true; }
-        if (Params != null) { Flags[3] = true; }
+        if (Muted) { Flags = Flags.SetBit(0); }
+        if (VideoStopped) { Flags = Flags.SetBit(2); }
+        if (Join) { Flags = Flags.SetBit(3); }
+        if (PublicKey != null) { Flags = Flags.SetBit(3); }
+        if (Block != null) { Flags = Flags.SetBit(3); }
+        if (Params != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -35,20 +35,20 @@ public sealed class RequestCreateConferenceCall : IRequest<MyTelegram.Schema.IUp
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(RandomId);
-        if (Flags[3]) { writer.WriteRawBytes(PublicKey); }
-        if (Flags[3]) { writer.Write(Block); }
-        if (Flags[3]) { writer.Write(Params); }
+        if (Flags.IsBitSet(3)) { writer.WriteRawBytes(PublicKey); }
+        if (Flags.IsBitSet(3)) { writer.Write(Block); }
+        if (Flags.IsBitSet(3)) { writer.Write(Params); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Muted = true; }
-        if (Flags[2]) { VideoStopped = true; }
-        if (Flags[3]) { Join = true; }
-        RandomId = reader.ReadInt32();
-        if (Flags[3]) { PublicKey = reader.ReadInt256(); }
-        if (Flags[3]) { Block = reader.ReadBytes(); }
-        if (Flags[3]) { Params = reader.Read<MyTelegram.Schema.IDataJSON>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Muted = true; }
+        if (Flags.IsBitSet(2)) { VideoStopped = true; }
+        if (Flags.IsBitSet(3)) { Join = true; }
+        RandomId = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { PublicKey = buffer.ReadInt256(); }
+        if (Flags.IsBitSet(3)) { Block = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(3)) { Params = buffer.Read<MyTelegram.Schema.IDataJSON>(); }
     }
 }

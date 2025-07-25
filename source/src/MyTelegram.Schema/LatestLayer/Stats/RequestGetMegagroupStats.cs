@@ -19,7 +19,7 @@ public sealed class RequestGetMegagroupStats : IRequest<MyTelegram.Schema.Stats.
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to enable dark theme for graph colors
@@ -35,7 +35,7 @@ public sealed class RequestGetMegagroupStats : IRequest<MyTelegram.Schema.Stats.
 
     public void ComputeFlag()
     {
-        if (Dark) { Flags[0] = true; }
+        if (Dark) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,10 +47,10 @@ public sealed class RequestGetMegagroupStats : IRequest<MyTelegram.Schema.Stats.
         writer.Write(Channel);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Dark = true; }
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Dark = true; }
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
     }
 }

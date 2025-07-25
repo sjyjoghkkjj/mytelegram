@@ -38,9 +38,9 @@ public sealed class RequestConfirmPhone : IRequest<IBool>
         writer.Write(PhoneCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneCodeHash = reader.ReadString();
-        PhoneCode = reader.ReadString();
+        PhoneCodeHash = buffer.ReadString();
+        PhoneCode = buffer.ReadString();
     }
 }

@@ -18,7 +18,7 @@ public sealed class RequestDeleteMessages : IRequest<MyTelegram.Schema.Messages.
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to delete messages for all participants of the chat
@@ -33,7 +33,7 @@ public sealed class RequestDeleteMessages : IRequest<MyTelegram.Schema.Messages.
 
     public void ComputeFlag()
     {
-        if (Revoke) { Flags[0] = true; }
+        if (Revoke) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -45,10 +45,10 @@ public sealed class RequestDeleteMessages : IRequest<MyTelegram.Schema.Messages.
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Revoke = true; }
-        Id = reader.Read<TVector<int>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Revoke = true; }
+        Id = buffer.Read<TVector<int>>();
     }
 }

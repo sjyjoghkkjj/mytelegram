@@ -34,9 +34,9 @@ public sealed class TStarsSubscriptionPricing : IStarsSubscriptionPricing
         writer.Write(Amount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Period = reader.ReadInt32();
-        Amount = reader.ReadInt64();
+        Period = buffer.ReadInt32();
+        Amount = buffer.ReadInt64();
     }
 }

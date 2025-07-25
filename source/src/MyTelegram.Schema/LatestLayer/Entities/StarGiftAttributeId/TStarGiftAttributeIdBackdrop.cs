@@ -24,8 +24,8 @@ public sealed class TStarGiftAttributeIdBackdrop : IStarGiftAttributeId
         writer.Write(BackdropId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        BackdropId = reader.ReadInt32();
+        BackdropId = buffer.ReadInt32();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TCodeSettings : ICodeSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to allow phone verification via <a href="https://corefork.telegram.org/api/auth">phone calls</a>.
@@ -70,15 +70,15 @@ public sealed class TCodeSettings : ICodeSettings
 
     public void ComputeFlag()
     {
-        if (AllowFlashcall) { Flags[0] = true; }
-        if (CurrentNumber) { Flags[1] = true; }
-        if (AllowAppHash) { Flags[4] = true; }
-        if (AllowMissedCall) { Flags[5] = true; }
-        if (AllowFirebase) { Flags[7] = true; }
-        if (UnknownNumber) { Flags[9] = true; }
-        if (LogoutTokens?.Count > 0) { Flags[6] = true; }
-        if (Token != null) { Flags[8] = true; }
-        if (AppSandbox !=null) { Flags[8] = true; }
+        if (AllowFlashcall) { Flags = Flags.SetBit(0); }
+        if (CurrentNumber) { Flags = Flags.SetBit(1); }
+        if (AllowAppHash) { Flags = Flags.SetBit(4); }
+        if (AllowMissedCall) { Flags = Flags.SetBit(5); }
+        if (AllowFirebase) { Flags = Flags.SetBit(7); }
+        if (UnknownNumber) { Flags = Flags.SetBit(9); }
+        if (LogoutTokens?.Count > 0) { Flags = Flags.SetBit(6); }
+        if (Token != null) { Flags = Flags.SetBit(8); }
+        if (AppSandbox !=null) { Flags = Flags.SetBit(8); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -86,22 +86,22 @@ public sealed class TCodeSettings : ICodeSettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[6]) { writer.Write(LogoutTokens); }
-        if (Flags[8]) { writer.Write(Token); }
-        if (Flags[8]) { writer.Write(AppSandbox.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(LogoutTokens); }
+        if (Flags.IsBitSet(8)) { writer.Write(Token); }
+        if (Flags.IsBitSet(8)) { writer.Write(AppSandbox.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AllowFlashcall = true; }
-        if (Flags[1]) { CurrentNumber = true; }
-        if (Flags[4]) { AllowAppHash = true; }
-        if (Flags[5]) { AllowMissedCall = true; }
-        if (Flags[7]) { AllowFirebase = true; }
-        if (Flags[9]) { UnknownNumber = true; }
-        if (Flags[6]) { LogoutTokens = reader.Read<TVector<byte[]>>(); }
-        if (Flags[8]) { Token = reader.ReadString(); }
-        if (Flags[8]) { AppSandbox = reader.Read(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AllowFlashcall = true; }
+        if (Flags.IsBitSet(1)) { CurrentNumber = true; }
+        if (Flags.IsBitSet(4)) { AllowAppHash = true; }
+        if (Flags.IsBitSet(5)) { AllowMissedCall = true; }
+        if (Flags.IsBitSet(7)) { AllowFirebase = true; }
+        if (Flags.IsBitSet(9)) { UnknownNumber = true; }
+        if (Flags.IsBitSet(6)) { LogoutTokens = buffer.Read<TVector<byte[]>>(); }
+        if (Flags.IsBitSet(8)) { Token = buffer.ReadString(); }
+        if (Flags.IsBitSet(8)) { AppSandbox = buffer.Read(); }
     }
 }

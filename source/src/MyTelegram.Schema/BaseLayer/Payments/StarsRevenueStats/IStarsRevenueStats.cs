@@ -9,6 +9,9 @@ namespace MyTelegram.Schema.Payments;
 [JsonDerivedType(typeof(TStarsRevenueStats), nameof(TStarsRevenueStats))]
 public interface IStarsRevenueStats : IObject
 {
+    int Flags { get; set; }
+    MyTelegram.Schema.IStatsGraph? TopHoursGraph { get; set; }
+
     ///<summary>
     /// Star revenue graph (number of earned stars)
     /// See <a href="https://corefork.telegram.org/type/StatsGraph" />

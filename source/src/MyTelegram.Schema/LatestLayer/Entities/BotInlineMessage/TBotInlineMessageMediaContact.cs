@@ -14,7 +14,7 @@ public sealed class TBotInlineMessageMediaContact : IBotInlineMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Phone number
@@ -44,7 +44,7 @@ public sealed class TBotInlineMessageMediaContact : IBotInlineMessage
 
     public void ComputeFlag()
     {
-        if (ReplyMarkup != null) { Flags[2] = true; }
+        if (ReplyMarkup != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -56,16 +56,16 @@ public sealed class TBotInlineMessageMediaContact : IBotInlineMessage
         writer.Write(FirstName);
         writer.Write(LastName);
         writer.Write(Vcard);
-        if (Flags[2]) { writer.Write(ReplyMarkup); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        PhoneNumber = reader.ReadString();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
-        Vcard = reader.ReadString();
-        if (Flags[2]) { ReplyMarkup = reader.Read<MyTelegram.Schema.IReplyMarkup>(); }
+        Flags = buffer.ReadInt32();
+        PhoneNumber = buffer.ReadString();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
+        Vcard = buffer.ReadString();
+        if (Flags.IsBitSet(2)) { ReplyMarkup = buffer.Read<MyTelegram.Schema.IReplyMarkup>(); }
     }
 }

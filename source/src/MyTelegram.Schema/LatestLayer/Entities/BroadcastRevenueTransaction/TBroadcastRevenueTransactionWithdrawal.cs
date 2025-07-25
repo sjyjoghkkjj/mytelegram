@@ -14,7 +14,7 @@ public sealed class TBroadcastRevenueTransactionWithdrawal : IBroadcastRevenueTr
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the withdrawal is currently pending
@@ -55,10 +55,10 @@ public sealed class TBroadcastRevenueTransactionWithdrawal : IBroadcastRevenueTr
 
     public void ComputeFlag()
     {
-        if (Pending) { Flags[0] = true; }
-        if (Failed) { Flags[2] = true; }
-        if (/*TransactionDate != 0 && */TransactionDate.HasValue) { Flags[1] = true; }
-        if (TransactionUrl != null) { Flags[1] = true; }
+        if (Pending) { Flags = Flags.SetBit(0); }
+        if (Failed) { Flags = Flags.SetBit(2); }
+        if (/*TransactionDate != 0 && */TransactionDate.HasValue) { Flags = Flags.SetBit(1); }
+        if (TransactionUrl != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -69,19 +69,19 @@ public sealed class TBroadcastRevenueTransactionWithdrawal : IBroadcastRevenueTr
         writer.Write(Amount);
         writer.Write(Date);
         writer.Write(Provider);
-        if (Flags[1]) { writer.Write(TransactionDate.Value); }
-        if (Flags[1]) { writer.Write(TransactionUrl); }
+        if (Flags.IsBitSet(1)) { writer.Write(TransactionDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(TransactionUrl); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Pending = true; }
-        if (Flags[2]) { Failed = true; }
-        Amount = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        Provider = reader.ReadString();
-        if (Flags[1]) { TransactionDate = reader.ReadInt32(); }
-        if (Flags[1]) { TransactionUrl = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Pending = true; }
+        if (Flags.IsBitSet(2)) { Failed = true; }
+        Amount = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        Provider = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { TransactionDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { TransactionUrl = buffer.ReadString(); }
     }
 }

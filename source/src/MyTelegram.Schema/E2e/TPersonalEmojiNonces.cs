@@ -8,16 +8,16 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TPersonalEmojiNonces : IPersonal
 {
     public uint ConstructorId => 0x85FE42B7;
-    public BitArray Flags { get; set; } = new BitArray(32);
-    public byte[]? SelfNonce { get; set; }
-    public byte[]? ContactNonceHash { get; set; }
-    public byte[]? ContactNonce { get; set; }
+    public int Flags { get; set; }
+    public ReadOnlyMemory<byte>? SelfNonce { get; set; }
+    public ReadOnlyMemory<byte>? ContactNonceHash { get; set; }
+    public ReadOnlyMemory<byte>? ContactNonce { get; set; }
 
     public void ComputeFlag()
     {
-        if (SelfNonce != null) { Flags[0] = true; }
-        if (ContactNonceHash != null) { Flags[1] = true; }
-        if (ContactNonce != null) { Flags[2] = true; }
+        if (SelfNonce != null) { Flags = Flags.SetBit(0); }
+        if (ContactNonceHash != null) { Flags = Flags.SetBit(1); }
+        if (ContactNonce != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -25,16 +25,16 @@ public sealed class TPersonalEmojiNonces : IPersonal
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.WriteRawBytes(SelfNonce); }
-        if (Flags[1]) { writer.WriteRawBytes(ContactNonceHash); }
-        if (Flags[2]) { writer.WriteRawBytes(ContactNonce); }
+        if (Flags.IsBitSet(0)) { writer.WriteRawBytes(SelfNonce); }
+        if (Flags.IsBitSet(1)) { writer.WriteRawBytes(ContactNonceHash); }
+        if (Flags.IsBitSet(2)) { writer.WriteRawBytes(ContactNonce); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { SelfNonce = reader.ReadInt256(); }
-        if (Flags[1]) { ContactNonceHash = reader.ReadInt256(); }
-        if (Flags[2]) { ContactNonce = reader.ReadInt256(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { SelfNonce = buffer.ReadInt256(); }
+        if (Flags.IsBitSet(1)) { ContactNonceHash = buffer.ReadInt256(); }
+        if (Flags.IsBitSet(2)) { ContactNonce = buffer.ReadInt256(); }
     }
 }

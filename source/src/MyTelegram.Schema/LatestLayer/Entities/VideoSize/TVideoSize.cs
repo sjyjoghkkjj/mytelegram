@@ -14,7 +14,7 @@ public sealed class TVideoSize : IVideoSize
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <code>u</code> for animated profile pictures, and <code>v</code> for trimmed and downscaled video previews
@@ -43,7 +43,7 @@ public sealed class TVideoSize : IVideoSize
 
     public void ComputeFlag()
     {
-        if (VideoStartTs>0) { Flags[0] = true; }
+        if (VideoStartTs>0) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,16 +55,16 @@ public sealed class TVideoSize : IVideoSize
         writer.Write(W);
         writer.Write(H);
         writer.Write(Size);
-        if (Flags[0]) { writer.Write(VideoStartTs.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(VideoStartTs.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Type = reader.ReadString();
-        W = reader.ReadInt32();
-        H = reader.ReadInt32();
-        Size = reader.ReadInt32();
-        if (Flags[0]) { VideoStartTs = reader.ReadDouble(); }
+        Flags = buffer.ReadInt32();
+        Type = buffer.ReadString();
+        W = buffer.ReadInt32();
+        H = buffer.ReadInt32();
+        Size = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { VideoStartTs = buffer.ReadDouble(); }
     }
 }

@@ -141,7 +141,6 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TUpdateBotEditBusinessMessage), nameof(TUpdateBotEditBusinessMessage))]
 [JsonDerivedType(typeof(TUpdateBotDeleteBusinessMessage), nameof(TUpdateBotDeleteBusinessMessage))]
 [JsonDerivedType(typeof(TUpdateNewStoryReaction), nameof(TUpdateNewStoryReaction))]
-[JsonDerivedType(typeof(TUpdateBroadcastRevenueTransactions), nameof(TUpdateBroadcastRevenueTransactions))]
 [JsonDerivedType(typeof(TUpdateStarsBalance), nameof(TUpdateStarsBalance))]
 [JsonDerivedType(typeof(TUpdateBusinessBotCallbackQuery), nameof(TUpdateBusinessBotCallbackQuery))]
 [JsonDerivedType(typeof(TUpdateStarsRevenueStatus), nameof(TUpdateStarsRevenueStatus))]
@@ -151,6 +150,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TUpdateGroupCallChainBlocks), nameof(TUpdateGroupCallChainBlocks))]
 [JsonDerivedType(typeof(TUpdateReadMonoForumInbox), nameof(TUpdateReadMonoForumInbox))]
 [JsonDerivedType(typeof(TUpdateReadMonoForumOutbox), nameof(TUpdateReadMonoForumOutbox))]
+[JsonDerivedType(typeof(TUpdateMonoForumNoPaidException), nameof(TUpdateMonoForumNoPaidException))]
 public interface IUpdate : IObject
 {
 

@@ -35,9 +35,9 @@ public sealed class TUpdateShort : IUpdates
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Update = reader.Read<MyTelegram.Schema.IUpdate>();
-        Date = reader.ReadInt32();
+        Update = buffer.Read<MyTelegram.Schema.IUpdate>();
+        Date = buffer.ReadInt32();
     }
 }

@@ -53,7 +53,7 @@ public sealed class RequestSendInlineBotResult : IRequest<MyTelegram.Schema.IUpd
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to send the message silently (no notification will be triggered on the other client)
@@ -126,15 +126,15 @@ public sealed class RequestSendInlineBotResult : IRequest<MyTelegram.Schema.IUpd
 
     public void ComputeFlag()
     {
-        if (Silent) { Flags[5] = true; }
-        if (Background) { Flags[6] = true; }
-        if (ClearDraft) { Flags[7] = true; }
-        if (HideVia) { Flags[11] = true; }
-        if (ReplyTo != null) { Flags[0] = true; }
-        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[10] = true; }
-        if (SendAs != null) { Flags[13] = true; }
-        if (QuickReplyShortcut != null) { Flags[17] = true; }
-        if (/*AllowPaidStars != 0 &&*/ AllowPaidStars.HasValue) { Flags[21] = true; }
+        if (Silent) { Flags = Flags.SetBit(5); }
+        if (Background) { Flags = Flags.SetBit(6); }
+        if (ClearDraft) { Flags = Flags.SetBit(7); }
+        if (HideVia) { Flags = Flags.SetBit(11); }
+        if (ReplyTo != null) { Flags = Flags.SetBit(0); }
+        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags = Flags.SetBit(10); }
+        if (SendAs != null) { Flags = Flags.SetBit(13); }
+        if (QuickReplyShortcut != null) { Flags = Flags.SetBit(17); }
+        if (/*AllowPaidStars != 0 &&*/ AllowPaidStars.HasValue) { Flags = Flags.SetBit(21); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -143,31 +143,31 @@ public sealed class RequestSendInlineBotResult : IRequest<MyTelegram.Schema.IUpd
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(ReplyTo); }
+        if (Flags.IsBitSet(0)) { writer.Write(ReplyTo); }
         writer.Write(RandomId);
         writer.Write(QueryId);
         writer.Write(Id);
-        if (Flags[10]) { writer.Write(ScheduleDate.Value); }
-        if (Flags[13]) { writer.Write(SendAs); }
-        if (Flags[17]) { writer.Write(QuickReplyShortcut); }
-        if (Flags[21]) { writer.Write(AllowPaidStars.Value); }
+        if (Flags.IsBitSet(10)) { writer.Write(ScheduleDate.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(SendAs); }
+        if (Flags.IsBitSet(17)) { writer.Write(QuickReplyShortcut); }
+        if (Flags.IsBitSet(21)) { writer.Write(AllowPaidStars.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[5]) { Silent = true; }
-        if (Flags[6]) { Background = true; }
-        if (Flags[7]) { ClearDraft = true; }
-        if (Flags[11]) { HideVia = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[0]) { ReplyTo = reader.Read<MyTelegram.Schema.IInputReplyTo>(); }
-        RandomId = reader.ReadInt64();
-        QueryId = reader.ReadInt64();
-        Id = reader.ReadString();
-        if (Flags[10]) { ScheduleDate = reader.ReadInt32(); }
-        if (Flags[13]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[17]) { QuickReplyShortcut = reader.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }
-        if (Flags[21]) { AllowPaidStars = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(5)) { Silent = true; }
+        if (Flags.IsBitSet(6)) { Background = true; }
+        if (Flags.IsBitSet(7)) { ClearDraft = true; }
+        if (Flags.IsBitSet(11)) { HideVia = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(0)) { ReplyTo = buffer.Read<MyTelegram.Schema.IInputReplyTo>(); }
+        RandomId = buffer.ReadInt64();
+        QueryId = buffer.ReadInt64();
+        Id = buffer.ReadString();
+        if (Flags.IsBitSet(10)) { ScheduleDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(13)) { SendAs = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(17)) { QuickReplyShortcut = buffer.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }
+        if (Flags.IsBitSet(21)) { AllowPaidStars = buffer.ReadInt64(); }
     }
 }

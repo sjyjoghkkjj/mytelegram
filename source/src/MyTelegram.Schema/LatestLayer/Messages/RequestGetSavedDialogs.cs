@@ -14,7 +14,7 @@ public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Exclude pinned dialogs
@@ -51,8 +51,8 @@ public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages
 
     public void ComputeFlag()
     {
-        if (ExcludePinned) { Flags[0] = true; }
-        if (ParentPeer != null) { Flags[1] = true; }
+        if (ExcludePinned) { Flags = Flags.SetBit(0); }
+        if (ParentPeer != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -61,7 +61,7 @@ public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(ParentPeer); }
+        if (Flags.IsBitSet(1)) { writer.Write(ParentPeer); }
         writer.Write(OffsetDate);
         writer.Write(OffsetId);
         writer.Write(OffsetPeer);
@@ -69,15 +69,15 @@ public sealed class RequestGetSavedDialogs : IRequest<MyTelegram.Schema.Messages
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ExcludePinned = true; }
-        if (Flags[1]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        OffsetDate = reader.ReadInt32();
-        OffsetId = reader.ReadInt32();
-        OffsetPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Limit = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ExcludePinned = true; }
+        if (Flags.IsBitSet(1)) { ParentPeer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        OffsetDate = buffer.ReadInt32();
+        OffsetId = buffer.ReadInt32();
+        OffsetPeer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Limit = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

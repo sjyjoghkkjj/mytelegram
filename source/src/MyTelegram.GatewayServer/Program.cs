@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using MyTelegram;
+using MyTelegram.EventBus.RabbitMQ.Extensions;
 using MyTelegram.GatewayServer.NativeAot;
 
 Console.Title = "MyTelegram gateway server";
@@ -46,22 +47,23 @@ if (eventBusOptions == null)
     return;
 }
 
-builder.Services.AddRebusEventBus(options =>
-{
-    options.Transport(t =>
-    {
-        t.UseRabbitMq(
-                $"amqp://{rabbitMqOptions.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
-                eventBusOptions.ClientName)
-            .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
-            ;
-    });
+builder.Services.AddMyTelegramRabbitMqEventBus();
+//builder.Services.AddRebusEventBus(options =>
+//{
+//    options.Transport(t =>
+//    {
+//        t.UseRabbitMq(
+//                $"amqp://{rabbitMqOptions.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
+//                eventBusOptions.ClientName)
+//            .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
+//            ;
+//    });
 
-    options.AddSystemTextJson(jsonOptions =>
-    {
-        jsonOptions.TypeInfoResolverChain.Add(GatewayServerJsonContext.Default);
-    });
-});
+//    options.AddSystemTextJson(jsonOptions =>
+//    {
+//        jsonOptions.TypeInfoResolverChain.Add(GatewayServerJsonContext.Default);
+//    });
+//});
 
 var appConfig = builder.Configuration.GetRequiredSection("App").Get<MyTelegramGatewayServerOption>();
 
@@ -182,7 +184,5 @@ app.UseCors();
 
 app.MapGet("/", () => "Only websocket requests are supported.");
 
-var eventBus = app.Services.GetRequiredService<IEventBus>();
-eventBus.ConfigureEventBus();
 
 await app.RunAsync();

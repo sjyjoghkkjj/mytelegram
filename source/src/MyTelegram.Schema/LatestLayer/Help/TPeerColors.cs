@@ -34,9 +34,9 @@ public sealed class TPeerColors : IPeerColors
         writer.Write(Colors);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt32();
-        Colors = reader.Read<TVector<MyTelegram.Schema.Help.IPeerColorOption>>();
+        Hash = buffer.ReadInt32();
+        Colors = buffer.Read<TVector<MyTelegram.Schema.Help.IPeerColorOption>>();
     }
 }

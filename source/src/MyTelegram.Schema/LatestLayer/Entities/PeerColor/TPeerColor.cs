@@ -14,7 +14,7 @@ public sealed class TPeerColor : IPeerColor
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/colors">Color palette ID, see here »</a> for more info; if not set, the default palette should be used.
@@ -28,8 +28,8 @@ public sealed class TPeerColor : IPeerColor
 
     public void ComputeFlag()
     {
-        if (/*Color != 0 && */Color.HasValue) { Flags[0] = true; }
-        if (/*BackgroundEmojiId != 0 &&*/ BackgroundEmojiId.HasValue) { Flags[1] = true; }
+        if (/*Color != 0 && */Color.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*BackgroundEmojiId != 0 &&*/ BackgroundEmojiId.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -37,14 +37,14 @@ public sealed class TPeerColor : IPeerColor
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Color.Value); }
-        if (Flags[1]) { writer.Write(BackgroundEmojiId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Color.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(BackgroundEmojiId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Color = reader.ReadInt32(); }
-        if (Flags[1]) { BackgroundEmojiId = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Color = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { BackgroundEmojiId = buffer.ReadInt64(); }
     }
 }

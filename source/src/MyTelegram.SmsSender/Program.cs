@@ -2,10 +2,8 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using MyTelegram.EventBus.Rebus;
-using MyTelegram.Services.NativeAot;
+using MyTelegram.EventBus.RabbitMQ.Extensions;
 using MyTelegram.SmsSender;
-using Rebus.Config;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -42,30 +40,28 @@ builder.ConfigureServices((context,
     services.Configure<RabbitMqOptions>(context.Configuration.GetRequiredSection("RabbitMQ:Connections:Default"));
 
     services.AddMyTelegramSmsSender();
+    services.AddMyTelegramRabbitMqEventBus();
+    //services.AddRebusEventBus(options =>
+    //{
+    //    var eventBusOptions = context.Configuration.GetRequiredSection("RabbitMQ:EventBus").Get<EventBusRabbitMqOptions>();
+    //    var rabbitMqOptions = context.Configuration.GetRequiredSection("RabbitMQ:Connections:Default").Get<RabbitMqOptions>();
 
-    services.AddRebusEventBus(options =>
-    {
-        var eventBusOptions = context.Configuration.GetRequiredSection("RabbitMQ:EventBus").Get<EventBusRabbitMqOptions>();
-        var rabbitMqOptions = context.Configuration.GetRequiredSection("RabbitMQ:Connections:Default").Get<RabbitMqOptions>();
-
-        options.Transport(t =>
-        {
-            t.UseRabbitMq(
-                    $"amqp://{rabbitMqOptions!.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
-                    eventBusOptions!.ClientName)
-                .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
-                ;
-        });
-        options.AddSystemTextJson(jsonOptions =>
-        {
-            jsonOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
-        });
-    });
+    //    options.Transport(t =>
+    //    {
+    //        t.UseRabbitMq(
+    //                $"amqp://{rabbitMqOptions!.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
+    //                eventBusOptions!.ClientName)
+    //            .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
+    //            ;
+    //    });
+    //    options.AddSystemTextJson(jsonOptions =>
+    //    {
+    //        jsonOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
+    //    });
+    //});
 });
 
 var app = builder.Build();
 
-var eventBus = app.Services.GetRequiredService<IEventBus>();
-eventBus.ConfigureEventBus();
 
 await app.RunAsync();

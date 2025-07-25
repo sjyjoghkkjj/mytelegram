@@ -40,10 +40,10 @@ public sealed class RequestCheckDownloadFileParams : IRequest<IBool>
         writer.Write(Url);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        FileName = reader.ReadString();
-        Url = reader.ReadString();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        FileName = buffer.ReadString();
+        Url = buffer.ReadString();
     }
 }

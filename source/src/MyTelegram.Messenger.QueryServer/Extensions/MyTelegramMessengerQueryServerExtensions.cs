@@ -16,20 +16,22 @@ using MyTelegram.Messenger.Extensions;
 using MyTelegram.Messenger.QueryServer.EventHandlers;
 using MyTelegram.QueryHandlers.MongoDB;
 using MyTelegram.ReadModel.MongoDB;
+using MyTelegram.EventBus.Extensions;
 
 namespace MyTelegram.Messenger.QueryServer.Extensions;
 
 public static class MyTelegramMessengerQueryServerExtensions
 {
-    public static void ConfigureEventBus(this IEventBus eventBus)
+
+    public static void AddEventHandlers(this IServiceCollection services)
     {
-        eventBus.Subscribe<MessengerQueryDataReceivedEvent, MessengerEventHandler>();
-        eventBus.Subscribe<StickerDataReceivedEvent, MessengerEventHandler>();
+        services.AddSubscription<MessengerQueryDataReceivedEvent, MessengerEventHandler>();
+        services.AddSubscription<StickerDataReceivedEvent, MessengerEventHandler>();
 
-        eventBus.Subscribe<UserIsOnlineEvent, UserIsOnlineEventHandler>();
+        services.AddSubscription<UserIsOnlineEvent, UserIsOnlineEventHandler>();
 
-        eventBus.Subscribe<DomainEventMessage, DistributedDomainEventHandler>();
-        eventBus.Subscribe<DuplicateCommandEvent, DuplicateOperationExceptionHandler>();
+        services.AddSubscription<DomainEventMessage, DistributedDomainEventHandler>();
+        services.AddSubscription<DuplicateCommandEvent, DuplicateOperationExceptionHandler>();
     }
 
     public static void AddMyTelegramMessengerQueryServer(this IServiceCollection services, Action<IEventFlowOptions>? configure = null)
@@ -75,5 +77,6 @@ public static class MyTelegramMessengerQueryServerExtensions
 
         services.AddReadModelMongoDbContext();
         services.AddEventStoreMongoDbContext<DefaultReadModelMongoDbContext>();
+        services.AddEventHandlers();
     }
 }

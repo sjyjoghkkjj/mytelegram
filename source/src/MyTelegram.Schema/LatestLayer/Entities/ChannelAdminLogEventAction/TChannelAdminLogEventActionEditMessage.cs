@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionEditMessage : IChannelAdminLogEve
         writer.Write(NewMessage);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevMessage = reader.Read<MyTelegram.Schema.IMessage>();
-        NewMessage = reader.Read<MyTelegram.Schema.IMessage>();
+        PrevMessage = buffer.Read<MyTelegram.Schema.IMessage>();
+        NewMessage = buffer.Read<MyTelegram.Schema.IMessage>();
     }
 }

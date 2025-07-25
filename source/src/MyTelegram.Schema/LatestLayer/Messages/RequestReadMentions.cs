@@ -20,7 +20,7 @@ public sealed class RequestReadMentions : IRequest<MyTelegram.Schema.Messages.IA
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Dialog
@@ -35,7 +35,7 @@ public sealed class RequestReadMentions : IRequest<MyTelegram.Schema.Messages.IA
 
     public void ComputeFlag()
     {
-        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
+        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -44,13 +44,13 @@ public sealed class RequestReadMentions : IRequest<MyTelegram.Schema.Messages.IA
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(TopMsgId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(TopMsgId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(0)) { TopMsgId = buffer.ReadInt32(); }
     }
 }

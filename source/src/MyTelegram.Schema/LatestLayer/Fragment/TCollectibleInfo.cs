@@ -58,13 +58,13 @@ public sealed class TCollectibleInfo : ICollectibleInfo
         writer.Write(Url);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PurchaseDate = reader.ReadInt32();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
-        CryptoCurrency = reader.ReadString();
-        CryptoAmount = reader.ReadInt64();
-        Url = reader.ReadString();
+        PurchaseDate = buffer.ReadInt32();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
+        CryptoCurrency = buffer.ReadString();
+        CryptoAmount = buffer.ReadInt64();
+        Url = buffer.ReadString();
     }
 }

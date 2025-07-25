@@ -21,7 +21,7 @@ public sealed class RequestGetPaymentForm : IRequest<MyTelegram.Schema.Payments.
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Invoice
@@ -37,7 +37,7 @@ public sealed class RequestGetPaymentForm : IRequest<MyTelegram.Schema.Payments.
 
     public void ComputeFlag()
     {
-        if (ThemeParams != null) { Flags[0] = true; }
+        if (ThemeParams != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -46,13 +46,13 @@ public sealed class RequestGetPaymentForm : IRequest<MyTelegram.Schema.Payments.
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Invoice);
-        if (Flags[0]) { writer.Write(ThemeParams); }
+        if (Flags.IsBitSet(0)) { writer.Write(ThemeParams); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Invoice = reader.Read<MyTelegram.Schema.IInputInvoice>();
-        if (Flags[0]) { ThemeParams = reader.Read<MyTelegram.Schema.IDataJSON>(); }
+        Flags = buffer.ReadInt32();
+        Invoice = buffer.Read<MyTelegram.Schema.IInputInvoice>();
+        if (Flags.IsBitSet(0)) { ThemeParams = buffer.Read<MyTelegram.Schema.IDataJSON>(); }
     }
 }

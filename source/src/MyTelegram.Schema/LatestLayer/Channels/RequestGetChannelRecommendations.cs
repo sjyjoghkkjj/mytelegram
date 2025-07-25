@@ -18,7 +18,7 @@ public sealed class RequestGetChannelRecommendations : IRequest<MyTelegram.Schem
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The method will return channels related to the passed <code>channel</code>. If not set, the method will returns channels related to channels the user has joined.
@@ -28,7 +28,7 @@ public sealed class RequestGetChannelRecommendations : IRequest<MyTelegram.Schem
 
     public void ComputeFlag()
     {
-        if (Channel != null) { Flags[0] = true; }
+        if (Channel != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -36,12 +36,12 @@ public sealed class RequestGetChannelRecommendations : IRequest<MyTelegram.Schem
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Channel); }
+        if (Flags.IsBitSet(0)) { writer.Write(Channel); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Channel = reader.Read<MyTelegram.Schema.IInputChannel>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Channel = buffer.Read<MyTelegram.Schema.IInputChannel>(); }
     }
 }

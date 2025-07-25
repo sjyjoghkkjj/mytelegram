@@ -14,7 +14,7 @@ public sealed class TPageBlockVideo : IPageBlock
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the video is set to autoplay
@@ -41,8 +41,8 @@ public sealed class TPageBlockVideo : IPageBlock
 
     public void ComputeFlag()
     {
-        if (Autoplay) { Flags[0] = true; }
-        if (Loop) { Flags[1] = true; }
+        if (Autoplay) { Flags = Flags.SetBit(0); }
+        if (Loop) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -55,12 +55,12 @@ public sealed class TPageBlockVideo : IPageBlock
         writer.Write(Caption);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Autoplay = true; }
-        if (Flags[1]) { Loop = true; }
-        VideoId = reader.ReadInt64();
-        Caption = reader.Read<MyTelegram.Schema.IPageCaption>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Autoplay = true; }
+        if (Flags.IsBitSet(1)) { Loop = true; }
+        VideoId = buffer.ReadInt64();
+        Caption = buffer.Read<MyTelegram.Schema.IPageCaption>();
     }
 }

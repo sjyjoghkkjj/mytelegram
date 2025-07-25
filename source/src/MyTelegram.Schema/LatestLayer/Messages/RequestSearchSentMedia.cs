@@ -45,10 +45,10 @@ public sealed class RequestSearchSentMedia : IRequest<MyTelegram.Schema.Messages
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Q = reader.ReadString();
-        Filter = reader.Read<MyTelegram.Schema.IMessagesFilter>();
-        Limit = reader.ReadInt32();
+        Q = buffer.ReadString();
+        Filter = buffer.Read<MyTelegram.Schema.IMessagesFilter>();
+        Limit = buffer.ReadInt32();
     }
 }

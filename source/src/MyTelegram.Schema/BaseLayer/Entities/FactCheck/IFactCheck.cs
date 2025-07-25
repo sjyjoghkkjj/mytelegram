@@ -12,7 +12,7 @@ public interface IFactCheck : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// If set, the <code>country</code>/<code>text</code> fields will <strong>not</strong> be set, and the fact check must be fetched manually by the client (if it isn't already cached with the key specified in <code>hash</code>) using bundled <a href="https://corefork.telegram.org/method/messages.getFactCheck">messages.getFactCheck</a> requests, when the message with the factcheck scrolls into view.

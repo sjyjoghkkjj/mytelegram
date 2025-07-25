@@ -10,13 +10,13 @@ namespace MyTelegram.Schema.Payments;
 public sealed class RequestToggleChatStarGiftNotifications : IRequest<IBool>
 {
     public uint ConstructorId => 0x60eaefa1;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Enabled { get; set; }
     public MyTelegram.Schema.IInputPeer Peer { get; set; }
 
     public void ComputeFlag()
     {
-        if (Enabled) { Flags[0] = true; }
+        if (Enabled) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -28,10 +28,10 @@ public sealed class RequestToggleChatStarGiftNotifications : IRequest<IBool>
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Enabled = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Enabled = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

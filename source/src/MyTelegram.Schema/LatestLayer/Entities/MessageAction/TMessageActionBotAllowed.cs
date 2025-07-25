@@ -14,7 +14,7 @@ public sealed class TMessageActionBotAllowed : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// We have authorized the bot to send us messages by installing the bot's <a href="https://corefork.telegram.org/api/bots/attach">attachment menu</a>.
@@ -41,10 +41,10 @@ public sealed class TMessageActionBotAllowed : IMessageAction
 
     public void ComputeFlag()
     {
-        if (AttachMenu) { Flags[1] = true; }
-        if (FromRequest) { Flags[3] = true; }
-        if (Domain != null) { Flags[0] = true; }
-        if (App != null) { Flags[2] = true; }
+        if (AttachMenu) { Flags = Flags.SetBit(1); }
+        if (FromRequest) { Flags = Flags.SetBit(3); }
+        if (Domain != null) { Flags = Flags.SetBit(0); }
+        if (App != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -52,16 +52,16 @@ public sealed class TMessageActionBotAllowed : IMessageAction
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Domain); }
-        if (Flags[2]) { writer.Write(App); }
+        if (Flags.IsBitSet(0)) { writer.Write(Domain); }
+        if (Flags.IsBitSet(2)) { writer.Write(App); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { AttachMenu = true; }
-        if (Flags[3]) { FromRequest = true; }
-        if (Flags[0]) { Domain = reader.ReadString(); }
-        if (Flags[2]) { App = reader.Read<MyTelegram.Schema.IBotApp>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { AttachMenu = true; }
+        if (Flags.IsBitSet(3)) { FromRequest = true; }
+        if (Flags.IsBitSet(0)) { Domain = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { App = buffer.Read<MyTelegram.Schema.IBotApp>(); }
     }
 }

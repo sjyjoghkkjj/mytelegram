@@ -28,10 +28,10 @@ public sealed class TStarGiftAttributeModel : IStarGiftAttribute
         writer.Write(RarityPermille);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Name = reader.ReadString();
-        Document = reader.Read<MyTelegram.Schema.IDocument>();
-        RarityPermille = reader.ReadInt32();
+        Name = buffer.ReadString();
+        Document = buffer.Read<MyTelegram.Schema.IDocument>();
+        RarityPermille = buffer.ReadInt32();
     }
 }

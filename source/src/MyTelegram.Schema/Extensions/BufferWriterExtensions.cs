@@ -8,11 +8,58 @@ public static class BufferWriterExtensions
     private static readonly BooleanSerializer BooleanSerializer = new();
     private static readonly BytesSerializer BytesSerializer = new();
 
+    /// <summary>
+    /// Write bool value using BooleanSerializer.
+    /// </summary>
+    /// <param name="writer"></param>
+    /// <param name="value"></param>
     public static void Write(this IBufferWriter<byte> writer, bool value)
     {
         BooleanSerializer.Serialize(value, writer);
     }
 
+    public static void Write(this IBufferWriter<byte> writer, long? value)
+    {
+        if (value == null)
+        {
+            writer.WriteByte(0);
+        }
+        else
+        {
+            writer.WriteByte(1);
+            writer.Write(value.Value);
+        }
+    }
+
+    public static void Write(this IBufferWriter<byte> writer, int? value)
+    {
+        if (value == null)
+        {
+            writer.WriteByte(0);
+        }
+        else
+        {
+            writer.WriteByte(1);
+            writer.Write(value.Value);
+        }
+    }
+
+    public static void WriteBool(this IBufferWriter<byte> writer, bool? value)
+    {
+        if (value == null)
+        {
+            writer.WriteByte(3);
+        }
+        else
+        {
+            writer.WriteBool(value.Value);
+        }
+    }
+
+    public static void WriteBool(this IBufferWriter<byte> writer, bool value)
+    {
+        writer.WriteByte(value ? (byte)1 : (byte)0);
+    }
     public static void Write(this IBufferWriter<byte> writer, string value)
     {
         var bytes = Encoding.UTF8.GetBytes(value);
@@ -45,6 +92,26 @@ public static class BufferWriterExtensions
         BytesSerializer.Serialize(value, writer);
     }
 
+    public static void Write(this IBufferWriter<byte> writer, ReadOnlyMemory<byte> value)
+    {
+        BytesSerializer.Serialize(value, writer);
+    }
+
+    public static void Write(this IBufferWriter<byte> writer, ReadOnlyMemory<byte>? value)
+    {
+        if (value != null)
+        {
+            BytesSerializer.Serialize(value.Value, writer);
+        }
+    }
+
+    public static void WriteByte(this IBufferWriter<byte> writer, byte value)
+    {
+        var span = writer.GetSpan(1);
+        span[0] = value;
+        writer.Advance(1);
+    }
+
     public static void WriteRawBytes(this IBufferWriter<byte> writer,
         byte[] value)
     {
@@ -66,6 +133,17 @@ public static class BufferWriterExtensions
         writer.Advance(value.Length);
     }
 
+    public static void WriteRawBytes(this IBufferWriter<byte> writer,
+        ReadOnlyMemory<byte>? value)
+    {
+        if (value == null)
+        {
+            return;
+        }
+        value.Value.CopyTo(writer.GetMemory(value.Value.Length));
+        writer.Advance(value.Value.Length);
+    }
+
     public static void Write(this IBufferWriter<byte> writer,
         byte value)
     {
@@ -73,6 +151,14 @@ public static class BufferWriterExtensions
         span[0] = value;
         writer.Advance(1);
     }
+
+    //public static void Write(this IBufferWriter<byte> writer,
+    //    bool value)
+    //{
+    //    var span = writer.GetSpan(1);
+    //    span[0] = value ? (byte)1 : (byte)0;
+    //    writer.Advance(1);
+    //}
 
     public static void Write(this IBufferWriter<byte> writer,
         int value)
@@ -98,6 +184,14 @@ public static class BufferWriterExtensions
         const int size = sizeof(long);
         var span = writer.GetSpan(size);
         BinaryPrimitives.WriteInt64LittleEndian(span, value);
+        writer.Advance(size);
+    }
+
+    public static void Write(this IBufferWriter<byte> writer, Guid value)
+    {
+        const int size = 16;
+        var span = writer.GetSpan(size);
+        value.TryWriteBytes(span);
         writer.Advance(size);
     }
 

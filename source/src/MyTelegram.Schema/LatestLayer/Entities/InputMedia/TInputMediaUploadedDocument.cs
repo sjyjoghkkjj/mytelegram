@@ -14,7 +14,7 @@ public sealed class TInputMediaUploadedDocument : IInputMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the specified document is a video file with no audio tracks (a GIF animation (even as MPEG4), for example)
@@ -70,14 +70,14 @@ public sealed class TInputMediaUploadedDocument : IInputMedia
 
     public void ComputeFlag()
     {
-        if (NosoundVideo) { Flags[3] = true; }
-        if (ForceFile) { Flags[4] = true; }
-        if (Spoiler) { Flags[5] = true; }
-        if (Thumb != null) { Flags[2] = true; }
-        if (Stickers?.Count > 0) { Flags[0] = true; }
-        if (VideoCover != null) { Flags[6] = true; }
-        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[7] = true; }
-        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[1] = true; }
+        if (NosoundVideo) { Flags = Flags.SetBit(3); }
+        if (ForceFile) { Flags = Flags.SetBit(4); }
+        if (Spoiler) { Flags = Flags.SetBit(5); }
+        if (Thumb != null) { Flags = Flags.SetBit(2); }
+        if (Stickers?.Count > 0) { Flags = Flags.SetBit(0); }
+        if (VideoCover != null) { Flags = Flags.SetBit(6); }
+        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags = Flags.SetBit(7); }
+        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -86,28 +86,28 @@ public sealed class TInputMediaUploadedDocument : IInputMedia
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(File);
-        if (Flags[2]) { writer.Write(Thumb); }
+        if (Flags.IsBitSet(2)) { writer.Write(Thumb); }
         writer.Write(MimeType);
         writer.Write(Attributes);
-        if (Flags[0]) { writer.Write(Stickers); }
-        if (Flags[6]) { writer.Write(VideoCover); }
-        if (Flags[7]) { writer.Write(VideoTimestamp.Value); }
-        if (Flags[1]) { writer.Write(TtlSeconds.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Stickers); }
+        if (Flags.IsBitSet(6)) { writer.Write(VideoCover); }
+        if (Flags.IsBitSet(7)) { writer.Write(VideoTimestamp.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(TtlSeconds.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { NosoundVideo = true; }
-        if (Flags[4]) { ForceFile = true; }
-        if (Flags[5]) { Spoiler = true; }
-        File = reader.Read<MyTelegram.Schema.IInputFile>();
-        if (Flags[2]) { Thumb = reader.Read<MyTelegram.Schema.IInputFile>(); }
-        MimeType = reader.ReadString();
-        Attributes = reader.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
-        if (Flags[0]) { Stickers = reader.Read<TVector<MyTelegram.Schema.IInputDocument>>(); }
-        if (Flags[6]) { VideoCover = reader.Read<MyTelegram.Schema.IInputPhoto>(); }
-        if (Flags[7]) { VideoTimestamp = reader.ReadInt32(); }
-        if (Flags[1]) { TtlSeconds = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { NosoundVideo = true; }
+        if (Flags.IsBitSet(4)) { ForceFile = true; }
+        if (Flags.IsBitSet(5)) { Spoiler = true; }
+        File = buffer.Read<MyTelegram.Schema.IInputFile>();
+        if (Flags.IsBitSet(2)) { Thumb = buffer.Read<MyTelegram.Schema.IInputFile>(); }
+        MimeType = buffer.ReadString();
+        Attributes = buffer.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
+        if (Flags.IsBitSet(0)) { Stickers = buffer.Read<TVector<MyTelegram.Schema.IInputDocument>>(); }
+        if (Flags.IsBitSet(6)) { VideoCover = buffer.Read<MyTelegram.Schema.IInputPhoto>(); }
+        if (Flags.IsBitSet(7)) { VideoTimestamp = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { TtlSeconds = buffer.ReadInt32(); }
     }
 }

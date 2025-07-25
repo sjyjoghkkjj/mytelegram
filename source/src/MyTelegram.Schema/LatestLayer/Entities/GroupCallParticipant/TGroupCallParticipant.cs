@@ -14,7 +14,7 @@ public sealed class TGroupCallParticipant : IGroupCallParticipant
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the participant is muted
@@ -126,22 +126,22 @@ public sealed class TGroupCallParticipant : IGroupCallParticipant
 
     public void ComputeFlag()
     {
-        if (Muted) { Flags[0] = true; }
-        if (Left) { Flags[1] = true; }
-        if (CanSelfUnmute) { Flags[2] = true; }
-        if (JustJoined) { Flags[4] = true; }
-        if (Versioned) { Flags[5] = true; }
-        if (Min) { Flags[8] = true; }
-        if (MutedByYou) { Flags[9] = true; }
-        if (VolumeByAdmin) { Flags[10] = true; }
-        if (Self) { Flags[12] = true; }
-        if (VideoJoined) { Flags[15] = true; }
-        if (/*ActiveDate != 0 && */ActiveDate.HasValue) { Flags[3] = true; }
-        if (/*Volume != 0 && */Volume.HasValue) { Flags[7] = true; }
-        if (About != null) { Flags[11] = true; }
-        if (/*RaiseHandRating != 0 &&*/ RaiseHandRating.HasValue) { Flags[13] = true; }
-        if (Video != null) { Flags[6] = true; }
-        if (Presentation != null) { Flags[14] = true; }
+        if (Muted) { Flags = Flags.SetBit(0); }
+        if (Left) { Flags = Flags.SetBit(1); }
+        if (CanSelfUnmute) { Flags = Flags.SetBit(2); }
+        if (JustJoined) { Flags = Flags.SetBit(4); }
+        if (Versioned) { Flags = Flags.SetBit(5); }
+        if (Min) { Flags = Flags.SetBit(8); }
+        if (MutedByYou) { Flags = Flags.SetBit(9); }
+        if (VolumeByAdmin) { Flags = Flags.SetBit(10); }
+        if (Self) { Flags = Flags.SetBit(12); }
+        if (VideoJoined) { Flags = Flags.SetBit(15); }
+        if (/*ActiveDate != 0 && */ActiveDate.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*Volume != 0 && */Volume.HasValue) { Flags = Flags.SetBit(7); }
+        if (About != null) { Flags = Flags.SetBit(11); }
+        if (/*RaiseHandRating != 0 &&*/ RaiseHandRating.HasValue) { Flags = Flags.SetBit(13); }
+        if (Video != null) { Flags = Flags.SetBit(6); }
+        if (Presentation != null) { Flags = Flags.SetBit(14); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -151,36 +151,36 @@ public sealed class TGroupCallParticipant : IGroupCallParticipant
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Date);
-        if (Flags[3]) { writer.Write(ActiveDate.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(ActiveDate.Value); }
         writer.Write(Source);
-        if (Flags[7]) { writer.Write(Volume.Value); }
-        if (Flags[11]) { writer.Write(About); }
-        if (Flags[13]) { writer.Write(RaiseHandRating.Value); }
-        if (Flags[6]) { writer.Write(Video); }
-        if (Flags[14]) { writer.Write(Presentation); }
+        if (Flags.IsBitSet(7)) { writer.Write(Volume.Value); }
+        if (Flags.IsBitSet(11)) { writer.Write(About); }
+        if (Flags.IsBitSet(13)) { writer.Write(RaiseHandRating.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(Video); }
+        if (Flags.IsBitSet(14)) { writer.Write(Presentation); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Muted = true; }
-        if (Flags[1]) { Left = true; }
-        if (Flags[2]) { CanSelfUnmute = true; }
-        if (Flags[4]) { JustJoined = true; }
-        if (Flags[5]) { Versioned = true; }
-        if (Flags[8]) { Min = true; }
-        if (Flags[9]) { MutedByYou = true; }
-        if (Flags[10]) { VolumeByAdmin = true; }
-        if (Flags[12]) { Self = true; }
-        if (Flags[15]) { VideoJoined = true; }
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Date = reader.ReadInt32();
-        if (Flags[3]) { ActiveDate = reader.ReadInt32(); }
-        Source = reader.ReadInt32();
-        if (Flags[7]) { Volume = reader.ReadInt32(); }
-        if (Flags[11]) { About = reader.ReadString(); }
-        if (Flags[13]) { RaiseHandRating = reader.ReadInt64(); }
-        if (Flags[6]) { Video = reader.Read<MyTelegram.Schema.IGroupCallParticipantVideo>(); }
-        if (Flags[14]) { Presentation = reader.Read<MyTelegram.Schema.IGroupCallParticipantVideo>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Muted = true; }
+        if (Flags.IsBitSet(1)) { Left = true; }
+        if (Flags.IsBitSet(2)) { CanSelfUnmute = true; }
+        if (Flags.IsBitSet(4)) { JustJoined = true; }
+        if (Flags.IsBitSet(5)) { Versioned = true; }
+        if (Flags.IsBitSet(8)) { Min = true; }
+        if (Flags.IsBitSet(9)) { MutedByYou = true; }
+        if (Flags.IsBitSet(10)) { VolumeByAdmin = true; }
+        if (Flags.IsBitSet(12)) { Self = true; }
+        if (Flags.IsBitSet(15)) { VideoJoined = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { ActiveDate = buffer.ReadInt32(); }
+        Source = buffer.ReadInt32();
+        if (Flags.IsBitSet(7)) { Volume = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(11)) { About = buffer.ReadString(); }
+        if (Flags.IsBitSet(13)) { RaiseHandRating = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(6)) { Video = buffer.Read<MyTelegram.Schema.IGroupCallParticipantVideo>(); }
+        if (Flags.IsBitSet(14)) { Presentation = buffer.Read<MyTelegram.Schema.IGroupCallParticipantVideo>(); }
     }
 }

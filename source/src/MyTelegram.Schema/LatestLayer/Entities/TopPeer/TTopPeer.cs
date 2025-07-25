@@ -35,9 +35,9 @@ public sealed class TTopPeer : ITopPeer
         writer.Write(Rating);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Rating = reader.ReadDouble();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Rating = buffer.ReadDouble();
     }
 }

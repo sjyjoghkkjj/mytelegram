@@ -28,8 +28,8 @@ public sealed class TAccountDaysTTL : IAccountDaysTTL
         writer.Write(Days);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Days = reader.ReadInt32();
+        Days = buffer.ReadInt32();
     }
 }

@@ -31,8 +31,8 @@ public sealed class RequestSetDefaultHistoryTTL : IRequest<IBool>
         writer.Write(Period);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Period = reader.ReadInt32();
+        Period = buffer.ReadInt32();
     }
 }

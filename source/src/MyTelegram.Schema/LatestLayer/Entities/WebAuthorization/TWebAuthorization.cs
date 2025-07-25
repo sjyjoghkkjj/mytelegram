@@ -76,16 +76,16 @@ public sealed class TWebAuthorization : IWebAuthorization
         writer.Write(Region);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        BotId = reader.ReadInt64();
-        Domain = reader.ReadString();
-        Browser = reader.ReadString();
-        Platform = reader.ReadString();
-        DateCreated = reader.ReadInt32();
-        DateActive = reader.ReadInt32();
-        Ip = reader.ReadString();
-        Region = reader.ReadString();
+        Hash = buffer.ReadInt64();
+        BotId = buffer.ReadInt64();
+        Domain = buffer.ReadString();
+        Browser = buffer.ReadString();
+        Platform = buffer.ReadString();
+        DateCreated = buffer.ReadInt32();
+        DateActive = buffer.ReadInt32();
+        Ip = buffer.ReadString();
+        Region = buffer.ReadString();
     }
 }

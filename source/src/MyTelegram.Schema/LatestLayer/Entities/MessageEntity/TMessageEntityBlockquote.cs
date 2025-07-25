@@ -14,7 +14,7 @@ public sealed class TMessageEntityBlockquote : IMessageEntity
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the quote is collapsed by default.
@@ -34,7 +34,7 @@ public sealed class TMessageEntityBlockquote : IMessageEntity
 
     public void ComputeFlag()
     {
-        if (Collapsed) { Flags[0] = true; }
+        if (Collapsed) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class TMessageEntityBlockquote : IMessageEntity
         writer.Write(Length);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Collapsed = true; }
-        Offset = reader.ReadInt32();
-        Length = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Collapsed = true; }
+        Offset = buffer.ReadInt32();
+        Length = buffer.ReadInt32();
     }
 }

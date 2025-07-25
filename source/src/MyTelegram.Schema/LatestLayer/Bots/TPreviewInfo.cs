@@ -34,9 +34,9 @@ public sealed class TPreviewInfo : IPreviewInfo
         writer.Write(LangCodes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Media = reader.Read<TVector<MyTelegram.Schema.IBotPreviewMedia>>();
-        LangCodes = reader.Read<TVector<string>>();
+        Media = buffer.Read<TVector<MyTelegram.Schema.IBotPreviewMedia>>();
+        LangCodes = buffer.Read<TVector<string>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TInputStorePaymentPremiumGiftCode : IInputStorePaymentPurpos
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The users that will receive the <a href="https://corefork.telegram.org/api/premium">Telegram Premium</a> subscriptions.
@@ -45,8 +45,8 @@ public sealed class TInputStorePaymentPremiumGiftCode : IInputStorePaymentPurpos
 
     public void ComputeFlag()
     {
-        if (BoostPeer != null) { Flags[0] = true; }
-        if (Message != null) { Flags[1] = true; }
+        if (BoostPeer != null) { Flags = Flags.SetBit(0); }
+        if (Message != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,19 +55,19 @@ public sealed class TInputStorePaymentPremiumGiftCode : IInputStorePaymentPurpos
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Users);
-        if (Flags[0]) { writer.Write(BoostPeer); }
+        if (Flags.IsBitSet(0)) { writer.Write(BoostPeer); }
         writer.Write(Currency);
         writer.Write(Amount);
-        if (Flags[1]) { writer.Write(Message); }
+        if (Flags.IsBitSet(1)) { writer.Write(Message); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Users = reader.Read<TVector<MyTelegram.Schema.IInputUser>>();
-        if (Flags[0]) { BoostPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
-        if (Flags[1]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        Flags = buffer.ReadInt32();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IInputUser>>();
+        if (Flags.IsBitSet(0)) { BoostPeer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
+        if (Flags.IsBitSet(1)) { Message = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
     }
 }

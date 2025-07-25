@@ -18,7 +18,7 @@ public sealed class RequestExportGroupCallInvite : IRequest<MyTelegram.Schema.Ph
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// For livestreams or muted group chats, if set, users that join using this link will be able to speak without explicitly requesting permission by (for example by raising their hand).
@@ -34,7 +34,7 @@ public sealed class RequestExportGroupCallInvite : IRequest<MyTelegram.Schema.Ph
 
     public void ComputeFlag()
     {
-        if (CanSelfUnmute) { Flags[0] = true; }
+        if (CanSelfUnmute) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -46,10 +46,10 @@ public sealed class RequestExportGroupCallInvite : IRequest<MyTelegram.Schema.Ph
         writer.Write(Call);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { CanSelfUnmute = true; }
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { CanSelfUnmute = true; }
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
     }
 }

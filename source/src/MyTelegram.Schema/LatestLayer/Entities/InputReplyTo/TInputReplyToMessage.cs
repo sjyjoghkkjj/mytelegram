@@ -14,7 +14,7 @@ public sealed class TInputReplyToMessage : IInputReplyTo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The message ID to reply to.
@@ -50,12 +50,12 @@ public sealed class TInputReplyToMessage : IInputReplyTo
 
     public void ComputeFlag()
     {
-        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
-        if (ReplyToPeerId != null) { Flags[1] = true; }
-        if (QuoteText != null) { Flags[2] = true; }
-        if (QuoteEntities?.Count > 0) { Flags[3] = true; }
-        if (/*QuoteOffset != 0 && */QuoteOffset.HasValue) { Flags[4] = true; }
-        if (MonoforumPeerId != null) { Flags[5] = true; }
+        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags = Flags.SetBit(0); }
+        if (ReplyToPeerId != null) { Flags = Flags.SetBit(1); }
+        if (QuoteText != null) { Flags = Flags.SetBit(2); }
+        if (QuoteEntities?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (/*QuoteOffset != 0 && */QuoteOffset.HasValue) { Flags = Flags.SetBit(4); }
+        if (MonoforumPeerId != null) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -64,23 +64,23 @@ public sealed class TInputReplyToMessage : IInputReplyTo
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ReplyToMsgId);
-        if (Flags[0]) { writer.Write(TopMsgId.Value); }
-        if (Flags[1]) { writer.Write(ReplyToPeerId); }
-        if (Flags[2]) { writer.Write(QuoteText); }
-        if (Flags[3]) { writer.Write(QuoteEntities); }
-        if (Flags[4]) { writer.Write(QuoteOffset.Value); }
-        if (Flags[5]) { writer.Write(MonoforumPeerId); }
+        if (Flags.IsBitSet(0)) { writer.Write(TopMsgId.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(ReplyToPeerId); }
+        if (Flags.IsBitSet(2)) { writer.Write(QuoteText); }
+        if (Flags.IsBitSet(3)) { writer.Write(QuoteEntities); }
+        if (Flags.IsBitSet(4)) { writer.Write(QuoteOffset.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(MonoforumPeerId); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ReplyToMsgId = reader.ReadInt32();
-        if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
-        if (Flags[1]) { ReplyToPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[2]) { QuoteText = reader.ReadString(); }
-        if (Flags[3]) { QuoteEntities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        if (Flags[4]) { QuoteOffset = reader.ReadInt32(); }
-        if (Flags[5]) { MonoforumPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
+        Flags = buffer.ReadInt32();
+        ReplyToMsgId = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { TopMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { ReplyToPeerId = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(2)) { QuoteText = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { QuoteEntities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        if (Flags.IsBitSet(4)) { QuoteOffset = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { MonoforumPeerId = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

@@ -14,7 +14,7 @@ public sealed class TInputInvoiceStarGift : IInputInvoice
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, your name will be hidden if the destination user decides to display the gift on their profile (they will still see that you sent the gift)
@@ -37,9 +37,9 @@ public sealed class TInputInvoiceStarGift : IInputInvoice
 
     public void ComputeFlag()
     {
-        if (HideName) { Flags[0] = true; }
-        if (IncludeUpgrade) { Flags[2] = true; }
-        if (Message != null) { Flags[1] = true; }
+        if (HideName) { Flags = Flags.SetBit(0); }
+        if (IncludeUpgrade) { Flags = Flags.SetBit(2); }
+        if (Message != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -49,16 +49,16 @@ public sealed class TInputInvoiceStarGift : IInputInvoice
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(GiftId);
-        if (Flags[1]) { writer.Write(Message); }
+        if (Flags.IsBitSet(1)) { writer.Write(Message); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { HideName = true; }
-        if (Flags[2]) { IncludeUpgrade = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        GiftId = reader.ReadInt64();
-        if (Flags[1]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { HideName = true; }
+        if (Flags.IsBitSet(2)) { IncludeUpgrade = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        GiftId = buffer.ReadInt64();
+        if (Flags.IsBitSet(1)) { Message = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
     }
 }

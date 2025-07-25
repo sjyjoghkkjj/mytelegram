@@ -14,7 +14,7 @@ public sealed class TInputBusinessIntro : IInputBusinessIntro
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Title of the introduction message
@@ -34,7 +34,7 @@ public sealed class TInputBusinessIntro : IInputBusinessIntro
 
     public void ComputeFlag()
     {
-        if (Sticker != null) { Flags[0] = true; }
+        if (Sticker != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -44,14 +44,14 @@ public sealed class TInputBusinessIntro : IInputBusinessIntro
         writer.Write(Flags);
         writer.Write(Title);
         writer.Write(Description);
-        if (Flags[0]) { writer.Write(Sticker); }
+        if (Flags.IsBitSet(0)) { writer.Write(Sticker); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        if (Flags[0]) { Sticker = reader.Read<MyTelegram.Schema.IInputDocument>(); }
+        Flags = buffer.ReadInt32();
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Sticker = buffer.Read<MyTelegram.Schema.IInputDocument>(); }
     }
 }

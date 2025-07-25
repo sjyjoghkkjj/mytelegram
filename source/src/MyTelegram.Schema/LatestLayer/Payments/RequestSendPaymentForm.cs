@@ -18,7 +18,7 @@ public sealed class RequestSendPaymentForm : IRequest<MyTelegram.Schema.Payments
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Form ID
@@ -54,9 +54,9 @@ public sealed class RequestSendPaymentForm : IRequest<MyTelegram.Schema.Payments
 
     public void ComputeFlag()
     {
-        if (RequestedInfoId != null) { Flags[0] = true; }
-        if (ShippingOptionId != null) { Flags[1] = true; }
-        if (/*TipAmount != 0 &&*/ TipAmount.HasValue) { Flags[2] = true; }
+        if (RequestedInfoId != null) { Flags = Flags.SetBit(0); }
+        if (ShippingOptionId != null) { Flags = Flags.SetBit(1); }
+        if (/*TipAmount != 0 &&*/ TipAmount.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -66,20 +66,20 @@ public sealed class RequestSendPaymentForm : IRequest<MyTelegram.Schema.Payments
         writer.Write(Flags);
         writer.Write(FormId);
         writer.Write(Invoice);
-        if (Flags[0]) { writer.Write(RequestedInfoId); }
-        if (Flags[1]) { writer.Write(ShippingOptionId); }
+        if (Flags.IsBitSet(0)) { writer.Write(RequestedInfoId); }
+        if (Flags.IsBitSet(1)) { writer.Write(ShippingOptionId); }
         writer.Write(Credentials);
-        if (Flags[2]) { writer.Write(TipAmount.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(TipAmount.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        FormId = reader.ReadInt64();
-        Invoice = reader.Read<MyTelegram.Schema.IInputInvoice>();
-        if (Flags[0]) { RequestedInfoId = reader.ReadString(); }
-        if (Flags[1]) { ShippingOptionId = reader.ReadString(); }
-        Credentials = reader.Read<MyTelegram.Schema.IInputPaymentCredentials>();
-        if (Flags[2]) { TipAmount = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        FormId = buffer.ReadInt64();
+        Invoice = buffer.Read<MyTelegram.Schema.IInputInvoice>();
+        if (Flags.IsBitSet(0)) { RequestedInfoId = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { ShippingOptionId = buffer.ReadString(); }
+        Credentials = buffer.Read<MyTelegram.Schema.IInputPaymentCredentials>();
+        if (Flags.IsBitSet(2)) { TipAmount = buffer.ReadInt64(); }
     }
 }

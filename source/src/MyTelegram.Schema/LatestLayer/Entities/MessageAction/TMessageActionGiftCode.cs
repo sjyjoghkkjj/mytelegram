@@ -14,7 +14,7 @@ public sealed class TMessageActionGiftCode : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, this gift code was received from a <a href="https://corefork.telegram.org/api/giveaways">giveaway »</a> started by a channel/supergroup we're subscribed to.
@@ -72,14 +72,14 @@ public sealed class TMessageActionGiftCode : IMessageAction
 
     public void ComputeFlag()
     {
-        if (ViaGiveaway) { Flags[0] = true; }
-        if (Unclaimed) { Flags[5] = true; }
-        if (BoostPeer != null) { Flags[1] = true; }
-        if (Currency != null) { Flags[2] = true; }
-        if (/*Amount != 0 &&*/ Amount.HasValue) { Flags[2] = true; }
-        if (CryptoCurrency != null) { Flags[3] = true; }
-        if (/*CryptoAmount != 0 &&*/ CryptoAmount.HasValue) { Flags[3] = true; }
-        if (Message != null) { Flags[4] = true; }
+        if (ViaGiveaway) { Flags = Flags.SetBit(0); }
+        if (Unclaimed) { Flags = Flags.SetBit(5); }
+        if (BoostPeer != null) { Flags = Flags.SetBit(1); }
+        if (Currency != null) { Flags = Flags.SetBit(2); }
+        if (/*Amount != 0 &&*/ Amount.HasValue) { Flags = Flags.SetBit(2); }
+        if (CryptoCurrency != null) { Flags = Flags.SetBit(3); }
+        if (/*CryptoAmount != 0 &&*/ CryptoAmount.HasValue) { Flags = Flags.SetBit(3); }
+        if (Message != null) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -87,28 +87,28 @@ public sealed class TMessageActionGiftCode : IMessageAction
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(BoostPeer); }
+        if (Flags.IsBitSet(1)) { writer.Write(BoostPeer); }
         writer.Write(Months);
         writer.Write(Slug);
-        if (Flags[2]) { writer.Write(Currency); }
-        if (Flags[2]) { writer.Write(Amount.Value); }
-        if (Flags[3]) { writer.Write(CryptoCurrency); }
-        if (Flags[3]) { writer.Write(CryptoAmount.Value); }
-        if (Flags[4]) { writer.Write(Message); }
+        if (Flags.IsBitSet(2)) { writer.Write(Currency); }
+        if (Flags.IsBitSet(2)) { writer.Write(Amount.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(CryptoCurrency); }
+        if (Flags.IsBitSet(3)) { writer.Write(CryptoAmount.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(Message); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ViaGiveaway = true; }
-        if (Flags[5]) { Unclaimed = true; }
-        if (Flags[1]) { BoostPeer = reader.Read<MyTelegram.Schema.IPeer>(); }
-        Months = reader.ReadInt32();
-        Slug = reader.ReadString();
-        if (Flags[2]) { Currency = reader.ReadString(); }
-        if (Flags[2]) { Amount = reader.ReadInt64(); }
-        if (Flags[3]) { CryptoCurrency = reader.ReadString(); }
-        if (Flags[3]) { CryptoAmount = reader.ReadInt64(); }
-        if (Flags[4]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ViaGiveaway = true; }
+        if (Flags.IsBitSet(5)) { Unclaimed = true; }
+        if (Flags.IsBitSet(1)) { BoostPeer = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        Months = buffer.ReadInt32();
+        Slug = buffer.ReadString();
+        if (Flags.IsBitSet(2)) { Currency = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Amount = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(3)) { CryptoCurrency = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { CryptoAmount = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(4)) { Message = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
     }
 }

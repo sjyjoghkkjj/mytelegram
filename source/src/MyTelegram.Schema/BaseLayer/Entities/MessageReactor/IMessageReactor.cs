@@ -12,7 +12,7 @@ public interface IMessageReactor : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// If set, the reactor is one of the most active reactors; may be unset if the reactor is the current user.

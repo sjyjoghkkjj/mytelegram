@@ -14,7 +14,7 @@ public sealed class TReactionCount : IReactionCount
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, indicates that the current user also sent this reaction. <br>The integer value indicates when was the reaction added: the bigger the value, the newer the reaction.
@@ -34,7 +34,7 @@ public sealed class TReactionCount : IReactionCount
 
     public void ComputeFlag()
     {
-        if (/*ChosenOrder != 0 && */ChosenOrder.HasValue) { Flags[0] = true; }
+        if (/*ChosenOrder != 0 && */ChosenOrder.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -43,16 +43,16 @@ public sealed class TReactionCount : IReactionCount
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(ChosenOrder.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(ChosenOrder.Value); }
         writer.Write(Reaction);
         writer.Write(Count);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ChosenOrder = reader.ReadInt32(); }
-        Reaction = reader.Read<MyTelegram.Schema.IReaction>();
-        Count = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ChosenOrder = buffer.ReadInt32(); }
+        Reaction = buffer.Read<MyTelegram.Schema.IReaction>();
+        Count = buffer.ReadInt32();
     }
 }

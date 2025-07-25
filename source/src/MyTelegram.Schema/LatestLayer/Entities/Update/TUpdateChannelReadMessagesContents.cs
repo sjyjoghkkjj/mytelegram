@@ -14,7 +14,7 @@ public sealed class TUpdateChannelReadMessagesContents : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/channel">Channel/supergroup</a> ID
@@ -34,8 +34,8 @@ public sealed class TUpdateChannelReadMessagesContents : IUpdate
 
     public void ComputeFlag()
     {
-        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
-        if (SavedPeerId != null) { Flags[1] = true; }
+        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags = Flags.SetBit(0); }
+        if (SavedPeerId != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -45,17 +45,17 @@ public sealed class TUpdateChannelReadMessagesContents : IUpdate
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ChannelId);
-        if (Flags[0]) { writer.Write(TopMsgId.Value); }
-        if (Flags[1]) { writer.Write(SavedPeerId); }
+        if (Flags.IsBitSet(0)) { writer.Write(TopMsgId.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(SavedPeerId); }
         writer.Write(Messages);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ChannelId = reader.ReadInt64();
-        if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
-        if (Flags[1]) { SavedPeerId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        Messages = reader.Read<TVector<int>>();
+        Flags = buffer.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { TopMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { SavedPeerId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        Messages = buffer.Read<TVector<int>>();
     }
 }

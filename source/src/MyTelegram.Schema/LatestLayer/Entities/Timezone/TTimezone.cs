@@ -40,10 +40,10 @@ public sealed class TTimezone : ITimezone
         writer.Write(UtcOffset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadString();
-        Name = reader.ReadString();
-        UtcOffset = reader.ReadInt32();
+        Id = buffer.ReadString();
+        Name = buffer.ReadString();
+        UtcOffset = buffer.ReadInt32();
     }
 }

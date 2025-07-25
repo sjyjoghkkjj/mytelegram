@@ -14,7 +14,7 @@ public sealed class TLangPackStringPluralized : ILangPackString
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Localization key
@@ -53,11 +53,11 @@ public sealed class TLangPackStringPluralized : ILangPackString
 
     public void ComputeFlag()
     {
-        if (ZeroValue != null) { Flags[0] = true; }
-        if (OneValue != null) { Flags[1] = true; }
-        if (TwoValue != null) { Flags[2] = true; }
-        if (FewValue != null) { Flags[3] = true; }
-        if (ManyValue != null) { Flags[4] = true; }
+        if (ZeroValue != null) { Flags = Flags.SetBit(0); }
+        if (OneValue != null) { Flags = Flags.SetBit(1); }
+        if (TwoValue != null) { Flags = Flags.SetBit(2); }
+        if (FewValue != null) { Flags = Flags.SetBit(3); }
+        if (ManyValue != null) { Flags = Flags.SetBit(4); }
 
     }
 
@@ -67,23 +67,23 @@ public sealed class TLangPackStringPluralized : ILangPackString
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Key);
-        if (Flags[0]) { writer.Write(ZeroValue); }
-        if (Flags[1]) { writer.Write(OneValue); }
-        if (Flags[2]) { writer.Write(TwoValue); }
-        if (Flags[3]) { writer.Write(FewValue); }
-        if (Flags[4]) { writer.Write(ManyValue); }
+        if (Flags.IsBitSet(0)) { writer.Write(ZeroValue); }
+        if (Flags.IsBitSet(1)) { writer.Write(OneValue); }
+        if (Flags.IsBitSet(2)) { writer.Write(TwoValue); }
+        if (Flags.IsBitSet(3)) { writer.Write(FewValue); }
+        if (Flags.IsBitSet(4)) { writer.Write(ManyValue); }
         writer.Write(OtherValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Key = reader.ReadString();
-        if (Flags[0]) { ZeroValue = reader.ReadString(); }
-        if (Flags[1]) { OneValue = reader.ReadString(); }
-        if (Flags[2]) { TwoValue = reader.ReadString(); }
-        if (Flags[3]) { FewValue = reader.ReadString(); }
-        if (Flags[4]) { ManyValue = reader.ReadString(); }
-        OtherValue = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        Key = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { ZeroValue = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { OneValue = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { TwoValue = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { FewValue = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { ManyValue = buffer.ReadString(); }
+        OtherValue = buffer.ReadString();
     }
 }

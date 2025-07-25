@@ -14,7 +14,7 @@ public sealed class TBotCallbackAnswer : IBotCallbackAnswer
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether an alert should be shown to the user instead of a toast notification
@@ -51,11 +51,11 @@ public sealed class TBotCallbackAnswer : IBotCallbackAnswer
 
     public void ComputeFlag()
     {
-        if (Alert) { Flags[1] = true; }
-        if (HasUrl) { Flags[3] = true; }
-        if (NativeUi) { Flags[4] = true; }
-        if (Message != null) { Flags[0] = true; }
-        if (Url != null) { Flags[2] = true; }
+        if (Alert) { Flags = Flags.SetBit(1); }
+        if (HasUrl) { Flags = Flags.SetBit(3); }
+        if (NativeUi) { Flags = Flags.SetBit(4); }
+        if (Message != null) { Flags = Flags.SetBit(0); }
+        if (Url != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -64,19 +64,19 @@ public sealed class TBotCallbackAnswer : IBotCallbackAnswer
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Message); }
-        if (Flags[2]) { writer.Write(Url); }
+        if (Flags.IsBitSet(0)) { writer.Write(Message); }
+        if (Flags.IsBitSet(2)) { writer.Write(Url); }
         writer.Write(CacheTime);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Alert = true; }
-        if (Flags[3]) { HasUrl = true; }
-        if (Flags[4]) { NativeUi = true; }
-        if (Flags[0]) { Message = reader.ReadString(); }
-        if (Flags[2]) { Url = reader.ReadString(); }
-        CacheTime = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Alert = true; }
+        if (Flags.IsBitSet(3)) { HasUrl = true; }
+        if (Flags.IsBitSet(4)) { NativeUi = true; }
+        if (Flags.IsBitSet(0)) { Message = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Url = buffer.ReadString(); }
+        CacheTime = buffer.ReadInt32();
     }
 }

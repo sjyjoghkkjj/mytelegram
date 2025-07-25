@@ -14,7 +14,7 @@ public sealed class TInputStickerSetItem : IInputStickerSetItem
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The sticker
@@ -40,8 +40,8 @@ public sealed class TInputStickerSetItem : IInputStickerSetItem
 
     public void ComputeFlag()
     {
-        if (MaskCoords != null) { Flags[0] = true; }
-        if (Keywords != null) { Flags[1] = true; }
+        if (MaskCoords != null) { Flags = Flags.SetBit(0); }
+        if (Keywords != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -51,16 +51,16 @@ public sealed class TInputStickerSetItem : IInputStickerSetItem
         writer.Write(Flags);
         writer.Write(Document);
         writer.Write(Emoji);
-        if (Flags[0]) { writer.Write(MaskCoords); }
-        if (Flags[1]) { writer.Write(Keywords); }
+        if (Flags.IsBitSet(0)) { writer.Write(MaskCoords); }
+        if (Flags.IsBitSet(1)) { writer.Write(Keywords); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Document = reader.Read<MyTelegram.Schema.IInputDocument>();
-        Emoji = reader.ReadString();
-        if (Flags[0]) { MaskCoords = reader.Read<MyTelegram.Schema.IMaskCoords>(); }
-        if (Flags[1]) { Keywords = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Document = buffer.Read<MyTelegram.Schema.IInputDocument>();
+        Emoji = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { MaskCoords = buffer.Read<MyTelegram.Schema.IMaskCoords>(); }
+        if (Flags.IsBitSet(1)) { Keywords = buffer.ReadString(); }
     }
 }

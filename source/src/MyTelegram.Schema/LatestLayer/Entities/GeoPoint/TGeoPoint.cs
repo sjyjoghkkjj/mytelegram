@@ -14,7 +14,7 @@ public sealed class TGeoPoint : IGeoPoint
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Longitude
@@ -38,7 +38,7 @@ public sealed class TGeoPoint : IGeoPoint
 
     public void ComputeFlag()
     {
-        if (/*AccuracyRadius != 0 && */AccuracyRadius.HasValue) { Flags[0] = true; }
+        if (/*AccuracyRadius != 0 && */AccuracyRadius.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -49,15 +49,15 @@ public sealed class TGeoPoint : IGeoPoint
         writer.Write(Long);
         writer.Write(Lat);
         writer.Write(AccessHash);
-        if (Flags[0]) { writer.Write(AccuracyRadius.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(AccuracyRadius.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Long = reader.ReadDouble();
-        Lat = reader.ReadDouble();
-        AccessHash = reader.ReadInt64();
-        if (Flags[0]) { AccuracyRadius = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Long = buffer.ReadDouble();
+        Lat = buffer.ReadDouble();
+        AccessHash = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { AccuracyRadius = buffer.ReadInt32(); }
     }
 }

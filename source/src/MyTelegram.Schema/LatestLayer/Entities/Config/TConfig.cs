@@ -14,7 +14,7 @@ public sealed class TConfig : IConfig
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the client should use P2P by default for phone calls with contacts
@@ -260,22 +260,22 @@ public sealed class TConfig : IConfig
 
     public void ComputeFlag()
     {
-        if (DefaultP2pContacts) { Flags[3] = true; }
-        if (PreloadFeaturedStickers) { Flags[4] = true; }
-        if (RevokePmInbox) { Flags[6] = true; }
-        if (BlockedMode) { Flags[8] = true; }
-        if (ForceTryIpv6) { Flags[14] = true; }
-        if (/*TmpSessions != 0 && */TmpSessions.HasValue) { Flags[0] = true; }
-        if (AutoupdateUrlPrefix != null) { Flags[7] = true; }
-        if (GifSearchUsername != null) { Flags[9] = true; }
-        if (VenueSearchUsername != null) { Flags[10] = true; }
-        if (ImgSearchUsername != null) { Flags[11] = true; }
-        if (StaticMapsProvider != null) { Flags[12] = true; }
-        if (SuggestedLangCode != null) { Flags[2] = true; }
-        if (/*LangPackVersion != 0 && */LangPackVersion.HasValue) { Flags[2] = true; }
-        if (/*BaseLangPackVersion != 0 && */BaseLangPackVersion.HasValue) { Flags[2] = true; }
-        if (ReactionsDefault != null) { Flags[15] = true; }
-        if (AutologinToken != null) { Flags[16] = true; }
+        if (DefaultP2pContacts) { Flags = Flags.SetBit(3); }
+        if (PreloadFeaturedStickers) { Flags = Flags.SetBit(4); }
+        if (RevokePmInbox) { Flags = Flags.SetBit(6); }
+        if (BlockedMode) { Flags = Flags.SetBit(8); }
+        if (ForceTryIpv6) { Flags = Flags.SetBit(14); }
+        if (/*TmpSessions != 0 && */TmpSessions.HasValue) { Flags = Flags.SetBit(0); }
+        if (AutoupdateUrlPrefix != null) { Flags = Flags.SetBit(7); }
+        if (GifSearchUsername != null) { Flags = Flags.SetBit(9); }
+        if (VenueSearchUsername != null) { Flags = Flags.SetBit(10); }
+        if (ImgSearchUsername != null) { Flags = Flags.SetBit(11); }
+        if (StaticMapsProvider != null) { Flags = Flags.SetBit(12); }
+        if (SuggestedLangCode != null) { Flags = Flags.SetBit(2); }
+        if (/*LangPackVersion != 0 && */LangPackVersion.HasValue) { Flags = Flags.SetBit(2); }
+        if (/*BaseLangPackVersion != 0 && */BaseLangPackVersion.HasValue) { Flags = Flags.SetBit(2); }
+        if (ReactionsDefault != null) { Flags = Flags.SetBit(15); }
+        if (AutologinToken != null) { Flags = Flags.SetBit(16); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -306,76 +306,76 @@ public sealed class TConfig : IConfig
         writer.Write(RatingEDecay);
         writer.Write(StickersRecentLimit);
         writer.Write(ChannelsReadMediaPeriod);
-        if (Flags[0]) { writer.Write(TmpSessions.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(TmpSessions.Value); }
         writer.Write(CallReceiveTimeoutMs);
         writer.Write(CallRingTimeoutMs);
         writer.Write(CallConnectTimeoutMs);
         writer.Write(CallPacketTimeoutMs);
         writer.Write(MeUrlPrefix);
-        if (Flags[7]) { writer.Write(AutoupdateUrlPrefix); }
-        if (Flags[9]) { writer.Write(GifSearchUsername); }
-        if (Flags[10]) { writer.Write(VenueSearchUsername); }
-        if (Flags[11]) { writer.Write(ImgSearchUsername); }
-        if (Flags[12]) { writer.Write(StaticMapsProvider); }
+        if (Flags.IsBitSet(7)) { writer.Write(AutoupdateUrlPrefix); }
+        if (Flags.IsBitSet(9)) { writer.Write(GifSearchUsername); }
+        if (Flags.IsBitSet(10)) { writer.Write(VenueSearchUsername); }
+        if (Flags.IsBitSet(11)) { writer.Write(ImgSearchUsername); }
+        if (Flags.IsBitSet(12)) { writer.Write(StaticMapsProvider); }
         writer.Write(CaptionLengthMax);
         writer.Write(MessageLengthMax);
         writer.Write(WebfileDcId);
-        if (Flags[2]) { writer.Write(SuggestedLangCode); }
-        if (Flags[2]) { writer.Write(LangPackVersion.Value); }
-        if (Flags[2]) { writer.Write(BaseLangPackVersion.Value); }
-        if (Flags[15]) { writer.Write(ReactionsDefault); }
-        if (Flags[16]) { writer.Write(AutologinToken); }
+        if (Flags.IsBitSet(2)) { writer.Write(SuggestedLangCode); }
+        if (Flags.IsBitSet(2)) { writer.Write(LangPackVersion.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(BaseLangPackVersion.Value); }
+        if (Flags.IsBitSet(15)) { writer.Write(ReactionsDefault); }
+        if (Flags.IsBitSet(16)) { writer.Write(AutologinToken); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { DefaultP2pContacts = true; }
-        if (Flags[4]) { PreloadFeaturedStickers = true; }
-        if (Flags[6]) { RevokePmInbox = true; }
-        if (Flags[8]) { BlockedMode = true; }
-        if (Flags[14]) { ForceTryIpv6 = true; }
-        Date = reader.ReadInt32();
-        Expires = reader.ReadInt32();
-        TestMode = reader.Read();
-        ThisDc = reader.ReadInt32();
-        DcOptions = reader.Read<TVector<MyTelegram.Schema.IDcOption>>();
-        DcTxtDomainName = reader.ReadString();
-        ChatSizeMax = reader.ReadInt32();
-        MegagroupSizeMax = reader.ReadInt32();
-        ForwardedCountMax = reader.ReadInt32();
-        OnlineUpdatePeriodMs = reader.ReadInt32();
-        OfflineBlurTimeoutMs = reader.ReadInt32();
-        OfflineIdleTimeoutMs = reader.ReadInt32();
-        OnlineCloudTimeoutMs = reader.ReadInt32();
-        NotifyCloudDelayMs = reader.ReadInt32();
-        NotifyDefaultDelayMs = reader.ReadInt32();
-        PushChatPeriodMs = reader.ReadInt32();
-        PushChatLimit = reader.ReadInt32();
-        EditTimeLimit = reader.ReadInt32();
-        RevokeTimeLimit = reader.ReadInt32();
-        RevokePmTimeLimit = reader.ReadInt32();
-        RatingEDecay = reader.ReadInt32();
-        StickersRecentLimit = reader.ReadInt32();
-        ChannelsReadMediaPeriod = reader.ReadInt32();
-        if (Flags[0]) { TmpSessions = reader.ReadInt32(); }
-        CallReceiveTimeoutMs = reader.ReadInt32();
-        CallRingTimeoutMs = reader.ReadInt32();
-        CallConnectTimeoutMs = reader.ReadInt32();
-        CallPacketTimeoutMs = reader.ReadInt32();
-        MeUrlPrefix = reader.ReadString();
-        if (Flags[7]) { AutoupdateUrlPrefix = reader.ReadString(); }
-        if (Flags[9]) { GifSearchUsername = reader.ReadString(); }
-        if (Flags[10]) { VenueSearchUsername = reader.ReadString(); }
-        if (Flags[11]) { ImgSearchUsername = reader.ReadString(); }
-        if (Flags[12]) { StaticMapsProvider = reader.ReadString(); }
-        CaptionLengthMax = reader.ReadInt32();
-        MessageLengthMax = reader.ReadInt32();
-        WebfileDcId = reader.ReadInt32();
-        if (Flags[2]) { SuggestedLangCode = reader.ReadString(); }
-        if (Flags[2]) { LangPackVersion = reader.ReadInt32(); }
-        if (Flags[2]) { BaseLangPackVersion = reader.ReadInt32(); }
-        if (Flags[15]) { ReactionsDefault = reader.Read<MyTelegram.Schema.IReaction>(); }
-        if (Flags[16]) { AutologinToken = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { DefaultP2pContacts = true; }
+        if (Flags.IsBitSet(4)) { PreloadFeaturedStickers = true; }
+        if (Flags.IsBitSet(6)) { RevokePmInbox = true; }
+        if (Flags.IsBitSet(8)) { BlockedMode = true; }
+        if (Flags.IsBitSet(14)) { ForceTryIpv6 = true; }
+        Date = buffer.ReadInt32();
+        Expires = buffer.ReadInt32();
+        TestMode = buffer.Read();
+        ThisDc = buffer.ReadInt32();
+        DcOptions = buffer.Read<TVector<MyTelegram.Schema.IDcOption>>();
+        DcTxtDomainName = buffer.ReadString();
+        ChatSizeMax = buffer.ReadInt32();
+        MegagroupSizeMax = buffer.ReadInt32();
+        ForwardedCountMax = buffer.ReadInt32();
+        OnlineUpdatePeriodMs = buffer.ReadInt32();
+        OfflineBlurTimeoutMs = buffer.ReadInt32();
+        OfflineIdleTimeoutMs = buffer.ReadInt32();
+        OnlineCloudTimeoutMs = buffer.ReadInt32();
+        NotifyCloudDelayMs = buffer.ReadInt32();
+        NotifyDefaultDelayMs = buffer.ReadInt32();
+        PushChatPeriodMs = buffer.ReadInt32();
+        PushChatLimit = buffer.ReadInt32();
+        EditTimeLimit = buffer.ReadInt32();
+        RevokeTimeLimit = buffer.ReadInt32();
+        RevokePmTimeLimit = buffer.ReadInt32();
+        RatingEDecay = buffer.ReadInt32();
+        StickersRecentLimit = buffer.ReadInt32();
+        ChannelsReadMediaPeriod = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { TmpSessions = buffer.ReadInt32(); }
+        CallReceiveTimeoutMs = buffer.ReadInt32();
+        CallRingTimeoutMs = buffer.ReadInt32();
+        CallConnectTimeoutMs = buffer.ReadInt32();
+        CallPacketTimeoutMs = buffer.ReadInt32();
+        MeUrlPrefix = buffer.ReadString();
+        if (Flags.IsBitSet(7)) { AutoupdateUrlPrefix = buffer.ReadString(); }
+        if (Flags.IsBitSet(9)) { GifSearchUsername = buffer.ReadString(); }
+        if (Flags.IsBitSet(10)) { VenueSearchUsername = buffer.ReadString(); }
+        if (Flags.IsBitSet(11)) { ImgSearchUsername = buffer.ReadString(); }
+        if (Flags.IsBitSet(12)) { StaticMapsProvider = buffer.ReadString(); }
+        CaptionLengthMax = buffer.ReadInt32();
+        MessageLengthMax = buffer.ReadInt32();
+        WebfileDcId = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { SuggestedLangCode = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { LangPackVersion = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { BaseLangPackVersion = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(15)) { ReactionsDefault = buffer.Read<MyTelegram.Schema.IReaction>(); }
+        if (Flags.IsBitSet(16)) { AutologinToken = buffer.ReadString(); }
     }
 }

@@ -28,10 +28,10 @@ public sealed class TBotVerification : IBotVerification
         writer.Write(Description);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        BotId = reader.ReadInt64();
-        Icon = reader.ReadInt64();
-        Description = reader.ReadString();
+        BotId = buffer.ReadInt64();
+        Icon = buffer.ReadInt64();
+        Description = buffer.ReadString();
     }
 }

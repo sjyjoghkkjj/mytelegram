@@ -20,7 +20,7 @@ public sealed class TMessagePeerVote : IMessagePeerVote
     ///<summary>
     /// The option chosen by the peer
     ///</summary>
-    public byte[] Option { get; set; }
+    public ReadOnlyMemory<byte> Option { get; set; }
 
     ///<summary>
     /// When did the peer cast the vote
@@ -41,10 +41,10 @@ public sealed class TMessagePeerVote : IMessagePeerVote
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Option = reader.ReadBytes();
-        Date = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Option = buffer.ReadBytes();
+        Date = buffer.ReadInt32();
     }
 }

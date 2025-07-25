@@ -34,9 +34,9 @@ public sealed class TMessageMediaDice : IMessageMedia
         writer.Write(Emoticon);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Value = reader.ReadInt32();
-        Emoticon = reader.ReadString();
+        Value = buffer.ReadInt32();
+        Emoticon = buffer.ReadString();
     }
 }

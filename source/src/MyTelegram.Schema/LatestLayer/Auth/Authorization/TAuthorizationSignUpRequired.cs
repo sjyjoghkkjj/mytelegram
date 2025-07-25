@@ -14,7 +14,7 @@ public sealed class TAuthorizationSignUpRequired : IAuthorization
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Telegram's terms of service: the user must read and accept the terms of service before signing up to telegram
@@ -24,7 +24,7 @@ public sealed class TAuthorizationSignUpRequired : IAuthorization
 
     public void ComputeFlag()
     {
-        if (TermsOfService != null) { Flags[0] = true; }
+        if (TermsOfService != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -32,12 +32,12 @@ public sealed class TAuthorizationSignUpRequired : IAuthorization
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(TermsOfService); }
+        if (Flags.IsBitSet(0)) { writer.Write(TermsOfService); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { TermsOfService = reader.Read<MyTelegram.Schema.Help.ITermsOfService>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { TermsOfService = buffer.Read<MyTelegram.Schema.Help.ITermsOfService>(); }
     }
 }

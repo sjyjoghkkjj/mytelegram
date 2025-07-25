@@ -13,7 +13,6 @@ public class MyTelegramQueryServerBackgroundService(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Query server starting...");
-        //handlerHelper.InitAllHandlers();
         await inMemoryCacheLoader.LoadAsync();
         await languageCacheService.LoadAllLanguagesAsync();
         await languageCacheService.LoadAllLanguageTextAsync();

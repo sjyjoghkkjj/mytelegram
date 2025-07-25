@@ -40,10 +40,10 @@ public sealed class RequestGetOldFeaturedStickers : IRequest<MyTelegram.Schema.M
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Offset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

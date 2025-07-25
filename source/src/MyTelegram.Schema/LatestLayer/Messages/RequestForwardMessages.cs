@@ -57,14 +57,14 @@ namespace MyTelegram.Schema.Messages;
 /// 400 YOU_BLOCKED_USER You blocked this user.
 /// See <a href="https://corefork.telegram.org/method/messages.forwardMessages" />
 ///</summary>
-[TlObject(0x38f0188c)]
+[TlObject(0x978928ca)]
 public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates>
 {
-    public uint ConstructorId => 0x38f0188c;
+    public uint ConstructorId => 0x978928ca;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to send messages silently (no notification will be triggered on the destination clients)
@@ -154,23 +154,25 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
     public MyTelegram.Schema.IInputQuickReplyShortcut? QuickReplyShortcut { get; set; }
     public int? VideoTimestamp { get; set; }
     public long? AllowPaidStars { get; set; }
+    public MyTelegram.Schema.ISuggestedPost? SuggestedPost { get; set; }
 
     public void ComputeFlag()
     {
-        if (Silent) { Flags[5] = true; }
-        if (Background) { Flags[6] = true; }
-        if (WithMyScore) { Flags[8] = true; }
-        if (DropAuthor) { Flags[11] = true; }
-        if (DropMediaCaptions) { Flags[12] = true; }
-        if (Noforwards) { Flags[14] = true; }
-        if (AllowPaidFloodskip) { Flags[19] = true; }
-        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[9] = true; }
-        if (ReplyTo != null) { Flags[22] = true; }
-        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[10] = true; }
-        if (SendAs != null) { Flags[13] = true; }
-        if (QuickReplyShortcut != null) { Flags[17] = true; }
-        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[20] = true; }
-        if (/*AllowPaidStars != 0 &&*/ AllowPaidStars.HasValue) { Flags[21] = true; }
+        if (Silent) { Flags = Flags.SetBit(5); }
+        if (Background) { Flags = Flags.SetBit(6); }
+        if (WithMyScore) { Flags = Flags.SetBit(8); }
+        if (DropAuthor) { Flags = Flags.SetBit(11); }
+        if (DropMediaCaptions) { Flags = Flags.SetBit(12); }
+        if (Noforwards) { Flags = Flags.SetBit(14); }
+        if (AllowPaidFloodskip) { Flags = Flags.SetBit(19); }
+        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags = Flags.SetBit(9); }
+        if (ReplyTo != null) { Flags = Flags.SetBit(22); }
+        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags = Flags.SetBit(10); }
+        if (SendAs != null) { Flags = Flags.SetBit(13); }
+        if (QuickReplyShortcut != null) { Flags = Flags.SetBit(17); }
+        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags = Flags.SetBit(20); }
+        if (/*AllowPaidStars != 0 &&*/ AllowPaidStars.HasValue) { Flags = Flags.SetBit(21); }
+        if (SuggestedPost != null) { Flags = Flags.SetBit(23); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -182,35 +184,37 @@ public sealed class RequestForwardMessages : IRequest<MyTelegram.Schema.IUpdates
         writer.Write(Id);
         writer.Write(RandomId);
         writer.Write(ToPeer);
-        if (Flags[9]) { writer.Write(TopMsgId.Value); }
-        if (Flags[22]) { writer.Write(ReplyTo); }
-        if (Flags[10]) { writer.Write(ScheduleDate.Value); }
-        if (Flags[13]) { writer.Write(SendAs); }
-        if (Flags[17]) { writer.Write(QuickReplyShortcut); }
-        if (Flags[20]) { writer.Write(VideoTimestamp.Value); }
-        if (Flags[21]) { writer.Write(AllowPaidStars.Value); }
+        if (Flags.IsBitSet(9)) { writer.Write(TopMsgId.Value); }
+        if (Flags.IsBitSet(22)) { writer.Write(ReplyTo); }
+        if (Flags.IsBitSet(10)) { writer.Write(ScheduleDate.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(SendAs); }
+        if (Flags.IsBitSet(17)) { writer.Write(QuickReplyShortcut); }
+        if (Flags.IsBitSet(20)) { writer.Write(VideoTimestamp.Value); }
+        if (Flags.IsBitSet(21)) { writer.Write(AllowPaidStars.Value); }
+        if (Flags.IsBitSet(23)) { writer.Write(SuggestedPost); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[5]) { Silent = true; }
-        if (Flags[6]) { Background = true; }
-        if (Flags[8]) { WithMyScore = true; }
-        if (Flags[11]) { DropAuthor = true; }
-        if (Flags[12]) { DropMediaCaptions = true; }
-        if (Flags[14]) { Noforwards = true; }
-        if (Flags[19]) { AllowPaidFloodskip = true; }
-        FromPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.Read<TVector<int>>();
-        RandomId = reader.Read<TVector<long>>();
-        ToPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[9]) { TopMsgId = reader.ReadInt32(); }
-        if (Flags[22]) { ReplyTo = reader.Read<MyTelegram.Schema.IInputReplyTo>(); }
-        if (Flags[10]) { ScheduleDate = reader.ReadInt32(); }
-        if (Flags[13]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[17]) { QuickReplyShortcut = reader.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }
-        if (Flags[20]) { VideoTimestamp = reader.ReadInt32(); }
-        if (Flags[21]) { AllowPaidStars = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(5)) { Silent = true; }
+        if (Flags.IsBitSet(6)) { Background = true; }
+        if (Flags.IsBitSet(8)) { WithMyScore = true; }
+        if (Flags.IsBitSet(11)) { DropAuthor = true; }
+        if (Flags.IsBitSet(12)) { DropMediaCaptions = true; }
+        if (Flags.IsBitSet(14)) { Noforwards = true; }
+        if (Flags.IsBitSet(19)) { AllowPaidFloodskip = true; }
+        FromPeer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.Read<TVector<int>>();
+        RandomId = buffer.Read<TVector<long>>();
+        ToPeer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(9)) { TopMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(22)) { ReplyTo = buffer.Read<MyTelegram.Schema.IInputReplyTo>(); }
+        if (Flags.IsBitSet(10)) { ScheduleDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(13)) { SendAs = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(17)) { QuickReplyShortcut = buffer.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }
+        if (Flags.IsBitSet(20)) { VideoTimestamp = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(21)) { AllowPaidStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(23)) { SuggestedPost = buffer.Read<MyTelegram.Schema.ISuggestedPost>(); }
     }
 }

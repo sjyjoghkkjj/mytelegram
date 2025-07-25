@@ -36,9 +36,9 @@ public sealed class TPageBlockBlockquote : IPageBlock
         writer.Write(Caption);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.Read<MyTelegram.Schema.IRichText>();
-        Caption = reader.Read<MyTelegram.Schema.IRichText>();
+        Text = buffer.Read<MyTelegram.Schema.IRichText>();
+        Caption = buffer.Read<MyTelegram.Schema.IRichText>();
     }
 }

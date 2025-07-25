@@ -13,7 +13,7 @@ public sealed class RequestUpdateStarRefProgram : IRequest<MyTelegram.Schema.ISt
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -33,7 +33,7 @@ public sealed class RequestUpdateStarRefProgram : IRequest<MyTelegram.Schema.ISt
 
     public void ComputeFlag()
     {
-        if (/*DurationMonths != 0 && */DurationMonths.HasValue) { Flags[0] = true; }
+        if (/*DurationMonths != 0 && */DurationMonths.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -43,14 +43,14 @@ public sealed class RequestUpdateStarRefProgram : IRequest<MyTelegram.Schema.ISt
         writer.Write(Flags);
         writer.Write(Bot);
         writer.Write(CommissionPermille);
-        if (Flags[0]) { writer.Write(DurationMonths.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(DurationMonths.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        CommissionPermille = reader.ReadInt32();
-        if (Flags[0]) { DurationMonths = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        CommissionPermille = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { DurationMonths = buffer.ReadInt32(); }
     }
 }

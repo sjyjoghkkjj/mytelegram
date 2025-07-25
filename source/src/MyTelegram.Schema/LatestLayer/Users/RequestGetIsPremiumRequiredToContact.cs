@@ -28,8 +28,8 @@ public sealed class RequestGetIsPremiumRequiredToContact : IRequest<TVector<bool
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<TVector<MyTelegram.Schema.IInputUser>>();
+        Id = buffer.Read<TVector<MyTelegram.Schema.IInputUser>>();
     }
 }

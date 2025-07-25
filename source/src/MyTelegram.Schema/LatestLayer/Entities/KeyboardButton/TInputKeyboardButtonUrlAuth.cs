@@ -14,7 +14,7 @@ public sealed class TInputKeyboardButtonUrlAuth : IKeyboardButton
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Set this flag to request the permission for your bot to send messages to the user.
@@ -45,8 +45,8 @@ public sealed class TInputKeyboardButtonUrlAuth : IKeyboardButton
 
     public void ComputeFlag()
     {
-        if (RequestWriteAccess) { Flags[0] = true; }
-        if (FwdText != null) { Flags[1] = true; }
+        if (RequestWriteAccess) { Flags = Flags.SetBit(0); }
+        if (FwdText != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -56,18 +56,18 @@ public sealed class TInputKeyboardButtonUrlAuth : IKeyboardButton
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Text);
-        if (Flags[1]) { writer.Write(FwdText); }
+        if (Flags.IsBitSet(1)) { writer.Write(FwdText); }
         writer.Write(Url);
         writer.Write(Bot);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { RequestWriteAccess = true; }
-        Text = reader.ReadString();
-        if (Flags[1]) { FwdText = reader.ReadString(); }
-        Url = reader.ReadString();
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { RequestWriteAccess = true; }
+        Text = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { FwdText = buffer.ReadString(); }
+        Url = buffer.ReadString();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

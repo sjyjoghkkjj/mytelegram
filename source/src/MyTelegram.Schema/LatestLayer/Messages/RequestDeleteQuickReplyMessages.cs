@@ -37,9 +37,9 @@ public sealed class RequestDeleteQuickReplyMessages : IRequest<MyTelegram.Schema
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ShortcutId = reader.ReadInt32();
-        Id = reader.Read<TVector<int>>();
+        ShortcutId = buffer.ReadInt32();
+        Id = buffer.Read<TVector<int>>();
     }
 }

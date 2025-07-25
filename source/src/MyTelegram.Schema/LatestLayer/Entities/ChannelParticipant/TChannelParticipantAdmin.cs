@@ -14,7 +14,7 @@ public sealed class TChannelParticipantAdmin : IChannelParticipant
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Can this admin promote other admins with the same permissions?
@@ -61,10 +61,10 @@ public sealed class TChannelParticipantAdmin : IChannelParticipant
 
     public void ComputeFlag()
     {
-        if (CanEdit) { Flags[0] = true; }
-        if (Self) { Flags[1] = true; }
-        if (/*InviterId != 0 &&*/ InviterId.HasValue) { Flags[1] = true; }
-        if (Rank != null) { Flags[2] = true; }
+        if (CanEdit) { Flags = Flags.SetBit(0); }
+        if (Self) { Flags = Flags.SetBit(1); }
+        if (/*InviterId != 0 &&*/ InviterId.HasValue) { Flags = Flags.SetBit(1); }
+        if (Rank != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -73,23 +73,23 @@ public sealed class TChannelParticipantAdmin : IChannelParticipant
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(UserId);
-        if (Flags[1]) { writer.Write(InviterId.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(InviterId.Value); }
         writer.Write(PromotedBy);
         writer.Write(Date);
         writer.Write(AdminRights);
-        if (Flags[2]) { writer.Write(Rank); }
+        if (Flags.IsBitSet(2)) { writer.Write(Rank); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { CanEdit = true; }
-        if (Flags[1]) { Self = true; }
-        UserId = reader.ReadInt64();
-        if (Flags[1]) { InviterId = reader.ReadInt64(); }
-        PromotedBy = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        AdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>();
-        if (Flags[2]) { Rank = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { CanEdit = true; }
+        if (Flags.IsBitSet(1)) { Self = true; }
+        UserId = buffer.ReadInt64();
+        if (Flags.IsBitSet(1)) { InviterId = buffer.ReadInt64(); }
+        PromotedBy = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        AdminRights = buffer.Read<MyTelegram.Schema.IChatAdminRights>();
+        if (Flags.IsBitSet(2)) { Rank = buffer.ReadString(); }
     }
 }

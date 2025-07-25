@@ -34,9 +34,9 @@ public sealed class RequestGetTopReactions : IRequest<MyTelegram.Schema.Messages
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Limit = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Limit = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

@@ -40,10 +40,10 @@ public sealed class TChatAdminWithInvites : IChatAdminWithInvites
         writer.Write(RevokedInvitesCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        AdminId = reader.ReadInt64();
-        InvitesCount = reader.ReadInt32();
-        RevokedInvitesCount = reader.ReadInt32();
+        AdminId = buffer.ReadInt64();
+        InvitesCount = buffer.ReadInt32();
+        RevokedInvitesCount = buffer.ReadInt32();
     }
 }

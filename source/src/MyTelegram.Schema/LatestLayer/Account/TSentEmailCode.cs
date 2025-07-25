@@ -34,9 +34,9 @@ public sealed class TSentEmailCode : ISentEmailCode
         writer.Write(Length);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        EmailPattern = reader.ReadString();
-        Length = reader.ReadInt32();
+        EmailPattern = buffer.ReadString();
+        Length = buffer.ReadInt32();
     }
 }

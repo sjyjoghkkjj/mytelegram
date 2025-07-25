@@ -35,9 +35,9 @@ public sealed class TMessageActionGroupCallScheduled : IMessageAction
         writer.Write(ScheduleDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        ScheduleDate = reader.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        ScheduleDate = buffer.ReadInt32();
     }
 }

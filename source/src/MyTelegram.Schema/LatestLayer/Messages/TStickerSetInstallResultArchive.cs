@@ -28,8 +28,8 @@ public sealed class TStickerSetInstallResultArchive : IStickerSetInstallResult
         writer.Write(Sets);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Sets = reader.Read<TVector<MyTelegram.Schema.IStickerSetCovered>>();
+        Sets = buffer.Read<TVector<MyTelegram.Schema.IStickerSetCovered>>();
     }
 }

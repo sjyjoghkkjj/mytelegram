@@ -29,8 +29,8 @@ public sealed class TInputPaymentCredentialsGooglePay : IInputPaymentCredentials
         writer.Write(PaymentToken);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PaymentToken = reader.Read<MyTelegram.Schema.IDataJSON>();
+        PaymentToken = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

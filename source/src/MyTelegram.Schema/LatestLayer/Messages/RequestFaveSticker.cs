@@ -39,9 +39,9 @@ public sealed class RequestFaveSticker : IRequest<IBool>
         writer.Write(Unfave);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<MyTelegram.Schema.IInputDocument>();
-        Unfave = reader.Read();
+        Id = buffer.Read<MyTelegram.Schema.IInputDocument>();
+        Unfave = buffer.Read();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TInputBotInlineMessageMediaInvoice : IInputBotInlineMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Product name, 1-32 characters
@@ -41,7 +41,7 @@ public sealed class TInputBotInlineMessageMediaInvoice : IInputBotInlineMessage
     ///<summary>
     /// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
     ///</summary>
-    public byte[] Payload { get; set; }
+    public ReadOnlyMemory<byte> Payload { get; set; }
 
     ///<summary>
     /// Payments provider token, obtained via <a href="https://t.me/botfather">Botfather</a>
@@ -62,8 +62,8 @@ public sealed class TInputBotInlineMessageMediaInvoice : IInputBotInlineMessage
 
     public void ComputeFlag()
     {
-        if (Photo != null) { Flags[0] = true; }
-        if (ReplyMarkup != null) { Flags[2] = true; }
+        if (Photo != null) { Flags = Flags.SetBit(0); }
+        if (ReplyMarkup != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -73,24 +73,24 @@ public sealed class TInputBotInlineMessageMediaInvoice : IInputBotInlineMessage
         writer.Write(Flags);
         writer.Write(Title);
         writer.Write(Description);
-        if (Flags[0]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(0)) { writer.Write(Photo); }
         writer.Write(Invoice);
         writer.Write(Payload);
         writer.Write(Provider);
         writer.Write(ProviderData);
-        if (Flags[2]) { writer.Write(ReplyMarkup); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        if (Flags[0]) { Photo = reader.Read<MyTelegram.Schema.IInputWebDocument>(); }
-        Invoice = reader.Read<MyTelegram.Schema.IInvoice>();
-        Payload = reader.ReadBytes();
-        Provider = reader.ReadString();
-        ProviderData = reader.Read<MyTelegram.Schema.IDataJSON>();
-        if (Flags[2]) { ReplyMarkup = reader.Read<MyTelegram.Schema.IReplyMarkup>(); }
+        Flags = buffer.ReadInt32();
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Photo = buffer.Read<MyTelegram.Schema.IInputWebDocument>(); }
+        Invoice = buffer.Read<MyTelegram.Schema.IInvoice>();
+        Payload = buffer.ReadBytes();
+        Provider = buffer.ReadString();
+        ProviderData = buffer.Read<MyTelegram.Schema.IDataJSON>();
+        if (Flags.IsBitSet(2)) { ReplyMarkup = buffer.Read<MyTelegram.Schema.IReplyMarkup>(); }
     }
 }

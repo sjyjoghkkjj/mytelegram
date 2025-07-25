@@ -36,8 +36,8 @@ public sealed class RequestGetFullUser : IRequest<MyTelegram.Schema.Users.IUserF
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<MyTelegram.Schema.IInputUser>();
+        Id = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

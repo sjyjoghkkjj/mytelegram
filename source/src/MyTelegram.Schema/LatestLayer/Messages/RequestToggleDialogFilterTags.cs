@@ -32,8 +32,8 @@ public sealed class RequestToggleDialogFilterTags : IRequest<IBool>
         writer.Write(Enabled);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Enabled = reader.Read();
+        Enabled = buffer.Read();
     }
 }

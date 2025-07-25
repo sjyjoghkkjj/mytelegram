@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionChangeEmojiStickerSet : IChannelA
         writer.Write(NewStickerset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevStickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
-        NewStickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
+        PrevStickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
+        NewStickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
     }
 }

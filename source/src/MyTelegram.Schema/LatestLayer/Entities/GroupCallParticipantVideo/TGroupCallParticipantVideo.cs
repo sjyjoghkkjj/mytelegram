@@ -14,7 +14,7 @@ public sealed class TGroupCallParticipantVideo : IGroupCallParticipantVideo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the stream is currently paused
@@ -39,8 +39,8 @@ public sealed class TGroupCallParticipantVideo : IGroupCallParticipantVideo
 
     public void ComputeFlag()
     {
-        if (Paused) { Flags[0] = true; }
-        if (/*AudioSource != 0 && */AudioSource.HasValue) { Flags[1] = true; }
+        if (Paused) { Flags = Flags.SetBit(0); }
+        if (/*AudioSource != 0 && */AudioSource.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,15 +50,15 @@ public sealed class TGroupCallParticipantVideo : IGroupCallParticipantVideo
         writer.Write(Flags);
         writer.Write(Endpoint);
         writer.Write(SourceGroups);
-        if (Flags[1]) { writer.Write(AudioSource.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(AudioSource.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Paused = true; }
-        Endpoint = reader.ReadString();
-        SourceGroups = reader.Read<TVector<MyTelegram.Schema.IGroupCallParticipantVideoSourceGroup>>();
-        if (Flags[1]) { AudioSource = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Paused = true; }
+        Endpoint = buffer.ReadString();
+        SourceGroups = buffer.Read<TVector<MyTelegram.Schema.IGroupCallParticipantVideoSourceGroup>>();
+        if (Flags.IsBitSet(1)) { AudioSource = buffer.ReadInt32(); }
     }
 }

@@ -40,10 +40,10 @@ public sealed class TFavedStickers : IFavedStickers
         writer.Write(Stickers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Packs = reader.Read<TVector<MyTelegram.Schema.IStickerPack>>();
-        Stickers = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
+        Hash = buffer.ReadInt64();
+        Packs = buffer.Read<TVector<MyTelegram.Schema.IStickerPack>>();
+        Stickers = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
     }
 }

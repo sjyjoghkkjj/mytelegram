@@ -34,9 +34,9 @@ public sealed class TAllStickers : IAllStickers
         writer.Write(Sets);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Sets = reader.Read<TVector<MyTelegram.Schema.IStickerSet>>();
+        Hash = buffer.ReadInt64();
+        Sets = buffer.Read<TVector<MyTelegram.Schema.IStickerSet>>();
     }
 }

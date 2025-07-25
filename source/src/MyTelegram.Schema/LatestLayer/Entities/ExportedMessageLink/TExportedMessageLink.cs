@@ -34,9 +34,9 @@ public sealed class TExportedMessageLink : IExportedMessageLink
         writer.Write(Html);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Link = reader.ReadString();
-        Html = reader.ReadString();
+        Link = buffer.ReadString();
+        Html = buffer.ReadString();
     }
 }

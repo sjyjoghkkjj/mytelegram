@@ -34,9 +34,9 @@ public sealed class TWebAuthorizations : IWebAuthorizations
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Authorizations = reader.Read<TVector<MyTelegram.Schema.IWebAuthorization>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Authorizations = buffer.Read<TVector<MyTelegram.Schema.IWebAuthorization>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

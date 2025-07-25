@@ -12,7 +12,7 @@ public interface IBoostsStatus : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether we're currently boosting this channel/supergroup, <code>my_boost_slots</code> will also be set.
