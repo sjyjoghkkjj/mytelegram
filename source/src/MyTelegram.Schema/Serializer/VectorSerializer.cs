@@ -12,21 +12,17 @@ public class VectorSerializer<T> : ISerializer<TVector<T>>
         }
     }
 
-    public TVector<T> Deserialize(ref SequenceReader<byte> reader)
+    public TVector<T> Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        if (reader.TryReadLittleEndian(out int count))
+        var count = buffer.ReadInt32();
+        var serializer = SerializerFactory.CreateSerializer<T>();
+        var result = new TVector<T>();
+        for (var i = 0; i < count; i++)
         {
-            var serializer = SerializerFactory.CreateSerializer<T>();
-            var result = new TVector<T>();
-            for (int i = 0; i < count; i++)
-            {
-                var item = serializer.Deserialize(ref reader);
-                result.Add(item);
-            }
-
-            return result;
+            var item = serializer.Deserialize(ref buffer);
+            result.Add(item);
         }
 
-        throw new ArgumentException("Read vector count failed.");
+        return result;
     }
 }

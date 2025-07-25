@@ -18,4 +18,12 @@ public class Int512Serializer : ISerializer<byte[]>
 
         return data;
     }
+
+    public byte[] Deserialize(ref ReadOnlyMemory<byte> buffer)
+    {
+        var value = buffer.Slice(0, 64);
+        buffer = buffer[64..];
+
+        return value.ToArray();
+    }
 }

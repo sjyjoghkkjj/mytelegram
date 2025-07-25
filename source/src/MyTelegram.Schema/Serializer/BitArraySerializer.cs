@@ -1,22 +1,7 @@
-﻿using System;
-
-namespace MyTelegram.Schema.Serializer;
+﻿namespace MyTelegram.Schema.Serializer;
 
 public class BitArraySerializer : ISerializer<BitArray>
 {
-    //public void Serialize(BitArray value,
-    //    BinaryWriter writer)
-    //{
-    //    var data = new byte[(value.Length - 1) / 8 + 1];
-    //    value.CopyTo(data, 0);
-    //    writer.Write(data);
-    //}
-
-    //public BitArray Deserialize(BinaryReader reader)
-    //{
-    //    return new(reader.ReadBytes(4));
-    //}
-
     public void Serialize(BitArray value,
         IBufferWriter<byte> writer)
     {
@@ -25,21 +10,13 @@ public class BitArraySerializer : ISerializer<BitArray>
         writer.WriteRawBytes(data);
     }
 
-    public BitArray Deserialize(ref SequenceReader<byte> reader)
+    public BitArray Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
         var data = new byte[4];
-        reader.TryCopyTo(data);
-        reader.Advance(4);
-
-        return new BitArray(data);
+        buffer.CopyTo(data);
+        var value = new BitArray(data);
+        buffer = buffer[4..];
+        
+        return value;
     }
-
-    //public BitArray Deserialize(ref ReadOnlySequence<byte> buffer)
-    //{
-    //    byte[] bytes = new byte[4];
-    //    buffer.CopyTo(bytes);
-    //    buffer = buffer.Slice(4);
-
-    //    return new BitArray(bytes);
-    //}
 }
