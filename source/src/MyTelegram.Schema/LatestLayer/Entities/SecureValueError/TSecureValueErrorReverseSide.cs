@@ -20,7 +20,7 @@ public sealed class TSecureValueErrorReverseSide : ISecureValueError
     ///<summary>
     /// File hash
     ///</summary>
-    public byte[] FileHash { get; set; }
+    public ReadOnlyMemory<byte> FileHash { get; set; }
 
     ///<summary>
     /// Error message
@@ -41,10 +41,10 @@ public sealed class TSecureValueErrorReverseSide : ISecureValueError
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Type = reader.Read<MyTelegram.Schema.ISecureValueType>();
-        FileHash = reader.ReadBytes();
-        Text = reader.ReadString();
+        Type = buffer.Read<MyTelegram.Schema.ISecureValueType>();
+        FileHash = buffer.ReadBytes();
+        Text = buffer.ReadString();
     }
 }

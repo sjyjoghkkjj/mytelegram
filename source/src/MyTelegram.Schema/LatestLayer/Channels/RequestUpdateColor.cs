@@ -18,7 +18,7 @@ public sealed class RequestUpdateColor : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to change the accent color emoji pattern of the profile page; otherwise, the accent color and emoji pattern of messages will be changed. <br>Channels can change both message and profile palettes; supergroups can only change the profile palette, of course after reaching the <a href="https://corefork.telegram.org/api/colors">appropriate boost level</a>.
@@ -44,9 +44,9 @@ public sealed class RequestUpdateColor : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (ForProfile) { Flags[1] = true; }
-        if (/*Color != 0 && */Color.HasValue) { Flags[2] = true; }
-        if (/*BackgroundEmojiId != 0 &&*/ BackgroundEmojiId.HasValue) { Flags[0] = true; }
+        if (ForProfile) { Flags = Flags.SetBit(1); }
+        if (/*Color != 0 && */Color.HasValue) { Flags = Flags.SetBit(2); }
+        if (/*BackgroundEmojiId != 0 &&*/ BackgroundEmojiId.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,16 +55,16 @@ public sealed class RequestUpdateColor : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Channel);
-        if (Flags[2]) { writer.Write(Color.Value); }
-        if (Flags[0]) { writer.Write(BackgroundEmojiId.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(Color.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(BackgroundEmojiId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { ForProfile = true; }
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        if (Flags[2]) { Color = reader.ReadInt32(); }
-        if (Flags[0]) { BackgroundEmojiId = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { ForProfile = true; }
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        if (Flags.IsBitSet(2)) { Color = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { BackgroundEmojiId = buffer.ReadInt64(); }
     }
 }

@@ -14,7 +14,7 @@ public sealed class TWebPageAttributeStory : IWebPageAttribute
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Peer that posted the story
@@ -35,7 +35,7 @@ public sealed class TWebPageAttributeStory : IWebPageAttribute
 
     public void ComputeFlag()
     {
-        if (Story != null) { Flags[0] = true; }
+        if (Story != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -45,14 +45,14 @@ public sealed class TWebPageAttributeStory : IWebPageAttribute
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Id);
-        if (Flags[0]) { writer.Write(Story); }
+        if (Flags.IsBitSet(0)) { writer.Write(Story); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Id = reader.ReadInt32();
-        if (Flags[0]) { Story = reader.Read<MyTelegram.Schema.IStoryItem>(); }
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Id = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Story = buffer.Read<MyTelegram.Schema.IStoryItem>(); }
     }
 }

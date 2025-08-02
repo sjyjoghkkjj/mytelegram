@@ -14,7 +14,7 @@ public sealed class TStarGift : IStarGift
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a limited-supply gift.
@@ -81,17 +81,17 @@ public sealed class TStarGift : IStarGift
 
     public void ComputeFlag()
     {
-        if (Limited) { Flags[0] = true; }
-        if (SoldOut) { Flags[1] = true; }
-        if (Birthday) { Flags[2] = true; }
-        if (/*AvailabilityRemains != 0 && */AvailabilityRemains.HasValue) { Flags[0] = true; }
-        if (/*AvailabilityTotal != 0 && */AvailabilityTotal.HasValue) { Flags[0] = true; }
-        if (/*AvailabilityResale != 0 &&*/ AvailabilityResale.HasValue) { Flags[4] = true; }
-        if (/*FirstSaleDate != 0 && */FirstSaleDate.HasValue) { Flags[1] = true; }
-        if (/*LastSaleDate != 0 && */LastSaleDate.HasValue) { Flags[1] = true; }
-        if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags[3] = true; }
-        if (/*ResellMinStars != 0 &&*/ ResellMinStars.HasValue) { Flags[4] = true; }
-        if (Title != null) { Flags[5] = true; }
+        if (Limited) { Flags = Flags.SetBit(0); }
+        if (SoldOut) { Flags = Flags.SetBit(1); }
+        if (Birthday) { Flags = Flags.SetBit(2); }
+        if (/*AvailabilityRemains != 0 && */AvailabilityRemains.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*AvailabilityTotal != 0 && */AvailabilityTotal.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*AvailabilityResale != 0 &&*/ AvailabilityResale.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*FirstSaleDate != 0 && */FirstSaleDate.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*LastSaleDate != 0 && */LastSaleDate.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*ResellMinStars != 0 &&*/ ResellMinStars.HasValue) { Flags = Flags.SetBit(4); }
+        if (Title != null) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -102,34 +102,34 @@ public sealed class TStarGift : IStarGift
         writer.Write(Id);
         writer.Write(Sticker);
         writer.Write(Stars);
-        if (Flags[0]) { writer.Write(AvailabilityRemains.Value); }
-        if (Flags[0]) { writer.Write(AvailabilityTotal.Value); }
-        if (Flags[4]) { writer.Write(AvailabilityResale.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(AvailabilityRemains.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(AvailabilityTotal.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(AvailabilityResale.Value); }
         writer.Write(ConvertStars);
-        if (Flags[1]) { writer.Write(FirstSaleDate.Value); }
-        if (Flags[1]) { writer.Write(LastSaleDate.Value); }
-        if (Flags[3]) { writer.Write(UpgradeStars.Value); }
-        if (Flags[4]) { writer.Write(ResellMinStars.Value); }
-        if (Flags[5]) { writer.Write(Title); }
+        if (Flags.IsBitSet(1)) { writer.Write(FirstSaleDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(LastSaleDate.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(UpgradeStars.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(ResellMinStars.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(Title); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Limited = true; }
-        if (Flags[1]) { SoldOut = true; }
-        if (Flags[2]) { Birthday = true; }
-        Id = reader.ReadInt64();
-        Sticker = reader.Read<MyTelegram.Schema.IDocument>();
-        Stars = reader.ReadInt64();
-        if (Flags[0]) { AvailabilityRemains = reader.ReadInt32(); }
-        if (Flags[0]) { AvailabilityTotal = reader.ReadInt32(); }
-        if (Flags[4]) { AvailabilityResale = reader.ReadInt64(); }
-        ConvertStars = reader.ReadInt64();
-        if (Flags[1]) { FirstSaleDate = reader.ReadInt32(); }
-        if (Flags[1]) { LastSaleDate = reader.ReadInt32(); }
-        if (Flags[3]) { UpgradeStars = reader.ReadInt64(); }
-        if (Flags[4]) { ResellMinStars = reader.ReadInt64(); }
-        if (Flags[5]) { Title = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Limited = true; }
+        if (Flags.IsBitSet(1)) { SoldOut = true; }
+        if (Flags.IsBitSet(2)) { Birthday = true; }
+        Id = buffer.ReadInt64();
+        Sticker = buffer.Read<MyTelegram.Schema.IDocument>();
+        Stars = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { AvailabilityRemains = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { AvailabilityTotal = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { AvailabilityResale = buffer.ReadInt64(); }
+        ConvertStars = buffer.ReadInt64();
+        if (Flags.IsBitSet(1)) { FirstSaleDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { LastSaleDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { UpgradeStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(4)) { ResellMinStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(5)) { Title = buffer.ReadString(); }
     }
 }

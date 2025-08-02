@@ -14,7 +14,7 @@ public sealed class TChannelAdminLogEventsFilter : IChannelAdminLogEventsFilter
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/constructor/channelAdminLogEventActionParticipantJoin">Join events</a>, including <a href="https://corefork.telegram.org/constructor/channelAdminLogEventActionParticipantJoinByInvite">joins using invite links</a> and <a href="https://corefork.telegram.org/constructor/channelAdminLogEventActionParticipantJoinByRequest">join requests</a>.
@@ -132,25 +132,25 @@ public sealed class TChannelAdminLogEventsFilter : IChannelAdminLogEventsFilter
 
     public void ComputeFlag()
     {
-        if (Join) { Flags[0] = true; }
-        if (Leave) { Flags[1] = true; }
-        if (Invite) { Flags[2] = true; }
-        if (Ban) { Flags[3] = true; }
-        if (Unban) { Flags[4] = true; }
-        if (Kick) { Flags[5] = true; }
-        if (Unkick) { Flags[6] = true; }
-        if (Promote) { Flags[7] = true; }
-        if (Demote) { Flags[8] = true; }
-        if (Info) { Flags[9] = true; }
-        if (Settings) { Flags[10] = true; }
-        if (Pinned) { Flags[11] = true; }
-        if (Edit) { Flags[12] = true; }
-        if (Delete) { Flags[13] = true; }
-        if (GroupCall) { Flags[14] = true; }
-        if (Invites) { Flags[15] = true; }
-        if (Send) { Flags[16] = true; }
-        if (Forums) { Flags[17] = true; }
-        if (SubExtend) { Flags[18] = true; }
+        if (Join) { Flags = Flags.SetBit(0); }
+        if (Leave) { Flags = Flags.SetBit(1); }
+        if (Invite) { Flags = Flags.SetBit(2); }
+        if (Ban) { Flags = Flags.SetBit(3); }
+        if (Unban) { Flags = Flags.SetBit(4); }
+        if (Kick) { Flags = Flags.SetBit(5); }
+        if (Unkick) { Flags = Flags.SetBit(6); }
+        if (Promote) { Flags = Flags.SetBit(7); }
+        if (Demote) { Flags = Flags.SetBit(8); }
+        if (Info) { Flags = Flags.SetBit(9); }
+        if (Settings) { Flags = Flags.SetBit(10); }
+        if (Pinned) { Flags = Flags.SetBit(11); }
+        if (Edit) { Flags = Flags.SetBit(12); }
+        if (Delete) { Flags = Flags.SetBit(13); }
+        if (GroupCall) { Flags = Flags.SetBit(14); }
+        if (Invites) { Flags = Flags.SetBit(15); }
+        if (Send) { Flags = Flags.SetBit(16); }
+        if (Forums) { Flags = Flags.SetBit(17); }
+        if (SubExtend) { Flags = Flags.SetBit(18); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -161,27 +161,27 @@ public sealed class TChannelAdminLogEventsFilter : IChannelAdminLogEventsFilter
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Join = true; }
-        if (Flags[1]) { Leave = true; }
-        if (Flags[2]) { Invite = true; }
-        if (Flags[3]) { Ban = true; }
-        if (Flags[4]) { Unban = true; }
-        if (Flags[5]) { Kick = true; }
-        if (Flags[6]) { Unkick = true; }
-        if (Flags[7]) { Promote = true; }
-        if (Flags[8]) { Demote = true; }
-        if (Flags[9]) { Info = true; }
-        if (Flags[10]) { Settings = true; }
-        if (Flags[11]) { Pinned = true; }
-        if (Flags[12]) { Edit = true; }
-        if (Flags[13]) { Delete = true; }
-        if (Flags[14]) { GroupCall = true; }
-        if (Flags[15]) { Invites = true; }
-        if (Flags[16]) { Send = true; }
-        if (Flags[17]) { Forums = true; }
-        if (Flags[18]) { SubExtend = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Join = true; }
+        if (Flags.IsBitSet(1)) { Leave = true; }
+        if (Flags.IsBitSet(2)) { Invite = true; }
+        if (Flags.IsBitSet(3)) { Ban = true; }
+        if (Flags.IsBitSet(4)) { Unban = true; }
+        if (Flags.IsBitSet(5)) { Kick = true; }
+        if (Flags.IsBitSet(6)) { Unkick = true; }
+        if (Flags.IsBitSet(7)) { Promote = true; }
+        if (Flags.IsBitSet(8)) { Demote = true; }
+        if (Flags.IsBitSet(9)) { Info = true; }
+        if (Flags.IsBitSet(10)) { Settings = true; }
+        if (Flags.IsBitSet(11)) { Pinned = true; }
+        if (Flags.IsBitSet(12)) { Edit = true; }
+        if (Flags.IsBitSet(13)) { Delete = true; }
+        if (Flags.IsBitSet(14)) { GroupCall = true; }
+        if (Flags.IsBitSet(15)) { Invites = true; }
+        if (Flags.IsBitSet(16)) { Send = true; }
+        if (Flags.IsBitSet(17)) { Forums = true; }
+        if (Flags.IsBitSet(18)) { SubExtend = true; }
     }
 }

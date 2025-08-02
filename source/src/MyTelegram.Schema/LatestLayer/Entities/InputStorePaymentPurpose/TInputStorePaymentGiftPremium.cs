@@ -41,10 +41,10 @@ public sealed class TInputStorePaymentGiftPremium : IInputStorePaymentPurpose
         writer.Write(Amount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
     }
 }

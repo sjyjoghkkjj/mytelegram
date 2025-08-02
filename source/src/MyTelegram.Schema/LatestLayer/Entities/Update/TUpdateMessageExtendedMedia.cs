@@ -41,10 +41,10 @@ public sealed class TUpdateMessageExtendedMedia : IUpdate
         writer.Write(ExtendedMedia);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        MsgId = reader.ReadInt32();
-        ExtendedMedia = reader.Read<TVector<MyTelegram.Schema.IMessageExtendedMedia>>();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        MsgId = buffer.ReadInt32();
+        ExtendedMedia = buffer.Read<TVector<MyTelegram.Schema.IMessageExtendedMedia>>();
     }
 }

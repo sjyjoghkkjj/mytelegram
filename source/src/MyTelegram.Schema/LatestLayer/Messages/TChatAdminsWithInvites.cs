@@ -34,9 +34,9 @@ public sealed class TChatAdminsWithInvites : IChatAdminsWithInvites
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Admins = reader.Read<TVector<MyTelegram.Schema.IChatAdminWithInvites>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Admins = buffer.Read<TVector<MyTelegram.Schema.IChatAdminWithInvites>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

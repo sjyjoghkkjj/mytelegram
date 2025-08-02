@@ -17,7 +17,7 @@ public sealed class RequestInitTakeoutSession : IRequest<MyTelegram.Schema.Accou
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to export contacts
@@ -62,13 +62,13 @@ public sealed class RequestInitTakeoutSession : IRequest<MyTelegram.Schema.Accou
 
     public void ComputeFlag()
     {
-        if (Contacts) { Flags[0] = true; }
-        if (MessageUsers) { Flags[1] = true; }
-        if (MessageChats) { Flags[2] = true; }
-        if (MessageMegagroups) { Flags[3] = true; }
-        if (MessageChannels) { Flags[4] = true; }
-        if (Files) { Flags[5] = true; }
-        if (/*FileMaxSize != 0 &&*/ FileMaxSize.HasValue) { Flags[5] = true; }
+        if (Contacts) { Flags = Flags.SetBit(0); }
+        if (MessageUsers) { Flags = Flags.SetBit(1); }
+        if (MessageChats) { Flags = Flags.SetBit(2); }
+        if (MessageMegagroups) { Flags = Flags.SetBit(3); }
+        if (MessageChannels) { Flags = Flags.SetBit(4); }
+        if (Files) { Flags = Flags.SetBit(5); }
+        if (/*FileMaxSize != 0 &&*/ FileMaxSize.HasValue) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -76,18 +76,18 @@ public sealed class RequestInitTakeoutSession : IRequest<MyTelegram.Schema.Accou
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[5]) { writer.Write(FileMaxSize.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(FileMaxSize.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Contacts = true; }
-        if (Flags[1]) { MessageUsers = true; }
-        if (Flags[2]) { MessageChats = true; }
-        if (Flags[3]) { MessageMegagroups = true; }
-        if (Flags[4]) { MessageChannels = true; }
-        if (Flags[5]) { Files = true; }
-        if (Flags[5]) { FileMaxSize = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Contacts = true; }
+        if (Flags.IsBitSet(1)) { MessageUsers = true; }
+        if (Flags.IsBitSet(2)) { MessageChats = true; }
+        if (Flags.IsBitSet(3)) { MessageMegagroups = true; }
+        if (Flags.IsBitSet(4)) { MessageChannels = true; }
+        if (Flags.IsBitSet(5)) { Files = true; }
+        if (Flags.IsBitSet(5)) { FileMaxSize = buffer.ReadInt64(); }
     }
 }

@@ -31,8 +31,8 @@ public sealed class RequestCheckHistoryImport : IRequest<MyTelegram.Schema.Messa
         writer.Write(ImportHead);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ImportHead = reader.ReadString();
+        ImportHead = buffer.ReadString();
     }
 }

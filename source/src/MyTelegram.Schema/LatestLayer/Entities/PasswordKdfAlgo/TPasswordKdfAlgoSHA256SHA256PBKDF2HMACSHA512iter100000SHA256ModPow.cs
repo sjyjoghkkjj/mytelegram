@@ -29,7 +29,7 @@ public sealed class TPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256
     ///<summary>
     /// 2048-bit modulus (see <a href="https://corefork.telegram.org/api/srp">SRP 2FA login</a>)
     ///</summary>
-    public byte[] P { get; set; }
+    public ReadOnlyMemory<byte> P { get; set; }
 
     public void ComputeFlag()
     {
@@ -46,11 +46,11 @@ public sealed class TPasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256
         writer.Write(P);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Salt1 = reader.ReadBytes();
-        Salt2 = reader.ReadBytes();
-        G = reader.ReadInt32();
-        P = reader.ReadBytes();
+        Salt1 = buffer.ReadBytes();
+        Salt2 = buffer.ReadBytes();
+        G = buffer.ReadInt32();
+        P = buffer.ReadBytes();
     }
 }

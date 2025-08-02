@@ -10,7 +10,6 @@ public record MessengerDataReceivedEvent(
     long AuthKeyId,
     long PermAuthKeyId,
     ReadOnlyMemory<byte> Data,
-    //byte[] Data,
     int Layer,
     long Date,
     DeviceType DeviceType,

@@ -28,10 +28,10 @@ public sealed class TUpdateReadMonoForumOutbox : IUpdate
         writer.Write(ReadMaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
-        SavedPeerId = reader.Read<MyTelegram.Schema.IPeer>();
-        ReadMaxId = reader.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        SavedPeerId = buffer.Read<MyTelegram.Schema.IPeer>();
+        ReadMaxId = buffer.ReadInt32();
     }
 }

@@ -33,8 +33,8 @@ public sealed class RequestCreateBusinessChatLink : IRequest<MyTelegram.Schema.I
         writer.Write(Link);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Link = reader.Read<MyTelegram.Schema.IInputBusinessChatLink>();
+        Link = buffer.Read<MyTelegram.Schema.IInputBusinessChatLink>();
     }
 }

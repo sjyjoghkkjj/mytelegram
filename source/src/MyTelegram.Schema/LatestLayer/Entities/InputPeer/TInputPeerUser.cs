@@ -34,9 +34,9 @@ public sealed class TInputPeerUser : IInputPeer
         writer.Write(AccessHash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
+        UserId = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
     }
 }

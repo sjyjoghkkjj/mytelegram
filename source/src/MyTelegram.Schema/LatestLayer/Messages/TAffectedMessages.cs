@@ -34,9 +34,9 @@ public sealed class TAffectedMessages : IAffectedMessages
         writer.Write(PtsCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
     }
 }

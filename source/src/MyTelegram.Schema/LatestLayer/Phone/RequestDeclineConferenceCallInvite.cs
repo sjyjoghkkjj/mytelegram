@@ -24,8 +24,8 @@ public sealed class RequestDeclineConferenceCallInvite : IRequest<MyTelegram.Sch
         writer.Write(MsgId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MsgId = reader.ReadInt32();
+        MsgId = buffer.ReadInt32();
     }
 }

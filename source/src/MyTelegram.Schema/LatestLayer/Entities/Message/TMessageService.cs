@@ -7,14 +7,14 @@ namespace MyTelegram.Schema;
 /// Indicates a service message
 /// See <a href="https://corefork.telegram.org/constructor/messageService" />
 ///</summary>
-[TlObject(0xd3d28540)]
-public sealed class TMessageService : ILayeredServiceMessage
+[TlObject(0x7a800e0a)]
+public sealed class TMessageService : MyTelegram.Schema.IMessage, ILayeredServiceMessage
 {
-    public uint ConstructorId => 0xd3d28540;
+    public uint ConstructorId => 0x7a800e0a;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the message is outgoing
@@ -69,6 +69,7 @@ public sealed class TMessageService : ILayeredServiceMessage
     /// See <a href="https://corefork.telegram.org/type/Peer" />
     ///</summary>
     public MyTelegram.Schema.IPeer PeerId { get; set; }
+    public MyTelegram.Schema.IPeer? SavedPeerId { get; set; }
 
     ///<summary>
     /// Reply (thread) information
@@ -95,17 +96,18 @@ public sealed class TMessageService : ILayeredServiceMessage
 
     public void ComputeFlag()
     {
-        if (Out) { Flags[1] = true; }
-        if (Mentioned) { Flags[4] = true; }
-        if (MediaUnread) { Flags[5] = true; }
-        if (ReactionsArePossible) { Flags[9] = true; }
-        if (Silent) { Flags[13] = true; }
-        if (Post) { Flags[14] = true; }
-        if (Legacy) { Flags[19] = true; }
-        if (FromId != null) { Flags[8] = true; }
-        if (ReplyTo != null) { Flags[3] = true; }
-        if (Reactions != null) { Flags[20] = true; }
-        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags[25] = true; }
+        if (Out) { Flags = Flags.SetBit(1); }
+        if (Mentioned) { Flags = Flags.SetBit(4); }
+        if (MediaUnread) { Flags = Flags.SetBit(5); }
+        if (ReactionsArePossible) { Flags = Flags.SetBit(9); }
+        if (Silent) { Flags = Flags.SetBit(13); }
+        if (Post) { Flags = Flags.SetBit(14); }
+        if (Legacy) { Flags = Flags.SetBit(19); }
+        if (FromId != null) { Flags = Flags.SetBit(8); }
+        if (SavedPeerId != null) { Flags = Flags.SetBit(28); }
+        if (ReplyTo != null) { Flags = Flags.SetBit(3); }
+        if (Reactions != null) { Flags = Flags.SetBit(20); }
+        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags = Flags.SetBit(25); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -114,32 +116,34 @@ public sealed class TMessageService : ILayeredServiceMessage
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Id);
-        if (Flags[8]) { writer.Write(FromId); }
+        if (Flags.IsBitSet(8)) { writer.Write(FromId); }
         writer.Write(PeerId);
-        if (Flags[3]) { writer.Write(ReplyTo); }
+        if (Flags.IsBitSet(28)) { writer.Write(SavedPeerId); }
+        if (Flags.IsBitSet(3)) { writer.Write(ReplyTo); }
         writer.Write(Date);
         writer.Write(Action);
-        if (Flags[20]) { writer.Write(Reactions); }
-        if (Flags[25]) { writer.Write(TtlPeriod.Value); }
+        if (Flags.IsBitSet(20)) { writer.Write(Reactions); }
+        if (Flags.IsBitSet(25)) { writer.Write(TtlPeriod.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Out = true; }
-        if (Flags[4]) { Mentioned = true; }
-        if (Flags[5]) { MediaUnread = true; }
-        if (Flags[9]) { ReactionsArePossible = true; }
-        if (Flags[13]) { Silent = true; }
-        if (Flags[14]) { Post = true; }
-        if (Flags[19]) { Legacy = true; }
-        Id = reader.ReadInt32();
-        if (Flags[8]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        PeerId = reader.Read<MyTelegram.Schema.IPeer>();
-        if (Flags[3]) { ReplyTo = reader.Read<MyTelegram.Schema.IMessageReplyHeader>(); }
-        Date = reader.ReadInt32();
-        Action = reader.Read<MyTelegram.Schema.IMessageAction>();
-        if (Flags[20]) { Reactions = reader.Read<MyTelegram.Schema.IMessageReactions>(); }
-        if (Flags[25]) { TtlPeriod = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Out = true; }
+        if (Flags.IsBitSet(4)) { Mentioned = true; }
+        if (Flags.IsBitSet(5)) { MediaUnread = true; }
+        if (Flags.IsBitSet(9)) { ReactionsArePossible = true; }
+        if (Flags.IsBitSet(13)) { Silent = true; }
+        if (Flags.IsBitSet(14)) { Post = true; }
+        if (Flags.IsBitSet(19)) { Legacy = true; }
+        Id = buffer.ReadInt32();
+        if (Flags.IsBitSet(8)) { FromId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        PeerId = buffer.Read<MyTelegram.Schema.IPeer>();
+        if (Flags.IsBitSet(28)) { SavedPeerId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(3)) { ReplyTo = buffer.Read<MyTelegram.Schema.IMessageReplyHeader>(); }
+        Date = buffer.ReadInt32();
+        Action = buffer.Read<MyTelegram.Schema.IMessageAction>();
+        if (Flags.IsBitSet(20)) { Reactions = buffer.Read<MyTelegram.Schema.IMessageReactions>(); }
+        if (Flags.IsBitSet(25)) { TtlPeriod = buffer.ReadInt32(); }
     }
 }

@@ -10,8 +10,8 @@ public class ReqDhParamsHandler(IStep2Helper step2ServerHelper, ILogger<ReqDhPar
     )
     {
         var dto = await step2ServerHelper.GetServerDhParamsAsync(obj);
-        logger.LogDebug(
-            "[Step2] ServerDHParams created, connectionId: {ConnectionId}, reqMsgId: {ReqMsgId}",
+        logger.LogInformation(
+            "[Step2] ReqDhParamsHandler, connectionId: {ConnectionId}, reqMsgId: {ReqMsgId}",
             input.ConnectionId,
             input.ReqMsgId
         );

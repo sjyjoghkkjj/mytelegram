@@ -31,8 +31,8 @@ public sealed class RequestGetBankCardData : IRequest<MyTelegram.Schema.Payments
         writer.Write(Number);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Number = reader.ReadString();
+        Number = buffer.ReadString();
     }
 }

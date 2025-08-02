@@ -33,8 +33,8 @@ public sealed class RequestGetCollectibleInfo : IRequest<MyTelegram.Schema.Fragm
         writer.Write(Collectible);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Collectible = reader.Read<MyTelegram.Schema.IInputCollectible>();
+        Collectible = buffer.Read<MyTelegram.Schema.IInputCollectible>();
     }
 }

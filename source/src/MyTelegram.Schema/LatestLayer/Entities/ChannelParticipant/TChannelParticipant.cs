@@ -14,7 +14,7 @@ public sealed class TChannelParticipant : IChannelParticipant
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Participant user ID
@@ -33,7 +33,7 @@ public sealed class TChannelParticipant : IChannelParticipant
 
     public void ComputeFlag()
     {
-        if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags[0] = true; }
+        if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -43,14 +43,14 @@ public sealed class TChannelParticipant : IChannelParticipant
         writer.Write(Flags);
         writer.Write(UserId);
         writer.Write(Date);
-        if (Flags[0]) { writer.Write(SubscriptionUntilDate.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(SubscriptionUntilDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        UserId = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        if (Flags[0]) { SubscriptionUntilDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        UserId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { SubscriptionUntilDate = buffer.ReadInt32(); }
     }
 }

@@ -34,9 +34,9 @@ public sealed class TEmojiList : IEmojiList
         writer.Write(DocumentId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        DocumentId = reader.Read<TVector<long>>();
+        Hash = buffer.ReadInt64();
+        DocumentId = buffer.Read<TVector<long>>();
     }
 }

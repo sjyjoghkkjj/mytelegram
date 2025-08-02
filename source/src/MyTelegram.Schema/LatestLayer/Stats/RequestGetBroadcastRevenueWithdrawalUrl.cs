@@ -41,9 +41,9 @@ public sealed class RequestGetBroadcastRevenueWithdrawalUrl : IRequest<MyTelegra
         writer.Write(Password);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
     }
 }

@@ -8,7 +8,7 @@ public interface IDocumentReadModel : IReadModel
     int Date { get; }
     int DcId { get; }
     long DocumentId { get; }
-    byte[] FileReference { get; }
+    ReadOnlyMemory<byte> FileReference { get; }
     int? Fingerprint { get; }
     string? Md5CheckSum { get; }
     string? Name { get; }

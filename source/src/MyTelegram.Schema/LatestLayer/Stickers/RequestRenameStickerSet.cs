@@ -38,9 +38,9 @@ public sealed class RequestRenameStickerSet : IRequest<MyTelegram.Schema.Message
         writer.Write(Title);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
-        Title = reader.ReadString();
+        Stickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
+        Title = buffer.ReadString();
     }
 }

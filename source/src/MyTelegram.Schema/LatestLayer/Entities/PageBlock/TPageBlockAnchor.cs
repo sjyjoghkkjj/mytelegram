@@ -28,8 +28,8 @@ public sealed class TPageBlockAnchor : IPageBlock
         writer.Write(Name);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Name = reader.ReadString();
+        Name = buffer.ReadString();
     }
 }

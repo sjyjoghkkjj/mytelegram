@@ -14,7 +14,7 @@ public sealed class RequestGetStarsSubscriptions : IRequest<MyTelegram.Schema.Pa
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to return only subscriptions expired due to an excessively low Telegram Star balance.
@@ -35,7 +35,7 @@ public sealed class RequestGetStarsSubscriptions : IRequest<MyTelegram.Schema.Pa
 
     public void ComputeFlag()
     {
-        if (MissingBalance) { Flags[0] = true; }
+        if (MissingBalance) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class RequestGetStarsSubscriptions : IRequest<MyTelegram.Schema.Pa
         writer.Write(Offset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { MissingBalance = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Offset = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { MissingBalance = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Offset = buffer.ReadString();
     }
 }

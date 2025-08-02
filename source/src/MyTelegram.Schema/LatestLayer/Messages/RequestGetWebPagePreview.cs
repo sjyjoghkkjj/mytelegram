@@ -18,7 +18,7 @@ public sealed class RequestGetWebPagePreview : IRequest<MyTelegram.Schema.Messag
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Message from which to extract the preview
@@ -32,7 +32,7 @@ public sealed class RequestGetWebPagePreview : IRequest<MyTelegram.Schema.Messag
 
     public void ComputeFlag()
     {
-        if (Entities?.Count > 0) { Flags[3] = true; }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -41,13 +41,13 @@ public sealed class RequestGetWebPagePreview : IRequest<MyTelegram.Schema.Messag
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Message);
-        if (Flags[3]) { writer.Write(Entities); }
+        if (Flags.IsBitSet(3)) { writer.Write(Entities); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Message = reader.ReadString();
-        if (Flags[3]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        Flags = buffer.ReadInt32();
+        Message = buffer.ReadString();
+        if (Flags.IsBitSet(3)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
     }
 }

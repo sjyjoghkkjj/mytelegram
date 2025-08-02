@@ -26,9 +26,9 @@ public sealed class TMessageActionPaidMessagesRefunded : IMessageAction
         writer.Write(Stars);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        Stars = reader.ReadInt64();
+        Count = buffer.ReadInt32();
+        Stars = buffer.ReadInt64();
     }
 }

@@ -11,7 +11,7 @@ namespace MyTelegram.Schema;
 public sealed class TEmojiStatus : IEmojiStatus
 {
     public uint ConstructorId => 0xe7ff068a;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/custom-emoji">Custom emoji document ID</a>
@@ -21,7 +21,7 @@ public sealed class TEmojiStatus : IEmojiStatus
 
     public void ComputeFlag()
     {
-        if (/*Until != 0 && */Until.HasValue) { Flags[0] = true; }
+        if (/*Until != 0 && */Until.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -30,13 +30,13 @@ public sealed class TEmojiStatus : IEmojiStatus
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(DocumentId);
-        if (Flags[0]) { writer.Write(Until.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Until.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        DocumentId = reader.ReadInt64();
-        if (Flags[0]) { Until = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        DocumentId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Until = buffer.ReadInt32(); }
     }
 }

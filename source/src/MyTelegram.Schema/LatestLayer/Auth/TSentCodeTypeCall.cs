@@ -28,8 +28,8 @@ public sealed class TSentCodeTypeCall : ISentCodeType
         writer.Write(Length);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Length = reader.ReadInt32();
+        Length = buffer.ReadInt32();
     }
 }

@@ -34,9 +34,9 @@ public sealed class TDocumentAttributeImageSize : IDocumentAttribute
         writer.Write(H);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        W = reader.ReadInt32();
-        H = reader.ReadInt32();
+        W = buffer.ReadInt32();
+        H = buffer.ReadInt32();
     }
 }

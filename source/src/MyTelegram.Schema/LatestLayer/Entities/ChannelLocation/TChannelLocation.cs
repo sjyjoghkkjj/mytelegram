@@ -35,9 +35,9 @@ public sealed class TChannelLocation : IChannelLocation
         writer.Write(Address);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        GeoPoint = reader.Read<MyTelegram.Schema.IGeoPoint>();
-        Address = reader.ReadString();
+        GeoPoint = buffer.Read<MyTelegram.Schema.IGeoPoint>();
+        Address = buffer.ReadString();
     }
 }

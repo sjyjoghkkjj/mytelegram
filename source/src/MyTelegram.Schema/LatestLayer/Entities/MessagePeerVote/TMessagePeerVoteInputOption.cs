@@ -35,9 +35,9 @@ public sealed class TMessagePeerVoteInputOption : IMessagePeerVote
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Date = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Date = buffer.ReadInt32();
     }
 }

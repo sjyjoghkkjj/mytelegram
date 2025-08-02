@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.AuthServer.Extensions;
+﻿using MyTelegram.EventBus.Extensions;
+
+namespace MyTelegram.AuthServer.Extensions;
 
 public static class MyTelegramAuthServerExtensions
 {
@@ -8,11 +10,13 @@ public static class MyTelegramAuthServerExtensions
 
         services.AddMyTelegramHandlerServices();
 
+        services.AddEventHandlers();
+
         return services;
     }
 
-    public static void ConfigureEventBus(this IEventBus eventBus)
+    private static void AddEventHandlers(this IServiceCollection services)
     {
-        eventBus.Subscribe<UnencryptedMessage, UnencryptedMessageHandler>();
+        services.AddSubscription<UnencryptedMessage, UnencryptedMessageHandler>();
     }
 }

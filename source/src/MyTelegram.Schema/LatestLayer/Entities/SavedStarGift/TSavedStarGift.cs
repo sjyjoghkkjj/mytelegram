@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TSavedStarGift : ISavedStarGift
 {
     public uint ConstructorId => 0xdfda0499;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool NameHidden { get; set; }
     public bool Unsaved { get; set; }
     public bool Refunded { get; set; }
@@ -31,21 +31,21 @@ public sealed class TSavedStarGift : ISavedStarGift
 
     public void ComputeFlag()
     {
-        if (NameHidden) { Flags[0] = true; }
-        if (Unsaved) { Flags[5] = true; }
-        if (Refunded) { Flags[9] = true; }
-        if (CanUpgrade) { Flags[10] = true; }
-        if (PinnedToTop) { Flags[12] = true; }
-        if (FromId != null) { Flags[1] = true; }
-        if (Message != null) { Flags[2] = true; }
-        if (/*MsgId != 0 && */MsgId.HasValue) { Flags[3] = true; }
-        if (/*SavedId != 0 &&*/ SavedId.HasValue) { Flags[11] = true; }
-        if (/*ConvertStars != 0 &&*/ ConvertStars.HasValue) { Flags[4] = true; }
-        if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags[6] = true; }
-        if (/*CanExportAt != 0 && */CanExportAt.HasValue) { Flags[7] = true; }
-        if (/*TransferStars != 0 &&*/ TransferStars.HasValue) { Flags[8] = true; }
-        if (/*CanTransferAt != 0 && */CanTransferAt.HasValue) { Flags[13] = true; }
-        if (/*CanResellAt != 0 && */CanResellAt.HasValue) { Flags[14] = true; }
+        if (NameHidden) { Flags = Flags.SetBit(0); }
+        if (Unsaved) { Flags = Flags.SetBit(5); }
+        if (Refunded) { Flags = Flags.SetBit(9); }
+        if (CanUpgrade) { Flags = Flags.SetBit(10); }
+        if (PinnedToTop) { Flags = Flags.SetBit(12); }
+        if (FromId != null) { Flags = Flags.SetBit(1); }
+        if (Message != null) { Flags = Flags.SetBit(2); }
+        if (/*MsgId != 0 && */MsgId.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*SavedId != 0 &&*/ SavedId.HasValue) { Flags = Flags.SetBit(11); }
+        if (/*ConvertStars != 0 &&*/ ConvertStars.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*UpgradeStars != 0 &&*/ UpgradeStars.HasValue) { Flags = Flags.SetBit(6); }
+        if (/*CanExportAt != 0 && */CanExportAt.HasValue) { Flags = Flags.SetBit(7); }
+        if (/*TransferStars != 0 &&*/ TransferStars.HasValue) { Flags = Flags.SetBit(8); }
+        if (/*CanTransferAt != 0 && */CanTransferAt.HasValue) { Flags = Flags.SetBit(13); }
+        if (/*CanResellAt != 0 && */CanResellAt.HasValue) { Flags = Flags.SetBit(14); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -53,39 +53,39 @@ public sealed class TSavedStarGift : ISavedStarGift
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(FromId); }
+        if (Flags.IsBitSet(1)) { writer.Write(FromId); }
         writer.Write(Date);
         writer.Write(Gift);
-        if (Flags[2]) { writer.Write(Message); }
-        if (Flags[3]) { writer.Write(MsgId.Value); }
-        if (Flags[11]) { writer.Write(SavedId.Value); }
-        if (Flags[4]) { writer.Write(ConvertStars.Value); }
-        if (Flags[6]) { writer.Write(UpgradeStars.Value); }
-        if (Flags[7]) { writer.Write(CanExportAt.Value); }
-        if (Flags[8]) { writer.Write(TransferStars.Value); }
-        if (Flags[13]) { writer.Write(CanTransferAt.Value); }
-        if (Flags[14]) { writer.Write(CanResellAt.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(Message); }
+        if (Flags.IsBitSet(3)) { writer.Write(MsgId.Value); }
+        if (Flags.IsBitSet(11)) { writer.Write(SavedId.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(ConvertStars.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(UpgradeStars.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(CanExportAt.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(TransferStars.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(CanTransferAt.Value); }
+        if (Flags.IsBitSet(14)) { writer.Write(CanResellAt.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NameHidden = true; }
-        if (Flags[5]) { Unsaved = true; }
-        if (Flags[9]) { Refunded = true; }
-        if (Flags[10]) { CanUpgrade = true; }
-        if (Flags[12]) { PinnedToTop = true; }
-        if (Flags[1]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        Date = reader.ReadInt32();
-        Gift = reader.Read<MyTelegram.Schema.IStarGift>();
-        if (Flags[2]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
-        if (Flags[3]) { MsgId = reader.ReadInt32(); }
-        if (Flags[11]) { SavedId = reader.ReadInt64(); }
-        if (Flags[4]) { ConvertStars = reader.ReadInt64(); }
-        if (Flags[6]) { UpgradeStars = reader.ReadInt64(); }
-        if (Flags[7]) { CanExportAt = reader.ReadInt32(); }
-        if (Flags[8]) { TransferStars = reader.ReadInt64(); }
-        if (Flags[13]) { CanTransferAt = reader.ReadInt32(); }
-        if (Flags[14]) { CanResellAt = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NameHidden = true; }
+        if (Flags.IsBitSet(5)) { Unsaved = true; }
+        if (Flags.IsBitSet(9)) { Refunded = true; }
+        if (Flags.IsBitSet(10)) { CanUpgrade = true; }
+        if (Flags.IsBitSet(12)) { PinnedToTop = true; }
+        if (Flags.IsBitSet(1)) { FromId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        Date = buffer.ReadInt32();
+        Gift = buffer.Read<MyTelegram.Schema.IStarGift>();
+        if (Flags.IsBitSet(2)) { Message = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        if (Flags.IsBitSet(3)) { MsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(11)) { SavedId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(4)) { ConvertStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(6)) { UpgradeStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(7)) { CanExportAt = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(8)) { TransferStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(13)) { CanTransferAt = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(14)) { CanResellAt = buffer.ReadInt32(); }
     }
 }

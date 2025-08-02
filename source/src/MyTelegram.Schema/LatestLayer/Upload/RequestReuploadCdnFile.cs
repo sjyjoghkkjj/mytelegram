@@ -22,12 +22,12 @@ public sealed class RequestReuploadCdnFile : IRequest<TVector<MyTelegram.Schema.
     ///<summary>
     /// File token
     ///</summary>
-    public byte[] FileToken { get; set; }
+    public ReadOnlyMemory<byte> FileToken { get; set; }
 
     ///<summary>
     /// Request token
     ///</summary>
-    public byte[] RequestToken { get; set; }
+    public ReadOnlyMemory<byte> RequestToken { get; set; }
 
     public void ComputeFlag()
     {
@@ -42,9 +42,9 @@ public sealed class RequestReuploadCdnFile : IRequest<TVector<MyTelegram.Schema.
         writer.Write(RequestToken);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FileToken = reader.ReadBytes();
-        RequestToken = reader.ReadBytes();
+        FileToken = buffer.ReadBytes();
+        RequestToken = buffer.ReadBytes();
     }
 }

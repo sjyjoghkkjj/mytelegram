@@ -34,9 +34,9 @@ public sealed class TContactBirthdays : IContactBirthdays
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Contacts = reader.Read<TVector<MyTelegram.Schema.IContactBirthday>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Contacts = buffer.Read<TVector<MyTelegram.Schema.IContactBirthday>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

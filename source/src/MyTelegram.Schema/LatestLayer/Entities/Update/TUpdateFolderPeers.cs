@@ -40,10 +40,10 @@ public sealed class TUpdateFolderPeers : IUpdate
         writer.Write(PtsCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FolderPeers = reader.Read<TVector<MyTelegram.Schema.IFolderPeer>>();
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
+        FolderPeers = buffer.Read<TVector<MyTelegram.Schema.IFolderPeer>>();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
     }
 }

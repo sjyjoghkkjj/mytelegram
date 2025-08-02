@@ -40,9 +40,9 @@ public sealed class RequestRefundStarsCharge : IRequest<MyTelegram.Schema.IUpdat
         writer.Write(ChargeId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        ChargeId = reader.ReadString();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        ChargeId = buffer.ReadString();
     }
 }

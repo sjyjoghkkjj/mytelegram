@@ -6,6 +6,9 @@ public partial class ObjectIdConsts
     public const uint GetFileObjectId = 0xb15a9afc;
     public const uint GetFileObjectIdLayer143 = 0xbe5335be;
     public const uint SaveFilePartObjectId = 0xb304a621;
+    public const uint UploadMediaObjectId = 0x14967978;
+
+    public const uint SaveBigFilePartObjectId = 0xde7b673d;
     public const uint GzipPackedId = 0x3072cfa1;
     public const uint InvokeWithLayer = 0xda9b0d0d;
     public const uint MsgAcks = 0x62d6b459;

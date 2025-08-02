@@ -14,7 +14,7 @@ public sealed class TUpdateSavedDialogPinned : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the dialog was pinned
@@ -30,7 +30,7 @@ public sealed class TUpdateSavedDialogPinned : IUpdate
 
     public void ComputeFlag()
     {
-        if (Pinned) { Flags[0] = true; }
+        if (Pinned) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -42,10 +42,10 @@ public sealed class TUpdateSavedDialogPinned : IUpdate
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Pinned = true; }
-        Peer = reader.Read<MyTelegram.Schema.IDialogPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Pinned = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IDialogPeer>();
     }
 }

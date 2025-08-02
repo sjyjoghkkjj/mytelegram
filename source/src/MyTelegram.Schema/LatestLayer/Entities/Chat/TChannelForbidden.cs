@@ -14,7 +14,7 @@ public sealed class TChannelForbidden : IChat
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Is this a channel
@@ -50,9 +50,9 @@ public sealed class TChannelForbidden : IChat
 
     public void ComputeFlag()
     {
-        if (Broadcast) { Flags[5] = true; }
-        if (Megagroup) { Flags[8] = true; }
-        if (/*UntilDate != 0 && */UntilDate.HasValue) { Flags[16] = true; }
+        if (Broadcast) { Flags = Flags.SetBit(5); }
+        if (Megagroup) { Flags = Flags.SetBit(8); }
+        if (/*UntilDate != 0 && */UntilDate.HasValue) { Flags = Flags.SetBit(16); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -63,17 +63,17 @@ public sealed class TChannelForbidden : IChat
         writer.Write(Id);
         writer.Write(AccessHash);
         writer.Write(Title);
-        if (Flags[16]) { writer.Write(UntilDate.Value); }
+        if (Flags.IsBitSet(16)) { writer.Write(UntilDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[5]) { Broadcast = true; }
-        if (Flags[8]) { Megagroup = true; }
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        Title = reader.ReadString();
-        if (Flags[16]) { UntilDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(5)) { Broadcast = true; }
+        if (Flags.IsBitSet(8)) { Megagroup = true; }
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        Title = buffer.ReadString();
+        if (Flags.IsBitSet(16)) { UntilDate = buffer.ReadInt32(); }
     }
 }

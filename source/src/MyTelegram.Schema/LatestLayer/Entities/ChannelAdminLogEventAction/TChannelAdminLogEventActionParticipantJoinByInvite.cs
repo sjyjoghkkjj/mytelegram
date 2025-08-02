@@ -14,7 +14,7 @@ public sealed class TChannelAdminLogEventActionParticipantJoinByInvite : IChanne
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The participant joined by importing a <a href="https://corefork.telegram.org/api/links#chat-folder-links">chat folder deep link »</a>.
@@ -30,7 +30,7 @@ public sealed class TChannelAdminLogEventActionParticipantJoinByInvite : IChanne
 
     public void ComputeFlag()
     {
-        if (ViaChatlist) { Flags[0] = true; }
+        if (ViaChatlist) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -42,10 +42,10 @@ public sealed class TChannelAdminLogEventActionParticipantJoinByInvite : IChanne
         writer.Write(Invite);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ViaChatlist = true; }
-        Invite = reader.Read<MyTelegram.Schema.IExportedChatInvite>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ViaChatlist = true; }
+        Invite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>();
     }
 }

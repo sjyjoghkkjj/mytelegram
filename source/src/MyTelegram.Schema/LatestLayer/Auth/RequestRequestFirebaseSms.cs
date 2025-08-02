@@ -18,7 +18,7 @@ public sealed class RequestRequestFirebaseSms : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Phone number
@@ -47,9 +47,9 @@ public sealed class RequestRequestFirebaseSms : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (SafetyNetToken != null) { Flags[0] = true; }
-        if (PlayIntegrityToken != null) { Flags[2] = true; }
-        if (IosPushSecret != null) { Flags[1] = true; }
+        if (SafetyNetToken != null) { Flags = Flags.SetBit(0); }
+        if (PlayIntegrityToken != null) { Flags = Flags.SetBit(2); }
+        if (IosPushSecret != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -59,18 +59,18 @@ public sealed class RequestRequestFirebaseSms : IRequest<IBool>
         writer.Write(Flags);
         writer.Write(PhoneNumber);
         writer.Write(PhoneCodeHash);
-        if (Flags[0]) { writer.Write(SafetyNetToken); }
-        if (Flags[2]) { writer.Write(PlayIntegrityToken); }
-        if (Flags[1]) { writer.Write(IosPushSecret); }
+        if (Flags.IsBitSet(0)) { writer.Write(SafetyNetToken); }
+        if (Flags.IsBitSet(2)) { writer.Write(PlayIntegrityToken); }
+        if (Flags.IsBitSet(1)) { writer.Write(IosPushSecret); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        PhoneNumber = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
-        if (Flags[0]) { SafetyNetToken = reader.ReadString(); }
-        if (Flags[2]) { PlayIntegrityToken = reader.ReadString(); }
-        if (Flags[1]) { IosPushSecret = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        PhoneNumber = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { SafetyNetToken = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { PlayIntegrityToken = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { IosPushSecret = buffer.ReadString(); }
     }
 }

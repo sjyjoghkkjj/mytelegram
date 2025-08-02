@@ -21,7 +21,7 @@ public sealed class RequestCreateGroupCall : IRequest<MyTelegram.Schema.IUpdates
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether RTMP stream support should be enabled: only the <a href="https://corefork.telegram.org/api/channel">group/supergroup/channel</a> owner can use this flag.
@@ -52,9 +52,9 @@ public sealed class RequestCreateGroupCall : IRequest<MyTelegram.Schema.IUpdates
 
     public void ComputeFlag()
     {
-        if (RtmpStream) { Flags[2] = true; }
-        if (Title != null) { Flags[0] = true; }
-        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[1] = true; }
+        if (RtmpStream) { Flags = Flags.SetBit(2); }
+        if (Title != null) { Flags = Flags.SetBit(0); }
+        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -64,17 +64,17 @@ public sealed class RequestCreateGroupCall : IRequest<MyTelegram.Schema.IUpdates
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(RandomId);
-        if (Flags[0]) { writer.Write(Title); }
-        if (Flags[1]) { writer.Write(ScheduleDate.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Title); }
+        if (Flags.IsBitSet(1)) { writer.Write(ScheduleDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { RtmpStream = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        RandomId = reader.ReadInt32();
-        if (Flags[0]) { Title = reader.ReadString(); }
-        if (Flags[1]) { ScheduleDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { RtmpStream = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        RandomId = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { ScheduleDate = buffer.ReadInt32(); }
     }
 }

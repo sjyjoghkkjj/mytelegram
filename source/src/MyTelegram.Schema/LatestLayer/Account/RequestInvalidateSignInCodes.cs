@@ -28,8 +28,8 @@ public sealed class RequestInvalidateSignInCodes : IRequest<IBool>
         writer.Write(Codes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Codes = reader.Read<TVector<string>>();
+        Codes = buffer.Read<TVector<string>>();
     }
 }

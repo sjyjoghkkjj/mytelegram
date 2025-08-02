@@ -28,8 +28,8 @@ public sealed class TPeerColorSet : IPeerColorSet
         writer.Write(Colors);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Colors = reader.Read<TVector<int>>();
+        Colors = buffer.Read<TVector<int>>();
     }
 }

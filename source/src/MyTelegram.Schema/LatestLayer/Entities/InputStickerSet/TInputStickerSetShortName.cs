@@ -28,8 +28,8 @@ public sealed class TInputStickerSetShortName : IInputStickerSet
         writer.Write(ShortName);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ShortName = reader.ReadString();
+        ShortName = buffer.ReadString();
     }
 }

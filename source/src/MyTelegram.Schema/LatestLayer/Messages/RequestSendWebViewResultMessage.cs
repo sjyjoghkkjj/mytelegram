@@ -39,9 +39,9 @@ public sealed class RequestSendWebViewResultMessage : IRequest<MyTelegram.Schema
         writer.Write(Result);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        BotQueryId = reader.ReadString();
-        Result = reader.Read<MyTelegram.Schema.IInputBotInlineResult>();
+        BotQueryId = buffer.ReadString();
+        Result = buffer.Read<MyTelegram.Schema.IInputBotInlineResult>();
     }
 }

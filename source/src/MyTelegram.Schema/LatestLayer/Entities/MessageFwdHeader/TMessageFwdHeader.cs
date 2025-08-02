@@ -14,7 +14,7 @@ public sealed class TMessageFwdHeader : IMessageFwdHeader
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this message was <a href="https://corefork.telegram.org/api/import">imported from a foreign chat service, click here for more info »</a>
@@ -88,18 +88,18 @@ public sealed class TMessageFwdHeader : IMessageFwdHeader
 
     public void ComputeFlag()
     {
-        if (Imported) { Flags[7] = true; }
-        if (SavedOut) { Flags[11] = true; }
-        if (FromId != null) { Flags[0] = true; }
-        if (FromName != null) { Flags[5] = true; }
-        if (/*ChannelPost != 0 && */ChannelPost.HasValue) { Flags[2] = true; }
-        if (PostAuthor != null) { Flags[3] = true; }
-        if (SavedFromPeer != null && SavedFromMsgId.HasValue) { Flags[4] = true; }
-        //if (/*SavedFromMsgId != 0 && */SavedFromMsgId.HasValue) { Flags[4] = true; }
-        if (SavedFromId != null) { Flags[8] = true; }
-        if (SavedFromName != null) { Flags[9] = true; }
-        if (/*SavedDate != 0 && */SavedDate.HasValue) { Flags[10] = true; }
-        if (PsaType != null) { Flags[6] = true; }
+        if (Imported) { Flags = Flags.SetBit(7); }
+        if (SavedOut) { Flags = Flags.SetBit(11); }
+        if (FromId != null) { Flags = Flags.SetBit(0); }
+        if (FromName != null) { Flags = Flags.SetBit(5); }
+        if (/*ChannelPost != 0 && */ChannelPost.HasValue) { Flags = Flags.SetBit(2); }
+        if (PostAuthor != null) { Flags = Flags.SetBit(3); }
+        if (SavedFromPeer != null && SavedFromMsgId.HasValue) { Flags = Flags.SetBit(4); }
+        //if (/*SavedFromMsgId != 0 && */SavedFromMsgId.HasValue) { Flags = Flags.SetBit(4); }
+        if (SavedFromId != null) { Flags = Flags.SetBit(8); }
+        if (SavedFromName != null) { Flags = Flags.SetBit(9); }
+        if (/*SavedDate != 0 && */SavedDate.HasValue) { Flags = Flags.SetBit(10); }
+        if (PsaType != null) { Flags = Flags.SetBit(6); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -107,34 +107,34 @@ public sealed class TMessageFwdHeader : IMessageFwdHeader
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(FromId); }
-        if (Flags[5]) { writer.Write(FromName); }
+        if (Flags.IsBitSet(0)) { writer.Write(FromId); }
+        if (Flags.IsBitSet(5)) { writer.Write(FromName); }
         writer.Write(Date);
-        if (Flags[2]) { writer.Write(ChannelPost.Value); }
-        if (Flags[3]) { writer.Write(PostAuthor); }
-        if (Flags[4]) { writer.Write(SavedFromPeer); }
-        if (Flags[4]) { writer.Write(SavedFromMsgId.Value); }
-        if (Flags[8]) { writer.Write(SavedFromId); }
-        if (Flags[9]) { writer.Write(SavedFromName); }
-        if (Flags[10]) { writer.Write(SavedDate.Value); }
-        if (Flags[6]) { writer.Write(PsaType); }
+        if (Flags.IsBitSet(2)) { writer.Write(ChannelPost.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(PostAuthor); }
+        if (Flags.IsBitSet(4)) { writer.Write(SavedFromPeer); }
+        if (Flags.IsBitSet(4)) { writer.Write(SavedFromMsgId.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(SavedFromId); }
+        if (Flags.IsBitSet(9)) { writer.Write(SavedFromName); }
+        if (Flags.IsBitSet(10)) { writer.Write(SavedDate.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(PsaType); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[7]) { Imported = true; }
-        if (Flags[11]) { SavedOut = true; }
-        if (Flags[0]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[5]) { FromName = reader.ReadString(); }
-        Date = reader.ReadInt32();
-        if (Flags[2]) { ChannelPost = reader.ReadInt32(); }
-        if (Flags[3]) { PostAuthor = reader.ReadString(); }
-        if (Flags[4]) { SavedFromPeer = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[4]) { SavedFromMsgId = reader.ReadInt32(); }
-        if (Flags[8]) { SavedFromId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[9]) { SavedFromName = reader.ReadString(); }
-        if (Flags[10]) { SavedDate = reader.ReadInt32(); }
-        if (Flags[6]) { PsaType = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(7)) { Imported = true; }
+        if (Flags.IsBitSet(11)) { SavedOut = true; }
+        if (Flags.IsBitSet(0)) { FromId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(5)) { FromName = buffer.ReadString(); }
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { ChannelPost = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { PostAuthor = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { SavedFromPeer = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(4)) { SavedFromMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(8)) { SavedFromId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(9)) { SavedFromName = buffer.ReadString(); }
+        if (Flags.IsBitSet(10)) { SavedDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(6)) { PsaType = buffer.ReadString(); }
     }
 }

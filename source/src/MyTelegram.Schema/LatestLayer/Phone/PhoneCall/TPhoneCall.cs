@@ -35,9 +35,9 @@ public sealed class TPhoneCall : IPhoneCall
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneCall = reader.Read<MyTelegram.Schema.IPhoneCall>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        PhoneCall = buffer.Read<MyTelegram.Schema.IPhoneCall>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

@@ -34,9 +34,9 @@ public sealed class RequestGetThemes : IRequest<MyTelegram.Schema.Account.ITheme
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Format = reader.ReadString();
-        Hash = reader.ReadInt64();
+        Format = buffer.ReadString();
+        Hash = buffer.ReadInt64();
     }
 }

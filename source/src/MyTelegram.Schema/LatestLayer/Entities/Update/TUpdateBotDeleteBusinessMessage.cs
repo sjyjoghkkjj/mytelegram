@@ -47,11 +47,11 @@ public sealed class TUpdateBotDeleteBusinessMessage : IUpdate
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ConnectionId = reader.ReadString();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Messages = reader.Read<TVector<int>>();
-        Qts = reader.ReadInt32();
+        ConnectionId = buffer.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Messages = buffer.Read<TVector<int>>();
+        Qts = buffer.ReadInt32();
     }
 }

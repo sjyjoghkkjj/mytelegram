@@ -14,7 +14,7 @@ public sealed class TInputStorePaymentPremiumSubscription : IInputStorePaymentPu
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Pass true if this is a restore of a Telegram Premium purchase; only for the App Store
@@ -30,8 +30,8 @@ public sealed class TInputStorePaymentPremiumSubscription : IInputStorePaymentPu
 
     public void ComputeFlag()
     {
-        if (Restore) { Flags[0] = true; }
-        if (Upgrade) { Flags[1] = true; }
+        if (Restore) { Flags = Flags.SetBit(0); }
+        if (Upgrade) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,10 +42,10 @@ public sealed class TInputStorePaymentPremiumSubscription : IInputStorePaymentPu
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Restore = true; }
-        if (Flags[1]) { Upgrade = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Restore = true; }
+        if (Flags.IsBitSet(1)) { Upgrade = true; }
     }
 }

@@ -22,8 +22,8 @@ public sealed class TChangeSetSharedKey : IChange
         writer.Write(SharedKey);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        SharedKey = reader.Read<MyTelegram.Schema.E2e.ISharedKey>();
+        SharedKey = buffer.Read<MyTelegram.Schema.E2e.ISharedKey>();
     }
 }

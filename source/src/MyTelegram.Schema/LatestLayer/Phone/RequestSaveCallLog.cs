@@ -39,9 +39,9 @@ public sealed class RequestSaveCallLog : IRequest<IBool>
         writer.Write(File);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPhoneCall>();
-        File = reader.Read<MyTelegram.Schema.IInputFile>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPhoneCall>();
+        File = buffer.Read<MyTelegram.Schema.IInputFile>();
     }
 }

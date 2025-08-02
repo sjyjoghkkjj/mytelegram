@@ -43,9 +43,9 @@ public sealed class RequestAddStickerToSet : IRequest<MyTelegram.Schema.Messages
         writer.Write(Sticker);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stickerset = reader.Read<MyTelegram.Schema.IInputStickerSet>();
-        Sticker = reader.Read<MyTelegram.Schema.IInputStickerSetItem>();
+        Stickerset = buffer.Read<MyTelegram.Schema.IInputStickerSet>();
+        Sticker = buffer.Read<MyTelegram.Schema.IInputStickerSetItem>();
     }
 }

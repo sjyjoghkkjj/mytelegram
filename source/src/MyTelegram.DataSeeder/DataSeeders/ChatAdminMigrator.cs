@@ -28,7 +28,7 @@ public class ChatAdminMigrator(ICommandBus commandBus,
             {
                 var command = new EditChannelAdminCommand2(
                     ChannelMemberId.Create(chatAdminReadModel.PeerId, chatAdminReadModel.UserId),
-                    RequestInfo.Empty,
+                    RequestInfo.Empty with { ReqMsgId = Random.Shared.NextInt64() },
                     chatAdminReadModel.PeerId,
                     chatAdminReadModel.UserId,
                     chatAdminReadModel.AdminRights.GetFlags().ToInt32(),

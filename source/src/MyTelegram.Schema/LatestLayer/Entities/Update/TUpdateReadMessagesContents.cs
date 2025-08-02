@@ -14,7 +14,7 @@ public sealed class TUpdateReadMessagesContents : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// IDs of read messages
@@ -38,7 +38,7 @@ public sealed class TUpdateReadMessagesContents : IUpdate
 
     public void ComputeFlag()
     {
-        if (/*Date != 0 && */Date.HasValue) { Flags[0] = true; }
+        if (/*Date != 0 && */Date.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -49,15 +49,15 @@ public sealed class TUpdateReadMessagesContents : IUpdate
         writer.Write(Messages);
         writer.Write(Pts);
         writer.Write(PtsCount);
-        if (Flags[0]) { writer.Write(Date.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Date.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Messages = reader.Read<TVector<int>>();
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
-        if (Flags[0]) { Date = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Messages = buffer.Read<TVector<int>>();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Date = buffer.ReadInt32(); }
     }
 }

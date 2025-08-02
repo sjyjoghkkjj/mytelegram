@@ -14,7 +14,7 @@ public sealed class TSecureValue : ISecureValue
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Secure <a href="https://corefork.telegram.org/passport">passport</a> value type
@@ -65,17 +65,17 @@ public sealed class TSecureValue : ISecureValue
     ///<summary>
     /// Data hash
     ///</summary>
-    public byte[] Hash { get; set; }
+    public ReadOnlyMemory<byte> Hash { get; set; }
 
     public void ComputeFlag()
     {
-        if (Data != null) { Flags[0] = true; }
-        if (FrontSide != null) { Flags[1] = true; }
-        if (ReverseSide != null) { Flags[2] = true; }
-        if (Selfie != null) { Flags[3] = true; }
-        if (Translation?.Count > 0) { Flags[6] = true; }
-        if (Files?.Count > 0) { Flags[4] = true; }
-        if (PlainData != null) { Flags[5] = true; }
+        if (Data != null) { Flags = Flags.SetBit(0); }
+        if (FrontSide != null) { Flags = Flags.SetBit(1); }
+        if (ReverseSide != null) { Flags = Flags.SetBit(2); }
+        if (Selfie != null) { Flags = Flags.SetBit(3); }
+        if (Translation?.Count > 0) { Flags = Flags.SetBit(6); }
+        if (Files?.Count > 0) { Flags = Flags.SetBit(4); }
+        if (PlainData != null) { Flags = Flags.SetBit(5); }
 
     }
 
@@ -85,27 +85,27 @@ public sealed class TSecureValue : ISecureValue
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Type);
-        if (Flags[0]) { writer.Write(Data); }
-        if (Flags[1]) { writer.Write(FrontSide); }
-        if (Flags[2]) { writer.Write(ReverseSide); }
-        if (Flags[3]) { writer.Write(Selfie); }
-        if (Flags[6]) { writer.Write(Translation); }
-        if (Flags[4]) { writer.Write(Files); }
-        if (Flags[5]) { writer.Write(PlainData); }
+        if (Flags.IsBitSet(0)) { writer.Write(Data); }
+        if (Flags.IsBitSet(1)) { writer.Write(FrontSide); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReverseSide); }
+        if (Flags.IsBitSet(3)) { writer.Write(Selfie); }
+        if (Flags.IsBitSet(6)) { writer.Write(Translation); }
+        if (Flags.IsBitSet(4)) { writer.Write(Files); }
+        if (Flags.IsBitSet(5)) { writer.Write(PlainData); }
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Type = reader.Read<MyTelegram.Schema.ISecureValueType>();
-        if (Flags[0]) { Data = reader.Read<MyTelegram.Schema.ISecureData>(); }
-        if (Flags[1]) { FrontSide = reader.Read<MyTelegram.Schema.ISecureFile>(); }
-        if (Flags[2]) { ReverseSide = reader.Read<MyTelegram.Schema.ISecureFile>(); }
-        if (Flags[3]) { Selfie = reader.Read<MyTelegram.Schema.ISecureFile>(); }
-        if (Flags[6]) { Translation = reader.Read<TVector<MyTelegram.Schema.ISecureFile>>(); }
-        if (Flags[4]) { Files = reader.Read<TVector<MyTelegram.Schema.ISecureFile>>(); }
-        if (Flags[5]) { PlainData = reader.Read<MyTelegram.Schema.ISecurePlainData>(); }
-        Hash = reader.ReadBytes();
+        Flags = buffer.ReadInt32();
+        Type = buffer.Read<MyTelegram.Schema.ISecureValueType>();
+        if (Flags.IsBitSet(0)) { Data = buffer.Read<MyTelegram.Schema.ISecureData>(); }
+        if (Flags.IsBitSet(1)) { FrontSide = buffer.Read<MyTelegram.Schema.ISecureFile>(); }
+        if (Flags.IsBitSet(2)) { ReverseSide = buffer.Read<MyTelegram.Schema.ISecureFile>(); }
+        if (Flags.IsBitSet(3)) { Selfie = buffer.Read<MyTelegram.Schema.ISecureFile>(); }
+        if (Flags.IsBitSet(6)) { Translation = buffer.Read<TVector<MyTelegram.Schema.ISecureFile>>(); }
+        if (Flags.IsBitSet(4)) { Files = buffer.Read<TVector<MyTelegram.Schema.ISecureFile>>(); }
+        if (Flags.IsBitSet(5)) { PlainData = buffer.Read<MyTelegram.Schema.ISecurePlainData>(); }
+        Hash = buffer.ReadBytes();
     }
 }

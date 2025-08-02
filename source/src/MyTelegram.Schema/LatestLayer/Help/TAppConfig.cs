@@ -35,9 +35,9 @@ public sealed class TAppConfig : IAppConfig
         writer.Write(Config);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt32();
-        Config = reader.Read<MyTelegram.Schema.IJSONValue>();
+        Hash = buffer.ReadInt32();
+        Config = buffer.Read<MyTelegram.Schema.IJSONValue>();
     }
 }

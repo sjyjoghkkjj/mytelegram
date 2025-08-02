@@ -14,7 +14,7 @@ public sealed class RequestInstallTheme : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to install the dark version
@@ -41,10 +41,10 @@ public sealed class RequestInstallTheme : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Dark) { Flags[0] = true; }
-        if (Theme != null) { Flags[1] = true; }
-        if (Format != null) { Flags[2] = true; }
-        if (BaseTheme != null) { Flags[3] = true; }
+        if (Dark) { Flags = Flags.SetBit(0); }
+        if (Theme != null) { Flags = Flags.SetBit(1); }
+        if (Format != null) { Flags = Flags.SetBit(2); }
+        if (BaseTheme != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -52,17 +52,17 @@ public sealed class RequestInstallTheme : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(Theme); }
-        if (Flags[2]) { writer.Write(Format); }
-        if (Flags[3]) { writer.Write(BaseTheme); }
+        if (Flags.IsBitSet(1)) { writer.Write(Theme); }
+        if (Flags.IsBitSet(2)) { writer.Write(Format); }
+        if (Flags.IsBitSet(3)) { writer.Write(BaseTheme); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Dark = true; }
-        if (Flags[1]) { Theme = reader.Read<MyTelegram.Schema.IInputTheme>(); }
-        if (Flags[2]) { Format = reader.ReadString(); }
-        if (Flags[3]) { BaseTheme = reader.Read<MyTelegram.Schema.IBaseTheme>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Dark = true; }
+        if (Flags.IsBitSet(1)) { Theme = buffer.Read<MyTelegram.Schema.IInputTheme>(); }
+        if (Flags.IsBitSet(2)) { Format = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { BaseTheme = buffer.Read<MyTelegram.Schema.IBaseTheme>(); }
     }
 }

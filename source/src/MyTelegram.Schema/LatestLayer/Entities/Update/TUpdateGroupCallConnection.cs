@@ -14,7 +14,7 @@ public sealed class TUpdateGroupCallConnection : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Are these parameters related to the screen capture session currently in progress?
@@ -30,7 +30,7 @@ public sealed class TUpdateGroupCallConnection : IUpdate
 
     public void ComputeFlag()
     {
-        if (Presentation) { Flags[0] = true; }
+        if (Presentation) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -42,10 +42,10 @@ public sealed class TUpdateGroupCallConnection : IUpdate
         writer.Write(Params);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Presentation = true; }
-        Params = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Presentation = true; }
+        Params = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

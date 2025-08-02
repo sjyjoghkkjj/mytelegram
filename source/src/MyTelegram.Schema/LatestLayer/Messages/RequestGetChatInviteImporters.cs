@@ -23,7 +23,7 @@ public sealed class RequestGetChatInviteImporters : IRequest<MyTelegram.Schema.M
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, only returns info about users with pending <a href="https://corefork.telegram.org/api/invites#join-requests">join requests »</a>
@@ -71,10 +71,10 @@ public sealed class RequestGetChatInviteImporters : IRequest<MyTelegram.Schema.M
 
     public void ComputeFlag()
     {
-        if (Requested) { Flags[0] = true; }
-        if (SubscriptionExpired) { Flags[3] = true; }
-        if (Link != null) { Flags[1] = true; }
-        if (Q != null) { Flags[2] = true; }
+        if (Requested) { Flags = Flags.SetBit(0); }
+        if (SubscriptionExpired) { Flags = Flags.SetBit(3); }
+        if (Link != null) { Flags = Flags.SetBit(1); }
+        if (Q != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -84,23 +84,23 @@ public sealed class RequestGetChatInviteImporters : IRequest<MyTelegram.Schema.M
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[1]) { writer.Write(Link); }
-        if (Flags[2]) { writer.Write(Q); }
+        if (Flags.IsBitSet(1)) { writer.Write(Link); }
+        if (Flags.IsBitSet(2)) { writer.Write(Q); }
         writer.Write(OffsetDate);
         writer.Write(OffsetUser);
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Requested = true; }
-        if (Flags[3]) { SubscriptionExpired = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[1]) { Link = reader.ReadString(); }
-        if (Flags[2]) { Q = reader.ReadString(); }
-        OffsetDate = reader.ReadInt32();
-        OffsetUser = reader.Read<MyTelegram.Schema.IInputUser>();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Requested = true; }
+        if (Flags.IsBitSet(3)) { SubscriptionExpired = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(1)) { Link = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Q = buffer.ReadString(); }
+        OffsetDate = buffer.ReadInt32();
+        OffsetUser = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Limit = buffer.ReadInt32();
     }
 }

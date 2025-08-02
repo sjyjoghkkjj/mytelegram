@@ -28,7 +28,7 @@ public sealed class RequestGetChannelDifference : IRequest<MyTelegram.Schema.Upd
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Set to true to skip some possibly unneeded updates and reduce server-side load
@@ -60,7 +60,7 @@ public sealed class RequestGetChannelDifference : IRequest<MyTelegram.Schema.Upd
 
     public void ComputeFlag()
     {
-        if (Force) { Flags[0] = true; }
+        if (Force) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -75,13 +75,13 @@ public sealed class RequestGetChannelDifference : IRequest<MyTelegram.Schema.Upd
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Force = true; }
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Filter = reader.Read<MyTelegram.Schema.IChannelMessagesFilter>();
-        Pts = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Force = true; }
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Filter = buffer.Read<MyTelegram.Schema.IChannelMessagesFilter>();
+        Pts = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

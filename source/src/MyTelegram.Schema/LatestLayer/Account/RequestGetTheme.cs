@@ -39,9 +39,9 @@ public sealed class RequestGetTheme : IRequest<MyTelegram.Schema.ITheme>
         writer.Write(Theme);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Format = reader.ReadString();
-        Theme = reader.Read<MyTelegram.Schema.IInputTheme>();
+        Format = buffer.ReadString();
+        Theme = buffer.Read<MyTelegram.Schema.IInputTheme>();
     }
 }

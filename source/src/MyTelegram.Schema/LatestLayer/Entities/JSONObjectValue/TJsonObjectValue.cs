@@ -35,9 +35,9 @@ public sealed class TJsonObjectValue : IJSONObjectValue
         writer.Write(Value);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Key = reader.ReadString();
-        Value = reader.Read<MyTelegram.Schema.IJSONValue>();
+        Key = buffer.ReadString();
+        Value = buffer.Read<MyTelegram.Schema.IJSONValue>();
     }
 }

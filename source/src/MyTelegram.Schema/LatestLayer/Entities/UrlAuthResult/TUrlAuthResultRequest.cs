@@ -14,7 +14,7 @@ public sealed class TUrlAuthResultRequest : IUrlAuthResult
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the bot would like to send messages to the user
@@ -35,7 +35,7 @@ public sealed class TUrlAuthResultRequest : IUrlAuthResult
 
     public void ComputeFlag()
     {
-        if (RequestWriteAccess) { Flags[0] = true; }
+        if (RequestWriteAccess) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class TUrlAuthResultRequest : IUrlAuthResult
         writer.Write(Domain);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { RequestWriteAccess = true; }
-        Bot = reader.Read<MyTelegram.Schema.IUser>();
-        Domain = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { RequestWriteAccess = true; }
+        Bot = buffer.Read<MyTelegram.Schema.IUser>();
+        Domain = buffer.ReadString();
     }
 }

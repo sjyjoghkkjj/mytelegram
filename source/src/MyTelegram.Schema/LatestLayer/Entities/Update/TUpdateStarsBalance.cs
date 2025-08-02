@@ -29,8 +29,8 @@ public sealed class TUpdateStarsBalance : IUpdate
         writer.Write(Balance);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Balance = reader.Read<MyTelegram.Schema.IStarsAmount>();
+        Balance = buffer.Read<MyTelegram.Schema.IStarsAmount>();
     }
 }

@@ -29,8 +29,8 @@ public sealed class TMessageExtendedMedia : IMessageExtendedMedia
         writer.Write(Media);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Media = reader.Read<MyTelegram.Schema.IMessageMedia>();
+        Media = buffer.Read<MyTelegram.Schema.IMessageMedia>();
     }
 }

@@ -39,9 +39,9 @@ public sealed class RequestGetTmpPassword : IRequest<MyTelegram.Schema.Account.I
         writer.Write(Period);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
-        Period = reader.ReadInt32();
+        Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
+        Period = buffer.ReadInt32();
     }
 }

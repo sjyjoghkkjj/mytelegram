@@ -11,7 +11,7 @@ public class MessengerEventHandler(
     :
         IEventHandler<MessengerCommandDataReceivedEvent>,
         IEventHandler<NewDeviceCreatedEvent>,
-        IEventHandler<BindUidToAuthKeyIntegrationEvent>,
+        IEventHandler<BindUserIdToAuthKeyIntegrationEvent>,
         IEventHandler<AuthKeyUnRegisteredIntegrationEvent>, ITransientDependency
 {
     public Task HandleEventAsync(AuthKeyUnRegisteredIntegrationEvent eventData)
@@ -22,7 +22,7 @@ public class MessengerEventHandler(
         return commandBus.PublishAsync(command);
     }
 
-    public Task HandleEventAsync(BindUidToAuthKeyIntegrationEvent eventData)
+    public Task HandleEventAsync(BindUserIdToAuthKeyIntegrationEvent eventData)
     {
         var command = new BindUserIdToDeviceCommand(DeviceId.Create(eventData.PermAuthKeyId),
             eventData.UserId,

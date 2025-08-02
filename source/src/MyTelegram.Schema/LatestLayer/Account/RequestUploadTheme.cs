@@ -18,7 +18,7 @@ public sealed class RequestUploadTheme : IRequest<MyTelegram.Schema.IDocument>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/themes#uploading-theme-files">Previously uploaded</a> theme file with platform-specific colors for UI components, can be left unset when creating themes that only modify the wallpaper or accent colors.
@@ -44,7 +44,7 @@ public sealed class RequestUploadTheme : IRequest<MyTelegram.Schema.IDocument>
 
     public void ComputeFlag()
     {
-        if (Thumb != null) { Flags[0] = true; }
+        if (Thumb != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -54,17 +54,17 @@ public sealed class RequestUploadTheme : IRequest<MyTelegram.Schema.IDocument>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(File);
-        if (Flags[0]) { writer.Write(Thumb); }
+        if (Flags.IsBitSet(0)) { writer.Write(Thumb); }
         writer.Write(FileName);
         writer.Write(MimeType);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        File = reader.Read<MyTelegram.Schema.IInputFile>();
-        if (Flags[0]) { Thumb = reader.Read<MyTelegram.Schema.IInputFile>(); }
-        FileName = reader.ReadString();
-        MimeType = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        File = buffer.Read<MyTelegram.Schema.IInputFile>();
+        if (Flags.IsBitSet(0)) { Thumb = buffer.Read<MyTelegram.Schema.IInputFile>(); }
+        FileName = buffer.ReadString();
+        MimeType = buffer.ReadString();
     }
 }

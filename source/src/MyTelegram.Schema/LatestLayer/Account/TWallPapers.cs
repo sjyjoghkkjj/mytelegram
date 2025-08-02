@@ -34,9 +34,9 @@ public sealed class TWallPapers : IWallPapers
         writer.Write(Wallpapers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Wallpapers = reader.Read<TVector<MyTelegram.Schema.IWallPaper>>();
+        Hash = buffer.ReadInt64();
+        Wallpapers = buffer.Read<TVector<MyTelegram.Schema.IWallPaper>>();
     }
 }

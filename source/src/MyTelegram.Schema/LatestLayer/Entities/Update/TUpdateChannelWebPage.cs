@@ -47,11 +47,11 @@ public sealed class TUpdateChannelWebPage : IUpdate
         writer.Write(PtsCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
-        Webpage = reader.Read<MyTelegram.Schema.IWebPage>();
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        Webpage = buffer.Read<MyTelegram.Schema.IWebPage>();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
     }
 }

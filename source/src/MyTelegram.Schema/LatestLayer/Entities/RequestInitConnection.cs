@@ -17,7 +17,7 @@ public sealed class RequestInitConnection : IRequest<IObject>, IHasSubQuery
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Application identifier (see. <a href="https://corefork.telegram.org/myapp">App configuration</a>)
@@ -73,8 +73,8 @@ public sealed class RequestInitConnection : IRequest<IObject>, IHasSubQuery
 
     public void ComputeFlag()
     {
-        if (Proxy != null) { Flags[0] = true; }
-        if (Params != null) { Flags[1] = true; }
+        if (Proxy != null) { Flags = Flags.SetBit(0); }
+        if (Params != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -90,23 +90,23 @@ public sealed class RequestInitConnection : IRequest<IObject>, IHasSubQuery
         writer.Write(SystemLangCode);
         writer.Write(LangPack);
         writer.Write(LangCode);
-        if (Flags[0]) { writer.Write(Proxy); }
-        if (Flags[1]) { writer.Write(Params); }
+        if (Flags.IsBitSet(0)) { writer.Write(Proxy); }
+        if (Flags.IsBitSet(1)) { writer.Write(Params); }
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ApiId = reader.ReadInt32();
-        DeviceModel = reader.ReadString();
-        SystemVersion = reader.ReadString();
-        AppVersion = reader.ReadString();
-        SystemLangCode = reader.ReadString();
-        LangPack = reader.ReadString();
-        LangCode = reader.ReadString();
-        if (Flags[0]) { Proxy = reader.Read<MyTelegram.Schema.IInputClientProxy>(); }
-        if (Flags[1]) { Params = reader.Read<MyTelegram.Schema.IJSONValue>(); }
-        Query = reader.Read<IObject>();
+        Flags = buffer.ReadInt32();
+        ApiId = buffer.ReadInt32();
+        DeviceModel = buffer.ReadString();
+        SystemVersion = buffer.ReadString();
+        AppVersion = buffer.ReadString();
+        SystemLangCode = buffer.ReadString();
+        LangPack = buffer.ReadString();
+        LangCode = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Proxy = buffer.Read<MyTelegram.Schema.IInputClientProxy>(); }
+        if (Flags.IsBitSet(1)) { Params = buffer.Read<MyTelegram.Schema.IJSONValue>(); }
+        Query = buffer.Read<IObject>();
     }
 }

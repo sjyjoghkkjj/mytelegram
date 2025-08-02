@@ -34,9 +34,9 @@ public sealed class TBotCommand : IBotCommand
         writer.Write(Description);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Command = reader.ReadString();
-        Description = reader.ReadString();
+        Command = buffer.ReadString();
+        Description = buffer.ReadString();
     }
 }

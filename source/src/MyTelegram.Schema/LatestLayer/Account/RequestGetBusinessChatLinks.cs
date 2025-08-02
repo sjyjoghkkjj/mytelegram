@@ -24,7 +24,7 @@ public sealed class RequestGetBusinessChatLinks : IRequest<MyTelegram.Schema.Acc
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

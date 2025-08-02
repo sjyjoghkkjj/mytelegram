@@ -36,9 +36,9 @@ public sealed class TUpdateStarsRevenueStatus : IUpdate
         writer.Write(Status);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Status = reader.Read<MyTelegram.Schema.IStarsRevenueStatus>();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Status = buffer.Read<MyTelegram.Schema.IStarsRevenueStatus>();
     }
 }

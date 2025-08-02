@@ -10,3 +10,6 @@ global using MyTelegram.Schema.Extensions;
 global using MyTelegram.Schema;
 global using MyTelegram.Abstractions;
 global using MyTelegram.Services.TLObjectConverters;
+global using MyTelegram.EventBus.RabbitMQ;
+global using System.Buffers;
+//global using CommunityToolkit.HighPerformance.Buffers;

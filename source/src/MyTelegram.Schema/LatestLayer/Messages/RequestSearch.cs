@@ -28,7 +28,7 @@ public sealed class RequestSearch : IRequest<MyTelegram.Schema.Messages.IMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// User or chat, histories with which are searched, or <a href="https://corefork.telegram.org/constructor/inputPeerEmpty">(inputPeerEmpty)</a> constructor to search in all private chats and <a href="https://corefork.telegram.org/api/channel">normal groups (not channels) »</a>. Use <a href="https://corefork.telegram.org/method/messages.searchGlobal">messages.searchGlobal</a> to search globally in all chats, groups, supergroups and channels.
@@ -111,10 +111,10 @@ public sealed class RequestSearch : IRequest<MyTelegram.Schema.Messages.IMessage
 
     public void ComputeFlag()
     {
-        if (FromId != null) { Flags[0] = true; }
-        if (SavedPeerId != null) { Flags[2] = true; }
-        if (SavedReaction?.Count > 0) { Flags[3] = true; }
-        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[1] = true; }
+        if (FromId != null) { Flags = Flags.SetBit(0); }
+        if (SavedPeerId != null) { Flags = Flags.SetBit(2); }
+        if (SavedReaction?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -125,10 +125,10 @@ public sealed class RequestSearch : IRequest<MyTelegram.Schema.Messages.IMessage
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Q);
-        if (Flags[0]) { writer.Write(FromId); }
-        if (Flags[2]) { writer.Write(SavedPeerId); }
-        if (Flags[3]) { writer.Write(SavedReaction); }
-        if (Flags[1]) { writer.Write(TopMsgId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(FromId); }
+        if (Flags.IsBitSet(2)) { writer.Write(SavedPeerId); }
+        if (Flags.IsBitSet(3)) { writer.Write(SavedReaction); }
+        if (Flags.IsBitSet(1)) { writer.Write(TopMsgId.Value); }
         writer.Write(Filter);
         writer.Write(MinDate);
         writer.Write(MaxDate);
@@ -140,23 +140,23 @@ public sealed class RequestSearch : IRequest<MyTelegram.Schema.Messages.IMessage
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Q = reader.ReadString();
-        if (Flags[0]) { FromId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[2]) { SavedPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[3]) { SavedReaction = reader.Read<TVector<MyTelegram.Schema.IReaction>>(); }
-        if (Flags[1]) { TopMsgId = reader.ReadInt32(); }
-        Filter = reader.Read<MyTelegram.Schema.IMessagesFilter>();
-        MinDate = reader.ReadInt32();
-        MaxDate = reader.ReadInt32();
-        OffsetId = reader.ReadInt32();
-        AddOffset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
-        MaxId = reader.ReadInt32();
-        MinId = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Q = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { FromId = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(2)) { SavedPeerId = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(3)) { SavedReaction = buffer.Read<TVector<MyTelegram.Schema.IReaction>>(); }
+        if (Flags.IsBitSet(1)) { TopMsgId = buffer.ReadInt32(); }
+        Filter = buffer.Read<MyTelegram.Schema.IMessagesFilter>();
+        MinDate = buffer.ReadInt32();
+        MaxDate = buffer.ReadInt32();
+        OffsetId = buffer.ReadInt32();
+        AddOffset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
+        MaxId = buffer.ReadInt32();
+        MinId = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TPhotoSizeEmpty : IPhotoSize,IEmpty
         writer.Write(Type);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Type = reader.ReadString();
+        Type = buffer.ReadString();
     }
 }

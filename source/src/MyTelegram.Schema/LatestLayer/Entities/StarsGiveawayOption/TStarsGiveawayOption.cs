@@ -14,7 +14,7 @@ public sealed class TStarsGiveawayOption : IStarsGiveawayOption
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, this option must only be shown in the full list of giveaway options (i.e. they must be added to the list only when the user clicks on the expand button).
@@ -60,9 +60,9 @@ public sealed class TStarsGiveawayOption : IStarsGiveawayOption
 
     public void ComputeFlag()
     {
-        if (Extended) { Flags[0] = true; }
-        if (Default) { Flags[1] = true; }
-        if (StoreProduct != null) { Flags[2] = true; }
+        if (Extended) { Flags = Flags.SetBit(0); }
+        if (Default) { Flags = Flags.SetBit(1); }
+        if (StoreProduct != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -73,22 +73,22 @@ public sealed class TStarsGiveawayOption : IStarsGiveawayOption
         writer.Write(Flags);
         writer.Write(Stars);
         writer.Write(YearlyBoosts);
-        if (Flags[2]) { writer.Write(StoreProduct); }
+        if (Flags.IsBitSet(2)) { writer.Write(StoreProduct); }
         writer.Write(Currency);
         writer.Write(Amount);
         writer.Write(Winners);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Extended = true; }
-        if (Flags[1]) { Default = true; }
-        Stars = reader.ReadInt64();
-        YearlyBoosts = reader.ReadInt32();
-        if (Flags[2]) { StoreProduct = reader.ReadString(); }
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
-        Winners = reader.Read<TVector<MyTelegram.Schema.IStarsGiveawayWinnersOption>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Extended = true; }
+        if (Flags.IsBitSet(1)) { Default = true; }
+        Stars = buffer.ReadInt64();
+        YearlyBoosts = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { StoreProduct = buffer.ReadString(); }
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
+        Winners = buffer.Read<TVector<MyTelegram.Schema.IStarsGiveawayWinnersOption>>();
     }
 }

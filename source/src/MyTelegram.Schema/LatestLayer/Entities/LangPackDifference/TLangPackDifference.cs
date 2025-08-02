@@ -46,11 +46,11 @@ public sealed class TLangPackDifference : ILangPackDifference
         writer.Write(Strings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangCode = reader.ReadString();
-        FromVersion = reader.ReadInt32();
-        Version = reader.ReadInt32();
-        Strings = reader.Read<TVector<MyTelegram.Schema.ILangPackString>>();
+        LangCode = buffer.ReadString();
+        FromVersion = buffer.ReadInt32();
+        Version = buffer.ReadInt32();
+        Strings = buffer.Read<TVector<MyTelegram.Schema.ILangPackString>>();
     }
 }

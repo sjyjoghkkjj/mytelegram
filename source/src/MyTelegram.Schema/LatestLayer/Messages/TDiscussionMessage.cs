@@ -14,7 +14,7 @@ public sealed class TDiscussionMessage : IDiscussionMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The messages from which the thread starts. The messages are returned in reverse chronological order (i.e., in order of decreasing message ID).
@@ -53,9 +53,9 @@ public sealed class TDiscussionMessage : IDiscussionMessage
 
     public void ComputeFlag()
     {
-        if (/*MaxId != 0 && */MaxId.HasValue) { Flags[0] = true; }
-        if (/*ReadInboxMaxId != 0 && */ReadInboxMaxId.HasValue) { Flags[1] = true; }
-        if (/*ReadOutboxMaxId != 0 && */ReadOutboxMaxId.HasValue) { Flags[2] = true; }
+        if (/*MaxId != 0 && */MaxId.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*ReadInboxMaxId != 0 && */ReadInboxMaxId.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*ReadOutboxMaxId != 0 && */ReadOutboxMaxId.HasValue) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -65,23 +65,23 @@ public sealed class TDiscussionMessage : IDiscussionMessage
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Messages);
-        if (Flags[0]) { writer.Write(MaxId.Value); }
-        if (Flags[1]) { writer.Write(ReadInboxMaxId.Value); }
-        if (Flags[2]) { writer.Write(ReadOutboxMaxId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(MaxId.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(ReadInboxMaxId.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReadOutboxMaxId.Value); }
         writer.Write(UnreadCount);
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Messages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        if (Flags[0]) { MaxId = reader.ReadInt32(); }
-        if (Flags[1]) { ReadInboxMaxId = reader.ReadInt32(); }
-        if (Flags[2]) { ReadOutboxMaxId = reader.ReadInt32(); }
-        UnreadCount = reader.ReadInt32();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        Messages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        if (Flags.IsBitSet(0)) { MaxId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { ReadInboxMaxId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { ReadOutboxMaxId = buffer.ReadInt32(); }
+        UnreadCount = buffer.ReadInt32();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

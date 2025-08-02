@@ -14,7 +14,7 @@ public sealed class TMessageActionGiftPremium : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Three-letter ISO 4217 <a href="https://corefork.telegram.org/bots/payments#supported-currencies">currency</a> code
@@ -49,9 +49,9 @@ public sealed class TMessageActionGiftPremium : IMessageAction
 
     public void ComputeFlag()
     {
-        if (CryptoCurrency != null) { Flags[0] = true; }
-        if (/*CryptoAmount != 0 &&*/ CryptoAmount.HasValue) { Flags[0] = true; }
-        if (Message != null) { Flags[1] = true; }
+        if (CryptoCurrency != null) { Flags = Flags.SetBit(0); }
+        if (/*CryptoAmount != 0 &&*/ CryptoAmount.HasValue) { Flags = Flags.SetBit(0); }
+        if (Message != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -62,19 +62,19 @@ public sealed class TMessageActionGiftPremium : IMessageAction
         writer.Write(Currency);
         writer.Write(Amount);
         writer.Write(Months);
-        if (Flags[0]) { writer.Write(CryptoCurrency); }
-        if (Flags[0]) { writer.Write(CryptoAmount.Value); }
-        if (Flags[1]) { writer.Write(Message); }
+        if (Flags.IsBitSet(0)) { writer.Write(CryptoCurrency); }
+        if (Flags.IsBitSet(0)) { writer.Write(CryptoAmount.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Message); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
-        Months = reader.ReadInt32();
-        if (Flags[0]) { CryptoCurrency = reader.ReadString(); }
-        if (Flags[0]) { CryptoAmount = reader.ReadInt64(); }
-        if (Flags[1]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        Flags = buffer.ReadInt32();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
+        Months = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { CryptoCurrency = buffer.ReadString(); }
+        if (Flags.IsBitSet(0)) { CryptoAmount = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(1)) { Message = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
     }
 }

@@ -42,9 +42,9 @@ public sealed class RequestVerifyEmail : IRequest<MyTelegram.Schema.Account.IEma
         writer.Write(Verification);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Purpose = reader.Read<MyTelegram.Schema.IEmailVerifyPurpose>();
-        Verification = reader.Read<MyTelegram.Schema.IEmailVerification>();
+        Purpose = buffer.Read<MyTelegram.Schema.IEmailVerifyPurpose>();
+        Verification = buffer.Read<MyTelegram.Schema.IEmailVerification>();
     }
 }

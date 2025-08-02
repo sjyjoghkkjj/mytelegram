@@ -41,9 +41,9 @@ public sealed class RequestInvokeWithLayer : IRequest<IObject>, IHasSubQuery
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Layer = reader.ReadInt32();
-        Query = reader.Read<IObject>();
+        Layer = buffer.ReadInt32();
+        Query = buffer.Read<IObject>();
     }
 }

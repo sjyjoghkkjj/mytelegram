@@ -34,9 +34,9 @@ public sealed class TChannelAdminLogEventActionChangeAbout : IChannelAdminLogEve
         writer.Write(NewValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevValue = reader.ReadString();
-        NewValue = reader.ReadString();
+        PrevValue = buffer.ReadString();
+        NewValue = buffer.ReadString();
     }
 }

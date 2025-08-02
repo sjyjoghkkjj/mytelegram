@@ -12,7 +12,7 @@ public interface IPeerColorOption : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether this palette should not be displayed as an option to the user when choosing a palette to apply to profile pages or message accents.

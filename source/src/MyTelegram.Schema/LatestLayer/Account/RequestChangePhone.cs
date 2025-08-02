@@ -46,10 +46,10 @@ public sealed class RequestChangePhone : IRequest<MyTelegram.Schema.IUser>
         writer.Write(PhoneCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
-        PhoneCode = reader.ReadString();
+        PhoneNumber = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
+        PhoneCode = buffer.ReadString();
     }
 }

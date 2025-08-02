@@ -35,9 +35,9 @@ public sealed class TContact : IContact
         writer.Write(Mutual);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        Mutual = reader.Read();
+        UserId = buffer.ReadInt64();
+        Mutual = buffer.Read();
     }
 }

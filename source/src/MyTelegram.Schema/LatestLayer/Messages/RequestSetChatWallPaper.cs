@@ -19,7 +19,7 @@ public sealed class RequestSetChatWallPaper : IRequest<MyTelegram.Schema.IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Only for <a href="https://corefork.telegram.org/api/premium">Premium</a> users, sets the specified wallpaper for both users of the chat, without requiring confirmation from the other user.
@@ -58,11 +58,11 @@ public sealed class RequestSetChatWallPaper : IRequest<MyTelegram.Schema.IUpdate
 
     public void ComputeFlag()
     {
-        if (ForBoth) { Flags[3] = true; }
-        if (Revert) { Flags[4] = true; }
-        if (Wallpaper != null) { Flags[0] = true; }
-        if (Settings != null) { Flags[2] = true; }
-        if (/*Id != 0 && */Id.HasValue) { Flags[1] = true; }
+        if (ForBoth) { Flags = Flags.SetBit(3); }
+        if (Revert) { Flags = Flags.SetBit(4); }
+        if (Wallpaper != null) { Flags = Flags.SetBit(0); }
+        if (Settings != null) { Flags = Flags.SetBit(2); }
+        if (/*Id != 0 && */Id.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -71,19 +71,19 @@ public sealed class RequestSetChatWallPaper : IRequest<MyTelegram.Schema.IUpdate
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(Wallpaper); }
-        if (Flags[2]) { writer.Write(Settings); }
-        if (Flags[1]) { writer.Write(Id.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Wallpaper); }
+        if (Flags.IsBitSet(2)) { writer.Write(Settings); }
+        if (Flags.IsBitSet(1)) { writer.Write(Id.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { ForBoth = true; }
-        if (Flags[4]) { Revert = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[0]) { Wallpaper = reader.Read<MyTelegram.Schema.IInputWallPaper>(); }
-        if (Flags[2]) { Settings = reader.Read<MyTelegram.Schema.IWallPaperSettings>(); }
-        if (Flags[1]) { Id = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { ForBoth = true; }
+        if (Flags.IsBitSet(4)) { Revert = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(0)) { Wallpaper = buffer.Read<MyTelegram.Schema.IInputWallPaper>(); }
+        if (Flags.IsBitSet(2)) { Settings = buffer.Read<MyTelegram.Schema.IWallPaperSettings>(); }
+        if (Flags.IsBitSet(1)) { Id = buffer.ReadInt32(); }
     }
 }

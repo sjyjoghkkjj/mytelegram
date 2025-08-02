@@ -40,10 +40,10 @@ public sealed class TBroadcastRevenueTransactionRefund : IBroadcastRevenueTransa
         writer.Write(Provider);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Amount = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        Provider = reader.ReadString();
+        Amount = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        Provider = buffer.ReadString();
     }
 }

@@ -65,8 +65,7 @@ public abstract class DomainEventHandlerBase(
             onlySendToUserId,
             onlySendToThisAuthKeyId,
             pts,
-            globalSeqNo: globalSeqNo,
-            layeredData: layeredData
+            globalSeqNo: globalSeqNo
         );
     }
 
@@ -80,7 +79,6 @@ public abstract class DomainEventHandlerBase(
         long? onlySendToThisAuthKeyId = null,
         int pts = 0,
         UpdatesType updatesType = UpdatesType.Updates,
-        LayeredData<IUpdates>? layeredData = null,
         long? senderUserId = null
     )
     {
@@ -102,8 +100,7 @@ public abstract class DomainEventHandlerBase(
             onlySendToUserId,
             onlySendToThisAuthKeyId,
             pts,
-            globalSeqNo: globalSeqNo,
-            layeredData: layeredData
+            globalSeqNo: globalSeqNo
         );
     }
 
@@ -116,7 +113,6 @@ public abstract class DomainEventHandlerBase(
         long? onlySendToThisAuthKeyId = null,
         int pts = 0,
         UpdatesType updatesType = UpdatesType.Updates,
-        LayeredData<IUpdates>? layeredData = null,
         long? senderUserId = null,
         bool skipSaveUpdates = false,
         PushData? pushData = null,
@@ -164,7 +160,6 @@ public abstract class DomainEventHandlerBase(
             onlySendToThisAuthKeyId,
             pts,
             globalSeqNo: globalSeqNo,
-            layeredData: layeredData,
             pushData: pushData,
             excludeUserIds: excludeUserIds
         );
@@ -296,7 +291,6 @@ public abstract class DomainEventHandlerBase(
         long? onlySendToThisAuthKeyId = null,
         int pts = 0,
         UpdatesType updatesType = UpdatesType.Updates,
-        LayeredData<TData>? layeredData = null,
         long channelId = 0,
         PushData? pushData = null,
         List<long>? excludeUserIds = null
@@ -325,60 +319,57 @@ public abstract class DomainEventHandlerBase(
             onlySendToThisAuthKeyId,
             pts,
             globalSeqNo: globalSeqNo,
-            layeredData: layeredData,
             pushData: pushData,
             excludeUserIds: excludeUserIds
         );
     }
 
-    protected async Task PushMessageToPeerAsync<TData, TExtraData>(
-        Peer toPeer,
-        TData data,
-        long? excludeAuthKeyId = null,
-        long? excludeUserId = null,
-        long? onlySendToUserId = null,
-        long? onlySendToThisAuthKeyId = null,
-        int pts = 0,
-        UpdatesType updatesType = UpdatesType.Updates,
-        LayeredData<TData>? layeredData = null,
-        TExtraData? extraData = default,
-        PushData? pushData = null,
-        List<long>? excludeUserIds = null
-    )
-        where TData : IObject
-    {
-        var globalSeqNo = 0L;
+    //protected async Task PushMessageToPeerAsync<TData, TExtraData>(
+    //    Peer toPeer,
+    //    TData data,
+    //    long? excludeAuthKeyId = null,
+    //    long? excludeUserId = null,
+    //    long? onlySendToUserId = null,
+    //    long? onlySendToThisAuthKeyId = null,
+    //    int pts = 0,
+    //    UpdatesType updatesType = UpdatesType.Updates,
+    //    TExtraData? extraData = default,
+    //    PushData? pushData = null,
+    //    List<long>? excludeUserIds = null
+    //)
+    //    where TData : IObject
+    //{
+    //    var globalSeqNo = 0L;
 
-        if (data is IUpdates updates)
-        {
-            globalSeqNo = await SavePushUpdatesAsync(
-                toPeer.PeerId,
-                //0,
-                updates,
-                pts,
-                excludeAuthKeyId,
-                excludeUserId,
-                onlySendToUserId,
-                onlySendToThisAuthKeyId,
-                updatesType: updatesType
-            );
-        }
+    //    if (data is IUpdates updates)
+    //    {
+    //        globalSeqNo = await SavePushUpdatesAsync(
+    //            toPeer.PeerId,
+    //            //0,
+    //            updates,
+    //            pts,
+    //            excludeAuthKeyId,
+    //            excludeUserId,
+    //            onlySendToUserId,
+    //            onlySendToThisAuthKeyId,
+    //            updatesType: updatesType
+    //        );
+    //    }
 
-        await objectMessageSender.PushMessageToPeerAsync(
-            toPeer,
-            data,
-            excludeAuthKeyId,
-            excludeUserId,
-            onlySendToUserId,
-            onlySendToThisAuthKeyId,
-            pts,
-            globalSeqNo: globalSeqNo,
-            layeredData: layeredData,
-            extraData: extraData,
-            pushData: pushData,
-            excludeUserIds: excludeUserIds
-        );
-    }
+    //    await objectMessageSender.PushMessageToPeerAsync(
+    //        toPeer,
+    //        data,
+    //        excludeAuthKeyId,
+    //        excludeUserId,
+    //        onlySendToUserId,
+    //        onlySendToThisAuthKeyId,
+    //        pts,
+    //        globalSeqNo: globalSeqNo,
+    //        //extraData: extraData,
+    //        pushData: pushData,
+    //        excludeUserIds: excludeUserIds
+    //    );
+    //}
 
     protected Task PushMessageToAuthKeyIdAsync<TData>(
         Peer toPeer,

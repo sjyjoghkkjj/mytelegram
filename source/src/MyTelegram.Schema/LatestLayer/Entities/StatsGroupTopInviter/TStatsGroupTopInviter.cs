@@ -34,9 +34,9 @@ public sealed class TStatsGroupTopInviter : IStatsGroupTopInviter
         writer.Write(Invitations);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        Invitations = reader.ReadInt32();
+        UserId = buffer.ReadInt64();
+        Invitations = buffer.ReadInt32();
     }
 }

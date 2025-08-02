@@ -39,9 +39,9 @@ public sealed class RequestTogglePeerStoriesHidden : IRequest<IBool>
         writer.Write(Hidden);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Hidden = reader.Read();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Hidden = buffer.Read();
     }
 }

@@ -35,9 +35,9 @@ public sealed class TInvitedUsers : IInvitedUsers
         writer.Write(MissingInvitees);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Updates = reader.Read<MyTelegram.Schema.IUpdates>();
-        MissingInvitees = reader.Read<TVector<MyTelegram.Schema.IMissingInvitee>>();
+        Updates = buffer.Read<MyTelegram.Schema.IUpdates>();
+        MissingInvitees = buffer.Read<TVector<MyTelegram.Schema.IMissingInvitee>>();
     }
 }

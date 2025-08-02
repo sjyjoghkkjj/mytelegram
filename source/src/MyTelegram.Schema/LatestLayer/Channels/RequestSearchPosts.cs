@@ -53,12 +53,12 @@ public sealed class RequestSearchPosts : IRequest<MyTelegram.Schema.Messages.IMe
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hashtag = reader.ReadString();
-        OffsetRate = reader.ReadInt32();
-        OffsetPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        OffsetId = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Hashtag = buffer.ReadString();
+        OffsetRate = buffer.ReadInt32();
+        OffsetPeer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        OffsetId = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

@@ -3,54 +3,10 @@
 namespace MyTelegram.Schema;
 
 [TlObject(0x73f1f8dc)]
-// ReSharper disable once InconsistentNaming
 public class TMsgContainer : IRequest<IObject>
 {
     public uint ConstructorId => 0x73f1f8dc;
     public TContainerMessage[] Messages { get; set; }
-
-    //public void Serialize(BinaryWriter bw)
-    //{
-    //    bw.Write(ConstructorId);
-    //    bw.Write(Messages.Length);
-
-    //    foreach (var containerMessage in Messages)
-    //    {
-    //        containerMessage.Serialize(bw);
-    //    }
-    //}
-
-    //public void Deserialize(BinaryReader br)
-    //{
-    //    var length = br.ReadInt32();
-    //    Messages = new TContainerMessage[length];
-    //    for (var i = 0; i < length; i++)
-    //    {
-    //        var item = new TContainerMessage();
-    //        item.Deserialize(br);
-
-    //        Messages[i] = item;
-    //    }
-    //}
-
-    //public void Deserialize(ref ReadOnlySequence<byte> buffer)
-    //{
-    //    var reader = new SequenceReader<byte>(buffer);
-    //    if (reader.TryReadLittleEndian(out int length))
-    //    {
-    //        buffer = buffer.Slice(sizeof(int));
-    //        if (length > 0)
-    //        {
-    //            Messages = new TContainerMessage[length];
-    //            for (int i = 0; i < length; i++)
-    //            {
-    //                var item = new TContainerMessage();
-    //                item.Deserialize(ref buffer);
-    //                Messages[i] = item;
-    //            }
-    //        }
-    //    }
-    //}
 
     public void Serialize(IBufferWriter<byte> writer)
     {
@@ -62,19 +18,17 @@ public class TMsgContainer : IRequest<IObject>
         }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        if (reader.TryReadLittleEndian(out int length))
+        var length = buffer.ReadInt32();
+        if (length > 0)
         {
-            if (length > 0)
+            Messages = new TContainerMessage[length];
+            for (int i = 0; i < length; i++)
             {
-                Messages = new TContainerMessage[length];
-                for (int i = 0; i < length; i++)
-                {
-                    var item = new TContainerMessage();
-                    item.Deserialize(ref reader);
-                    Messages[i] = item;
-                }
+                var item = new TContainerMessage();
+                item.Deserialize(ref buffer);
+                Messages[i] = item;
             }
         }
     }

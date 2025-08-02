@@ -28,8 +28,8 @@ public sealed class TKeyboardButtonRow : IKeyboardButtonRow
         writer.Write(Buttons);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Buttons = reader.Read<TVector<MyTelegram.Schema.IKeyboardButton>>();
+        Buttons = buffer.Read<TVector<MyTelegram.Schema.IKeyboardButton>>();
     }
 }

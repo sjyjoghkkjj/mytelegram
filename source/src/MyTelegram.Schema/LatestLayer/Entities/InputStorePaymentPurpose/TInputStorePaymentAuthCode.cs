@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TInputStorePaymentAuthCode : IInputStorePaymentPurpose
 {
     public uint ConstructorId => 0x9bb2636d;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Restore { get; set; }
     public string PhoneNumber { get; set; }
     public string PhoneCodeHash { get; set; }
@@ -19,7 +19,7 @@ public sealed class TInputStorePaymentAuthCode : IInputStorePaymentPurpose
 
     public void ComputeFlag()
     {
-        if (Restore) { Flags[0] = true; }
+        if (Restore) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -34,13 +34,13 @@ public sealed class TInputStorePaymentAuthCode : IInputStorePaymentPurpose
         writer.Write(Amount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Restore = true; }
-        PhoneNumber = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Restore = true; }
+        PhoneNumber = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
     }
 }

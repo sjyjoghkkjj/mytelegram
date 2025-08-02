@@ -34,9 +34,9 @@ public sealed class TUpdateChannelAvailableMessages : IUpdate
         writer.Write(AvailableMinId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
-        AvailableMinId = reader.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        AvailableMinId = buffer.ReadInt32();
     }
 }

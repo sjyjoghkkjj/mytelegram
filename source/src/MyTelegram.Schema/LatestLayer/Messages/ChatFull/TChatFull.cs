@@ -41,10 +41,10 @@ public sealed class TChatFull : MyTelegram.Schema.Messages.IChatFull//, ILayered
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FullChat = reader.Read<MyTelegram.Schema.IChatFull>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        FullChat = buffer.Read<MyTelegram.Schema.IChatFull>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

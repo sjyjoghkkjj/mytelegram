@@ -35,9 +35,9 @@ public sealed class TUpdatePrivacy : IUpdate
         writer.Write(Rules);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Key = reader.Read<MyTelegram.Schema.IPrivacyKey>();
-        Rules = reader.Read<TVector<MyTelegram.Schema.IPrivacyRule>>();
+        Key = buffer.Read<MyTelegram.Schema.IPrivacyKey>();
+        Rules = buffer.Read<TVector<MyTelegram.Schema.IPrivacyRule>>();
     }
 }

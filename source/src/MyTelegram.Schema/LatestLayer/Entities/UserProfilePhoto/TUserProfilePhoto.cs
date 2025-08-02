@@ -14,7 +14,7 @@ public sealed class TUserProfilePhoto : IUserProfilePhoto
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether an <a href="https://corefork.telegram.org/api/files#animated-profile-pictures">animated profile picture</a> is available for this user
@@ -36,7 +36,7 @@ public sealed class TUserProfilePhoto : IUserProfilePhoto
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/files#stripped-thumbnails">Stripped thumbnail</a>
     ///</summary>
-    public byte[]? StrippedThumb { get; set; }
+    public ReadOnlyMemory<byte>? StrippedThumb { get; set; }
 
     ///<summary>
     /// DC ID where the photo is stored
@@ -45,9 +45,9 @@ public sealed class TUserProfilePhoto : IUserProfilePhoto
 
     public void ComputeFlag()
     {
-        if (HasVideo) { Flags[0] = true; }
-        if (Personal) { Flags[2] = true; }
-        if (StrippedThumb != null) { Flags[1] = true; }
+        if (HasVideo) { Flags = Flags.SetBit(0); }
+        if (Personal) { Flags = Flags.SetBit(2); }
+        if (StrippedThumb != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -57,17 +57,17 @@ public sealed class TUserProfilePhoto : IUserProfilePhoto
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(PhotoId);
-        if (Flags[1]) { writer.Write(StrippedThumb); }
+        if (Flags.IsBitSet(1)) { writer.Write(StrippedThumb); }
         writer.Write(DcId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { HasVideo = true; }
-        if (Flags[2]) { Personal = true; }
-        PhotoId = reader.ReadInt64();
-        if (Flags[1]) { StrippedThumb = reader.ReadBytes(); }
-        DcId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { HasVideo = true; }
+        if (Flags.IsBitSet(2)) { Personal = true; }
+        PhotoId = buffer.ReadInt64();
+        if (Flags.IsBitSet(1)) { StrippedThumb = buffer.ReadBytes(); }
+        DcId = buffer.ReadInt32();
     }
 }

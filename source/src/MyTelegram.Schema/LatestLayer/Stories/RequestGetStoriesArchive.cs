@@ -45,10 +45,10 @@ public sealed class RequestGetStoriesArchive : IRequest<MyTelegram.Schema.Storie
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        OffsetId = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        OffsetId = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

@@ -40,10 +40,10 @@ public sealed class TChatParticipant : IChatParticipant
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        InviterId = reader.ReadInt64();
-        Date = reader.ReadInt32();
+        UserId = buffer.ReadInt64();
+        InviterId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
     }
 }

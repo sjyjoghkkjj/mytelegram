@@ -38,9 +38,9 @@ public sealed class RequestSearch : IRequest<MyTelegram.Schema.Contacts.IFound>
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Q = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Q = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

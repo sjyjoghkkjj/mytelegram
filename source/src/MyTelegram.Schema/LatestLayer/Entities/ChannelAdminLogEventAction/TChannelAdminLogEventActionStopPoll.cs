@@ -29,8 +29,8 @@ public sealed class TChannelAdminLogEventActionStopPoll : IChannelAdminLogEventA
         writer.Write(Message);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Message = reader.Read<MyTelegram.Schema.IMessage>();
+        Message = buffer.Read<MyTelegram.Schema.IMessage>();
     }
 }

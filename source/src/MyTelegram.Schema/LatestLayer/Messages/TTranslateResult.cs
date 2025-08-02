@@ -28,8 +28,8 @@ public sealed class TTranslateResult : ITranslatedText
         writer.Write(Result);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Result = reader.Read<TVector<MyTelegram.Schema.ITextWithEntities>>();
+        Result = buffer.Read<TVector<MyTelegram.Schema.ITextWithEntities>>();
     }
 }

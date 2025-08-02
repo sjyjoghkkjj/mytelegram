@@ -10,6 +10,6 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TStarGiftUnique), nameof(TStarGiftUnique))]
 public interface IStarGift : IObject
 {
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
     long Id { get; set; }
 }

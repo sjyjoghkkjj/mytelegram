@@ -19,7 +19,7 @@ public sealed class RequestGetForumTopics : IRequest<MyTelegram.Schema.Messages.
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Supergroup
@@ -54,7 +54,7 @@ public sealed class RequestGetForumTopics : IRequest<MyTelegram.Schema.Messages.
 
     public void ComputeFlag()
     {
-        if (Q != null) { Flags[0] = true; }
+        if (Q != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -64,21 +64,21 @@ public sealed class RequestGetForumTopics : IRequest<MyTelegram.Schema.Messages.
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Channel);
-        if (Flags[0]) { writer.Write(Q); }
+        if (Flags.IsBitSet(0)) { writer.Write(Q); }
         writer.Write(OffsetDate);
         writer.Write(OffsetId);
         writer.Write(OffsetTopic);
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        if (Flags[0]) { Q = reader.ReadString(); }
-        OffsetDate = reader.ReadInt32();
-        OffsetId = reader.ReadInt32();
-        OffsetTopic = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        if (Flags.IsBitSet(0)) { Q = buffer.ReadString(); }
+        OffsetDate = buffer.ReadInt32();
+        OffsetId = buffer.ReadInt32();
+        OffsetTopic = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

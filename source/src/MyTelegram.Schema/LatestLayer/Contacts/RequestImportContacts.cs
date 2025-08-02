@@ -28,8 +28,8 @@ public sealed class RequestImportContacts : IRequest<MyTelegram.Schema.Contacts.
         writer.Write(Contacts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Contacts = reader.Read<TVector<MyTelegram.Schema.IInputContact>>();
+        Contacts = buffer.Read<TVector<MyTelegram.Schema.IInputContact>>();
     }
 }

@@ -29,7 +29,7 @@ public sealed class TInputFileLocation : IInputFileLocation
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/file_reference">File reference</a>
     ///</summary>
-    public byte[] FileReference { get; set; }
+    public ReadOnlyMemory<byte> FileReference { get; set; }
 
     public void ComputeFlag()
     {
@@ -46,11 +46,11 @@ public sealed class TInputFileLocation : IInputFileLocation
         writer.Write(FileReference);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        VolumeId = reader.ReadInt64();
-        LocalId = reader.ReadInt32();
-        Secret = reader.ReadInt64();
-        FileReference = reader.ReadBytes();
+        VolumeId = buffer.ReadInt64();
+        LocalId = buffer.ReadInt32();
+        Secret = buffer.ReadInt64();
+        FileReference = buffer.ReadBytes();
     }
 }

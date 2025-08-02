@@ -14,7 +14,7 @@ public sealed class TUpdateBusinessBotCallbackQuery : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Query ID
@@ -51,12 +51,12 @@ public sealed class TUpdateBusinessBotCallbackQuery : IUpdate
     ///<summary>
     /// Callback data
     ///</summary>
-    public byte[]? Data { get; set; }
+    public ReadOnlyMemory<byte>? Data { get; set; }
 
     public void ComputeFlag()
     {
-        if (ReplyToMessage != null) { Flags[2] = true; }
-        if (Data != null) { Flags[0] = true; }
+        if (ReplyToMessage != null) { Flags = Flags.SetBit(2); }
+        if (Data != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -68,20 +68,20 @@ public sealed class TUpdateBusinessBotCallbackQuery : IUpdate
         writer.Write(UserId);
         writer.Write(ConnectionId);
         writer.Write(Message);
-        if (Flags[2]) { writer.Write(ReplyToMessage); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyToMessage); }
         writer.Write(ChatInstance);
-        if (Flags[0]) { writer.Write(Data); }
+        if (Flags.IsBitSet(0)) { writer.Write(Data); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        QueryId = reader.ReadInt64();
-        UserId = reader.ReadInt64();
-        ConnectionId = reader.ReadString();
-        Message = reader.Read<MyTelegram.Schema.IMessage>();
-        if (Flags[2]) { ReplyToMessage = reader.Read<MyTelegram.Schema.IMessage>(); }
-        ChatInstance = reader.ReadInt64();
-        if (Flags[0]) { Data = reader.ReadBytes(); }
+        Flags = buffer.ReadInt32();
+        QueryId = buffer.ReadInt64();
+        UserId = buffer.ReadInt64();
+        ConnectionId = buffer.ReadString();
+        Message = buffer.Read<MyTelegram.Schema.IMessage>();
+        if (Flags.IsBitSet(2)) { ReplyToMessage = buffer.Read<MyTelegram.Schema.IMessage>(); }
+        ChatInstance = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Data = buffer.ReadBytes(); }
     }
 }

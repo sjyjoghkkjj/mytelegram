@@ -24,7 +24,7 @@ public sealed class RequestRequestWebView : IRequest<MyTelegram.Schema.IWebViewR
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the webview was opened by clicking on the bot's <a href="https://corefork.telegram.org/api/bots/menu">menu button »</a>.
@@ -97,15 +97,15 @@ public sealed class RequestRequestWebView : IRequest<MyTelegram.Schema.IWebViewR
 
     public void ComputeFlag()
     {
-        if (FromBotMenu) { Flags[4] = true; }
-        if (Silent) { Flags[5] = true; }
-        if (Compact) { Flags[7] = true; }
-        if (Fullscreen) { Flags[8] = true; }
-        if (Url != null) { Flags[1] = true; }
-        if (StartParam != null) { Flags[3] = true; }
-        if (ThemeParams != null) { Flags[2] = true; }
-        if (ReplyTo != null) { Flags[0] = true; }
-        if (SendAs != null) { Flags[13] = true; }
+        if (FromBotMenu) { Flags = Flags.SetBit(4); }
+        if (Silent) { Flags = Flags.SetBit(5); }
+        if (Compact) { Flags = Flags.SetBit(7); }
+        if (Fullscreen) { Flags = Flags.SetBit(8); }
+        if (Url != null) { Flags = Flags.SetBit(1); }
+        if (StartParam != null) { Flags = Flags.SetBit(3); }
+        if (ThemeParams != null) { Flags = Flags.SetBit(2); }
+        if (ReplyTo != null) { Flags = Flags.SetBit(0); }
+        if (SendAs != null) { Flags = Flags.SetBit(13); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -115,28 +115,28 @@ public sealed class RequestRequestWebView : IRequest<MyTelegram.Schema.IWebViewR
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Bot);
-        if (Flags[1]) { writer.Write(Url); }
-        if (Flags[3]) { writer.Write(StartParam); }
-        if (Flags[2]) { writer.Write(ThemeParams); }
+        if (Flags.IsBitSet(1)) { writer.Write(Url); }
+        if (Flags.IsBitSet(3)) { writer.Write(StartParam); }
+        if (Flags.IsBitSet(2)) { writer.Write(ThemeParams); }
         writer.Write(Platform);
-        if (Flags[0]) { writer.Write(ReplyTo); }
-        if (Flags[13]) { writer.Write(SendAs); }
+        if (Flags.IsBitSet(0)) { writer.Write(ReplyTo); }
+        if (Flags.IsBitSet(13)) { writer.Write(SendAs); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[4]) { FromBotMenu = true; }
-        if (Flags[5]) { Silent = true; }
-        if (Flags[7]) { Compact = true; }
-        if (Flags[8]) { Fullscreen = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        if (Flags[1]) { Url = reader.ReadString(); }
-        if (Flags[3]) { StartParam = reader.ReadString(); }
-        if (Flags[2]) { ThemeParams = reader.Read<MyTelegram.Schema.IDataJSON>(); }
-        Platform = reader.ReadString();
-        if (Flags[0]) { ReplyTo = reader.Read<MyTelegram.Schema.IInputReplyTo>(); }
-        if (Flags[13]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(4)) { FromBotMenu = true; }
+        if (Flags.IsBitSet(5)) { Silent = true; }
+        if (Flags.IsBitSet(7)) { Compact = true; }
+        if (Flags.IsBitSet(8)) { Fullscreen = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        if (Flags.IsBitSet(1)) { Url = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { StartParam = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { ThemeParams = buffer.Read<MyTelegram.Schema.IDataJSON>(); }
+        Platform = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { ReplyTo = buffer.Read<MyTelegram.Schema.IInputReplyTo>(); }
+        if (Flags.IsBitSet(13)) { SendAs = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
     }
 }

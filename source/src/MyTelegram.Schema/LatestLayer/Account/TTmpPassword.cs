@@ -14,7 +14,7 @@ public sealed class TTmpPassword : ITmpPassword
     ///<summary>
     /// Temporary password
     ///</summary>
-    public byte[] TmpPassword { get; set; }
+    public ReadOnlyMemory<byte> TmpPassword { get; set; }
 
     ///<summary>
     /// Validity period
@@ -34,9 +34,9 @@ public sealed class TTmpPassword : ITmpPassword
         writer.Write(ValidUntil);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        TmpPassword = reader.ReadBytes();
-        ValidUntil = reader.ReadInt32();
+        TmpPassword = buffer.ReadBytes();
+        ValidUntil = buffer.ReadInt32();
     }
 }

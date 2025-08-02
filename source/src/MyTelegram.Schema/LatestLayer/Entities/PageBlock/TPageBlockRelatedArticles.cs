@@ -35,9 +35,9 @@ public sealed class TPageBlockRelatedArticles : IPageBlock
         writer.Write(Articles);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.Read<MyTelegram.Schema.IRichText>();
-        Articles = reader.Read<TVector<MyTelegram.Schema.IPageRelatedArticle>>();
+        Title = buffer.Read<MyTelegram.Schema.IRichText>();
+        Articles = buffer.Read<TVector<MyTelegram.Schema.IPageRelatedArticle>>();
     }
 }

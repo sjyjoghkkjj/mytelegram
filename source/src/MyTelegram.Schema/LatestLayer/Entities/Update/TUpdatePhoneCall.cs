@@ -29,8 +29,8 @@ public sealed class TUpdatePhoneCall : IUpdate
         writer.Write(PhoneCall);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneCall = reader.Read<MyTelegram.Schema.IPhoneCall>();
+        PhoneCall = buffer.Read<MyTelegram.Schema.IPhoneCall>();
     }
 }

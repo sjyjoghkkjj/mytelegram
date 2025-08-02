@@ -19,7 +19,7 @@ public sealed class RequestGetCdnFileHashes : IRequest<TVector<MyTelegram.Schema
     ///<summary>
     /// File
     ///</summary>
-    public byte[] FileToken { get; set; }
+    public ReadOnlyMemory<byte> FileToken { get; set; }
 
     ///<summary>
     /// Offset from which to start getting hashes
@@ -39,9 +39,9 @@ public sealed class RequestGetCdnFileHashes : IRequest<TVector<MyTelegram.Schema
         writer.Write(Offset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FileToken = reader.ReadBytes();
-        Offset = reader.ReadInt64();
+        FileToken = buffer.ReadBytes();
+        Offset = buffer.ReadInt64();
     }
 }

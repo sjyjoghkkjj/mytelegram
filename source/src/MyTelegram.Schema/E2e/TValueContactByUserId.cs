@@ -8,7 +8,7 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TValueContactByUserId : IValue
 {
     public uint ConstructorId => 0x6CA0713;
-    public TVector<byte[]> PublicKeys { get; set; }
+    public TVector<ReadOnlyMemory<byte>> PublicKeys { get; set; }
 
     public void ComputeFlag()
     {
@@ -22,8 +22,8 @@ public sealed class TValueContactByUserId : IValue
         writer.WriteVector(PublicKeys);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PublicKeys = reader.ReadVector<byte[]>();
+        PublicKeys = buffer.ReadVector<ReadOnlyMemory<byte>>();
     }
 }

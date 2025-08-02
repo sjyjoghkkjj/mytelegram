@@ -14,7 +14,7 @@ public sealed class TTranscribedAudio : ITranscribedAudio
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the transcription is partial because audio transcription is still in progress, if set the user may receive further <a href="https://corefork.telegram.org/constructor/updateTranscribedAudio">updateTranscribedAudio</a> updates with the updated transcription.
@@ -44,9 +44,9 @@ public sealed class TTranscribedAudio : ITranscribedAudio
 
     public void ComputeFlag()
     {
-        if (Pending) { Flags[0] = true; }
-        if (/*TrialRemainsNum != 0 && */TrialRemainsNum.HasValue) { Flags[1] = true; }
-        if (/*TrialRemainsUntilDate != 0 && */TrialRemainsUntilDate.HasValue) { Flags[1] = true; }
+        if (Pending) { Flags = Flags.SetBit(0); }
+        if (/*TrialRemainsNum != 0 && */TrialRemainsNum.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*TrialRemainsUntilDate != 0 && */TrialRemainsUntilDate.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -56,17 +56,17 @@ public sealed class TTranscribedAudio : ITranscribedAudio
         writer.Write(Flags);
         writer.Write(TranscriptionId);
         writer.Write(Text);
-        if (Flags[1]) { writer.Write(TrialRemainsNum.Value); }
-        if (Flags[1]) { writer.Write(TrialRemainsUntilDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(TrialRemainsNum.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(TrialRemainsUntilDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Pending = true; }
-        TranscriptionId = reader.ReadInt64();
-        Text = reader.ReadString();
-        if (Flags[1]) { TrialRemainsNum = reader.ReadInt32(); }
-        if (Flags[1]) { TrialRemainsUntilDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Pending = true; }
+        TranscriptionId = buffer.ReadInt64();
+        Text = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { TrialRemainsNum = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { TrialRemainsUntilDate = buffer.ReadInt32(); }
     }
 }

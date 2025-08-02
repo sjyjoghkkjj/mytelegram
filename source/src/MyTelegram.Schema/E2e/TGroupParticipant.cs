@@ -9,16 +9,16 @@ public sealed class TGroupParticipant : IGroupParticipant
 {
     public uint ConstructorId => 0x18F3971F;
     public long UserId { get; set; }
-    public byte[] PublicKey { get; set; }
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public ReadOnlyMemory<byte> PublicKey { get; set; }
+    public int Flags { get; set; }
     public bool AddUsers { get; set; }
     public bool RemoveUsers { get; set; }
     public int Version { get; set; }
 
     public void ComputeFlag()
     {
-        if (AddUsers) { Flags[0] = true; }
-        if (RemoveUsers) { Flags[1] = true; }
+        if (AddUsers) { Flags = Flags.SetBit(0); }
+        if (RemoveUsers) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -32,13 +32,13 @@ public sealed class TGroupParticipant : IGroupParticipant
         writer.Write(Version);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        PublicKey = reader.ReadInt256();
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AddUsers = true; }
-        if (Flags[1]) { RemoveUsers = true; }
-        Version = reader.ReadInt32();
+        UserId = buffer.ReadInt64();
+        PublicKey = buffer.ReadInt256();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AddUsers = true; }
+        if (Flags.IsBitSet(1)) { RemoveUsers = true; }
+        Version = buffer.ReadInt32();
     }
 }

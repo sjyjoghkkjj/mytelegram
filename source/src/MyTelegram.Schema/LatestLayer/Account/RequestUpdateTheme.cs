@@ -17,7 +17,7 @@ public sealed class RequestUpdateTheme : IRequest<MyTelegram.Schema.ITheme>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Theme format, a string that identifies the theming engines supported by the client
@@ -53,10 +53,10 @@ public sealed class RequestUpdateTheme : IRequest<MyTelegram.Schema.ITheme>
 
     public void ComputeFlag()
     {
-        if (Slug != null) { Flags[0] = true; }
-        if (Title != null) { Flags[1] = true; }
-        if (Document != null) { Flags[2] = true; }
-        if (Settings?.Count > 0) { Flags[3] = true; }
+        if (Slug != null) { Flags = Flags.SetBit(0); }
+        if (Title != null) { Flags = Flags.SetBit(1); }
+        if (Document != null) { Flags = Flags.SetBit(2); }
+        if (Settings?.Count > 0) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -66,20 +66,20 @@ public sealed class RequestUpdateTheme : IRequest<MyTelegram.Schema.ITheme>
         writer.Write(Flags);
         writer.Write(Format);
         writer.Write(Theme);
-        if (Flags[0]) { writer.Write(Slug); }
-        if (Flags[1]) { writer.Write(Title); }
-        if (Flags[2]) { writer.Write(Document); }
-        if (Flags[3]) { writer.Write(Settings); }
+        if (Flags.IsBitSet(0)) { writer.Write(Slug); }
+        if (Flags.IsBitSet(1)) { writer.Write(Title); }
+        if (Flags.IsBitSet(2)) { writer.Write(Document); }
+        if (Flags.IsBitSet(3)) { writer.Write(Settings); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Format = reader.ReadString();
-        Theme = reader.Read<MyTelegram.Schema.IInputTheme>();
-        if (Flags[0]) { Slug = reader.ReadString(); }
-        if (Flags[1]) { Title = reader.ReadString(); }
-        if (Flags[2]) { Document = reader.Read<MyTelegram.Schema.IInputDocument>(); }
-        if (Flags[3]) { Settings = reader.Read<TVector<MyTelegram.Schema.IInputThemeSettings>>(); }
+        Flags = buffer.ReadInt32();
+        Format = buffer.ReadString();
+        Theme = buffer.Read<MyTelegram.Schema.IInputTheme>();
+        if (Flags.IsBitSet(0)) { Slug = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Document = buffer.Read<MyTelegram.Schema.IInputDocument>(); }
+        if (Flags.IsBitSet(3)) { Settings = buffer.Read<TVector<MyTelegram.Schema.IInputThemeSettings>>(); }
     }
 }

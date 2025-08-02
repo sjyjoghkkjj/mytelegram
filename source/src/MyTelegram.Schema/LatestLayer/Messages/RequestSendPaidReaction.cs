@@ -14,7 +14,7 @@ public sealed class RequestSendPaidReaction : IRequest<MyTelegram.Schema.IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The channel
@@ -45,7 +45,7 @@ public sealed class RequestSendPaidReaction : IRequest<MyTelegram.Schema.IUpdate
 
     public void ComputeFlag()
     {
-        if (Private != null) { Flags[0] = true; }
+        if (Private != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -57,16 +57,16 @@ public sealed class RequestSendPaidReaction : IRequest<MyTelegram.Schema.IUpdate
         writer.Write(MsgId);
         writer.Write(Count);
         writer.Write(RandomId);
-        if (Flags[0]) { writer.Write(Private); }
+        if (Flags.IsBitSet(0)) { writer.Write(Private); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.ReadInt32();
-        Count = reader.ReadInt32();
-        RandomId = reader.ReadInt64();
-        if (Flags[0]) { Private = reader.Read<MyTelegram.Schema.IPaidReactionPrivacy>(); }
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.ReadInt32();
+        Count = buffer.ReadInt32();
+        RandomId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Private = buffer.Read<MyTelegram.Schema.IPaidReactionPrivacy>(); }
     }
 }

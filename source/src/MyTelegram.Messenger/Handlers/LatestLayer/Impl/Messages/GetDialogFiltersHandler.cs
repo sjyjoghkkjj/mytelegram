@@ -15,6 +15,15 @@ internal sealed class GetDialogFiltersHandler(
     protected override async Task<IDialogFilters> HandleCoreAsync(IRequestInput input,
         RequestGetDialogFilters obj)
     {
+        if (input.UserId == 0)
+        {
+            return new TDialogFilters
+            {
+                Filters = [],
+                TagsEnabled = false
+            };
+        }
+
         var filterReadModels = await queryProcessor.ProcessAsync(new GetDialogFiltersQuery(input.UserId), CancellationToken.None);
 
         var filters = new TVector<IDialogFilter>

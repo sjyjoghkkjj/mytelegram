@@ -34,9 +34,9 @@ public sealed class TStatsDateRangeDays : IStatsDateRangeDays
         writer.Write(MaxDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MinDate = reader.ReadInt32();
-        MaxDate = reader.ReadInt32();
+        MinDate = buffer.ReadInt32();
+        MaxDate = buffer.ReadInt32();
     }
 }

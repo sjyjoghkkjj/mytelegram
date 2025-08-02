@@ -60,12 +60,12 @@ public sealed class RequestGetParticipants : IRequest<MyTelegram.Schema.Channels
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Filter = reader.Read<MyTelegram.Schema.IChannelParticipantsFilter>();
-        Offset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Filter = buffer.Read<MyTelegram.Schema.IChannelParticipantsFilter>();
+        Offset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TBroadcastRevenueWithdrawalUrl : IBroadcastRevenueWithdrawal
         writer.Write(Url);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
+        Url = buffer.ReadString();
     }
 }

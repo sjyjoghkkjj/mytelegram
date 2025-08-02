@@ -35,8 +35,8 @@ public sealed class RequestExportInvoice : IRequest<MyTelegram.Schema.Payments.I
         writer.Write(InvoiceMedia);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        InvoiceMedia = reader.Read<MyTelegram.Schema.IInputMedia>();
+        InvoiceMedia = buffer.Read<MyTelegram.Schema.IInputMedia>();
     }
 }

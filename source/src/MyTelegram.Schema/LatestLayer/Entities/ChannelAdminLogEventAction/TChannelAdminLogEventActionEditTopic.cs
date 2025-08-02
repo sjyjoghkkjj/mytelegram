@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionEditTopic : IChannelAdminLogEvent
         writer.Write(NewTopic);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevTopic = reader.Read<MyTelegram.Schema.IForumTopic>();
-        NewTopic = reader.Read<MyTelegram.Schema.IForumTopic>();
+        PrevTopic = buffer.Read<MyTelegram.Schema.IForumTopic>();
+        NewTopic = buffer.Read<MyTelegram.Schema.IForumTopic>();
     }
 }

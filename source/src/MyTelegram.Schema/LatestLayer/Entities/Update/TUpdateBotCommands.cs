@@ -41,10 +41,10 @@ public sealed class TUpdateBotCommands : IUpdate
         writer.Write(Commands);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        BotId = reader.ReadInt64();
-        Commands = reader.Read<TVector<MyTelegram.Schema.IBotCommand>>();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        BotId = buffer.ReadInt64();
+        Commands = buffer.Read<TVector<MyTelegram.Schema.IBotCommand>>();
     }
 }

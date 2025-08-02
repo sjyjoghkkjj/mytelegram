@@ -35,9 +35,9 @@ public sealed class TStickerPack : IStickerPack
         writer.Write(Documents);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Emoticon = reader.ReadString();
-        Documents = reader.Read<TVector<long>>();
+        Emoticon = buffer.ReadString();
+        Documents = buffer.Read<TVector<long>>();
     }
 }

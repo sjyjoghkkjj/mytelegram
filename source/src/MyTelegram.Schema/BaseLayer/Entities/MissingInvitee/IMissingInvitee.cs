@@ -12,7 +12,7 @@ public interface IMissingInvitee : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// If set, we could not add the user <em>only because</em> the current account needs to purchase a <a href="https://corefork.telegram.org/api/premium">Telegram Premium</a> subscription to complete the operation.

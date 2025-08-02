@@ -7,14 +7,14 @@ namespace MyTelegram.Schema;
 /// Full info about a <a href="https://corefork.telegram.org/api/channel#channels">channel</a>, <a href="https://corefork.telegram.org/api/channel#supergroups">supergroup</a> or <a href="https://corefork.telegram.org/api/channel#gigagroups">gigagroup</a>.When updating the <a href="https://corefork.telegram.org/api/peers">local peer database »</a>, all fields from the newly received constructor take priority over the old constructor cached locally (including by removing fields that aren't set in the new constructor).
 /// See <a href="https://corefork.telegram.org/constructor/channelFull" />
 ///</summary>
-[TlObject(0x52d6806b)]
+[TlObject(0xe07429de)]
 public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelFull
 {
-    public uint ConstructorId => 0x52d6806b;
+    public uint ConstructorId => 0xe07429de;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Can we view the participant list?
@@ -67,7 +67,7 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags2 { get; set; } = new BitArray(32);
+    public int Flags2 { get; set; }
 
     ///<summary>
     /// Can we delete this channel?
@@ -355,64 +355,66 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
     public MyTelegram.Schema.IStickerSet? Emojiset { get; set; }
     public MyTelegram.Schema.IBotVerification? BotVerification { get; set; }
     public int? StargiftsCount { get; set; }
+    public long? SendPaidMessagesStars { get; set; }
 
     public void ComputeFlag()
     {
-        if (CanViewParticipants) { Flags[3] = true; }
-        if (CanSetUsername) { Flags[6] = true; }
-        if (CanSetStickers) { Flags[7] = true; }
-        if (HiddenPrehistory) { Flags[10] = true; }
-        if (CanSetLocation) { Flags[16] = true; }
-        if (HasScheduled) { Flags[19] = true; }
-        if (CanViewStats) { Flags[20] = true; }
-        if (Blocked) { Flags[22] = true; }
-        if (CanDeleteChannel) { Flags2[0] = true; }
-        if (Antispam) { Flags2[1] = true; }
-        if (ParticipantsHidden) { Flags2[2] = true; }
-        if (TranslationsDisabled) { Flags2[3] = true; }
-        if (StoriesPinnedAvailable) { Flags2[5] = true; }
-        if (ViewForumAsMessages) { Flags2[6] = true; }
-        if (RestrictedSponsored) { Flags2[11] = true; }
-        if (CanViewRevenue) { Flags2[12] = true; }
-        if (PaidMediaAllowed) { Flags2[14] = true; }
-        if (CanViewStarsRevenue) { Flags2[15] = true; }
-        if (PaidReactionsAvailable) { Flags2[16] = true; }
-        if (StargiftsAvailable) { Flags2[19] = true; }
-        if (PaidMessagesAvailable) { Flags2[20] = true; }
-        if (/*ParticipantsCount != 0 && */ParticipantsCount.HasValue) { Flags[0] = true; }
-        if (/*AdminsCount != 0 && */AdminsCount.HasValue) { Flags[1] = true; }
-        if (/*KickedCount != 0 && */KickedCount.HasValue) { Flags[2] = true; }
-        if (/*BannedCount != 0 && */BannedCount.HasValue) { Flags[2] = true; }
-        if (/*OnlineCount != 0 && */OnlineCount.HasValue) { Flags[13] = true; }
-        if (ExportedInvite != null) { Flags[23] = true; }
-        if (/*MigratedFromChatId != 0 &&*/ MigratedFromChatId.HasValue) { Flags[4] = true; }
-        if (/*MigratedFromMaxId != 0 && */MigratedFromMaxId.HasValue) { Flags[4] = true; }
-        if (/*PinnedMsgId != 0 && */PinnedMsgId.HasValue) { Flags[5] = true; }
-        if (Stickerset != null) { Flags[8] = true; }
-        if (/*AvailableMinId != 0 && */AvailableMinId.HasValue) { Flags[9] = true; }
-        if (/*FolderId != 0 && */FolderId.HasValue) { Flags[11] = true; }
-        if (/*LinkedChatId != 0 &&*/ LinkedChatId.HasValue) { Flags[14] = true; }
-        if (Location != null) { Flags[15] = true; }
-        if (/*SlowmodeSeconds != 0 && */SlowmodeSeconds.HasValue) { Flags[17] = true; }
-        if (/*SlowmodeNextSendDate != 0 && */SlowmodeNextSendDate.HasValue) { Flags[18] = true; }
-        if (/*StatsDc != 0 && */StatsDc.HasValue) { Flags[12] = true; }
-        if (Call != null) { Flags[21] = true; }
-        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags[24] = true; }
-        if (PendingSuggestions?.Count > 0) { Flags[25] = true; }
-        if (GroupcallDefaultJoinAs != null) { Flags[26] = true; }
-        if (ThemeEmoticon != null) { Flags[27] = true; }
-        if (/*RequestsPending != 0 && */RequestsPending.HasValue) { Flags[28] = true; }
-        if (RecentRequesters?.Count > 0) { Flags[28] = true; }
-        if (DefaultSendAs != null) { Flags[29] = true; }
-        if (AvailableReactions != null) { Flags[30] = true; }
-        if (/*ReactionsLimit != 0 && */ReactionsLimit.HasValue) { Flags2[13] = true; }
-        if (Stories != null) { Flags2[4] = true; }
-        if (Wallpaper != null) { Flags2[7] = true; }
-        if (/*BoostsApplied != 0 && */BoostsApplied.HasValue) { Flags2[8] = true; }
-        if (/*BoostsUnrestrict != 0 && */BoostsUnrestrict.HasValue) { Flags2[9] = true; }
-        if (Emojiset != null) { Flags2[10] = true; }
-        if (BotVerification != null) { Flags2[17] = true; }
-        if (/*StargiftsCount != 0 && */StargiftsCount.HasValue) { Flags2[18] = true; }
+        if (CanViewParticipants) { Flags = Flags.SetBit(3); }
+        if (CanSetUsername) { Flags = Flags.SetBit(6); }
+        if (CanSetStickers) { Flags = Flags.SetBit(7); }
+        if (HiddenPrehistory) { Flags = Flags.SetBit(10); }
+        if (CanSetLocation) { Flags = Flags.SetBit(16); }
+        if (HasScheduled) { Flags = Flags.SetBit(19); }
+        if (CanViewStats) { Flags = Flags.SetBit(20); }
+        if (Blocked) { Flags = Flags.SetBit(22); }
+        if (CanDeleteChannel) { Flags2 = Flags2.SetBit(0); }
+        if (Antispam) { Flags2 = Flags2.SetBit(1); }
+        if (ParticipantsHidden) { Flags2 = Flags2.SetBit(2); }
+        if (TranslationsDisabled) { Flags2 = Flags2.SetBit(3); }
+        if (StoriesPinnedAvailable) { Flags2 = Flags2.SetBit(5); }
+        if (ViewForumAsMessages) { Flags2 = Flags2.SetBit(6); }
+        if (RestrictedSponsored) { Flags2 = Flags2.SetBit(11); }
+        if (CanViewRevenue) { Flags2 = Flags2.SetBit(12); }
+        if (PaidMediaAllowed) { Flags2 = Flags2.SetBit(14); }
+        if (CanViewStarsRevenue) { Flags2 = Flags2.SetBit(15); }
+        if (PaidReactionsAvailable) { Flags2 = Flags2.SetBit(16); }
+        if (StargiftsAvailable) { Flags2 = Flags2.SetBit(19); }
+        if (PaidMessagesAvailable) { Flags2 = Flags2.SetBit(20); }
+        if (/*ParticipantsCount != 0 && */ParticipantsCount.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*AdminsCount != 0 && */AdminsCount.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*KickedCount != 0 && */KickedCount.HasValue) { Flags = Flags.SetBit(2); }
+        if (/*BannedCount != 0 && */BannedCount.HasValue) { Flags = Flags.SetBit(2); }
+        if (/*OnlineCount != 0 && */OnlineCount.HasValue) { Flags = Flags.SetBit(13); }
+        if (ExportedInvite != null) { Flags = Flags.SetBit(23); }
+        if (/*MigratedFromChatId != 0 &&*/ MigratedFromChatId.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*MigratedFromMaxId != 0 && */MigratedFromMaxId.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*PinnedMsgId != 0 && */PinnedMsgId.HasValue) { Flags = Flags.SetBit(5); }
+        if (Stickerset != null) { Flags = Flags.SetBit(8); }
+        if (/*AvailableMinId != 0 && */AvailableMinId.HasValue) { Flags = Flags.SetBit(9); }
+        if (/*FolderId != 0 && */FolderId.HasValue) { Flags = Flags.SetBit(11); }
+        if (/*LinkedChatId != 0 &&*/ LinkedChatId.HasValue) { Flags = Flags.SetBit(14); }
+        if (Location != null) { Flags = Flags.SetBit(15); }
+        if (/*SlowmodeSeconds != 0 && */SlowmodeSeconds.HasValue) { Flags = Flags.SetBit(17); }
+        if (/*SlowmodeNextSendDate != 0 && */SlowmodeNextSendDate.HasValue) { Flags = Flags.SetBit(18); }
+        if (/*StatsDc != 0 && */StatsDc.HasValue) { Flags = Flags.SetBit(12); }
+        if (Call != null) { Flags = Flags.SetBit(21); }
+        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags = Flags.SetBit(24); }
+        if (PendingSuggestions?.Count > 0) { Flags = Flags.SetBit(25); }
+        if (GroupcallDefaultJoinAs != null) { Flags = Flags.SetBit(26); }
+        if (ThemeEmoticon != null) { Flags = Flags.SetBit(27); }
+        if (/*RequestsPending != 0 && */RequestsPending.HasValue) { Flags = Flags.SetBit(28); }
+        if (RecentRequesters?.Count > 0) { Flags = Flags.SetBit(28); }
+        if (DefaultSendAs != null) { Flags = Flags.SetBit(29); }
+        if (AvailableReactions != null) { Flags = Flags.SetBit(30); }
+        if (/*ReactionsLimit != 0 && */ReactionsLimit.HasValue) { Flags2 = Flags2.SetBit(13); }
+        if (Stories != null) { Flags2 = Flags2.SetBit(4); }
+        if (Wallpaper != null) { Flags2 = Flags2.SetBit(7); }
+        if (/*BoostsApplied != 0 && */BoostsApplied.HasValue) { Flags2 = Flags2.SetBit(8); }
+        if (/*BoostsUnrestrict != 0 && */BoostsUnrestrict.HasValue) { Flags2 = Flags2.SetBit(9); }
+        if (Emojiset != null) { Flags2 = Flags2.SetBit(10); }
+        if (BotVerification != null) { Flags2 = Flags2.SetBit(17); }
+        if (/*StargiftsCount != 0 && */StargiftsCount.HasValue) { Flags2 = Flags2.SetBit(18); }
+        if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2 = Flags2.SetBit(21); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -423,116 +425,118 @@ public sealed class TChannelFull : MyTelegram.Schema.IChatFull, ILayeredChannelF
         writer.Write(Flags2);
         writer.Write(Id);
         writer.Write(About);
-        if (Flags[0]) { writer.Write(ParticipantsCount.Value); }
-        if (Flags[1]) { writer.Write(AdminsCount.Value); }
-        if (Flags[2]) { writer.Write(KickedCount.Value); }
-        if (Flags[2]) { writer.Write(BannedCount.Value); }
-        if (Flags[13]) { writer.Write(OnlineCount.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(ParticipantsCount.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(AdminsCount.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(KickedCount.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(BannedCount.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(OnlineCount.Value); }
         writer.Write(ReadInboxMaxId);
         writer.Write(ReadOutboxMaxId);
         writer.Write(UnreadCount);
         writer.Write(ChatPhoto);
         writer.Write(NotifySettings);
-        if (Flags[23]) { writer.Write(ExportedInvite); }
+        if (Flags.IsBitSet(23)) { writer.Write(ExportedInvite); }
         writer.Write(BotInfo);
-        if (Flags[4]) { writer.Write(MigratedFromChatId.Value); }
-        if (Flags[4]) { writer.Write(MigratedFromMaxId.Value); }
-        if (Flags[5]) { writer.Write(PinnedMsgId.Value); }
-        if (Flags[8]) { writer.Write(Stickerset); }
-        if (Flags[9]) { writer.Write(AvailableMinId.Value); }
-        if (Flags[11]) { writer.Write(FolderId.Value); }
-        if (Flags[14]) { writer.Write(LinkedChatId.Value); }
-        if (Flags[15]) { writer.Write(Location); }
-        if (Flags[17]) { writer.Write(SlowmodeSeconds.Value); }
-        if (Flags[18]) { writer.Write(SlowmodeNextSendDate.Value); }
-        if (Flags[12]) { writer.Write(StatsDc.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(MigratedFromChatId.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(MigratedFromMaxId.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(PinnedMsgId.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(Stickerset); }
+        if (Flags.IsBitSet(9)) { writer.Write(AvailableMinId.Value); }
+        if (Flags.IsBitSet(11)) { writer.Write(FolderId.Value); }
+        if (Flags.IsBitSet(14)) { writer.Write(LinkedChatId.Value); }
+        if (Flags.IsBitSet(15)) { writer.Write(Location); }
+        if (Flags.IsBitSet(17)) { writer.Write(SlowmodeSeconds.Value); }
+        if (Flags.IsBitSet(18)) { writer.Write(SlowmodeNextSendDate.Value); }
+        if (Flags.IsBitSet(12)) { writer.Write(StatsDc.Value); }
         writer.Write(Pts);
-        if (Flags[21]) { writer.Write(Call); }
-        if (Flags[24]) { writer.Write(TtlPeriod.Value); }
-        if (Flags[25]) { writer.Write(PendingSuggestions); }
-        if (Flags[26]) { writer.Write(GroupcallDefaultJoinAs); }
-        if (Flags[27]) { writer.Write(ThemeEmoticon); }
-        if (Flags[28]) { writer.Write(RequestsPending.Value); }
-        if (Flags[28]) { writer.Write(RecentRequesters); }
-        if (Flags[29]) { writer.Write(DefaultSendAs); }
-        if (Flags[30]) { writer.Write(AvailableReactions); }
-        if (Flags2[13]) { writer.Write(ReactionsLimit.Value); }
-        if (Flags2[4]) { writer.Write(Stories); }
-        if (Flags2[7]) { writer.Write(Wallpaper); }
-        if (Flags2[8]) { writer.Write(BoostsApplied.Value); }
-        if (Flags2[9]) { writer.Write(BoostsUnrestrict.Value); }
-        if (Flags2[10]) { writer.Write(Emojiset); }
-        if (Flags2[17]) { writer.Write(BotVerification); }
-        if (Flags2[18]) { writer.Write(StargiftsCount.Value); }
+        if (Flags.IsBitSet(21)) { writer.Write(Call); }
+        if (Flags.IsBitSet(24)) { writer.Write(TtlPeriod.Value); }
+        if (Flags.IsBitSet(25)) { writer.Write(PendingSuggestions); }
+        if (Flags.IsBitSet(26)) { writer.Write(GroupcallDefaultJoinAs); }
+        if (Flags.IsBitSet(27)) { writer.Write(ThemeEmoticon); }
+        if (Flags.IsBitSet(28)) { writer.Write(RequestsPending.Value); }
+        if (Flags.IsBitSet(28)) { writer.Write(RecentRequesters); }
+        if (Flags.IsBitSet(29)) { writer.Write(DefaultSendAs); }
+        if (Flags.IsBitSet(30)) { writer.Write(AvailableReactions); }
+        if (Flags2.IsBitSet(13)) { writer.Write(ReactionsLimit.Value); }
+        if (Flags2.IsBitSet(4)) { writer.Write(Stories); }
+        if (Flags2.IsBitSet(7)) { writer.Write(Wallpaper); }
+        if (Flags2.IsBitSet(8)) { writer.Write(BoostsApplied.Value); }
+        if (Flags2.IsBitSet(9)) { writer.Write(BoostsUnrestrict.Value); }
+        if (Flags2.IsBitSet(10)) { writer.Write(Emojiset); }
+        if (Flags2.IsBitSet(17)) { writer.Write(BotVerification); }
+        if (Flags2.IsBitSet(18)) { writer.Write(StargiftsCount.Value); }
+        if (Flags2.IsBitSet(21)) { writer.Write(SendPaidMessagesStars.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { CanViewParticipants = true; }
-        if (Flags[6]) { CanSetUsername = true; }
-        if (Flags[7]) { CanSetStickers = true; }
-        if (Flags[10]) { HiddenPrehistory = true; }
-        if (Flags[16]) { CanSetLocation = true; }
-        if (Flags[19]) { HasScheduled = true; }
-        if (Flags[20]) { CanViewStats = true; }
-        if (Flags[22]) { Blocked = true; }
-        Flags2 = reader.ReadBitArray();
-        if (Flags2[0]) { CanDeleteChannel = true; }
-        if (Flags2[1]) { Antispam = true; }
-        if (Flags2[2]) { ParticipantsHidden = true; }
-        if (Flags2[3]) { TranslationsDisabled = true; }
-        if (Flags2[5]) { StoriesPinnedAvailable = true; }
-        if (Flags2[6]) { ViewForumAsMessages = true; }
-        if (Flags2[11]) { RestrictedSponsored = true; }
-        if (Flags2[12]) { CanViewRevenue = true; }
-        if (Flags2[14]) { PaidMediaAllowed = true; }
-        if (Flags2[15]) { CanViewStarsRevenue = true; }
-        if (Flags2[16]) { PaidReactionsAvailable = true; }
-        if (Flags2[19]) { StargiftsAvailable = true; }
-        if (Flags2[20]) { PaidMessagesAvailable = true; }
-        Id = reader.ReadInt64();
-        About = reader.ReadString();
-        if (Flags[0]) { ParticipantsCount = reader.ReadInt32(); }
-        if (Flags[1]) { AdminsCount = reader.ReadInt32(); }
-        if (Flags[2]) { KickedCount = reader.ReadInt32(); }
-        if (Flags[2]) { BannedCount = reader.ReadInt32(); }
-        if (Flags[13]) { OnlineCount = reader.ReadInt32(); }
-        ReadInboxMaxId = reader.ReadInt32();
-        ReadOutboxMaxId = reader.ReadInt32();
-        UnreadCount = reader.ReadInt32();
-        ChatPhoto = reader.Read<MyTelegram.Schema.IPhoto>();
-        NotifySettings = reader.Read<MyTelegram.Schema.IPeerNotifySettings>();
-        if (Flags[23]) { ExportedInvite = reader.Read<MyTelegram.Schema.IExportedChatInvite>(); }
-        BotInfo = reader.Read<TVector<MyTelegram.Schema.IBotInfo>>();
-        if (Flags[4]) { MigratedFromChatId = reader.ReadInt64(); }
-        if (Flags[4]) { MigratedFromMaxId = reader.ReadInt32(); }
-        if (Flags[5]) { PinnedMsgId = reader.ReadInt32(); }
-        if (Flags[8]) { Stickerset = reader.Read<MyTelegram.Schema.IStickerSet>(); }
-        if (Flags[9]) { AvailableMinId = reader.ReadInt32(); }
-        if (Flags[11]) { FolderId = reader.ReadInt32(); }
-        if (Flags[14]) { LinkedChatId = reader.ReadInt64(); }
-        if (Flags[15]) { Location = reader.Read<MyTelegram.Schema.IChannelLocation>(); }
-        if (Flags[17]) { SlowmodeSeconds = reader.ReadInt32(); }
-        if (Flags[18]) { SlowmodeNextSendDate = reader.ReadInt32(); }
-        if (Flags[12]) { StatsDc = reader.ReadInt32(); }
-        Pts = reader.ReadInt32();
-        if (Flags[21]) { Call = reader.Read<MyTelegram.Schema.IInputGroupCall>(); }
-        if (Flags[24]) { TtlPeriod = reader.ReadInt32(); }
-        if (Flags[25]) { PendingSuggestions = reader.Read<TVector<string>>(); }
-        if (Flags[26]) { GroupcallDefaultJoinAs = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[27]) { ThemeEmoticon = reader.ReadString(); }
-        if (Flags[28]) { RequestsPending = reader.ReadInt32(); }
-        if (Flags[28]) { RecentRequesters = reader.Read<TVector<long>>(); }
-        if (Flags[29]) { DefaultSendAs = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[30]) { AvailableReactions = reader.Read<MyTelegram.Schema.IChatReactions>(); }
-        if (Flags2[13]) { ReactionsLimit = reader.ReadInt32(); }
-        if (Flags2[4]) { Stories = reader.Read<MyTelegram.Schema.IPeerStories>(); }
-        if (Flags2[7]) { Wallpaper = reader.Read<MyTelegram.Schema.IWallPaper>(); }
-        if (Flags2[8]) { BoostsApplied = reader.ReadInt32(); }
-        if (Flags2[9]) { BoostsUnrestrict = reader.ReadInt32(); }
-        if (Flags2[10]) { Emojiset = reader.Read<MyTelegram.Schema.IStickerSet>(); }
-        if (Flags2[17]) { BotVerification = reader.Read<MyTelegram.Schema.IBotVerification>(); }
-        if (Flags2[18]) { StargiftsCount = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { CanViewParticipants = true; }
+        if (Flags.IsBitSet(6)) { CanSetUsername = true; }
+        if (Flags.IsBitSet(7)) { CanSetStickers = true; }
+        if (Flags.IsBitSet(10)) { HiddenPrehistory = true; }
+        if (Flags.IsBitSet(16)) { CanSetLocation = true; }
+        if (Flags.IsBitSet(19)) { HasScheduled = true; }
+        if (Flags.IsBitSet(20)) { CanViewStats = true; }
+        if (Flags.IsBitSet(22)) { Blocked = true; }
+        Flags2 = buffer.ReadInt32();
+        if (Flags2.IsBitSet(0)) { CanDeleteChannel = true; }
+        if (Flags2.IsBitSet(1)) { Antispam = true; }
+        if (Flags2.IsBitSet(2)) { ParticipantsHidden = true; }
+        if (Flags2.IsBitSet(3)) { TranslationsDisabled = true; }
+        if (Flags2.IsBitSet(5)) { StoriesPinnedAvailable = true; }
+        if (Flags2.IsBitSet(6)) { ViewForumAsMessages = true; }
+        if (Flags2.IsBitSet(11)) { RestrictedSponsored = true; }
+        if (Flags2.IsBitSet(12)) { CanViewRevenue = true; }
+        if (Flags2.IsBitSet(14)) { PaidMediaAllowed = true; }
+        if (Flags2.IsBitSet(15)) { CanViewStarsRevenue = true; }
+        if (Flags2.IsBitSet(16)) { PaidReactionsAvailable = true; }
+        if (Flags2.IsBitSet(19)) { StargiftsAvailable = true; }
+        if (Flags2.IsBitSet(20)) { PaidMessagesAvailable = true; }
+        Id = buffer.ReadInt64();
+        About = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { ParticipantsCount = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { AdminsCount = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { KickedCount = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { BannedCount = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(13)) { OnlineCount = buffer.ReadInt32(); }
+        ReadInboxMaxId = buffer.ReadInt32();
+        ReadOutboxMaxId = buffer.ReadInt32();
+        UnreadCount = buffer.ReadInt32();
+        ChatPhoto = buffer.Read<MyTelegram.Schema.IPhoto>();
+        NotifySettings = buffer.Read<MyTelegram.Schema.IPeerNotifySettings>();
+        if (Flags.IsBitSet(23)) { ExportedInvite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>(); }
+        BotInfo = buffer.Read<TVector<MyTelegram.Schema.IBotInfo>>();
+        if (Flags.IsBitSet(4)) { MigratedFromChatId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(4)) { MigratedFromMaxId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { PinnedMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(8)) { Stickerset = buffer.Read<MyTelegram.Schema.IStickerSet>(); }
+        if (Flags.IsBitSet(9)) { AvailableMinId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(11)) { FolderId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(14)) { LinkedChatId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(15)) { Location = buffer.Read<MyTelegram.Schema.IChannelLocation>(); }
+        if (Flags.IsBitSet(17)) { SlowmodeSeconds = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(18)) { SlowmodeNextSendDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(12)) { StatsDc = buffer.ReadInt32(); }
+        Pts = buffer.ReadInt32();
+        if (Flags.IsBitSet(21)) { Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>(); }
+        if (Flags.IsBitSet(24)) { TtlPeriod = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(25)) { PendingSuggestions = buffer.Read<TVector<string>>(); }
+        if (Flags.IsBitSet(26)) { GroupcallDefaultJoinAs = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(27)) { ThemeEmoticon = buffer.ReadString(); }
+        if (Flags.IsBitSet(28)) { RequestsPending = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(28)) { RecentRequesters = buffer.Read<TVector<long>>(); }
+        if (Flags.IsBitSet(29)) { DefaultSendAs = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(30)) { AvailableReactions = buffer.Read<MyTelegram.Schema.IChatReactions>(); }
+        if (Flags2.IsBitSet(13)) { ReactionsLimit = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(4)) { Stories = buffer.Read<MyTelegram.Schema.IPeerStories>(); }
+        if (Flags2.IsBitSet(7)) { Wallpaper = buffer.Read<MyTelegram.Schema.IWallPaper>(); }
+        if (Flags2.IsBitSet(8)) { BoostsApplied = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(9)) { BoostsUnrestrict = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(10)) { Emojiset = buffer.Read<MyTelegram.Schema.IStickerSet>(); }
+        if (Flags2.IsBitSet(17)) { BotVerification = buffer.Read<MyTelegram.Schema.IBotVerification>(); }
+        if (Flags2.IsBitSet(18)) { StargiftsCount = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(21)) { SendPaidMessagesStars = buffer.ReadInt64(); }
     }
 }

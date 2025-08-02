@@ -14,7 +14,7 @@ public sealed class TPasswordSettings : IPasswordSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/srp#email-verification">2FA Recovery email</a>
@@ -29,8 +29,8 @@ public sealed class TPasswordSettings : IPasswordSettings
 
     public void ComputeFlag()
     {
-        if (Email != null) { Flags[0] = true; }
-        if (SecureSettings != null) { Flags[1] = true; }
+        if (Email != null) { Flags = Flags.SetBit(0); }
+        if (SecureSettings != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -38,14 +38,14 @@ public sealed class TPasswordSettings : IPasswordSettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Email); }
-        if (Flags[1]) { writer.Write(SecureSettings); }
+        if (Flags.IsBitSet(0)) { writer.Write(Email); }
+        if (Flags.IsBitSet(1)) { writer.Write(SecureSettings); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Email = reader.ReadString(); }
-        if (Flags[1]) { SecureSettings = reader.Read<MyTelegram.Schema.ISecureSecretSettings>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Email = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { SecureSettings = buffer.Read<MyTelegram.Schema.ISecureSecretSettings>(); }
     }
 }

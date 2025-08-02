@@ -60,13 +60,13 @@ public sealed class TUpdateBotChatInviteRequester : IUpdate
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Date = reader.ReadInt32();
-        UserId = reader.ReadInt64();
-        About = reader.ReadString();
-        Invite = reader.Read<MyTelegram.Schema.IExportedChatInvite>();
-        Qts = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Date = buffer.ReadInt32();
+        UserId = buffer.ReadInt64();
+        About = buffer.ReadString();
+        Invite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>();
+        Qts = buffer.ReadInt32();
     }
 }

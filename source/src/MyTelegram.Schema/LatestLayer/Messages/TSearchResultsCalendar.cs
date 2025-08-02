@@ -14,7 +14,7 @@ public sealed class TSearchResultsCalendar : ISearchResultsCalendar
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, indicates that the results may be inexact
@@ -64,8 +64,8 @@ public sealed class TSearchResultsCalendar : ISearchResultsCalendar
 
     public void ComputeFlag()
     {
-        if (Inexact) { Flags[0] = true; }
-        if (/*OffsetIdOffset != 0 && */OffsetIdOffset.HasValue) { Flags[1] = true; }
+        if (Inexact) { Flags = Flags.SetBit(0); }
+        if (/*OffsetIdOffset != 0 && */OffsetIdOffset.HasValue) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -77,24 +77,24 @@ public sealed class TSearchResultsCalendar : ISearchResultsCalendar
         writer.Write(Count);
         writer.Write(MinDate);
         writer.Write(MinMsgId);
-        if (Flags[1]) { writer.Write(OffsetIdOffset.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(OffsetIdOffset.Value); }
         writer.Write(Periods);
         writer.Write(Messages);
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Inexact = true; }
-        Count = reader.ReadInt32();
-        MinDate = reader.ReadInt32();
-        MinMsgId = reader.ReadInt32();
-        if (Flags[1]) { OffsetIdOffset = reader.ReadInt32(); }
-        Periods = reader.Read<TVector<MyTelegram.Schema.ISearchResultsCalendarPeriod>>();
-        Messages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Inexact = true; }
+        Count = buffer.ReadInt32();
+        MinDate = buffer.ReadInt32();
+        MinMsgId = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { OffsetIdOffset = buffer.ReadInt32(); }
+        Periods = buffer.Read<TVector<MyTelegram.Schema.ISearchResultsCalendarPeriod>>();
+        Messages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

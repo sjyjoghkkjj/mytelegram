@@ -35,9 +35,9 @@ public sealed class TFolderPeer : IFolderPeer
         writer.Write(FolderId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        FolderId = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        FolderId = buffer.ReadInt32();
     }
 }

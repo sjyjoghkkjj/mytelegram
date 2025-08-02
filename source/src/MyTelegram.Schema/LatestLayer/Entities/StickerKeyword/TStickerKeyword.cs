@@ -34,9 +34,9 @@ public sealed class TStickerKeyword : IStickerKeyword
         writer.Write(Keyword);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DocumentId = reader.ReadInt64();
-        Keyword = reader.Read<TVector<string>>();
+        DocumentId = buffer.ReadInt64();
+        Keyword = buffer.Read<TVector<string>>();
     }
 }

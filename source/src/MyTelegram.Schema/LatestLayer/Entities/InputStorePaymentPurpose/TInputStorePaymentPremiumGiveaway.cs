@@ -14,7 +14,7 @@ public sealed class TInputStorePaymentPremiumGiveaway : IInputStorePaymentPurpos
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, only new subscribers starting from the giveaway creation date will be able to participate to the giveaway.
@@ -71,11 +71,11 @@ public sealed class TInputStorePaymentPremiumGiveaway : IInputStorePaymentPurpos
 
     public void ComputeFlag()
     {
-        if (OnlyNewSubscribers) { Flags[0] = true; }
-        if (WinnersAreVisible) { Flags[3] = true; }
-        if (AdditionalPeers?.Count > 0) { Flags[1] = true; }
-        if (CountriesIso2?.Count > 0) { Flags[2] = true; }
-        if (PrizeDescription != null) { Flags[4] = true; }
+        if (OnlyNewSubscribers) { Flags = Flags.SetBit(0); }
+        if (WinnersAreVisible) { Flags = Flags.SetBit(3); }
+        if (AdditionalPeers?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (CountriesIso2?.Count > 0) { Flags = Flags.SetBit(2); }
+        if (PrizeDescription != null) { Flags = Flags.SetBit(4); }
 
     }
 
@@ -85,27 +85,27 @@ public sealed class TInputStorePaymentPremiumGiveaway : IInputStorePaymentPurpos
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(BoostPeer);
-        if (Flags[1]) { writer.Write(AdditionalPeers); }
-        if (Flags[2]) { writer.Write(CountriesIso2); }
-        if (Flags[4]) { writer.Write(PrizeDescription); }
+        if (Flags.IsBitSet(1)) { writer.Write(AdditionalPeers); }
+        if (Flags.IsBitSet(2)) { writer.Write(CountriesIso2); }
+        if (Flags.IsBitSet(4)) { writer.Write(PrizeDescription); }
         writer.Write(RandomId);
         writer.Write(UntilDate);
         writer.Write(Currency);
         writer.Write(Amount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { OnlyNewSubscribers = true; }
-        if (Flags[3]) { WinnersAreVisible = true; }
-        BoostPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[1]) { AdditionalPeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>(); }
-        if (Flags[2]) { CountriesIso2 = reader.Read<TVector<string>>(); }
-        if (Flags[4]) { PrizeDescription = reader.ReadString(); }
-        RandomId = reader.ReadInt64();
-        UntilDate = reader.ReadInt32();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { OnlyNewSubscribers = true; }
+        if (Flags.IsBitSet(3)) { WinnersAreVisible = true; }
+        BoostPeer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(1)) { AdditionalPeers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>(); }
+        if (Flags.IsBitSet(2)) { CountriesIso2 = buffer.Read<TVector<string>>(); }
+        if (Flags.IsBitSet(4)) { PrizeDescription = buffer.ReadString(); }
+        RandomId = buffer.ReadInt64();
+        UntilDate = buffer.ReadInt32();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
     }
 }

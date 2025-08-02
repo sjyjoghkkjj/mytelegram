@@ -40,10 +40,10 @@ public sealed class TBlocked : IBlocked
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Blocked = reader.Read<TVector<MyTelegram.Schema.IPeerBlocked>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Blocked = buffer.Read<TVector<MyTelegram.Schema.IPeerBlocked>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

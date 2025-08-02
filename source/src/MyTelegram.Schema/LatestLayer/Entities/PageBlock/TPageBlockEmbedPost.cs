@@ -65,14 +65,14 @@ public sealed class TPageBlockEmbedPost : IPageBlock
         writer.Write(Caption);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        WebpageId = reader.ReadInt64();
-        AuthorPhotoId = reader.ReadInt64();
-        Author = reader.ReadString();
-        Date = reader.ReadInt32();
-        Blocks = reader.Read<TVector<MyTelegram.Schema.IPageBlock>>();
-        Caption = reader.Read<MyTelegram.Schema.IPageCaption>();
+        Url = buffer.ReadString();
+        WebpageId = buffer.ReadInt64();
+        AuthorPhotoId = buffer.ReadInt64();
+        Author = buffer.ReadString();
+        Date = buffer.ReadInt32();
+        Blocks = buffer.Read<TVector<MyTelegram.Schema.IPageBlock>>();
+        Caption = buffer.Read<MyTelegram.Schema.IPageCaption>();
     }
 }

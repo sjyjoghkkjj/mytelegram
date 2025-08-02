@@ -14,7 +14,7 @@ public sealed class TMessageMediaDocument : IMessageMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a normal sticker, if not set this is a premium sticker and a premium sticker animation must be played.
@@ -66,16 +66,16 @@ public sealed class TMessageMediaDocument : IMessageMedia
 
     public void ComputeFlag()
     {
-        if (Nopremium) { Flags[3] = true; }
-        if (Spoiler) { Flags[4] = true; }
-        if (Video) { Flags[6] = true; }
-        if (Round) { Flags[7] = true; }
-        if (Voice) { Flags[8] = true; }
-        if (Document != null) { Flags[0] = true; }
-        if (AltDocuments?.Count > 0) { Flags[5] = true; }
-        if (VideoCover != null) { Flags[9] = true; }
-        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[10] = true; }
-        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[2] = true; }
+        if (Nopremium) { Flags = Flags.SetBit(3); }
+        if (Spoiler) { Flags = Flags.SetBit(4); }
+        if (Video) { Flags = Flags.SetBit(6); }
+        if (Round) { Flags = Flags.SetBit(7); }
+        if (Voice) { Flags = Flags.SetBit(8); }
+        if (Document != null) { Flags = Flags.SetBit(0); }
+        if (AltDocuments?.Count > 0) { Flags = Flags.SetBit(5); }
+        if (VideoCover != null) { Flags = Flags.SetBit(9); }
+        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags = Flags.SetBit(10); }
+        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -83,25 +83,25 @@ public sealed class TMessageMediaDocument : IMessageMedia
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Document); }
-        if (Flags[5]) { writer.Write(AltDocuments); }
-        if (Flags[9]) { writer.Write(VideoCover); }
-        if (Flags[10]) { writer.Write(VideoTimestamp.Value); }
-        if (Flags[2]) { writer.Write(TtlSeconds.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Document); }
+        if (Flags.IsBitSet(5)) { writer.Write(AltDocuments); }
+        if (Flags.IsBitSet(9)) { writer.Write(VideoCover); }
+        if (Flags.IsBitSet(10)) { writer.Write(VideoTimestamp.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(TtlSeconds.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { Nopremium = true; }
-        if (Flags[4]) { Spoiler = true; }
-        if (Flags[6]) { Video = true; }
-        if (Flags[7]) { Round = true; }
-        if (Flags[8]) { Voice = true; }
-        if (Flags[0]) { Document = reader.Read<MyTelegram.Schema.IDocument>(); }
-        if (Flags[5]) { AltDocuments = reader.Read<TVector<MyTelegram.Schema.IDocument>>(); }
-        if (Flags[9]) { VideoCover = reader.Read<MyTelegram.Schema.IPhoto>(); }
-        if (Flags[10]) { VideoTimestamp = reader.ReadInt32(); }
-        if (Flags[2]) { TtlSeconds = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Nopremium = true; }
+        if (Flags.IsBitSet(4)) { Spoiler = true; }
+        if (Flags.IsBitSet(6)) { Video = true; }
+        if (Flags.IsBitSet(7)) { Round = true; }
+        if (Flags.IsBitSet(8)) { Voice = true; }
+        if (Flags.IsBitSet(0)) { Document = buffer.Read<MyTelegram.Schema.IDocument>(); }
+        if (Flags.IsBitSet(5)) { AltDocuments = buffer.Read<TVector<MyTelegram.Schema.IDocument>>(); }
+        if (Flags.IsBitSet(9)) { VideoCover = buffer.Read<MyTelegram.Schema.IPhoto>(); }
+        if (Flags.IsBitSet(10)) { VideoTimestamp = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { TtlSeconds = buffer.ReadInt32(); }
     }
 }

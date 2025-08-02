@@ -39,9 +39,9 @@ public sealed class RequestGetUserBoosts : IRequest<MyTelegram.Schema.Premium.IB
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

@@ -35,9 +35,9 @@ public sealed class TPollAnswer : IPollAnswer
         writer.Write(Option);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.Read<MyTelegram.Schema.ITextWithEntities>();
-        Option = reader.ReadString();
+        Text = buffer.Read<MyTelegram.Schema.ITextWithEntities>();
+        Option = buffer.ReadString();
     }
 }

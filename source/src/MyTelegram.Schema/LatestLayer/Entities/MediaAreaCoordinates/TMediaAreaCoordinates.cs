@@ -14,7 +14,7 @@ public sealed class TMediaAreaCoordinates : IMediaAreaCoordinates
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The abscissa of the rectangle's center, as a percentage of the media width (0-100).
@@ -48,7 +48,7 @@ public sealed class TMediaAreaCoordinates : IMediaAreaCoordinates
 
     public void ComputeFlag()
     {
-        if (Radius>0) { Flags[0] = true; }
+        if (Radius>0) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -61,17 +61,17 @@ public sealed class TMediaAreaCoordinates : IMediaAreaCoordinates
         writer.Write(W);
         writer.Write(H);
         writer.Write(Rotation);
-        if (Flags[0]) { writer.Write(Radius.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Radius.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        X = reader.ReadDouble();
-        Y = reader.ReadDouble();
-        W = reader.ReadDouble();
-        H = reader.ReadDouble();
-        Rotation = reader.ReadDouble();
-        if (Flags[0]) { Radius = reader.ReadDouble(); }
+        Flags = buffer.ReadInt32();
+        X = buffer.ReadDouble();
+        Y = buffer.ReadDouble();
+        W = buffer.ReadDouble();
+        H = buffer.ReadDouble();
+        Rotation = buffer.ReadDouble();
+        if (Flags.IsBitSet(0)) { Radius = buffer.ReadDouble(); }
     }
 }

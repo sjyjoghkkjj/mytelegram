@@ -14,7 +14,7 @@ public sealed class TDialog : ILayeredDialog
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Is the dialog pinned
@@ -99,13 +99,13 @@ public sealed class TDialog : ILayeredDialog
 
     public void ComputeFlag()
     {
-        if (Pinned) { Flags[2] = true; }
-        if (UnreadMark) { Flags[3] = true; }
-        if (ViewForumAsMessages) { Flags[6] = true; }
-        if (/*Pts != 0 && */Pts.HasValue) { Flags[0] = true; }
-        if (Draft != null) { Flags[1] = true; }
-        if (/*FolderId != 0 && */FolderId.HasValue) { Flags[4] = true; }
-        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags[5] = true; }
+        if (Pinned) { Flags = Flags.SetBit(2); }
+        if (UnreadMark) { Flags = Flags.SetBit(3); }
+        if (ViewForumAsMessages) { Flags = Flags.SetBit(6); }
+        if (/*Pts != 0 && */Pts.HasValue) { Flags = Flags.SetBit(0); }
+        if (Draft != null) { Flags = Flags.SetBit(1); }
+        if (/*FolderId != 0 && */FolderId.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -121,29 +121,29 @@ public sealed class TDialog : ILayeredDialog
         writer.Write(UnreadMentionsCount);
         writer.Write(UnreadReactionsCount);
         writer.Write(NotifySettings);
-        if (Flags[0]) { writer.Write(Pts.Value); }
-        if (Flags[1]) { writer.Write(Draft); }
-        if (Flags[4]) { writer.Write(FolderId.Value); }
-        if (Flags[5]) { writer.Write(TtlPeriod.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Pts.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Draft); }
+        if (Flags.IsBitSet(4)) { writer.Write(FolderId.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(TtlPeriod.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Pinned = true; }
-        if (Flags[3]) { UnreadMark = true; }
-        if (Flags[6]) { ViewForumAsMessages = true; }
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        TopMessage = reader.ReadInt32();
-        ReadInboxMaxId = reader.ReadInt32();
-        ReadOutboxMaxId = reader.ReadInt32();
-        UnreadCount = reader.ReadInt32();
-        UnreadMentionsCount = reader.ReadInt32();
-        UnreadReactionsCount = reader.ReadInt32();
-        NotifySettings = reader.Read<MyTelegram.Schema.IPeerNotifySettings>();
-        if (Flags[0]) { Pts = reader.ReadInt32(); }
-        if (Flags[1]) { Draft = reader.Read<MyTelegram.Schema.IDraftMessage>(); }
-        if (Flags[4]) { FolderId = reader.ReadInt32(); }
-        if (Flags[5]) { TtlPeriod = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Pinned = true; }
+        if (Flags.IsBitSet(3)) { UnreadMark = true; }
+        if (Flags.IsBitSet(6)) { ViewForumAsMessages = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        TopMessage = buffer.ReadInt32();
+        ReadInboxMaxId = buffer.ReadInt32();
+        ReadOutboxMaxId = buffer.ReadInt32();
+        UnreadCount = buffer.ReadInt32();
+        UnreadMentionsCount = buffer.ReadInt32();
+        UnreadReactionsCount = buffer.ReadInt32();
+        NotifySettings = buffer.Read<MyTelegram.Schema.IPeerNotifySettings>();
+        if (Flags.IsBitSet(0)) { Pts = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { Draft = buffer.Read<MyTelegram.Schema.IDraftMessage>(); }
+        if (Flags.IsBitSet(4)) { FolderId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { TtlPeriod = buffer.ReadInt32(); }
     }
 }

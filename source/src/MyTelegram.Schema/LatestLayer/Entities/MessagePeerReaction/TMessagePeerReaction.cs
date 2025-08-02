@@ -14,7 +14,7 @@ public sealed class TMessagePeerReaction : IMessagePeerReaction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the specified <a href="https://corefork.telegram.org/api/reactions">message reaction »</a> should elicit a bigger and longer reaction
@@ -53,9 +53,9 @@ public sealed class TMessagePeerReaction : IMessagePeerReaction
 
     public void ComputeFlag()
     {
-        if (Big) { Flags[0] = true; }
-        if (Unread) { Flags[1] = true; }
-        if (My) { Flags[2] = true; }
+        if (Big) { Flags = Flags.SetBit(0); }
+        if (Unread) { Flags = Flags.SetBit(1); }
+        if (My) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -69,14 +69,14 @@ public sealed class TMessagePeerReaction : IMessagePeerReaction
         writer.Write(Reaction);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Big = true; }
-        if (Flags[1]) { Unread = true; }
-        if (Flags[2]) { My = true; }
-        PeerId = reader.Read<MyTelegram.Schema.IPeer>();
-        Date = reader.ReadInt32();
-        Reaction = reader.Read<MyTelegram.Schema.IReaction>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Big = true; }
+        if (Flags.IsBitSet(1)) { Unread = true; }
+        if (Flags.IsBitSet(2)) { My = true; }
+        PeerId = buffer.Read<MyTelegram.Schema.IPeer>();
+        Date = buffer.ReadInt32();
+        Reaction = buffer.Read<MyTelegram.Schema.IReaction>();
     }
 }

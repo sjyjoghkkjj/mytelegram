@@ -17,7 +17,7 @@ public sealed class RequestAssignAppStoreTransaction : IRequest<MyTelegram.Schem
     ///<summary>
     /// Receipt
     ///</summary>
-    public byte[] Receipt { get; set; }
+    public ReadOnlyMemory<byte> Receipt { get; set; }
 
     ///<summary>
     /// Payment purpose
@@ -38,9 +38,9 @@ public sealed class RequestAssignAppStoreTransaction : IRequest<MyTelegram.Schem
         writer.Write(Purpose);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Receipt = reader.ReadBytes();
-        Purpose = reader.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
+        Receipt = buffer.ReadBytes();
+        Purpose = buffer.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
     }
 }

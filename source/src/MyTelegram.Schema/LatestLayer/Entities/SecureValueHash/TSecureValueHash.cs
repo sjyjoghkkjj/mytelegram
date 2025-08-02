@@ -20,7 +20,7 @@ public sealed class TSecureValueHash : ISecureValueHash
     ///<summary>
     /// Hash
     ///</summary>
-    public byte[] Hash { get; set; }
+    public ReadOnlyMemory<byte> Hash { get; set; }
 
     public void ComputeFlag()
     {
@@ -35,9 +35,9 @@ public sealed class TSecureValueHash : ISecureValueHash
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Type = reader.Read<MyTelegram.Schema.ISecureValueType>();
-        Hash = reader.ReadBytes();
+        Type = buffer.Read<MyTelegram.Schema.ISecureValueType>();
+        Hash = buffer.ReadBytes();
     }
 }

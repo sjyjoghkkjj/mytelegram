@@ -52,12 +52,12 @@ public sealed class TPreparedInlineMessage : IPreparedInlineMessage
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        QueryId = reader.ReadInt64();
-        Result = reader.Read<MyTelegram.Schema.IBotInlineResult>();
-        PeerTypes = reader.Read<TVector<MyTelegram.Schema.IInlineQueryPeerType>>();
-        CacheTime = reader.ReadInt32();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        QueryId = buffer.ReadInt64();
+        Result = buffer.Read<MyTelegram.Schema.IBotInlineResult>();
+        PeerTypes = buffer.Read<TVector<MyTelegram.Schema.IInlineQueryPeerType>>();
+        CacheTime = buffer.ReadInt32();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

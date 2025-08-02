@@ -24,7 +24,7 @@ public sealed class RequestGetPaidReactionPrivacy : IRequest<MyTelegram.Schema.I
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

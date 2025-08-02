@@ -14,7 +14,7 @@ public sealed class RequestSaveStarGift : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, hides the gift from our profile.
@@ -25,7 +25,7 @@ public sealed class RequestSaveStarGift : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Unsave) { Flags[0] = true; }
+        if (Unsave) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -37,10 +37,10 @@ public sealed class RequestSaveStarGift : IRequest<IBool>
         writer.Write(Stargift);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Unsave = true; }
-        Stargift = reader.Read<MyTelegram.Schema.IInputSavedStarGift>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Unsave = true; }
+        Stargift = buffer.Read<MyTelegram.Schema.IInputSavedStarGift>();
     }
 }

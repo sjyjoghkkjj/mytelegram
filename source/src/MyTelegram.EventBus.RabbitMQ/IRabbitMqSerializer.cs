@@ -1,14 +1,10 @@
-﻿namespace MyTelegram.EventBus.RabbitMQ;
+﻿using System.Buffers;
+
+namespace MyTelegram.EventBus.RabbitMQ;
 
 public interface IRabbitMqSerializer
 {
-    byte[] Serialize<T>(T obj);
-    byte[] Serialize(object obj);
-
-    object? Deserialize(byte[] value, Type type);
-
-    object? Deserialize(ReadOnlySpan<byte> value,
-        Type type);
-    T? Deserialize<T>(byte[] value);
-    T? Deserialize<T>(ReadOnlySpan<byte> value);
+    void Serialize<TData>(IBufferWriter<byte> writer, TData value);
+    TData Deserialize<TData>(ReadOnlyMemory<byte> value) where TData : class;
+    object Deserialize(Type eventType, ReadOnlyMemory<byte> value);
 }

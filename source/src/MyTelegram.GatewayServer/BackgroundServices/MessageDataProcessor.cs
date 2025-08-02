@@ -4,13 +4,27 @@ public class MessageDataProcessor(IEventBus eventBus)
     : IDataProcessor<UnencryptedMessage>,
         IDataProcessor<EncryptedMessage>, ITransientDependency
 {
-    public Task ProcessAsync(EncryptedMessage data)
+    public async Task ProcessAsync(EncryptedMessage data)
     {
-        return eventBus.PublishAsync(data);
+        try
+        {
+            await eventBus.PublishAsync(data);
+        }
+        finally
+        {
+            data.MemoryOwner?.Dispose();
+        }
     }
 
-    public Task ProcessAsync(UnencryptedMessage data)
+    public async Task ProcessAsync(UnencryptedMessage data)
     {
-        return eventBus.PublishAsync(data);
+        try
+        {
+            await eventBus.PublishAsync(data);
+        }
+        finally
+        {
+            data.MemoryOwner?.Dispose();
+        }
     }
 }

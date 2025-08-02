@@ -14,7 +14,7 @@ public sealed class TInputMediaPoll : IInputMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The poll to send
@@ -39,9 +39,9 @@ public sealed class TInputMediaPoll : IInputMedia
 
     public void ComputeFlag()
     {
-        if (CorrectAnswers?.Count > 0) { Flags[0] = true; }
-        if (Solution != null) { Flags[1] = true; }
-        if (SolutionEntities?.Count > 0) { Flags[1] = true; }
+        if (CorrectAnswers?.Count > 0) { Flags = Flags.SetBit(0); }
+        if (Solution != null) { Flags = Flags.SetBit(1); }
+        if (SolutionEntities?.Count > 0) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,17 +50,17 @@ public sealed class TInputMediaPoll : IInputMedia
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Poll);
-        if (Flags[0]) { writer.Write(CorrectAnswers); }
-        if (Flags[1]) { writer.Write(Solution); }
-        if (Flags[1]) { writer.Write(SolutionEntities); }
+        if (Flags.IsBitSet(0)) { writer.Write(CorrectAnswers); }
+        if (Flags.IsBitSet(1)) { writer.Write(Solution); }
+        if (Flags.IsBitSet(1)) { writer.Write(SolutionEntities); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Poll = reader.Read<MyTelegram.Schema.IPoll>();
-        if (Flags[0]) { CorrectAnswers = reader.Read<TVector<string>>(); }
-        if (Flags[1]) { Solution = reader.ReadString(); }
-        if (Flags[1]) { SolutionEntities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        Flags = buffer.ReadInt32();
+        Poll = buffer.Read<MyTelegram.Schema.IPoll>();
+        if (Flags.IsBitSet(0)) { CorrectAnswers = buffer.Read<TVector<string>>(); }
+        if (Flags.IsBitSet(1)) { Solution = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { SolutionEntities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
     }
 }

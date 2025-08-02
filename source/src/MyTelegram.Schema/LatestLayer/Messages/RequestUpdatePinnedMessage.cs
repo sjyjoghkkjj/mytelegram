@@ -25,7 +25,7 @@ public sealed class RequestUpdatePinnedMessage : IRequest<MyTelegram.Schema.IUpd
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Pin the message silently, without triggering a notification
@@ -58,9 +58,9 @@ public sealed class RequestUpdatePinnedMessage : IRequest<MyTelegram.Schema.IUpd
 
     public void ComputeFlag()
     {
-        if (Silent) { Flags[0] = true; }
-        if (Unpin) { Flags[1] = true; }
-        if (PmOneside) { Flags[2] = true; }
+        if (Silent) { Flags = Flags.SetBit(0); }
+        if (Unpin) { Flags = Flags.SetBit(1); }
+        if (PmOneside) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -73,13 +73,13 @@ public sealed class RequestUpdatePinnedMessage : IRequest<MyTelegram.Schema.IUpd
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Silent = true; }
-        if (Flags[1]) { Unpin = true; }
-        if (Flags[2]) { PmOneside = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Silent = true; }
+        if (Flags.IsBitSet(1)) { Unpin = true; }
+        if (Flags.IsBitSet(2)) { PmOneside = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.ReadInt32();
     }
 }

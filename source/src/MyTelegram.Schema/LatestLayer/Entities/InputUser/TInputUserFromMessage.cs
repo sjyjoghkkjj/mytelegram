@@ -41,10 +41,10 @@ public sealed class TInputUserFromMessage : IInputUser
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.ReadInt32();
-        UserId = reader.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.ReadInt32();
+        UserId = buffer.ReadInt64();
     }
 }

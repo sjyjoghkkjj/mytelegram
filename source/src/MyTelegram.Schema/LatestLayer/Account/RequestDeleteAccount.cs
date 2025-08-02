@@ -17,7 +17,7 @@ public sealed class RequestDeleteAccount : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Why is the account being deleted, can be empty
@@ -32,7 +32,7 @@ public sealed class RequestDeleteAccount : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Password != null) { Flags[0] = true; }
+        if (Password != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -41,13 +41,13 @@ public sealed class RequestDeleteAccount : IRequest<IBool>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Reason);
-        if (Flags[0]) { writer.Write(Password); }
+        if (Flags.IsBitSet(0)) { writer.Write(Password); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Reason = reader.ReadString();
-        if (Flags[0]) { Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>(); }
+        Flags = buffer.ReadInt32();
+        Reason = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>(); }
     }
 }

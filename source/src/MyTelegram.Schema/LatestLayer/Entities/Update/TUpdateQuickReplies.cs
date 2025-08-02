@@ -28,8 +28,8 @@ public sealed class TUpdateQuickReplies : IUpdate
         writer.Write(QuickReplies);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        QuickReplies = reader.Read<TVector<MyTelegram.Schema.IQuickReply>>();
+        QuickReplies = buffer.Read<TVector<MyTelegram.Schema.IQuickReply>>();
     }
 }

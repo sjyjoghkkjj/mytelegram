@@ -13,7 +13,7 @@ public sealed class TConnectedBotStarRef : IConnectedBotStarRef
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -58,8 +58,8 @@ public sealed class TConnectedBotStarRef : IConnectedBotStarRef
 
     public void ComputeFlag()
     {
-        if (Revoked) { Flags[1] = true; }
-        if (/*DurationMonths != 0 && */DurationMonths.HasValue) { Flags[0] = true; }
+        if (Revoked) { Flags = Flags.SetBit(1); }
+        if (/*DurationMonths != 0 && */DurationMonths.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -72,21 +72,21 @@ public sealed class TConnectedBotStarRef : IConnectedBotStarRef
         writer.Write(Date);
         writer.Write(BotId);
         writer.Write(CommissionPermille);
-        if (Flags[0]) { writer.Write(DurationMonths.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(DurationMonths.Value); }
         writer.Write(Participants);
         writer.Write(Revenue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Revoked = true; }
-        Url = reader.ReadString();
-        Date = reader.ReadInt32();
-        BotId = reader.ReadInt64();
-        CommissionPermille = reader.ReadInt32();
-        if (Flags[0]) { DurationMonths = reader.ReadInt32(); }
-        Participants = reader.ReadInt64();
-        Revenue = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Revoked = true; }
+        Url = buffer.ReadString();
+        Date = buffer.ReadInt32();
+        BotId = buffer.ReadInt64();
+        CommissionPermille = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { DurationMonths = buffer.ReadInt32(); }
+        Participants = buffer.ReadInt64();
+        Revenue = buffer.ReadInt64();
     }
 }

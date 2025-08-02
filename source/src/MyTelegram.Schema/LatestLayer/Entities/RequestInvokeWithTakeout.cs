@@ -34,9 +34,9 @@ public sealed class RequestInvokeWithTakeout : IRequest<IObject>, IHasSubQuery
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        TakeoutId = reader.ReadInt64();
-        Query = reader.Read<IObject>();
+        TakeoutId = buffer.ReadInt64();
+        Query = buffer.Read<IObject>();
     }
 }

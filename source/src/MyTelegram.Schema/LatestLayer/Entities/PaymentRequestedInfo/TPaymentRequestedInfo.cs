@@ -14,7 +14,7 @@ public sealed class TPaymentRequestedInfo : IPaymentRequestedInfo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// User's full name
@@ -39,10 +39,10 @@ public sealed class TPaymentRequestedInfo : IPaymentRequestedInfo
 
     public void ComputeFlag()
     {
-        if (Name != null) { Flags[0] = true; }
-        if (Phone != null) { Flags[1] = true; }
-        if (Email != null) { Flags[2] = true; }
-        if (ShippingAddress != null) { Flags[3] = true; }
+        if (Name != null) { Flags = Flags.SetBit(0); }
+        if (Phone != null) { Flags = Flags.SetBit(1); }
+        if (Email != null) { Flags = Flags.SetBit(2); }
+        if (ShippingAddress != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,18 +50,18 @@ public sealed class TPaymentRequestedInfo : IPaymentRequestedInfo
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Name); }
-        if (Flags[1]) { writer.Write(Phone); }
-        if (Flags[2]) { writer.Write(Email); }
-        if (Flags[3]) { writer.Write(ShippingAddress); }
+        if (Flags.IsBitSet(0)) { writer.Write(Name); }
+        if (Flags.IsBitSet(1)) { writer.Write(Phone); }
+        if (Flags.IsBitSet(2)) { writer.Write(Email); }
+        if (Flags.IsBitSet(3)) { writer.Write(ShippingAddress); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Name = reader.ReadString(); }
-        if (Flags[1]) { Phone = reader.ReadString(); }
-        if (Flags[2]) { Email = reader.ReadString(); }
-        if (Flags[3]) { ShippingAddress = reader.Read<MyTelegram.Schema.IPostAddress>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Name = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Phone = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Email = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { ShippingAddress = buffer.Read<MyTelegram.Schema.IPostAddress>(); }
     }
 }

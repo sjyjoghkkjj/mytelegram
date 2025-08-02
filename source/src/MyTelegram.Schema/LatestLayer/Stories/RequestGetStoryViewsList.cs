@@ -18,7 +18,7 @@ public sealed class RequestGetStoryViewsList : IRequest<MyTelegram.Schema.Storie
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to only fetch view reaction/views made by our <a href="https://corefork.telegram.org/api/contacts">contacts</a>
@@ -66,10 +66,10 @@ public sealed class RequestGetStoryViewsList : IRequest<MyTelegram.Schema.Storie
 
     public void ComputeFlag()
     {
-        if (JustContacts) { Flags[0] = true; }
-        if (ReactionsFirst) { Flags[2] = true; }
-        if (ForwardsFirst) { Flags[3] = true; }
-        if (Q != null) { Flags[1] = true; }
+        if (JustContacts) { Flags = Flags.SetBit(0); }
+        if (ReactionsFirst) { Flags = Flags.SetBit(2); }
+        if (ForwardsFirst) { Flags = Flags.SetBit(3); }
+        if (Q != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -79,22 +79,22 @@ public sealed class RequestGetStoryViewsList : IRequest<MyTelegram.Schema.Storie
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[1]) { writer.Write(Q); }
+        if (Flags.IsBitSet(1)) { writer.Write(Q); }
         writer.Write(Id);
         writer.Write(Offset);
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { JustContacts = true; }
-        if (Flags[2]) { ReactionsFirst = true; }
-        if (Flags[3]) { ForwardsFirst = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[1]) { Q = reader.ReadString(); }
-        Id = reader.ReadInt32();
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { JustContacts = true; }
+        if (Flags.IsBitSet(2)) { ReactionsFirst = true; }
+        if (Flags.IsBitSet(3)) { ForwardsFirst = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(1)) { Q = buffer.ReadString(); }
+        Id = buffer.ReadInt32();
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

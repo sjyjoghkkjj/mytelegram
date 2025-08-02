@@ -18,5 +18,5 @@ public interface ISecureValueHash : IObject
     ///<summary>
     /// Hash
     ///</summary>
-    byte[] Hash { get; set; }
+    ReadOnlyMemory<byte> Hash { get; set; }
 }

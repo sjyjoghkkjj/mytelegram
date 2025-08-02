@@ -34,9 +34,9 @@ public sealed class TDifferenceEmpty : IDifference,IEmpty
         writer.Write(Seq);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Date = reader.ReadInt32();
-        Seq = reader.ReadInt32();
+        Date = buffer.ReadInt32();
+        Seq = buffer.ReadInt32();
     }
 }

@@ -13,7 +13,7 @@ public sealed class RequestEditConnectedStarRefBot : IRequest<MyTelegram.Schema.
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -34,7 +34,7 @@ public sealed class RequestEditConnectedStarRefBot : IRequest<MyTelegram.Schema.
 
     public void ComputeFlag()
     {
-        if (Revoked) { Flags[0] = true; }
+        if (Revoked) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class RequestEditConnectedStarRefBot : IRequest<MyTelegram.Schema.
         writer.Write(Link);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Revoked = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Link = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Revoked = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Link = buffer.ReadString();
     }
 }

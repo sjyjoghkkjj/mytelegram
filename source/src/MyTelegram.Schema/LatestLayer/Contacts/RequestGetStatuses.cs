@@ -24,7 +24,7 @@ public sealed class RequestGetStatuses : IRequest<TVector<MyTelegram.Schema.ICon
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

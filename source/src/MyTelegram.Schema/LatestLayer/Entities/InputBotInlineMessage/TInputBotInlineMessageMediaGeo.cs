@@ -14,7 +14,7 @@ public sealed class TInputBotInlineMessageMediaGeo : IInputBotInlineMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Geolocation
@@ -45,10 +45,10 @@ public sealed class TInputBotInlineMessageMediaGeo : IInputBotInlineMessage
 
     public void ComputeFlag()
     {
-        if (/*Heading != 0 && */Heading.HasValue) { Flags[0] = true; }
-        if (/*Period != 0 && */Period.HasValue) { Flags[1] = true; }
-        if (/*ProximityNotificationRadius != 0 && */ProximityNotificationRadius.HasValue) { Flags[3] = true; }
-        if (ReplyMarkup != null) { Flags[2] = true; }
+        if (/*Heading != 0 && */Heading.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*Period != 0 && */Period.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*ProximityNotificationRadius != 0 && */ProximityNotificationRadius.HasValue) { Flags = Flags.SetBit(3); }
+        if (ReplyMarkup != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -57,19 +57,19 @@ public sealed class TInputBotInlineMessageMediaGeo : IInputBotInlineMessage
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(GeoPoint);
-        if (Flags[0]) { writer.Write(Heading.Value); }
-        if (Flags[1]) { writer.Write(Period.Value); }
-        if (Flags[3]) { writer.Write(ProximityNotificationRadius.Value); }
-        if (Flags[2]) { writer.Write(ReplyMarkup); }
+        if (Flags.IsBitSet(0)) { writer.Write(Heading.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Period.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(ProximityNotificationRadius.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>();
-        if (Flags[0]) { Heading = reader.ReadInt32(); }
-        if (Flags[1]) { Period = reader.ReadInt32(); }
-        if (Flags[3]) { ProximityNotificationRadius = reader.ReadInt32(); }
-        if (Flags[2]) { ReplyMarkup = reader.Read<MyTelegram.Schema.IReplyMarkup>(); }
+        Flags = buffer.ReadInt32();
+        GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>();
+        if (Flags.IsBitSet(0)) { Heading = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { Period = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { ProximityNotificationRadius = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { ReplyMarkup = buffer.Read<MyTelegram.Schema.IReplyMarkup>(); }
     }
 }

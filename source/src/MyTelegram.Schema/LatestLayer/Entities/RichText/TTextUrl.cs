@@ -41,10 +41,10 @@ public sealed class TTextUrl : IRichText
         writer.Write(WebpageId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.Read<MyTelegram.Schema.IRichText>();
-        Url = reader.ReadString();
-        WebpageId = reader.ReadInt64();
+        Text = buffer.Read<MyTelegram.Schema.IRichText>();
+        Url = buffer.ReadString();
+        WebpageId = buffer.ReadInt64();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TUserStatusLastMonth : IUserStatus
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the exact user status of this user is actually available to us, but to view it we must first purchase a <a href="https://corefork.telegram.org/api/premium">Premium</a> subscription, or allow this user to see <em>our</em> exact last online status. See <a href="https://corefork.telegram.org/constructor/privacyKeyStatusTimestamp">here »</a> for more info.
@@ -24,7 +24,7 @@ public sealed class TUserStatusLastMonth : IUserStatus
 
     public void ComputeFlag()
     {
-        if (ByMe) { Flags[0] = true; }
+        if (ByMe) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -35,9 +35,9 @@ public sealed class TUserStatusLastMonth : IUserStatus
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ByMe = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ByMe = true; }
     }
 }

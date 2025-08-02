@@ -48,11 +48,11 @@ public sealed class RequestRateTranscribedAudio : IRequest<IBool>
         writer.Write(Good);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.ReadInt32();
-        TranscriptionId = reader.ReadInt64();
-        Good = reader.Read();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.ReadInt32();
+        TranscriptionId = buffer.ReadInt64();
+        Good = buffer.Read();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TCheckedGiftCode : ICheckedGiftCode
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this giftcode was created by a <a href="https://corefork.telegram.org/api/giveaways">giveaway</a>.
@@ -65,11 +65,11 @@ public sealed class TCheckedGiftCode : ICheckedGiftCode
 
     public void ComputeFlag()
     {
-        if (ViaGiveaway) { Flags[2] = true; }
-        if (FromId != null) { Flags[4] = true; }
-        if (/*GiveawayMsgId != 0 && */GiveawayMsgId.HasValue) { Flags[3] = true; }
-        if (/*ToId != 0 &&*/ ToId.HasValue) { Flags[0] = true; }
-        if (/*UsedDate != 0 && */UsedDate.HasValue) { Flags[1] = true; }
+        if (ViaGiveaway) { Flags = Flags.SetBit(2); }
+        if (FromId != null) { Flags = Flags.SetBit(4); }
+        if (/*GiveawayMsgId != 0 && */GiveawayMsgId.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*ToId != 0 &&*/ ToId.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*UsedDate != 0 && */UsedDate.HasValue) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -78,27 +78,27 @@ public sealed class TCheckedGiftCode : ICheckedGiftCode
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[4]) { writer.Write(FromId); }
-        if (Flags[3]) { writer.Write(GiveawayMsgId.Value); }
-        if (Flags[0]) { writer.Write(ToId.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(FromId); }
+        if (Flags.IsBitSet(3)) { writer.Write(GiveawayMsgId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(ToId.Value); }
         writer.Write(Date);
         writer.Write(Months);
-        if (Flags[1]) { writer.Write(UsedDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(UsedDate.Value); }
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { ViaGiveaway = true; }
-        if (Flags[4]) { FromId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[3]) { GiveawayMsgId = reader.ReadInt32(); }
-        if (Flags[0]) { ToId = reader.ReadInt64(); }
-        Date = reader.ReadInt32();
-        Months = reader.ReadInt32();
-        if (Flags[1]) { UsedDate = reader.ReadInt32(); }
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { ViaGiveaway = true; }
+        if (Flags.IsBitSet(4)) { FromId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(3)) { GiveawayMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { ToId = buffer.ReadInt64(); }
+        Date = buffer.ReadInt32();
+        Months = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { UsedDate = buffer.ReadInt32(); }
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

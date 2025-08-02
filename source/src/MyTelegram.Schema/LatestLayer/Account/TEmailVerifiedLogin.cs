@@ -35,9 +35,9 @@ public sealed class TEmailVerifiedLogin : IEmailVerified
         writer.Write(SentCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Email = reader.ReadString();
-        SentCode = reader.Read<MyTelegram.Schema.Auth.ISentCode>();
+        Email = buffer.ReadString();
+        SentCode = buffer.Read<MyTelegram.Schema.Auth.ISentCode>();
     }
 }

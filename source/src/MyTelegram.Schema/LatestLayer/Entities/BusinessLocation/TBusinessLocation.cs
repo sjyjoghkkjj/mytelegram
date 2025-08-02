@@ -14,7 +14,7 @@ public sealed class TBusinessLocation : IBusinessLocation
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Geographical coordinates (optional).
@@ -29,7 +29,7 @@ public sealed class TBusinessLocation : IBusinessLocation
 
     public void ComputeFlag()
     {
-        if (GeoPoint != null) { Flags[0] = true; }
+        if (GeoPoint != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -38,14 +38,14 @@ public sealed class TBusinessLocation : IBusinessLocation
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(GeoPoint); }
+        if (Flags.IsBitSet(0)) { writer.Write(GeoPoint); }
         writer.Write(Address);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { GeoPoint = reader.Read<MyTelegram.Schema.IGeoPoint>(); }
-        Address = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { GeoPoint = buffer.Read<MyTelegram.Schema.IGeoPoint>(); }
+        Address = buffer.ReadString();
     }
 }

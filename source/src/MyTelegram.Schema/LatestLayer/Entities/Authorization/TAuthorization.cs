@@ -14,7 +14,7 @@ public sealed class TAuthorization : IAuthorization
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is the current session
@@ -114,12 +114,12 @@ public sealed class TAuthorization : IAuthorization
 
     public void ComputeFlag()
     {
-        if (Current) { Flags[0] = true; }
-        if (OfficialApp) { Flags[1] = true; }
-        if (PasswordPending) { Flags[2] = true; }
-        if (EncryptedRequestsDisabled) { Flags[3] = true; }
-        if (CallRequestsDisabled) { Flags[4] = true; }
-        if (Unconfirmed) { Flags[5] = true; }
+        if (Current) { Flags = Flags.SetBit(0); }
+        if (OfficialApp) { Flags = Flags.SetBit(1); }
+        if (PasswordPending) { Flags = Flags.SetBit(2); }
+        if (EncryptedRequestsDisabled) { Flags = Flags.SetBit(3); }
+        if (CallRequestsDisabled) { Flags = Flags.SetBit(4); }
+        if (Unconfirmed) { Flags = Flags.SetBit(5); }
 
     }
 
@@ -142,26 +142,26 @@ public sealed class TAuthorization : IAuthorization
         writer.Write(Region);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Current = true; }
-        if (Flags[1]) { OfficialApp = true; }
-        if (Flags[2]) { PasswordPending = true; }
-        if (Flags[3]) { EncryptedRequestsDisabled = true; }
-        if (Flags[4]) { CallRequestsDisabled = true; }
-        if (Flags[5]) { Unconfirmed = true; }
-        Hash = reader.ReadInt64();
-        DeviceModel = reader.ReadString();
-        Platform = reader.ReadString();
-        SystemVersion = reader.ReadString();
-        ApiId = reader.ReadInt32();
-        AppName = reader.ReadString();
-        AppVersion = reader.ReadString();
-        DateCreated = reader.ReadInt32();
-        DateActive = reader.ReadInt32();
-        Ip = reader.ReadString();
-        Country = reader.ReadString();
-        Region = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Current = true; }
+        if (Flags.IsBitSet(1)) { OfficialApp = true; }
+        if (Flags.IsBitSet(2)) { PasswordPending = true; }
+        if (Flags.IsBitSet(3)) { EncryptedRequestsDisabled = true; }
+        if (Flags.IsBitSet(4)) { CallRequestsDisabled = true; }
+        if (Flags.IsBitSet(5)) { Unconfirmed = true; }
+        Hash = buffer.ReadInt64();
+        DeviceModel = buffer.ReadString();
+        Platform = buffer.ReadString();
+        SystemVersion = buffer.ReadString();
+        ApiId = buffer.ReadInt32();
+        AppName = buffer.ReadString();
+        AppVersion = buffer.ReadString();
+        DateCreated = buffer.ReadInt32();
+        DateActive = buffer.ReadInt32();
+        Ip = buffer.ReadString();
+        Country = buffer.ReadString();
+        Region = buffer.ReadString();
     }
 }

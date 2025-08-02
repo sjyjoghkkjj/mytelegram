@@ -14,7 +14,7 @@ public sealed class TBusinessAwayMessage : IBusinessAwayMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the messages will not be sent if the account was online in the last 10 minutes.
@@ -41,7 +41,7 @@ public sealed class TBusinessAwayMessage : IBusinessAwayMessage
 
     public void ComputeFlag()
     {
-        if (OfflineOnly) { Flags[0] = true; }
+        if (OfflineOnly) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -55,12 +55,12 @@ public sealed class TBusinessAwayMessage : IBusinessAwayMessage
         writer.Write(Recipients);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { OfflineOnly = true; }
-        ShortcutId = reader.ReadInt32();
-        Schedule = reader.Read<MyTelegram.Schema.IBusinessAwayMessageSchedule>();
-        Recipients = reader.Read<MyTelegram.Schema.IBusinessRecipients>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { OfflineOnly = true; }
+        ShortcutId = buffer.ReadInt32();
+        Schedule = buffer.Read<MyTelegram.Schema.IBusinessAwayMessageSchedule>();
+        Recipients = buffer.Read<MyTelegram.Schema.IBusinessRecipients>();
     }
 }

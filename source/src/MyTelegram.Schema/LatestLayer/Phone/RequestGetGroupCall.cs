@@ -39,9 +39,9 @@ public sealed class RequestGetGroupCall : IRequest<MyTelegram.Schema.Phone.IGrou
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Limit = reader.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Limit = buffer.ReadInt32();
     }
 }

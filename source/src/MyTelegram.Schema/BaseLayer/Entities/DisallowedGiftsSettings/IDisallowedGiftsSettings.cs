@@ -8,7 +8,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TDisallowedGiftsSettings), nameof(TDisallowedGiftsSettings))]
 public interface IDisallowedGiftsSettings : IObject
 {
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
     bool DisallowUnlimitedStargifts { get; set; }
     bool DisallowLimitedStargifts { get; set; }
     bool DisallowUniqueStargifts { get; set; }

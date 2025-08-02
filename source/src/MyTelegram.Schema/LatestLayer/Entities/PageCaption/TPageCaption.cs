@@ -36,9 +36,9 @@ public sealed class TPageCaption : IPageCaption
         writer.Write(Credit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.Read<MyTelegram.Schema.IRichText>();
-        Credit = reader.Read<MyTelegram.Schema.IRichText>();
+        Text = buffer.Read<MyTelegram.Schema.IRichText>();
+        Credit = buffer.Read<MyTelegram.Schema.IRichText>();
     }
 }

@@ -29,8 +29,8 @@ public sealed class TInputPaymentCredentialsApplePay : IInputPaymentCredentials
         writer.Write(PaymentData);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PaymentData = reader.Read<MyTelegram.Schema.IDataJSON>();
+        PaymentData = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

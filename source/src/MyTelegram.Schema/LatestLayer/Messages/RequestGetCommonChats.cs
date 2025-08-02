@@ -45,10 +45,10 @@ public sealed class RequestGetCommonChats : IRequest<MyTelegram.Schema.Messages.
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        MaxId = reader.ReadInt64();
-        Limit = reader.ReadInt32();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        MaxId = buffer.ReadInt64();
+        Limit = buffer.ReadInt32();
     }
 }

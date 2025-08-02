@@ -46,9 +46,9 @@ public sealed class RequestEditChatAbout : IRequest<IBool>
         writer.Write(About);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        About = reader.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        About = buffer.ReadString();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TStickerSet : IStickerSet
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this stickerset was archived (due to too many saved stickers in the current account)
@@ -115,18 +115,18 @@ public sealed class TStickerSet : IStickerSet
 
     public void ComputeFlag()
     {
-        if (Archived) { Flags[1] = true; }
-        if (Official) { Flags[2] = true; }
-        if (Masks) { Flags[3] = true; }
-        if (Emojis) { Flags[7] = true; }
-        if (TextColor) { Flags[9] = true; }
-        if (ChannelEmojiStatus) { Flags[10] = true; }
-        if (Creator) { Flags[11] = true; }
-        if (/*InstalledDate != 0 && */InstalledDate.HasValue) { Flags[0] = true; }
-        if (Thumbs?.Count > 0) { Flags[4] = true; }
-        if (/*ThumbDcId != 0 && */ThumbDcId.HasValue) { Flags[4] = true; }
-        if (/*ThumbVersion != 0 && */ThumbVersion.HasValue) { Flags[4] = true; }
-        if (/*ThumbDocumentId != 0 &&*/ ThumbDocumentId.HasValue) { Flags[8] = true; }
+        if (Archived) { Flags = Flags.SetBit(1); }
+        if (Official) { Flags = Flags.SetBit(2); }
+        if (Masks) { Flags = Flags.SetBit(3); }
+        if (Emojis) { Flags = Flags.SetBit(7); }
+        if (TextColor) { Flags = Flags.SetBit(9); }
+        if (ChannelEmojiStatus) { Flags = Flags.SetBit(10); }
+        if (Creator) { Flags = Flags.SetBit(11); }
+        if (/*InstalledDate != 0 && */InstalledDate.HasValue) { Flags = Flags.SetBit(0); }
+        if (Thumbs?.Count > 0) { Flags = Flags.SetBit(4); }
+        if (/*ThumbDcId != 0 && */ThumbDcId.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*ThumbVersion != 0 && */ThumbVersion.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*ThumbDocumentId != 0 &&*/ ThumbDocumentId.HasValue) { Flags = Flags.SetBit(8); }
 
     }
 
@@ -135,39 +135,39 @@ public sealed class TStickerSet : IStickerSet
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(InstalledDate.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(InstalledDate.Value); }
         writer.Write(Id);
         writer.Write(AccessHash);
         writer.Write(Title);
         writer.Write(ShortName);
-        if (Flags[4]) { writer.Write(Thumbs); }
-        if (Flags[4]) { writer.Write(ThumbDcId.Value); }
-        if (Flags[4]) { writer.Write(ThumbVersion.Value); }
-        if (Flags[8]) { writer.Write(ThumbDocumentId.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(Thumbs); }
+        if (Flags.IsBitSet(4)) { writer.Write(ThumbDcId.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(ThumbVersion.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(ThumbDocumentId.Value); }
         writer.Write(Count);
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Archived = true; }
-        if (Flags[2]) { Official = true; }
-        if (Flags[3]) { Masks = true; }
-        if (Flags[7]) { Emojis = true; }
-        if (Flags[9]) { TextColor = true; }
-        if (Flags[10]) { ChannelEmojiStatus = true; }
-        if (Flags[11]) { Creator = true; }
-        if (Flags[0]) { InstalledDate = reader.ReadInt32(); }
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        Title = reader.ReadString();
-        ShortName = reader.ReadString();
-        if (Flags[4]) { Thumbs = reader.Read<TVector<MyTelegram.Schema.IPhotoSize>>(); }
-        if (Flags[4]) { ThumbDcId = reader.ReadInt32(); }
-        if (Flags[4]) { ThumbVersion = reader.ReadInt32(); }
-        if (Flags[8]) { ThumbDocumentId = reader.ReadInt64(); }
-        Count = reader.ReadInt32();
-        Hash = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Archived = true; }
+        if (Flags.IsBitSet(2)) { Official = true; }
+        if (Flags.IsBitSet(3)) { Masks = true; }
+        if (Flags.IsBitSet(7)) { Emojis = true; }
+        if (Flags.IsBitSet(9)) { TextColor = true; }
+        if (Flags.IsBitSet(10)) { ChannelEmojiStatus = true; }
+        if (Flags.IsBitSet(11)) { Creator = true; }
+        if (Flags.IsBitSet(0)) { InstalledDate = buffer.ReadInt32(); }
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        Title = buffer.ReadString();
+        ShortName = buffer.ReadString();
+        if (Flags.IsBitSet(4)) { Thumbs = buffer.Read<TVector<MyTelegram.Schema.IPhotoSize>>(); }
+        if (Flags.IsBitSet(4)) { ThumbDcId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { ThumbVersion = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(8)) { ThumbDocumentId = buffer.ReadInt64(); }
+        Count = buffer.ReadInt32();
+        Hash = buffer.ReadInt32();
     }
 }

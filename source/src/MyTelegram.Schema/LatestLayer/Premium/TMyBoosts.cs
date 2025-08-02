@@ -40,10 +40,10 @@ public sealed class TMyBoosts : IMyBoosts
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MyBoosts = reader.Read<TVector<MyTelegram.Schema.IMyBoost>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        MyBoosts = buffer.Read<TVector<MyTelegram.Schema.IMyBoost>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

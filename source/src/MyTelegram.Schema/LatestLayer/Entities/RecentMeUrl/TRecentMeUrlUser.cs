@@ -34,9 +34,9 @@ public sealed class TRecentMeUrlUser : IRecentMeUrl
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        UserId = reader.ReadInt64();
+        Url = buffer.ReadString();
+        UserId = buffer.ReadInt64();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TStoryViews : IStoryViews
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, indicates that the viewers list is currently viewable, and was not yet deleted because the story has expired while the user didn't have a <a href="https://corefork.telegram.org/api/premium">Premium</a> account.
@@ -49,11 +49,11 @@ public sealed class TStoryViews : IStoryViews
 
     public void ComputeFlag()
     {
-        if (HasViewers) { Flags[1] = true; }
-        if (/*ForwardsCount != 0 && */ForwardsCount.HasValue) { Flags[2] = true; }
-        if (Reactions?.Count > 0) { Flags[3] = true; }
-        if (/*ReactionsCount != 0 && */ReactionsCount.HasValue) { Flags[4] = true; }
-        if (RecentViewers?.Count > 0) { Flags[0] = true; }
+        if (HasViewers) { Flags = Flags.SetBit(1); }
+        if (/*ForwardsCount != 0 && */ForwardsCount.HasValue) { Flags = Flags.SetBit(2); }
+        if (Reactions?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (/*ReactionsCount != 0 && */ReactionsCount.HasValue) { Flags = Flags.SetBit(4); }
+        if (RecentViewers?.Count > 0) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -62,20 +62,20 @@ public sealed class TStoryViews : IStoryViews
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ViewsCount);
-        if (Flags[2]) { writer.Write(ForwardsCount.Value); }
-        if (Flags[3]) { writer.Write(Reactions); }
-        if (Flags[4]) { writer.Write(ReactionsCount.Value); }
-        if (Flags[0]) { writer.Write(RecentViewers); }
+        if (Flags.IsBitSet(2)) { writer.Write(ForwardsCount.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Reactions); }
+        if (Flags.IsBitSet(4)) { writer.Write(ReactionsCount.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(RecentViewers); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { HasViewers = true; }
-        ViewsCount = reader.ReadInt32();
-        if (Flags[2]) { ForwardsCount = reader.ReadInt32(); }
-        if (Flags[3]) { Reactions = reader.Read<TVector<MyTelegram.Schema.IReactionCount>>(); }
-        if (Flags[4]) { ReactionsCount = reader.ReadInt32(); }
-        if (Flags[0]) { RecentViewers = reader.Read<TVector<long>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { HasViewers = true; }
+        ViewsCount = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { ForwardsCount = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { Reactions = buffer.Read<TVector<MyTelegram.Schema.IReactionCount>>(); }
+        if (Flags.IsBitSet(4)) { ReactionsCount = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { RecentViewers = buffer.Read<TVector<long>>(); }
     }
 }

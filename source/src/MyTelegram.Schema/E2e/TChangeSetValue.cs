@@ -8,8 +8,8 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TChangeSetValue : IChange
 {
     public uint ConstructorId => 0xFE0139CC;
-    public byte[] Key { get; set; }
-    public byte[] Value { get; set; }
+    public ReadOnlyMemory<byte> Key { get; set; }
+    public ReadOnlyMemory<byte> Value { get; set; }
 
     public void ComputeFlag()
     {
@@ -24,9 +24,9 @@ public sealed class TChangeSetValue : IChange
         writer.Write(Value);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Key = reader.ReadBytes();
-        Value = reader.ReadBytes();
+        Key = buffer.ReadBytes();
+        Value = buffer.ReadBytes();
     }
 }

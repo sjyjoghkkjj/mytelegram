@@ -14,7 +14,7 @@ public sealed class TPhoneCallRequested : IPhoneCall
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a video call
@@ -50,7 +50,7 @@ public sealed class TPhoneCallRequested : IPhoneCall
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/end-to-end/voice-calls">Parameter for key exchange</a>
     ///</summary>
-    public byte[] GAHash { get; set; }
+    public ReadOnlyMemory<byte> GAHash { get; set; }
 
     ///<summary>
     /// Call protocol info to be passed to libtgvoip
@@ -60,7 +60,7 @@ public sealed class TPhoneCallRequested : IPhoneCall
 
     public void ComputeFlag()
     {
-        if (Video) { Flags[6] = true; }
+        if (Video) { Flags = Flags.SetBit(6); }
 
     }
 
@@ -78,16 +78,16 @@ public sealed class TPhoneCallRequested : IPhoneCall
         writer.Write(Protocol);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[6]) { Video = true; }
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        AdminId = reader.ReadInt64();
-        ParticipantId = reader.ReadInt64();
-        GAHash = reader.ReadBytes();
-        Protocol = reader.Read<MyTelegram.Schema.IPhoneCallProtocol>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(6)) { Video = true; }
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        AdminId = buffer.ReadInt64();
+        ParticipantId = buffer.ReadInt64();
+        GAHash = buffer.ReadBytes();
+        Protocol = buffer.Read<MyTelegram.Schema.IPhoneCallProtocol>();
     }
 }

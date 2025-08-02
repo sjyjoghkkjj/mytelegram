@@ -14,7 +14,7 @@ public sealed class TReplyKeyboardMarkup : IReplyMarkup
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Requests clients to resize the keyboard vertically for optimal fit (e.g., make the keyboard smaller if there are just two rows of buttons). If not set, the custom keyboard is always of the same height as the app's standard keyboard.
@@ -52,11 +52,11 @@ public sealed class TReplyKeyboardMarkup : IReplyMarkup
 
     public void ComputeFlag()
     {
-        if (Resize) { Flags[0] = true; }
-        if (SingleUse) { Flags[1] = true; }
-        if (Selective) { Flags[2] = true; }
-        if (Persistent) { Flags[4] = true; }
-        if (Placeholder != null) { Flags[3] = true; }
+        if (Resize) { Flags = Flags.SetBit(0); }
+        if (SingleUse) { Flags = Flags.SetBit(1); }
+        if (Selective) { Flags = Flags.SetBit(2); }
+        if (Persistent) { Flags = Flags.SetBit(4); }
+        if (Placeholder != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -65,17 +65,17 @@ public sealed class TReplyKeyboardMarkup : IReplyMarkup
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Rows);
-        if (Flags[3]) { writer.Write(Placeholder); }
+        if (Flags.IsBitSet(3)) { writer.Write(Placeholder); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Resize = true; }
-        if (Flags[1]) { SingleUse = true; }
-        if (Flags[2]) { Selective = true; }
-        if (Flags[4]) { Persistent = true; }
-        Rows = reader.Read<TVector<MyTelegram.Schema.IKeyboardButtonRow>>();
-        if (Flags[3]) { Placeholder = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Resize = true; }
+        if (Flags.IsBitSet(1)) { SingleUse = true; }
+        if (Flags.IsBitSet(2)) { Selective = true; }
+        if (Flags.IsBitSet(4)) { Persistent = true; }
+        Rows = buffer.Read<TVector<MyTelegram.Schema.IKeyboardButtonRow>>();
+        if (Flags.IsBitSet(3)) { Placeholder = buffer.ReadString(); }
     }
 }

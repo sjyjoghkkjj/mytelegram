@@ -34,9 +34,9 @@ public sealed class TEligibleToJoin : IEligibilityToJoin
         writer.Write(MonthlySentSms);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        TermsUrl = reader.ReadString();
-        MonthlySentSms = reader.ReadInt32();
+        TermsUrl = buffer.ReadString();
+        MonthlySentSms = buffer.ReadInt32();
     }
 }

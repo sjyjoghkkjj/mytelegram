@@ -34,9 +34,9 @@ public sealed class TBotMenuButton : IBotMenuButton
         writer.Write(Url);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        Url = reader.ReadString();
+        Text = buffer.ReadString();
+        Url = buffer.ReadString();
     }
 }

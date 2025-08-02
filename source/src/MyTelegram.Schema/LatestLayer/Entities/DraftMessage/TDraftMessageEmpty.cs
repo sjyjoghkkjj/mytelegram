@@ -14,7 +14,7 @@ public sealed class TDraftMessageEmpty : IDraftMessage,IEmpty
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     public IInputMedia? Media { get; set; }
 
@@ -25,7 +25,7 @@ public sealed class TDraftMessageEmpty : IDraftMessage,IEmpty
 
     public void ComputeFlag()
     {
-        if (/*Date != 0 && */Date.HasValue) { Flags[0] = true; }
+        if (/*Date != 0 && */Date.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -33,12 +33,12 @@ public sealed class TDraftMessageEmpty : IDraftMessage,IEmpty
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Date.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Date.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Date = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Date = buffer.ReadInt32(); }
     }
 }

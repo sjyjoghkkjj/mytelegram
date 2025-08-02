@@ -46,11 +46,11 @@ public sealed class TQuickReply : IQuickReply
         writer.Write(Count);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ShortcutId = reader.ReadInt32();
-        Shortcut = reader.ReadString();
-        TopMessage = reader.ReadInt32();
-        Count = reader.ReadInt32();
+        ShortcutId = buffer.ReadInt32();
+        Shortcut = buffer.ReadString();
+        TopMessage = buffer.ReadInt32();
+        Count = buffer.ReadInt32();
     }
 }

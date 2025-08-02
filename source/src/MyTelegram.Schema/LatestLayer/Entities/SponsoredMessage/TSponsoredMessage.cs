@@ -7,14 +7,14 @@ namespace MyTelegram.Schema;
 /// A <a href="https://corefork.telegram.org/api/sponsored-messages">sponsored message</a>.
 /// See <a href="https://corefork.telegram.org/constructor/sponsoredMessage" />
 ///</summary>
-[TlObject(0x4d93a990)]
+[TlObject(0x7dbf8673)]
 public sealed class TSponsoredMessage : ISponsoredMessage
 {
-    public uint ConstructorId => 0x4d93a990;
+    public uint ConstructorId => 0x7dbf8673;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the message needs to be labeled as "recommended" instead of "sponsored"
@@ -31,7 +31,7 @@ public sealed class TSponsoredMessage : ISponsoredMessage
     ///<summary>
     /// Message ID
     ///</summary>
-    public byte[] RandomId { get; set; }
+    public ReadOnlyMemory<byte> RandomId { get; set; }
 
     ///<summary>
     /// Contains the URL to open when the user clicks on the sponsored message.
@@ -85,17 +85,21 @@ public sealed class TSponsoredMessage : ISponsoredMessage
     /// If set, contains additional information about the sponsored message to be shown along with the message.
     ///</summary>
     public string? AdditionalInfo { get; set; }
+    public int? MinDisplayDuration { get; set; }
+    public int? MaxDisplayDuration { get; set; }
 
     public void ComputeFlag()
     {
-        if (Recommended) { Flags[5] = true; }
-        if (CanReport) { Flags[12] = true; }
-        if (Entities?.Count > 0) { Flags[1] = true; }
-        if (Photo != null) { Flags[6] = true; }
-        if (Media != null) { Flags[14] = true; }
-        if (Color != null) { Flags[13] = true; }
-        if (SponsorInfo != null) { Flags[7] = true; }
-        if (AdditionalInfo != null) { Flags[8] = true; }
+        if (Recommended) { Flags = Flags.SetBit(5); }
+        if (CanReport) { Flags = Flags.SetBit(12); }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (Photo != null) { Flags = Flags.SetBit(6); }
+        if (Media != null) { Flags = Flags.SetBit(14); }
+        if (Color != null) { Flags = Flags.SetBit(13); }
+        if (SponsorInfo != null) { Flags = Flags.SetBit(7); }
+        if (AdditionalInfo != null) { Flags = Flags.SetBit(8); }
+        if (/*MinDisplayDuration != 0 && */MinDisplayDuration.HasValue) { Flags = Flags.SetBit(15); }
+        if (/*MaxDisplayDuration != 0 && */MaxDisplayDuration.HasValue) { Flags = Flags.SetBit(15); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -107,30 +111,34 @@ public sealed class TSponsoredMessage : ISponsoredMessage
         writer.Write(Url);
         writer.Write(Title);
         writer.Write(Message);
-        if (Flags[1]) { writer.Write(Entities); }
-        if (Flags[6]) { writer.Write(Photo); }
-        if (Flags[14]) { writer.Write(Media); }
-        if (Flags[13]) { writer.Write(Color); }
+        if (Flags.IsBitSet(1)) { writer.Write(Entities); }
+        if (Flags.IsBitSet(6)) { writer.Write(Photo); }
+        if (Flags.IsBitSet(14)) { writer.Write(Media); }
+        if (Flags.IsBitSet(13)) { writer.Write(Color); }
         writer.Write(ButtonText);
-        if (Flags[7]) { writer.Write(SponsorInfo); }
-        if (Flags[8]) { writer.Write(AdditionalInfo); }
+        if (Flags.IsBitSet(7)) { writer.Write(SponsorInfo); }
+        if (Flags.IsBitSet(8)) { writer.Write(AdditionalInfo); }
+        if (Flags.IsBitSet(15)) { writer.Write(MinDisplayDuration.Value); }
+        if (Flags.IsBitSet(15)) { writer.Write(MaxDisplayDuration.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[5]) { Recommended = true; }
-        if (Flags[12]) { CanReport = true; }
-        RandomId = reader.ReadBytes();
-        Url = reader.ReadString();
-        Title = reader.ReadString();
-        Message = reader.ReadString();
-        if (Flags[1]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        if (Flags[6]) { Photo = reader.Read<MyTelegram.Schema.IPhoto>(); }
-        if (Flags[14]) { Media = reader.Read<MyTelegram.Schema.IMessageMedia>(); }
-        if (Flags[13]) { Color = reader.Read<MyTelegram.Schema.IPeerColor>(); }
-        ButtonText = reader.ReadString();
-        if (Flags[7]) { SponsorInfo = reader.ReadString(); }
-        if (Flags[8]) { AdditionalInfo = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(5)) { Recommended = true; }
+        if (Flags.IsBitSet(12)) { CanReport = true; }
+        RandomId = buffer.ReadBytes();
+        Url = buffer.ReadString();
+        Title = buffer.ReadString();
+        Message = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        if (Flags.IsBitSet(6)) { Photo = buffer.Read<MyTelegram.Schema.IPhoto>(); }
+        if (Flags.IsBitSet(14)) { Media = buffer.Read<MyTelegram.Schema.IMessageMedia>(); }
+        if (Flags.IsBitSet(13)) { Color = buffer.Read<MyTelegram.Schema.IPeerColor>(); }
+        ButtonText = buffer.ReadString();
+        if (Flags.IsBitSet(7)) { SponsorInfo = buffer.ReadString(); }
+        if (Flags.IsBitSet(8)) { AdditionalInfo = buffer.ReadString(); }
+        if (Flags.IsBitSet(15)) { MinDisplayDuration = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(15)) { MaxDisplayDuration = buffer.ReadInt32(); }
     }
 }

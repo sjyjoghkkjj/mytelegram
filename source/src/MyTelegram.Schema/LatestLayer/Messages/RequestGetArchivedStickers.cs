@@ -14,7 +14,7 @@ public sealed class RequestGetArchivedStickers : IRequest<MyTelegram.Schema.Mess
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Get <a href="https://corefork.telegram.org/api/stickers#mask-stickers">mask stickers</a>
@@ -40,8 +40,8 @@ public sealed class RequestGetArchivedStickers : IRequest<MyTelegram.Schema.Mess
 
     public void ComputeFlag()
     {
-        if (Masks) { Flags[0] = true; }
-        if (Emojis) { Flags[1] = true; }
+        if (Masks) { Flags = Flags.SetBit(0); }
+        if (Emojis) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -54,12 +54,12 @@ public sealed class RequestGetArchivedStickers : IRequest<MyTelegram.Schema.Mess
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Masks = true; }
-        if (Flags[1]) { Emojis = true; }
-        OffsetId = reader.ReadInt64();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Masks = true; }
+        if (Flags.IsBitSet(1)) { Emojis = true; }
+        OffsetId = buffer.ReadInt64();
+        Limit = buffer.ReadInt32();
     }
 }

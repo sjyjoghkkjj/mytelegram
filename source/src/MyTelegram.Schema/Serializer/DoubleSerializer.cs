@@ -7,38 +7,17 @@ namespace MyTelegram.Schema.Serializer;
 /// </summary>
 public class DoubleSerializer : ISerializer<double>//, ISerializer2<double>
 {
-    //public void Serialize(double value,
-    //    BinaryWriter writer)
-    //{
-    //    writer.Write(value);
-    //}
-
-    //public double Deserialize(BinaryReader reader)
-    //{
-    //    return reader.ReadDouble();
-    //}
-
     public void Serialize(double value,
         IBufferWriter<byte> writer)
     {
         writer.Write(value);
     }
 
-    public double Deserialize(ref SequenceReader<byte> reader)
+    public double Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Span<byte> valueBytes = stackalloc byte[8];
-        reader.TryCopyTo(valueBytes);
-        reader.Advance(8);
+        var value = BinaryPrimitives.ReadDoubleLittleEndian(buffer.Span);
+        buffer = buffer[8..];
 
-        return BinaryPrimitives.ReadDoubleLittleEndian(valueBytes);
+        return value;
     }
-
-    //public double Deserialize(ref ReadOnlySequence<byte> buffer)
-    //{
-    //    var reader = new SequenceReader<byte>(buffer);
-    //    Span<byte> valueBytes = stackalloc byte[8];
-    //    reader.TryCopyTo(valueBytes);
-    //    buffer = buffer.Slice(8);
-    //    return BinaryPrimitives.ReadDoubleLittleEndian(valueBytes);
-    //}
 }

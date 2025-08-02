@@ -42,9 +42,9 @@ public sealed class RequestGetExportedChatInvite : IRequest<MyTelegram.Schema.Me
         writer.Write(Link);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Link = reader.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Link = buffer.ReadString();
     }
 }

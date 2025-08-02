@@ -39,10 +39,11 @@ internal sealed class EditBannedHandler(
             if (obj.BannedRights.SendPlain)
             {
                 obj.BannedRights.SendMessages = true;
-                obj.BannedRights.Flags[1] = true;
+                //obj.BannedRights.Flags[1] = true;
+                obj.BannedRights.Flags.SetBit(1);
             }
 
-            var bannedRights = ChatBannedRights.FromValue(obj.BannedRights.Flags.ToInt32(), obj.BannedRights.UntilDate);
+            var bannedRights = ChatBannedRights.FromValue(obj.BannedRights.Flags, obj.BannedRights.UntilDate);
             var command = new EditBannedCommand(ChannelMemberId.Create(channel.PeerId, peer.PeerId),
                 input.ToRequestInfo(),
                 input.UserId,

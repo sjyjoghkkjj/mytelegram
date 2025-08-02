@@ -59,13 +59,13 @@ public sealed class TDifferenceSlice : IDifference
         writer.Write(IntermediateState);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        NewMessages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        NewEncryptedMessages = reader.Read<TVector<MyTelegram.Schema.IEncryptedMessage>>();
-        OtherUpdates = reader.Read<TVector<MyTelegram.Schema.IUpdate>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
-        IntermediateState = reader.Read<MyTelegram.Schema.Updates.IState>();
+        NewMessages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        NewEncryptedMessages = buffer.Read<TVector<MyTelegram.Schema.IEncryptedMessage>>();
+        OtherUpdates = buffer.Read<TVector<MyTelegram.Schema.IUpdate>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
+        IntermediateState = buffer.Read<MyTelegram.Schema.Updates.IState>();
     }
 }

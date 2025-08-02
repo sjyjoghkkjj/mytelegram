@@ -20,7 +20,7 @@ public sealed class RequestAddContact : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Allow the other user to see our phone number?
@@ -51,7 +51,7 @@ public sealed class RequestAddContact : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (AddPhonePrivacyException) { Flags[0] = true; }
+        if (AddPhonePrivacyException) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -66,13 +66,13 @@ public sealed class RequestAddContact : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Phone);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AddPhonePrivacyException = true; }
-        Id = reader.Read<MyTelegram.Schema.IInputUser>();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
-        Phone = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AddPhonePrivacyException = true; }
+        Id = buffer.Read<MyTelegram.Schema.IInputUser>();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
+        Phone = buffer.ReadString();
     }
 }

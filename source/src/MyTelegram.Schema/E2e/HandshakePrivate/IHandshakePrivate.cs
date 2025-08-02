@@ -7,10 +7,10 @@ namespace MyTelegram.Schema.E2e;
 [JsonDerivedType(typeof(THandshakePrivateFinish), "THandshakePrivateFinishLayer0")]
 public interface IHandshakePrivate : IObject
 {
-    byte[] AlicePK { get; set; }
-    byte[] BobPK { get; set; }
+    ReadOnlyMemory<byte> AlicePK { get; set; }
+    ReadOnlyMemory<byte> BobPK { get; set; }
     long AliceUserId { get; set; }
     long BobUserId { get; set; }
-    byte[] AliceNonce { get; set; }
-    byte[] BobNonce { get; set; }
+    ReadOnlyMemory<byte> AliceNonce { get; set; }
+    ReadOnlyMemory<byte> BobNonce { get; set; }
 }

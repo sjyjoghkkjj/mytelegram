@@ -1,9 +1,11 @@
-﻿namespace MyTelegram.Core;
+﻿using System.Buffers;
+
+namespace MyTelegram.Core;
 
 public record LayeredPushMessageCreatedIntegrationEvent(
     PeerType PeerType,
     long PeerId,
-    byte[] Data,
+    ReadOnlyMemory<byte> Data,
     long? ExcludeAuthKeyId,
     long? ExcludeUserId,
     long? OnlySendToUserId,
@@ -11,14 +13,17 @@ public record LayeredPushMessageCreatedIntegrationEvent(
     int Pts,
     int? Qts,
     long GlobalSeqNo,
-    LayeredData<byte[]>? LayeredData,
+    //LayeredData<byte[]>? LayeredData,
     PushData? PushData,
-    List<long>? ExcludeUserIds) : ISessionMessage;
+    List<long>? ExcludeUserIds) : ISessionMessage
+{
+    public IMemoryOwner<byte>? MemoryOwner { get; set; }
+}
 
 public record LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
     PeerType PeerType,
     long PeerId,
-    byte[] Data,
+    ReadOnlyMemory<byte> Data,
     long? ExcludeAuthKeyId,
     long? ExcludeUserId,
     long? OnlySendToUserId,
@@ -26,7 +31,7 @@ public record LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
     int Pts,
     int? Qts,
     long GlobalSeqNo,
-    LayeredData<byte[]>? LayeredData,
+    //LayeredData<byte[]>? LayeredData,
     TExtraData ExtraData,
     PushData? PushData,
     List<long>? ExcludeUserIds
@@ -41,5 +46,5 @@ public record LayeredPushMessageCreatedIntegrationEvent<TExtraData>(
         Pts,
         Qts,
         GlobalSeqNo,
-        LayeredData,
+        //LayeredData,
         PushData, ExcludeUserIds);

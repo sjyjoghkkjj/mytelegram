@@ -53,12 +53,12 @@ public sealed class TPeerDialogs : IPeerDialogs
         writer.Write(State);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Dialogs = reader.Read<TVector<MyTelegram.Schema.IDialog>>();
-        Messages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
-        State = reader.Read<MyTelegram.Schema.Updates.IState>();
+        Dialogs = buffer.Read<TVector<MyTelegram.Schema.IDialog>>();
+        Messages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
+        State = buffer.Read<MyTelegram.Schema.Updates.IState>();
     }
 }

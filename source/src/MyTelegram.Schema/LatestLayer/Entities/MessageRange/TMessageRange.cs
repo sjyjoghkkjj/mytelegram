@@ -34,9 +34,9 @@ public sealed class TMessageRange : IMessageRange
         writer.Write(MaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MinId = reader.ReadInt32();
-        MaxId = reader.ReadInt32();
+        MinId = buffer.ReadInt32();
+        MaxId = buffer.ReadInt32();
     }
 }

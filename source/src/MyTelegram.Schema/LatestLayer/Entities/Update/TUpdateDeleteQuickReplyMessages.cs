@@ -34,9 +34,9 @@ public sealed class TUpdateDeleteQuickReplyMessages : IUpdate
         writer.Write(Messages);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ShortcutId = reader.ReadInt32();
-        Messages = reader.Read<TVector<int>>();
+        ShortcutId = buffer.ReadInt32();
+        Messages = buffer.Read<TVector<int>>();
     }
 }

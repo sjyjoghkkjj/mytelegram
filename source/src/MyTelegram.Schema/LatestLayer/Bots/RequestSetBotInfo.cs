@@ -17,7 +17,7 @@ public sealed class RequestSetBotInfo : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If called by a user, <strong>must</strong> contain the peer of a bot we own.
@@ -47,10 +47,10 @@ public sealed class RequestSetBotInfo : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Bot != null) { Flags[2] = true; }
-        if (Name != null) { Flags[3] = true; }
-        if (About != null) { Flags[0] = true; }
-        if (Description != null) { Flags[1] = true; }
+        if (Bot != null) { Flags = Flags.SetBit(2); }
+        if (Name != null) { Flags = Flags.SetBit(3); }
+        if (About != null) { Flags = Flags.SetBit(0); }
+        if (Description != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -58,20 +58,20 @@ public sealed class RequestSetBotInfo : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[2]) { writer.Write(Bot); }
+        if (Flags.IsBitSet(2)) { writer.Write(Bot); }
         writer.Write(LangCode);
-        if (Flags[3]) { writer.Write(Name); }
-        if (Flags[0]) { writer.Write(About); }
-        if (Flags[1]) { writer.Write(Description); }
+        if (Flags.IsBitSet(3)) { writer.Write(Name); }
+        if (Flags.IsBitSet(0)) { writer.Write(About); }
+        if (Flags.IsBitSet(1)) { writer.Write(Description); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Bot = reader.Read<MyTelegram.Schema.IInputUser>(); }
-        LangCode = reader.ReadString();
-        if (Flags[3]) { Name = reader.ReadString(); }
-        if (Flags[0]) { About = reader.ReadString(); }
-        if (Flags[1]) { Description = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Bot = buffer.Read<MyTelegram.Schema.IInputUser>(); }
+        LangCode = buffer.ReadString();
+        if (Flags.IsBitSet(3)) { Name = buffer.ReadString(); }
+        if (Flags.IsBitSet(0)) { About = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Description = buffer.ReadString(); }
     }
 }

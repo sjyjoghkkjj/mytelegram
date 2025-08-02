@@ -14,7 +14,7 @@ public sealed class TUpdateReadChannelDiscussionInbox : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/channel">Discussion group ID</a>
@@ -43,8 +43,8 @@ public sealed class TUpdateReadChannelDiscussionInbox : IUpdate
 
     public void ComputeFlag()
     {
-        if (/*BroadcastId != 0 &&*/ BroadcastId.HasValue) { Flags[0] = true; }
-        if (/*BroadcastPost != 0 && */BroadcastPost.HasValue) { Flags[0] = true; }
+        if (/*BroadcastId != 0 &&*/ BroadcastId.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*BroadcastPost != 0 && */BroadcastPost.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,17 +55,17 @@ public sealed class TUpdateReadChannelDiscussionInbox : IUpdate
         writer.Write(ChannelId);
         writer.Write(TopMsgId);
         writer.Write(ReadMaxId);
-        if (Flags[0]) { writer.Write(BroadcastId.Value); }
-        if (Flags[0]) { writer.Write(BroadcastPost.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(BroadcastId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(BroadcastPost.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        ChannelId = reader.ReadInt64();
-        TopMsgId = reader.ReadInt32();
-        ReadMaxId = reader.ReadInt32();
-        if (Flags[0]) { BroadcastId = reader.ReadInt64(); }
-        if (Flags[0]) { BroadcastPost = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        TopMsgId = buffer.ReadInt32();
+        ReadMaxId = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { BroadcastId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(0)) { BroadcastPost = buffer.ReadInt32(); }
     }
 }

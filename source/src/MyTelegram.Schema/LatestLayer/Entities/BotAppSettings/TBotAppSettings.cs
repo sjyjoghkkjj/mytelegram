@@ -13,12 +13,12 @@ public sealed class TBotAppSettings : IBotAppSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
     ///</summary>
-    public byte[]? PlaceholderPath { get; set; }
+    public ReadOnlyMemory<byte>? PlaceholderPath { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -42,11 +42,11 @@ public sealed class TBotAppSettings : IBotAppSettings
 
     public void ComputeFlag()
     {
-        if (PlaceholderPath != null) { Flags[0] = true; }
-        if (/*BackgroundColor != 0 && */BackgroundColor.HasValue) { Flags[1] = true; }
-        if (/*BackgroundDarkColor != 0 && */BackgroundDarkColor.HasValue) { Flags[2] = true; }
-        if (/*HeaderColor != 0 && */HeaderColor.HasValue) { Flags[3] = true; }
-        if (/*HeaderDarkColor != 0 && */HeaderDarkColor.HasValue) { Flags[4] = true; }
+        if (PlaceholderPath != null) { Flags = Flags.SetBit(0); }
+        if (/*BackgroundColor != 0 && */BackgroundColor.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*BackgroundDarkColor != 0 && */BackgroundDarkColor.HasValue) { Flags = Flags.SetBit(2); }
+        if (/*HeaderColor != 0 && */HeaderColor.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*HeaderDarkColor != 0 && */HeaderDarkColor.HasValue) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -54,20 +54,20 @@ public sealed class TBotAppSettings : IBotAppSettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(PlaceholderPath); }
-        if (Flags[1]) { writer.Write(BackgroundColor.Value); }
-        if (Flags[2]) { writer.Write(BackgroundDarkColor.Value); }
-        if (Flags[3]) { writer.Write(HeaderColor.Value); }
-        if (Flags[4]) { writer.Write(HeaderDarkColor.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(PlaceholderPath); }
+        if (Flags.IsBitSet(1)) { writer.Write(BackgroundColor.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(BackgroundDarkColor.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(HeaderColor.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(HeaderDarkColor.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { PlaceholderPath = reader.ReadBytes(); }
-        if (Flags[1]) { BackgroundColor = reader.ReadInt32(); }
-        if (Flags[2]) { BackgroundDarkColor = reader.ReadInt32(); }
-        if (Flags[3]) { HeaderColor = reader.ReadInt32(); }
-        if (Flags[4]) { HeaderDarkColor = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { PlaceholderPath = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(1)) { BackgroundColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { BackgroundDarkColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { HeaderColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { HeaderDarkColor = buffer.ReadInt32(); }
     }
 }

@@ -41,10 +41,10 @@ public sealed class TMessageEntityCustomEmoji : IMessageEntity
         writer.Write(DocumentId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offset = reader.ReadInt32();
-        Length = reader.ReadInt32();
-        DocumentId = reader.ReadInt64();
+        Offset = buffer.ReadInt32();
+        Length = buffer.ReadInt32();
+        DocumentId = buffer.ReadInt64();
     }
 }

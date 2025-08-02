@@ -41,9 +41,9 @@ public sealed class RequestToggleNoForwards : IRequest<MyTelegram.Schema.IUpdate
         writer.Write(Enabled);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Enabled = reader.Read();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Enabled = buffer.Read();
     }
 }

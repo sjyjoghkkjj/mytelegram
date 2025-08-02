@@ -40,10 +40,10 @@ public sealed class TUpdateDeleteMessages : IUpdate
         writer.Write(PtsCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Messages = reader.Read<TVector<int>>();
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
+        Messages = buffer.Read<TVector<int>>();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
     }
 }

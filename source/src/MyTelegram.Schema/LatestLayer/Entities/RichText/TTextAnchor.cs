@@ -35,9 +35,9 @@ public sealed class TTextAnchor : IRichText
         writer.Write(Name);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.Read<MyTelegram.Schema.IRichText>();
-        Name = reader.ReadString();
+        Text = buffer.Read<MyTelegram.Schema.IRichText>();
+        Name = buffer.ReadString();
     }
 }

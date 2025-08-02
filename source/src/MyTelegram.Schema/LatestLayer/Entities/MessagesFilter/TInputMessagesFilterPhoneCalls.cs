@@ -14,7 +14,7 @@ public sealed class TInputMessagesFilterPhoneCalls : IMessagesFilter
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Return only missed phone calls
@@ -24,7 +24,7 @@ public sealed class TInputMessagesFilterPhoneCalls : IMessagesFilter
 
     public void ComputeFlag()
     {
-        if (Missed) { Flags[0] = true; }
+        if (Missed) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -35,9 +35,9 @@ public sealed class TInputMessagesFilterPhoneCalls : IMessagesFilter
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Missed = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Missed = true; }
     }
 }

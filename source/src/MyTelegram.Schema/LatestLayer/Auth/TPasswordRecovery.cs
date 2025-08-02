@@ -28,8 +28,8 @@ public sealed class TPasswordRecovery : IPasswordRecovery
         writer.Write(EmailPattern);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        EmailPattern = reader.ReadString();
+        EmailPattern = buffer.ReadString();
     }
 }

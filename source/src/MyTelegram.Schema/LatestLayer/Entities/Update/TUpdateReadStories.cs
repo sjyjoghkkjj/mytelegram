@@ -35,9 +35,9 @@ public sealed class TUpdateReadStories : IUpdate
         writer.Write(MaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        MaxId = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        MaxId = buffer.ReadInt32();
     }
 }

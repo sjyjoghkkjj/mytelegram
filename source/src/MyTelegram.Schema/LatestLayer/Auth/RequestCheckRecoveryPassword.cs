@@ -32,8 +32,8 @@ public sealed class RequestCheckRecoveryPassword : IRequest<IBool>
         writer.Write(Code);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Code = reader.ReadString();
+        Code = buffer.ReadString();
     }
 }

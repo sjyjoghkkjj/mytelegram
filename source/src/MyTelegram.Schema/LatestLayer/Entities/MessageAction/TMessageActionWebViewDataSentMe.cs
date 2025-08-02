@@ -34,9 +34,9 @@ public sealed class TMessageActionWebViewDataSentMe : IMessageAction
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        Data = reader.ReadString();
+        Text = buffer.ReadString();
+        Data = buffer.ReadString();
     }
 }

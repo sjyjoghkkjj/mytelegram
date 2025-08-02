@@ -14,7 +14,7 @@ public sealed class TSentCodeTypeEmailCode : ISentCodeType
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether authorization through Apple ID is allowed
@@ -50,10 +50,10 @@ public sealed class TSentCodeTypeEmailCode : ISentCodeType
 
     public void ComputeFlag()
     {
-        if (AppleSigninAllowed) { Flags[0] = true; }
-        if (GoogleSigninAllowed) { Flags[1] = true; }
-        if (/*ResetAvailablePeriod != 0 && */ResetAvailablePeriod.HasValue) { Flags[3] = true; }
-        if (/*ResetPendingDate != 0 && */ResetPendingDate.HasValue) { Flags[4] = true; }
+        if (AppleSigninAllowed) { Flags = Flags.SetBit(0); }
+        if (GoogleSigninAllowed) { Flags = Flags.SetBit(1); }
+        if (/*ResetAvailablePeriod != 0 && */ResetAvailablePeriod.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*ResetPendingDate != 0 && */ResetPendingDate.HasValue) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -63,18 +63,18 @@ public sealed class TSentCodeTypeEmailCode : ISentCodeType
         writer.Write(Flags);
         writer.Write(EmailPattern);
         writer.Write(Length);
-        if (Flags[3]) { writer.Write(ResetAvailablePeriod.Value); }
-        if (Flags[4]) { writer.Write(ResetPendingDate.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(ResetAvailablePeriod.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(ResetPendingDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AppleSigninAllowed = true; }
-        if (Flags[1]) { GoogleSigninAllowed = true; }
-        EmailPattern = reader.ReadString();
-        Length = reader.ReadInt32();
-        if (Flags[3]) { ResetAvailablePeriod = reader.ReadInt32(); }
-        if (Flags[4]) { ResetPendingDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AppleSigninAllowed = true; }
+        if (Flags.IsBitSet(1)) { GoogleSigninAllowed = true; }
+        EmailPattern = buffer.ReadString();
+        Length = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { ResetAvailablePeriod = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { ResetPendingDate = buffer.ReadInt32(); }
     }
 }

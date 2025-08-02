@@ -14,7 +14,7 @@ public sealed class TTermsOfService : ITermsOfService
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether a prompt must be showed to the user, in order to accept the new terms.
@@ -45,8 +45,8 @@ public sealed class TTermsOfService : ITermsOfService
 
     public void ComputeFlag()
     {
-        if (Popup) { Flags[0] = true; }
-        if (/*MinAgeConfirm != 0 && */MinAgeConfirm.HasValue) { Flags[1] = true; }
+        if (Popup) { Flags = Flags.SetBit(0); }
+        if (/*MinAgeConfirm != 0 && */MinAgeConfirm.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -57,16 +57,16 @@ public sealed class TTermsOfService : ITermsOfService
         writer.Write(Id);
         writer.Write(Text);
         writer.Write(Entities);
-        if (Flags[1]) { writer.Write(MinAgeConfirm.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(MinAgeConfirm.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Popup = true; }
-        Id = reader.Read<MyTelegram.Schema.IDataJSON>();
-        Text = reader.ReadString();
-        Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
-        if (Flags[1]) { MinAgeConfirm = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Popup = true; }
+        Id = buffer.Read<MyTelegram.Schema.IDataJSON>();
+        Text = buffer.ReadString();
+        Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
+        if (Flags.IsBitSet(1)) { MinAgeConfirm = buffer.ReadInt32(); }
     }
 }

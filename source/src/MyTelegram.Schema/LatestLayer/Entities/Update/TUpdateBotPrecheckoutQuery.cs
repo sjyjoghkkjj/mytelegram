@@ -14,7 +14,7 @@ public sealed class TUpdateBotPrecheckoutQuery : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Unique query identifier
@@ -29,7 +29,7 @@ public sealed class TUpdateBotPrecheckoutQuery : IUpdate
     ///<summary>
     /// Bot specified invoice payload
     ///</summary>
-    public byte[] Payload { get; set; }
+    public ReadOnlyMemory<byte> Payload { get; set; }
 
     ///<summary>
     /// Order info provided by the user
@@ -54,8 +54,8 @@ public sealed class TUpdateBotPrecheckoutQuery : IUpdate
 
     public void ComputeFlag()
     {
-        if (Info != null) { Flags[0] = true; }
-        if (ShippingOptionId != null) { Flags[1] = true; }
+        if (Info != null) { Flags = Flags.SetBit(0); }
+        if (ShippingOptionId != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -67,21 +67,21 @@ public sealed class TUpdateBotPrecheckoutQuery : IUpdate
         writer.Write(QueryId);
         writer.Write(UserId);
         writer.Write(Payload);
-        if (Flags[0]) { writer.Write(Info); }
-        if (Flags[1]) { writer.Write(ShippingOptionId); }
+        if (Flags.IsBitSet(0)) { writer.Write(Info); }
+        if (Flags.IsBitSet(1)) { writer.Write(ShippingOptionId); }
         writer.Write(Currency);
         writer.Write(TotalAmount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        QueryId = reader.ReadInt64();
-        UserId = reader.ReadInt64();
-        Payload = reader.ReadBytes();
-        if (Flags[0]) { Info = reader.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
-        if (Flags[1]) { ShippingOptionId = reader.ReadString(); }
-        Currency = reader.ReadString();
-        TotalAmount = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        QueryId = buffer.ReadInt64();
+        UserId = buffer.ReadInt64();
+        Payload = buffer.ReadBytes();
+        if (Flags.IsBitSet(0)) { Info = buffer.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
+        if (Flags.IsBitSet(1)) { ShippingOptionId = buffer.ReadString(); }
+        Currency = buffer.ReadString();
+        TotalAmount = buffer.ReadInt64();
     }
 }

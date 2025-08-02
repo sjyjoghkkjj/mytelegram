@@ -18,8 +18,8 @@ public class ReqPqHandler(
             authCacheItem,
             MyTelegramConsts.AuthKeyExpireSeconds
         );
-        logger.LogDebug(
-            "[Step1] ResPQ created, connectionId: {ConnectionId}, reqMsgId: {ReqMsgId}",
+        logger.LogInformation(
+            "[Step1] ReqPqHandler, connectionId: {ConnectionId}, reqMsgId: {ReqMsgId}",
             input.ConnectionId,
             input.ReqMsgId
         );

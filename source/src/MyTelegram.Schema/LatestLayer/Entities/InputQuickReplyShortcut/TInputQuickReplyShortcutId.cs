@@ -28,8 +28,8 @@ public sealed class TInputQuickReplyShortcutId : IInputQuickReplyShortcut
         writer.Write(ShortcutId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ShortcutId = reader.ReadInt32();
+        ShortcutId = buffer.ReadInt32();
     }
 }

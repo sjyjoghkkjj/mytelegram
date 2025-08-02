@@ -18,7 +18,7 @@ public sealed class RequestUploadContactProfilePhoto : IRequest<MyTelegram.Schem
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, will send a <a href="https://corefork.telegram.org/constructor/messageActionSuggestProfilePhoto">messageActionSuggestProfilePhoto</a> service message to <code>user_id</code>, suggesting them to use the specified profile picture; otherwise, will set a personal profile picture for the user (only visible to the current user).
@@ -63,12 +63,12 @@ public sealed class RequestUploadContactProfilePhoto : IRequest<MyTelegram.Schem
 
     public void ComputeFlag()
     {
-        if (Suggest) { Flags[3] = true; }
-        if (Save) { Flags[4] = true; }
-        if (File != null) { Flags[0] = true; }
-        if (Video != null) { Flags[1] = true; }
-        if (VideoStartTs>0) { Flags[2] = true; }
-        if (VideoEmojiMarkup != null) { Flags[5] = true; }
+        if (Suggest) { Flags = Flags.SetBit(3); }
+        if (Save) { Flags = Flags.SetBit(4); }
+        if (File != null) { Flags = Flags.SetBit(0); }
+        if (Video != null) { Flags = Flags.SetBit(1); }
+        if (VideoStartTs>0) { Flags = Flags.SetBit(2); }
+        if (VideoEmojiMarkup != null) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -77,21 +77,21 @@ public sealed class RequestUploadContactProfilePhoto : IRequest<MyTelegram.Schem
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(UserId);
-        if (Flags[0]) { writer.Write(File); }
-        if (Flags[1]) { writer.Write(Video); }
-        if (Flags[2]) { writer.Write(VideoStartTs.Value); }
-        if (Flags[5]) { writer.Write(VideoEmojiMarkup); }
+        if (Flags.IsBitSet(0)) { writer.Write(File); }
+        if (Flags.IsBitSet(1)) { writer.Write(Video); }
+        if (Flags.IsBitSet(2)) { writer.Write(VideoStartTs.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(VideoEmojiMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { Suggest = true; }
-        if (Flags[4]) { Save = true; }
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        if (Flags[0]) { File = reader.Read<MyTelegram.Schema.IInputFile>(); }
-        if (Flags[1]) { Video = reader.Read<MyTelegram.Schema.IInputFile>(); }
-        if (Flags[2]) { VideoStartTs = reader.ReadDouble(); }
-        if (Flags[5]) { VideoEmojiMarkup = reader.Read<MyTelegram.Schema.IVideoSize>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Suggest = true; }
+        if (Flags.IsBitSet(4)) { Save = true; }
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        if (Flags.IsBitSet(0)) { File = buffer.Read<MyTelegram.Schema.IInputFile>(); }
+        if (Flags.IsBitSet(1)) { Video = buffer.Read<MyTelegram.Schema.IInputFile>(); }
+        if (Flags.IsBitSet(2)) { VideoStartTs = buffer.ReadDouble(); }
+        if (Flags.IsBitSet(5)) { VideoEmojiMarkup = buffer.Read<MyTelegram.Schema.IVideoSize>(); }
     }
 }

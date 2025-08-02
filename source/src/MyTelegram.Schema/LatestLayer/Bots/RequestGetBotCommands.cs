@@ -39,9 +39,9 @@ public sealed class RequestGetBotCommands : IRequest<TVector<MyTelegram.Schema.I
         writer.Write(LangCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Scope = reader.Read<MyTelegram.Schema.IBotCommandScope>();
-        LangCode = reader.ReadString();
+        Scope = buffer.Read<MyTelegram.Schema.IBotCommandScope>();
+        LangCode = buffer.ReadString();
     }
 }

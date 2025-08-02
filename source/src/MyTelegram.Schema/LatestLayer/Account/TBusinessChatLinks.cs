@@ -40,10 +40,10 @@ public sealed class TBusinessChatLinks : IBusinessChatLinks
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Links = reader.Read<TVector<MyTelegram.Schema.IBusinessChatLink>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Links = buffer.Read<TVector<MyTelegram.Schema.IBusinessChatLink>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

@@ -40,10 +40,10 @@ public sealed class TMessageEntityMentionName : IMessageEntity
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offset = reader.ReadInt32();
-        Length = reader.ReadInt32();
-        UserId = reader.ReadInt64();
+        Offset = buffer.ReadInt32();
+        Length = buffer.ReadInt32();
+        UserId = buffer.ReadInt64();
     }
 }

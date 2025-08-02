@@ -26,9 +26,9 @@ public sealed class RequestToggleStarGiftsPinnedToTop : IRequest<IBool>
         writer.Write(Stargift);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Stargift = reader.Read<TVector<MyTelegram.Schema.IInputSavedStarGift>>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Stargift = buffer.Read<TVector<MyTelegram.Schema.IInputSavedStarGift>>();
     }
 }

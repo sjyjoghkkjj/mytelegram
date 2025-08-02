@@ -14,7 +14,7 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the current user is the creator of this channel
@@ -139,7 +139,7 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags2 { get; set; } = new BitArray(32);
+    public int Flags2 { get; set; }
 
     ///<summary>
     /// Whether we have <a href="https://corefork.telegram.org/api/stories#hiding-stories-of-other-users">hidden all stories posted by this channel »</a>.
@@ -271,51 +271,51 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
 
     public void ComputeFlag()
     {
-        if (Creator) { Flags[0] = true; }
-        if (Left) { Flags[2] = true; }
-        if (Broadcast) { Flags[5] = true; }
-        if (Verified) { Flags[7] = true; }
-        if (Megagroup) { Flags[8] = true; }
-        if (Restricted) { Flags[9] = true; }
-        if (Signatures) { Flags[11] = true; }
-        if (Min) { Flags[12] = true; }
-        if (Scam) { Flags[19] = true; }
-        if (HasLink) { Flags[20] = true; }
-        if (HasGeo) { Flags[21] = true; }
-        if (SlowmodeEnabled) { Flags[22] = true; }
-        if (CallActive) { Flags[23] = true; }
-        if (CallNotEmpty) { Flags[24] = true; }
-        if (Fake) { Flags[25] = true; }
-        if (Gigagroup) { Flags[26] = true; }
-        if (Noforwards) { Flags[27] = true; }
-        if (JoinToSend) { Flags[28] = true; }
-        if (JoinRequest) { Flags[29] = true; }
-        if (Forum) { Flags[30] = true; }
-        if (StoriesHidden) { Flags2[1] = true; }
-        if (StoriesHiddenMin) { Flags2[2] = true; }
-        if (StoriesUnavailable) { Flags2[3] = true; }
-        if (SignatureProfiles) { Flags2[12] = true; }
-        if (Autotranslation) { Flags2[15] = true; }
-        if (BroadcastMessagesAllowed) { Flags2[16] = true; }
-        if (Monoforum) { Flags2[17] = true; }
-        if (ForumTabs) { Flags2[19] = true; }
-        if (/*AccessHash != 0 &&*/ AccessHash.HasValue) { Flags[13] = true; }
-        if (Username != null) { Flags[6] = true; }
-        if (RestrictionReason?.Count > 0) { Flags[9] = true; }
-        if (AdminRights != null) { Flags[14] = true; }
-        if (BannedRights != null) { Flags[15] = true; }
-        if (DefaultBannedRights != null) { Flags[18] = true; }
-        if (/*ParticipantsCount != 0 && */ParticipantsCount.HasValue) { Flags[17] = true; }
-        if (Usernames?.Count > 0) { Flags2[0] = true; }
-        if (/*StoriesMaxId != 0 && */StoriesMaxId.HasValue) { Flags2[4] = true; }
-        if (Color != null) { Flags2[7] = true; }
-        if (ProfileColor != null) { Flags2[8] = true; }
-        if (EmojiStatus != null) { Flags2[9] = true; }
-        if (/*Level != 0 && */Level.HasValue) { Flags2[10] = true; }
-        if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags2[11] = true; }
-        if (/*BotVerificationIcon != 0 &&*/ BotVerificationIcon.HasValue) { Flags2[13] = true; }
-        if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2[14] = true; }
-        if (/*LinkedMonoforumId != 0 &&*/ LinkedMonoforumId.HasValue) { Flags2[18] = true; }
+        if (Creator) { Flags = Flags.SetBit(0); }
+        if (Left) { Flags = Flags.SetBit(2); }
+        if (Broadcast) { Flags = Flags.SetBit(5); }
+        if (Verified) { Flags = Flags.SetBit(7); }
+        if (Megagroup) { Flags = Flags.SetBit(8); }
+        if (Restricted) { Flags = Flags.SetBit(9); }
+        if (Signatures) { Flags = Flags.SetBit(11); }
+        if (Min) { Flags = Flags.SetBit(12); }
+        if (Scam) { Flags = Flags.SetBit(19); }
+        if (HasLink) { Flags = Flags.SetBit(20); }
+        if (HasGeo) { Flags = Flags.SetBit(21); }
+        if (SlowmodeEnabled) { Flags = Flags.SetBit(22); }
+        if (CallActive) { Flags = Flags.SetBit(23); }
+        if (CallNotEmpty) { Flags = Flags.SetBit(24); }
+        if (Fake) { Flags = Flags.SetBit(25); }
+        if (Gigagroup) { Flags = Flags.SetBit(26); }
+        if (Noforwards) { Flags = Flags.SetBit(27); }
+        if (JoinToSend) { Flags = Flags.SetBit(28); }
+        if (JoinRequest) { Flags = Flags.SetBit(29); }
+        if (Forum) { Flags = Flags.SetBit(30); }
+        if (StoriesHidden) { Flags2 = Flags2.SetBit(1); }
+        if (StoriesHiddenMin) { Flags2 = Flags2.SetBit(2); }
+        if (StoriesUnavailable) { Flags2 = Flags2.SetBit(3); }
+        if (SignatureProfiles) { Flags2 = Flags2.SetBit(12); }
+        if (Autotranslation) { Flags2 = Flags2.SetBit(15); }
+        if (BroadcastMessagesAllowed) { Flags2 = Flags2.SetBit(16); }
+        if (Monoforum) { Flags2 = Flags2.SetBit(17); }
+        if (ForumTabs) { Flags2 = Flags2.SetBit(19); }
+        if (/*AccessHash != 0 &&*/ AccessHash.HasValue) { Flags = Flags.SetBit(13); }
+        if (Username != null) { Flags = Flags.SetBit(6); }
+        if (RestrictionReason?.Count > 0) { Flags = Flags.SetBit(9); }
+        if (AdminRights != null) { Flags = Flags.SetBit(14); }
+        if (BannedRights != null) { Flags = Flags.SetBit(15); }
+        if (DefaultBannedRights != null) { Flags = Flags.SetBit(18); }
+        if (/*ParticipantsCount != 0 && */ParticipantsCount.HasValue) { Flags = Flags.SetBit(17); }
+        if (Usernames?.Count > 0) { Flags2 = Flags2.SetBit(0); }
+        if (/*StoriesMaxId != 0 && */StoriesMaxId.HasValue) { Flags2 = Flags2.SetBit(4); }
+        if (Color != null) { Flags2 = Flags2.SetBit(7); }
+        if (ProfileColor != null) { Flags2 = Flags2.SetBit(8); }
+        if (EmojiStatus != null) { Flags2 = Flags2.SetBit(9); }
+        if (/*Level != 0 && */Level.HasValue) { Flags2 = Flags2.SetBit(10); }
+        if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags2 = Flags2.SetBit(11); }
+        if (/*BotVerificationIcon != 0 &&*/ BotVerificationIcon.HasValue) { Flags2 = Flags2.SetBit(13); }
+        if (/*SendPaidMessagesStars != 0 &&*/ SendPaidMessagesStars.HasValue) { Flags2 = Flags2.SetBit(14); }
+        if (/*LinkedMonoforumId != 0 &&*/ LinkedMonoforumId.HasValue) { Flags2 = Flags2.SetBit(18); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -325,80 +325,80 @@ public sealed class TChannel : MyTelegram.Schema.IChat, ILayeredChannel
         writer.Write(Flags);
         writer.Write(Flags2);
         writer.Write(Id);
-        if (Flags[13]) { writer.Write(AccessHash.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(AccessHash.Value); }
         writer.Write(Title);
-        if (Flags[6]) { writer.Write(Username); }
+        if (Flags.IsBitSet(6)) { writer.Write(Username); }
         writer.Write(Photo);
         writer.Write(Date);
-        if (Flags[9]) { writer.Write(RestrictionReason); }
-        if (Flags[14]) { writer.Write(AdminRights); }
-        if (Flags[15]) { writer.Write(BannedRights); }
-        if (Flags[18]) { writer.Write(DefaultBannedRights); }
-        if (Flags[17]) { writer.Write(ParticipantsCount.Value); }
-        if (Flags2[0]) { writer.Write(Usernames); }
-        if (Flags2[4]) { writer.Write(StoriesMaxId.Value); }
-        if (Flags2[7]) { writer.Write(Color); }
-        if (Flags2[8]) { writer.Write(ProfileColor); }
-        if (Flags2[9]) { writer.Write(EmojiStatus); }
-        if (Flags2[10]) { writer.Write(Level.Value); }
-        if (Flags2[11]) { writer.Write(SubscriptionUntilDate.Value); }
-        if (Flags2[13]) { writer.Write(BotVerificationIcon.Value); }
-        if (Flags2[14]) { writer.Write(SendPaidMessagesStars.Value); }
-        if (Flags2[18]) { writer.Write(LinkedMonoforumId.Value); }
+        if (Flags.IsBitSet(9)) { writer.Write(RestrictionReason); }
+        if (Flags.IsBitSet(14)) { writer.Write(AdminRights); }
+        if (Flags.IsBitSet(15)) { writer.Write(BannedRights); }
+        if (Flags.IsBitSet(18)) { writer.Write(DefaultBannedRights); }
+        if (Flags.IsBitSet(17)) { writer.Write(ParticipantsCount.Value); }
+        if (Flags2.IsBitSet(0)) { writer.Write(Usernames); }
+        if (Flags2.IsBitSet(4)) { writer.Write(StoriesMaxId.Value); }
+        if (Flags2.IsBitSet(7)) { writer.Write(Color); }
+        if (Flags2.IsBitSet(8)) { writer.Write(ProfileColor); }
+        if (Flags2.IsBitSet(9)) { writer.Write(EmojiStatus); }
+        if (Flags2.IsBitSet(10)) { writer.Write(Level.Value); }
+        if (Flags2.IsBitSet(11)) { writer.Write(SubscriptionUntilDate.Value); }
+        if (Flags2.IsBitSet(13)) { writer.Write(BotVerificationIcon.Value); }
+        if (Flags2.IsBitSet(14)) { writer.Write(SendPaidMessagesStars.Value); }
+        if (Flags2.IsBitSet(18)) { writer.Write(LinkedMonoforumId.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Creator = true; }
-        if (Flags[2]) { Left = true; }
-        if (Flags[5]) { Broadcast = true; }
-        if (Flags[7]) { Verified = true; }
-        if (Flags[8]) { Megagroup = true; }
-        if (Flags[9]) { Restricted = true; }
-        if (Flags[11]) { Signatures = true; }
-        if (Flags[12]) { Min = true; }
-        if (Flags[19]) { Scam = true; }
-        if (Flags[20]) { HasLink = true; }
-        if (Flags[21]) { HasGeo = true; }
-        if (Flags[22]) { SlowmodeEnabled = true; }
-        if (Flags[23]) { CallActive = true; }
-        if (Flags[24]) { CallNotEmpty = true; }
-        if (Flags[25]) { Fake = true; }
-        if (Flags[26]) { Gigagroup = true; }
-        if (Flags[27]) { Noforwards = true; }
-        if (Flags[28]) { JoinToSend = true; }
-        if (Flags[29]) { JoinRequest = true; }
-        if (Flags[30]) { Forum = true; }
-        Flags2 = reader.ReadBitArray();
-        if (Flags2[1]) { StoriesHidden = true; }
-        if (Flags2[2]) { StoriesHiddenMin = true; }
-        if (Flags2[3]) { StoriesUnavailable = true; }
-        if (Flags2[12]) { SignatureProfiles = true; }
-        if (Flags2[15]) { Autotranslation = true; }
-        if (Flags2[16]) { BroadcastMessagesAllowed = true; }
-        if (Flags2[17]) { Monoforum = true; }
-        if (Flags2[19]) { ForumTabs = true; }
-        Id = reader.ReadInt64();
-        if (Flags[13]) { AccessHash = reader.ReadInt64(); }
-        Title = reader.ReadString();
-        if (Flags[6]) { Username = reader.ReadString(); }
-        Photo = reader.Read<MyTelegram.Schema.IChatPhoto>();
-        Date = reader.ReadInt32();
-        if (Flags[9]) { RestrictionReason = reader.Read<TVector<MyTelegram.Schema.IRestrictionReason>>(); }
-        if (Flags[14]) { AdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>(); }
-        if (Flags[15]) { BannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>(); }
-        if (Flags[18]) { DefaultBannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>(); }
-        if (Flags[17]) { ParticipantsCount = reader.ReadInt32(); }
-        if (Flags2[0]) { Usernames = reader.Read<TVector<MyTelegram.Schema.IUsername>>(); }
-        if (Flags2[4]) { StoriesMaxId = reader.ReadInt32(); }
-        if (Flags2[7]) { Color = reader.Read<MyTelegram.Schema.IPeerColor>(); }
-        if (Flags2[8]) { ProfileColor = reader.Read<MyTelegram.Schema.IPeerColor>(); }
-        if (Flags2[9]) { EmojiStatus = reader.Read<MyTelegram.Schema.IEmojiStatus>(); }
-        if (Flags2[10]) { Level = reader.ReadInt32(); }
-        if (Flags2[11]) { SubscriptionUntilDate = reader.ReadInt32(); }
-        if (Flags2[13]) { BotVerificationIcon = reader.ReadInt64(); }
-        if (Flags2[14]) { SendPaidMessagesStars = reader.ReadInt64(); }
-        if (Flags2[18]) { LinkedMonoforumId = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Creator = true; }
+        if (Flags.IsBitSet(2)) { Left = true; }
+        if (Flags.IsBitSet(5)) { Broadcast = true; }
+        if (Flags.IsBitSet(7)) { Verified = true; }
+        if (Flags.IsBitSet(8)) { Megagroup = true; }
+        if (Flags.IsBitSet(9)) { Restricted = true; }
+        if (Flags.IsBitSet(11)) { Signatures = true; }
+        if (Flags.IsBitSet(12)) { Min = true; }
+        if (Flags.IsBitSet(19)) { Scam = true; }
+        if (Flags.IsBitSet(20)) { HasLink = true; }
+        if (Flags.IsBitSet(21)) { HasGeo = true; }
+        if (Flags.IsBitSet(22)) { SlowmodeEnabled = true; }
+        if (Flags.IsBitSet(23)) { CallActive = true; }
+        if (Flags.IsBitSet(24)) { CallNotEmpty = true; }
+        if (Flags.IsBitSet(25)) { Fake = true; }
+        if (Flags.IsBitSet(26)) { Gigagroup = true; }
+        if (Flags.IsBitSet(27)) { Noforwards = true; }
+        if (Flags.IsBitSet(28)) { JoinToSend = true; }
+        if (Flags.IsBitSet(29)) { JoinRequest = true; }
+        if (Flags.IsBitSet(30)) { Forum = true; }
+        Flags2 = buffer.ReadInt32();
+        if (Flags2.IsBitSet(1)) { StoriesHidden = true; }
+        if (Flags2.IsBitSet(2)) { StoriesHiddenMin = true; }
+        if (Flags2.IsBitSet(3)) { StoriesUnavailable = true; }
+        if (Flags2.IsBitSet(12)) { SignatureProfiles = true; }
+        if (Flags2.IsBitSet(15)) { Autotranslation = true; }
+        if (Flags2.IsBitSet(16)) { BroadcastMessagesAllowed = true; }
+        if (Flags2.IsBitSet(17)) { Monoforum = true; }
+        if (Flags2.IsBitSet(19)) { ForumTabs = true; }
+        Id = buffer.ReadInt64();
+        if (Flags.IsBitSet(13)) { AccessHash = buffer.ReadInt64(); }
+        Title = buffer.ReadString();
+        if (Flags.IsBitSet(6)) { Username = buffer.ReadString(); }
+        Photo = buffer.Read<MyTelegram.Schema.IChatPhoto>();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(9)) { RestrictionReason = buffer.Read<TVector<MyTelegram.Schema.IRestrictionReason>>(); }
+        if (Flags.IsBitSet(14)) { AdminRights = buffer.Read<MyTelegram.Schema.IChatAdminRights>(); }
+        if (Flags.IsBitSet(15)) { BannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>(); }
+        if (Flags.IsBitSet(18)) { DefaultBannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>(); }
+        if (Flags.IsBitSet(17)) { ParticipantsCount = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(0)) { Usernames = buffer.Read<TVector<MyTelegram.Schema.IUsername>>(); }
+        if (Flags2.IsBitSet(4)) { StoriesMaxId = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(7)) { Color = buffer.Read<MyTelegram.Schema.IPeerColor>(); }
+        if (Flags2.IsBitSet(8)) { ProfileColor = buffer.Read<MyTelegram.Schema.IPeerColor>(); }
+        if (Flags2.IsBitSet(9)) { EmojiStatus = buffer.Read<MyTelegram.Schema.IEmojiStatus>(); }
+        if (Flags2.IsBitSet(10)) { Level = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(11)) { SubscriptionUntilDate = buffer.ReadInt32(); }
+        if (Flags2.IsBitSet(13)) { BotVerificationIcon = buffer.ReadInt64(); }
+        if (Flags2.IsBitSet(14)) { SendPaidMessagesStars = buffer.ReadInt64(); }
+        if (Flags2.IsBitSet(18)) { LinkedMonoforumId = buffer.ReadInt64(); }
     }
 }

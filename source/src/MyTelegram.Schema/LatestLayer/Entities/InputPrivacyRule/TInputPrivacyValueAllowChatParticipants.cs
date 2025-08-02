@@ -28,8 +28,8 @@ public sealed class TInputPrivacyValueAllowChatParticipants : IInputPrivacyRule
         writer.Write(Chats);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Chats = reader.Read<TVector<long>>();
+        Chats = buffer.Read<TVector<long>>();
     }
 }

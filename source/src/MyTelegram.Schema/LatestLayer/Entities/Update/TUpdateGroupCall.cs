@@ -11,7 +11,7 @@ namespace MyTelegram.Schema;
 public sealed class TUpdateGroupCall : IUpdate
 {
     public uint ConstructorId => 0x97d64341;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a> where this group call or livestream takes place
@@ -26,7 +26,7 @@ public sealed class TUpdateGroupCall : IUpdate
 
     public void ComputeFlag()
     {
-        if (/*ChatId != 0 &&*/ ChatId.HasValue) { Flags[0] = true; }
+        if (/*ChatId != 0 &&*/ ChatId.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -35,14 +35,14 @@ public sealed class TUpdateGroupCall : IUpdate
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(ChatId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(ChatId.Value); }
         writer.Write(Call);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ChatId = reader.ReadInt64(); }
-        Call = reader.Read<MyTelegram.Schema.IGroupCall>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ChatId = buffer.ReadInt64(); }
+        Call = buffer.Read<MyTelegram.Schema.IGroupCall>();
     }
 }

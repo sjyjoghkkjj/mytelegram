@@ -14,7 +14,7 @@ public sealed class TUpdateBotInlineQuery : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Query ID
@@ -50,8 +50,8 @@ public sealed class TUpdateBotInlineQuery : IUpdate
 
     public void ComputeFlag()
     {
-        if (Geo != null) { Flags[0] = true; }
-        if (PeerType != null) { Flags[1] = true; }
+        if (Geo != null) { Flags = Flags.SetBit(0); }
+        if (PeerType != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -63,19 +63,19 @@ public sealed class TUpdateBotInlineQuery : IUpdate
         writer.Write(QueryId);
         writer.Write(UserId);
         writer.Write(Query);
-        if (Flags[0]) { writer.Write(Geo); }
-        if (Flags[1]) { writer.Write(PeerType); }
+        if (Flags.IsBitSet(0)) { writer.Write(Geo); }
+        if (Flags.IsBitSet(1)) { writer.Write(PeerType); }
         writer.Write(Offset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        QueryId = reader.ReadInt64();
-        UserId = reader.ReadInt64();
-        Query = reader.ReadString();
-        if (Flags[0]) { Geo = reader.Read<MyTelegram.Schema.IGeoPoint>(); }
-        if (Flags[1]) { PeerType = reader.Read<MyTelegram.Schema.IInlineQueryPeerType>(); }
-        Offset = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        QueryId = buffer.ReadInt64();
+        UserId = buffer.ReadInt64();
+        Query = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Geo = buffer.Read<MyTelegram.Schema.IGeoPoint>(); }
+        if (Flags.IsBitSet(1)) { PeerType = buffer.Read<MyTelegram.Schema.IInlineQueryPeerType>(); }
+        Offset = buffer.ReadString();
     }
 }

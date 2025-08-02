@@ -14,7 +14,7 @@ public sealed class TBotBusinessConnection : IBotBusinessConnection
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this business connection is currently disabled
@@ -45,8 +45,8 @@ public sealed class TBotBusinessConnection : IBotBusinessConnection
 
     public void ComputeFlag()
     {
-        if (Disabled) { Flags[1] = true; }
-        if (Rights != null) { Flags[2] = true; }
+        if (Disabled) { Flags = Flags.SetBit(1); }
+        if (Rights != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -58,17 +58,17 @@ public sealed class TBotBusinessConnection : IBotBusinessConnection
         writer.Write(UserId);
         writer.Write(DcId);
         writer.Write(Date);
-        if (Flags[2]) { writer.Write(Rights); }
+        if (Flags.IsBitSet(2)) { writer.Write(Rights); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Disabled = true; }
-        ConnectionId = reader.ReadString();
-        UserId = reader.ReadInt64();
-        DcId = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        if (Flags[2]) { Rights = reader.Read<MyTelegram.Schema.IBusinessBotRights>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Disabled = true; }
+        ConnectionId = buffer.ReadString();
+        UserId = buffer.ReadInt64();
+        DcId = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Rights = buffer.Read<MyTelegram.Schema.IBusinessBotRights>(); }
     }
 }

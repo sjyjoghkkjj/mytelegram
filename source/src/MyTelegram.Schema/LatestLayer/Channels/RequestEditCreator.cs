@@ -56,10 +56,10 @@ public sealed class RequestEditCreator : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Password);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
     }
 }

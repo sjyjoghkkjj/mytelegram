@@ -8,7 +8,7 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TPersonalData : IPersonalData
 {
     public uint ConstructorId => 0x3DDB7846;
-    public byte[] PublicKey { get; set; }
+    public ReadOnlyMemory<byte> PublicKey { get; set; }
     public TVector<MyTelegram.Schema.E2e.IPersonalOnServer> Data { get; set; }
 
     public void ComputeFlag()
@@ -24,9 +24,9 @@ public sealed class TPersonalData : IPersonalData
         writer.WriteVector(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PublicKey = reader.ReadInt256();
-        Data = reader.ReadVector<MyTelegram.Schema.E2e.IPersonalOnServer>();
+        PublicKey = buffer.ReadInt256();
+        Data = buffer.ReadVector<MyTelegram.Schema.E2e.IPersonalOnServer>();
     }
 }

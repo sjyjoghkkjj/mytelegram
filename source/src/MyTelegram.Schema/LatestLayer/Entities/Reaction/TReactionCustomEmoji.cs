@@ -28,8 +28,8 @@ public sealed class TReactionCustomEmoji : IReaction
         writer.Write(DocumentId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DocumentId = reader.ReadInt64();
+        DocumentId = buffer.ReadInt64();
     }
 }

@@ -26,9 +26,9 @@ public sealed class TInputInvoiceStarGiftResale : IInputInvoice
         writer.Write(ToId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Slug = reader.ReadString();
-        ToId = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Slug = buffer.ReadString();
+        ToId = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

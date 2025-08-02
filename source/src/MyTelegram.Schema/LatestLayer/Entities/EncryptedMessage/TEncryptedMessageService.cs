@@ -29,7 +29,7 @@ public sealed class TEncryptedMessageService : IEncryptedMessage
     ///<summary>
     /// TL-serialization of the <a href="https://corefork.telegram.org/type/DecryptedMessage">DecryptedMessage</a> type, encrypted with the key created at chat initialization
     ///</summary>
-    public byte[] Bytes { get; set; }
+    public ReadOnlyMemory<byte> Bytes { get; set; }
 
     public void ComputeFlag()
     {
@@ -46,11 +46,11 @@ public sealed class TEncryptedMessageService : IEncryptedMessage
         writer.Write(Bytes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        RandomId = reader.ReadInt64();
-        ChatId = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        Bytes = reader.ReadBytes();
+        RandomId = buffer.ReadInt64();
+        ChatId = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        Bytes = buffer.ReadBytes();
     }
 }

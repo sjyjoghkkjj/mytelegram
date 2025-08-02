@@ -39,9 +39,9 @@ public sealed class RequestAssignPlayMarketTransaction : IRequest<MyTelegram.Sch
         writer.Write(Purpose);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Receipt = reader.Read<MyTelegram.Schema.IDataJSON>();
-        Purpose = reader.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
+        Receipt = buffer.Read<MyTelegram.Schema.IDataJSON>();
+        Purpose = buffer.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
     }
 }

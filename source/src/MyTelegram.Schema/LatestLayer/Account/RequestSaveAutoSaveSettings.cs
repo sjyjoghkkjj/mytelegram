@@ -17,7 +17,7 @@ public sealed class RequestSaveAutoSaveSettings : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the new settings should affect all private chats
@@ -51,10 +51,10 @@ public sealed class RequestSaveAutoSaveSettings : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Users) { Flags[0] = true; }
-        if (Chats) { Flags[1] = true; }
-        if (Broadcasts) { Flags[2] = true; }
-        if (Peer != null) { Flags[3] = true; }
+        if (Users) { Flags = Flags.SetBit(0); }
+        if (Chats) { Flags = Flags.SetBit(1); }
+        if (Broadcasts) { Flags = Flags.SetBit(2); }
+        if (Peer != null) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -63,17 +63,17 @@ public sealed class RequestSaveAutoSaveSettings : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[3]) { writer.Write(Peer); }
+        if (Flags.IsBitSet(3)) { writer.Write(Peer); }
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Users = true; }
-        if (Flags[1]) { Chats = true; }
-        if (Flags[2]) { Broadcasts = true; }
-        if (Flags[3]) { Peer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        Settings = reader.Read<MyTelegram.Schema.IAutoSaveSettings>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Users = true; }
+        if (Flags.IsBitSet(1)) { Chats = true; }
+        if (Flags.IsBitSet(2)) { Broadcasts = true; }
+        if (Flags.IsBitSet(3)) { Peer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        Settings = buffer.Read<MyTelegram.Schema.IAutoSaveSettings>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TStarsRevenueStatus : IStarsRevenueStatus
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the user may <a href="https://corefork.telegram.org/api/stars#withdrawing-stars">withdraw</a> up to <code>available_balance</code> stars.
@@ -47,8 +47,8 @@ public sealed class TStarsRevenueStatus : IStarsRevenueStatus
 
     public void ComputeFlag()
     {
-        if (WithdrawalEnabled) { Flags[0] = true; }
-        if (/*NextWithdrawalAt != 0 && */NextWithdrawalAt.HasValue) { Flags[1] = true; }
+        if (WithdrawalEnabled) { Flags = Flags.SetBit(0); }
+        if (/*NextWithdrawalAt != 0 && */NextWithdrawalAt.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -59,16 +59,16 @@ public sealed class TStarsRevenueStatus : IStarsRevenueStatus
         writer.Write(CurrentBalance);
         writer.Write(AvailableBalance);
         writer.Write(OverallRevenue);
-        if (Flags[1]) { writer.Write(NextWithdrawalAt.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(NextWithdrawalAt.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { WithdrawalEnabled = true; }
-        CurrentBalance = reader.Read<MyTelegram.Schema.IStarsAmount>();
-        AvailableBalance = reader.Read<MyTelegram.Schema.IStarsAmount>();
-        OverallRevenue = reader.Read<MyTelegram.Schema.IStarsAmount>();
-        if (Flags[1]) { NextWithdrawalAt = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { WithdrawalEnabled = true; }
+        CurrentBalance = buffer.Read<MyTelegram.Schema.IStarsAmount>();
+        AvailableBalance = buffer.Read<MyTelegram.Schema.IStarsAmount>();
+        OverallRevenue = buffer.Read<MyTelegram.Schema.IStarsAmount>();
+        if (Flags.IsBitSet(1)) { NextWithdrawalAt = buffer.ReadInt32(); }
     }
 }

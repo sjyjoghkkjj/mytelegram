@@ -21,7 +21,7 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the user will be muted by default upon joining.
@@ -51,7 +51,7 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
     /// The invitation hash from the <a href="https://corefork.telegram.org/api/links#video-chat-livestream-links">invite link »</a>, if provided allows speaking in a livestream or muted group chat.
     ///</summary>
     public string? InviteHash { get; set; }
-    public byte[]? PublicKey { get; set; }
+    public ReadOnlyMemory<byte>? PublicKey { get; set; }
     public byte[]? Block { get; set; }
 
     ///<summary>
@@ -62,11 +62,11 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (Muted) { Flags[0] = true; }
-        if (VideoStopped) { Flags[2] = true; }
-        if (InviteHash != null) { Flags[1] = true; }
-        if (PublicKey != null) { Flags[3] = true; }
-        if (Block != null) { Flags[3] = true; }
+        if (Muted) { Flags = Flags.SetBit(0); }
+        if (VideoStopped) { Flags = Flags.SetBit(2); }
+        if (InviteHash != null) { Flags = Flags.SetBit(1); }
+        if (PublicKey != null) { Flags = Flags.SetBit(3); }
+        if (Block != null) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -77,22 +77,22 @@ public sealed class RequestJoinGroupCall : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Flags);
         writer.Write(Call);
         writer.Write(JoinAs);
-        if (Flags[1]) { writer.Write(InviteHash); }
-        if (Flags[3]) { writer.WriteRawBytes(PublicKey); }
-        if (Flags[3]) { writer.Write(Block); }
+        if (Flags.IsBitSet(1)) { writer.Write(InviteHash); }
+        if (Flags.IsBitSet(3)) { writer.WriteRawBytes(PublicKey); }
+        if (Flags.IsBitSet(3)) { writer.Write(Block); }
         writer.Write(Params);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Muted = true; }
-        if (Flags[2]) { VideoStopped = true; }
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        JoinAs = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[1]) { InviteHash = reader.ReadString(); }
-        if (Flags[3]) { PublicKey = reader.ReadInt256(); }
-        if (Flags[3]) { Block = reader.ReadBytes(); }
-        Params = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Muted = true; }
+        if (Flags.IsBitSet(2)) { VideoStopped = true; }
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        JoinAs = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(1)) { InviteHash = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { PublicKey = buffer.ReadInt256(); }
+        if (Flags.IsBitSet(3)) { Block = buffer.ReadBytes(); }
+        Params = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

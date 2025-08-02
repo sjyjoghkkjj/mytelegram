@@ -17,7 +17,7 @@ public sealed class RequestDeleteSavedHistory : IRequest<MyTelegram.Schema.Messa
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public MyTelegram.Schema.IInputPeer? ParentPeer { get; set; }
 
     ///<summary>
@@ -43,9 +43,9 @@ public sealed class RequestDeleteSavedHistory : IRequest<MyTelegram.Schema.Messa
 
     public void ComputeFlag()
     {
-        if (ParentPeer != null) { Flags[0] = true; }
-        if (/*MinDate != 0 && */MinDate.HasValue) { Flags[2] = true; }
-        if (/*MaxDate != 0 && */MaxDate.HasValue) { Flags[3] = true; }
+        if (ParentPeer != null) { Flags = Flags.SetBit(0); }
+        if (/*MinDate != 0 && */MinDate.HasValue) { Flags = Flags.SetBit(2); }
+        if (/*MaxDate != 0 && */MaxDate.HasValue) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -53,20 +53,20 @@ public sealed class RequestDeleteSavedHistory : IRequest<MyTelegram.Schema.Messa
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(ParentPeer); }
+        if (Flags.IsBitSet(0)) { writer.Write(ParentPeer); }
         writer.Write(Peer);
         writer.Write(MaxId);
-        if (Flags[2]) { writer.Write(MinDate.Value); }
-        if (Flags[3]) { writer.Write(MaxDate.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(MinDate.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(MaxDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ParentPeer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MaxId = reader.ReadInt32();
-        if (Flags[2]) { MinDate = reader.ReadInt32(); }
-        if (Flags[3]) { MaxDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ParentPeer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MaxId = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { MinDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { MaxDate = buffer.ReadInt32(); }
     }
 }

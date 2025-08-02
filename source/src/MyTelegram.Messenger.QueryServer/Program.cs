@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using MyTelegram;
 using MyTelegram.Caching.Redis;
+using MyTelegram.EventBus.RabbitMQ.Extensions;
 using MyTelegram.Messenger;
 using MyTelegram.Messenger.QueryServer.BackgroundServices;
 using MyTelegram.Messenger.QueryServer.Extensions;
@@ -68,21 +69,22 @@ builder.ConfigureServices((ctx,
     var eventBusOptions = ctx.Configuration.GetRequiredSection("RabbitMQ:EventBus").Get<EventBusRabbitMqOptions>();
     var rabbitMqOptions = ctx.Configuration.GetRequiredSection("RabbitMQ:Connections:Default").Get<RabbitMqOptions>();
 
-    services.AddRebusEventBus(options =>
-    {
-        options.Transport(t =>
-        {
-            t.UseRabbitMq(
-                    $"amqp://{rabbitMqOptions!.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
-                    eventBusOptions!.ClientName)
-                .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
-                ;
-        });
-        options.AddSystemTextJson(jsonOptions =>
-        {
-            jsonOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
-        });
-    });
+    services.AddMyTelegramRabbitMqEventBus();
+    //services.AddRebusEventBus(options =>
+    //{
+    //    options.Transport(t =>
+    //    {
+    //        t.UseRabbitMq(
+    //                $"amqp://{rabbitMqOptions!.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
+    //                eventBusOptions!.ClientName)
+    //            .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
+    //            ;
+    //    });
+    //    options.AddSystemTextJson(jsonOptions =>
+    //    {
+    //        jsonOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
+    //    });
+    //});
 
     services.AddMyTelegramMessengerQueryServer();
 
@@ -108,7 +110,5 @@ var app = builder.Build();
 
 var handlerHelper = app.Services.GetRequiredService<IHandlerHelper>();
 handlerHelper.InitAllHandlers();
-var eventBus = app.Services.GetRequiredService<IEventBus>();
-eventBus.ConfigureEventBus();
 
 await app.RunAsync();

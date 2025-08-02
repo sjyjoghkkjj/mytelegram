@@ -14,7 +14,7 @@ public sealed class TUpdateReadChannelInbox : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/folders#peer-folders">Peer folder ID, for more info click here</a>
@@ -43,7 +43,7 @@ public sealed class TUpdateReadChannelInbox : IUpdate
 
     public void ComputeFlag()
     {
-        if (/*FolderId != 0 && */FolderId.HasValue) { Flags[0] = true; }
+        if (/*FolderId != 0 && */FolderId.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -52,20 +52,20 @@ public sealed class TUpdateReadChannelInbox : IUpdate
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(FolderId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(FolderId.Value); }
         writer.Write(ChannelId);
         writer.Write(MaxId);
         writer.Write(StillUnreadCount);
         writer.Write(Pts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { FolderId = reader.ReadInt32(); }
-        ChannelId = reader.ReadInt64();
-        MaxId = reader.ReadInt32();
-        StillUnreadCount = reader.ReadInt32();
-        Pts = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { FolderId = buffer.ReadInt32(); }
+        ChannelId = buffer.ReadInt64();
+        MaxId = buffer.ReadInt32();
+        StillUnreadCount = buffer.ReadInt32();
+        Pts = buffer.ReadInt32();
     }
 }

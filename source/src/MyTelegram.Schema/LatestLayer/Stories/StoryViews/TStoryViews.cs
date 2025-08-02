@@ -34,9 +34,9 @@ public sealed class TStoryViews : IStoryViews
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Views = reader.Read<TVector<MyTelegram.Schema.IStoryViews>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Views = buffer.Read<TVector<MyTelegram.Schema.IStoryViews>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

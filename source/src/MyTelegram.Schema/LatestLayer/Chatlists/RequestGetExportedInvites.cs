@@ -32,8 +32,8 @@ public sealed class RequestGetExportedInvites : IRequest<MyTelegram.Schema.Chatl
         writer.Write(Chatlist);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Chatlist = reader.Read<MyTelegram.Schema.IInputChatlist>();
+        Chatlist = buffer.Read<MyTelegram.Schema.IInputChatlist>();
     }
 }

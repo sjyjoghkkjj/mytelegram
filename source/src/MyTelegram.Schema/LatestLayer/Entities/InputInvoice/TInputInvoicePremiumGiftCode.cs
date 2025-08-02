@@ -36,9 +36,9 @@ public sealed class TInputInvoicePremiumGiftCode : IInputInvoice
         writer.Write(Option);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Purpose = reader.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
-        Option = reader.Read<MyTelegram.Schema.IPremiumGiftCodeOption>();
+        Purpose = buffer.Read<MyTelegram.Schema.IInputStorePaymentPurpose>();
+        Option = buffer.Read<MyTelegram.Schema.IPremiumGiftCodeOption>();
     }
 }

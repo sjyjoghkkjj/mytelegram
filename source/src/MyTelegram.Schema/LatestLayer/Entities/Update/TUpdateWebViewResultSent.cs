@@ -28,8 +28,8 @@ public sealed class TUpdateWebViewResultSent : IUpdate
         writer.Write(QueryId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        QueryId = reader.ReadInt64();
+        QueryId = buffer.ReadInt64();
     }
 }

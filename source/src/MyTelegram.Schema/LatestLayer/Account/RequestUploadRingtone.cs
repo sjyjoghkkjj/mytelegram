@@ -44,10 +44,10 @@ public sealed class RequestUploadRingtone : IRequest<MyTelegram.Schema.IDocument
         writer.Write(MimeType);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        File = reader.Read<MyTelegram.Schema.IInputFile>();
-        FileName = reader.ReadString();
-        MimeType = reader.ReadString();
+        File = buffer.Read<MyTelegram.Schema.IInputFile>();
+        FileName = buffer.ReadString();
+        MimeType = buffer.ReadString();
     }
 }

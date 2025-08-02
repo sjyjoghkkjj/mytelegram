@@ -14,7 +14,7 @@ public sealed class TUpdateDeleteScheduledMessages : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Peer
@@ -34,7 +34,7 @@ public sealed class TUpdateDeleteScheduledMessages : IUpdate
 
     public void ComputeFlag()
     {
-        if (SentMessages?.Count > 0) { Flags[0] = true; }
+        if (SentMessages?.Count > 0) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -44,14 +44,14 @@ public sealed class TUpdateDeleteScheduledMessages : IUpdate
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Messages);
-        if (Flags[0]) { writer.Write(SentMessages); }
+        if (Flags.IsBitSet(0)) { writer.Write(SentMessages); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Messages = reader.Read<TVector<int>>();
-        if (Flags[0]) { SentMessages = reader.Read<TVector<int>>(); }
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Messages = buffer.Read<TVector<int>>();
+        if (Flags.IsBitSet(0)) { SentMessages = buffer.Read<TVector<int>>(); }
     }
 }

@@ -35,9 +35,9 @@ public sealed class TMessageReplyStoryHeader : IMessageReplyHeader
         writer.Write(StoryId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        StoryId = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        StoryId = buffer.ReadInt32();
     }
 }

@@ -29,8 +29,8 @@ public sealed class TStickerSetNoCovered : IStickerSetCovered
         writer.Write(Set);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Set = reader.Read<MyTelegram.Schema.IStickerSet>();
+        Set = buffer.Read<MyTelegram.Schema.IStickerSet>();
     }
 }

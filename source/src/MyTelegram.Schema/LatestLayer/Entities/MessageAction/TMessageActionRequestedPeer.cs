@@ -34,9 +34,9 @@ public sealed class TMessageActionRequestedPeer : IMessageAction
         writer.Write(Peers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ButtonId = reader.ReadInt32();
-        Peers = reader.Read<TVector<MyTelegram.Schema.IPeer>>();
+        ButtonId = buffer.ReadInt32();
+        Peers = buffer.Read<TVector<MyTelegram.Schema.IPeer>>();
     }
 }

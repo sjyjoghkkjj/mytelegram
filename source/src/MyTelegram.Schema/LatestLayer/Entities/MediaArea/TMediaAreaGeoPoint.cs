@@ -14,7 +14,7 @@ public sealed class TMediaAreaGeoPoint : IMediaArea
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The size and position of the media area corresponding to the location sticker on top of the story media.
@@ -36,7 +36,7 @@ public sealed class TMediaAreaGeoPoint : IMediaArea
 
     public void ComputeFlag()
     {
-        if (Address != null) { Flags[0] = true; }
+        if (Address != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -46,14 +46,14 @@ public sealed class TMediaAreaGeoPoint : IMediaArea
         writer.Write(Flags);
         writer.Write(Coordinates);
         writer.Write(Geo);
-        if (Flags[0]) { writer.Write(Address); }
+        if (Flags.IsBitSet(0)) { writer.Write(Address); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Coordinates = reader.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
-        Geo = reader.Read<MyTelegram.Schema.IGeoPoint>();
-        if (Flags[0]) { Address = reader.Read<MyTelegram.Schema.IGeoPointAddress>(); }
+        Flags = buffer.ReadInt32();
+        Coordinates = buffer.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
+        Geo = buffer.Read<MyTelegram.Schema.IGeoPoint>();
+        if (Flags.IsBitSet(0)) { Address = buffer.Read<MyTelegram.Schema.IGeoPointAddress>(); }
     }
 }

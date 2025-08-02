@@ -56,10 +56,11 @@ public class MtpConnectionHandler(
                 clientData.AuthKeyId);
         });
 
+        var processSendUnencryptedDataTask = ProcessSendUnencryptedDataAsync(clientData, connection);
         var processSendDataTask = ProcessSendDataAsync(clientData, connection);
         var processReceiveDataTask = ProcessReceiveDataAsync(clientData, connection);
 
-        await Task.WhenAny(processSendDataTask, processReceiveDataTask);
+        await Task.WhenAny(processSendUnencryptedDataTask, processSendDataTask, processReceiveDataTask);
     }
 
     private async Task ProcessReceiveDataAsync(ClientData clientData, ConnectionContext connection)
@@ -87,10 +88,6 @@ public class MtpConnectionHandler(
 
             if (!clientData.IsFirstPacketParsed)
             {
-                //if (buffer.Length < 4)
-                //{
-                //    continue;
-                //}
 
                 messageParser.ProcessFirstUnencryptedPacket(ref buffer, clientData);
             }
@@ -110,29 +107,72 @@ public class MtpConnectionHandler(
         await input.CompleteAsync();
     }
 
-    private async Task ProcessSendDataAsync(ClientData clientData, ConnectionContext connectionContext)
+    private async Task ProcessSendUnencryptedDataAsync(ClientData clientData,
+        ConnectionContext connectionContext)
     {
-        var queue = clientData.ResponseQueue;
+        var queue = clientData.UnencryptedMessageResponseQueue;
         while (await queue.Reader.WaitToReadAsync() && !connectionContext.ConnectionClosed.IsCancellationRequested)
         {
             while (queue.Reader.TryRead(out var response))
             {
-                var encodedBytes =
-                    ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
                 try
                 {
-                    clientManager.UpdateAuthKeyId(clientData, response.AuthKeyId, clientData.ConnectionId);
-                    var totalCount = clientDataSender.EncodeData(response, clientData, encodedBytes);
+                    if (!clientManager.TryGetClientData(clientData.ConnectionId, out var d))
+                    {
+                        logger.LogWarning(
+                            "[0] Cannot find cached client info, skip sending message, connectionId: {ConnectionId}",
+                            clientData.ConnectionId);
+                        continue;
+                    }
 
-                    await connectionContext.Transport.Output.WriteAsync(encodedBytes.AsMemory()[..totalCount]);
-                    await connectionContext.Transport.Output.FlushAsync();
+                    var encodedBytes = ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
+                    try
+                    {
+                        var totalCount = clientDataSender.EncodeData(response, d, encodedBytes);
+                        await SendAsync(encodedBytes.AsMemory()[..totalCount], connectionContext);
+                    }
+                    finally
+                    {
+                        ArrayPool<byte>.Shared.Return(encodedBytes);
+                    }
                 }
                 finally
                 {
-                    ArrayPool<byte>.Shared.Return(encodedBytes);
+                    response.MemoryOwner?.Dispose();
                 }
             }
         }
+    }
+
+    private async Task ProcessSendDataAsync(ClientData clientData, ConnectionContext connectionContext)
+    {
+        var queue = clientData.EncryptedMessageResponseQueue;
+        while (await queue.Reader.WaitToReadAsync() && !connectionContext.ConnectionClosed.IsCancellationRequested)
+        {
+            while (queue.Reader.TryRead(out var response))
+            {
+                try
+                {
+                    using var memoryOwner =
+                        MemoryPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
+                    var encodedBytes = memoryOwner.Memory;
+                    clientManager.UpdateAuthKeyId(clientData, response.AuthKeyId, clientData.ConnectionId);
+                    var totalCount = clientDataSender.EncodeData(response, clientData, encodedBytes);
+
+                    await SendAsync(encodedBytes[..totalCount], connectionContext);
+                }
+                finally
+                {
+                    response.MemoryOwner?.Dispose();
+                }
+            }
+        }
+    }
+
+    private async Task SendAsync(ReadOnlyMemory<byte> data, ConnectionContext connectionContext)
+    {
+        await connectionContext.Transport.Output.WriteAsync(data);
+        await connectionContext.Transport.Output.FlushAsync();
     }
 
     private Task ProcessDataAsync(IMtpMessage mtpMessage,
@@ -143,7 +183,6 @@ public class MtpConnectionHandler(
             mtpMessage.ConnectionId = clientData.ConnectionId;
             mtpMessage.ClientIp = clientData.ClientIp;
             mtpMessage.ConnectionType = clientData.ConnectionType;
-            //mtpMessage.ClientIp = (clientData.ConnectionContext!.RemoteEndPoint as IPEndPoint)?.Address.ToString() ?? string.Empty;
             return messageDispatcher.DispatchAsync(mtpMessage);
         }
 

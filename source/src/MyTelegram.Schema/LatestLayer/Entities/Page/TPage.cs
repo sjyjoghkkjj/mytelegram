@@ -14,7 +14,7 @@ public sealed class TPage : IPage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Indicates that not full page preview is available to the client and it will need to fetch full Instant View from the server using <a href="https://corefork.telegram.org/method/messages.getWebPagePreview">messages.getWebPagePreview</a>.
@@ -61,10 +61,10 @@ public sealed class TPage : IPage
 
     public void ComputeFlag()
     {
-        if (Part) { Flags[0] = true; }
-        if (Rtl) { Flags[1] = true; }
-        if (V2) { Flags[2] = true; }
-        if (/*Views != 0 && */Views.HasValue) { Flags[3] = true; }
+        if (Part) { Flags = Flags.SetBit(0); }
+        if (Rtl) { Flags = Flags.SetBit(1); }
+        if (V2) { Flags = Flags.SetBit(2); }
+        if (/*Views != 0 && */Views.HasValue) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -76,19 +76,19 @@ public sealed class TPage : IPage
         writer.Write(Blocks);
         writer.Write(Photos);
         writer.Write(Documents);
-        if (Flags[3]) { writer.Write(Views.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Views.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Part = true; }
-        if (Flags[1]) { Rtl = true; }
-        if (Flags[2]) { V2 = true; }
-        Url = reader.ReadString();
-        Blocks = reader.Read<TVector<MyTelegram.Schema.IPageBlock>>();
-        Photos = reader.Read<TVector<MyTelegram.Schema.IPhoto>>();
-        Documents = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
-        if (Flags[3]) { Views = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Part = true; }
+        if (Flags.IsBitSet(1)) { Rtl = true; }
+        if (Flags.IsBitSet(2)) { V2 = true; }
+        Url = buffer.ReadString();
+        Blocks = buffer.Read<TVector<MyTelegram.Schema.IPageBlock>>();
+        Photos = buffer.Read<TVector<MyTelegram.Schema.IPhoto>>();
+        Documents = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
+        if (Flags.IsBitSet(3)) { Views = buffer.ReadInt32(); }
     }
 }

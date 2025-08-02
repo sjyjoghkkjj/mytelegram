@@ -28,8 +28,8 @@ public sealed class RequestReadMessageContents : IRequest<MyTelegram.Schema.Mess
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<TVector<int>>();
+        Id = buffer.Read<TVector<int>>();
     }
 }

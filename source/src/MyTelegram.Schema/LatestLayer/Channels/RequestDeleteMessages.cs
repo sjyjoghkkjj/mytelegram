@@ -41,9 +41,9 @@ public sealed class RequestDeleteMessages : IRequest<MyTelegram.Schema.Messages.
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Id = reader.Read<TVector<int>>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Id = buffer.Read<TVector<int>>();
     }
 }

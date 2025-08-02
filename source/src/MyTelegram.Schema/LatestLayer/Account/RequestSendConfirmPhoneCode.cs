@@ -38,9 +38,9 @@ public sealed class RequestSendConfirmPhoneCode : IRequest<MyTelegram.Schema.Aut
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadString();
-        Settings = reader.Read<MyTelegram.Schema.ICodeSettings>();
+        Hash = buffer.ReadString();
+        Settings = buffer.Read<MyTelegram.Schema.ICodeSettings>();
     }
 }

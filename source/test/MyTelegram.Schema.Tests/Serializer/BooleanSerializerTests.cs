@@ -1,4 +1,7 @@
-﻿namespace MyTelegram.Schema.Serializer;
+﻿using System.Buffers;
+using MyTelegram.Schema.Extensions;
+
+namespace MyTelegram.Schema.Serializer;
 
 public class BooleanSerializerTests
 {
@@ -8,14 +11,16 @@ public class BooleanSerializerTests
         var value = new byte[] { 1, 2, 3, 4 };
         //var br = new BinaryReader(new MemoryStream(value));
         //var buffer = new ReadOnlySequence<byte>(value);
-
+        ReadOnlyMemory<byte> buffer = value;
         var serializer = CreateSerializer();
         //Assert.Throws<ArgumentException>(() => serializer.Deserialize(ref reader));
 
         Assert.Throws<ArgumentException>(() =>
         {
-            var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
-            serializer.Deserialize(ref reader);
+            //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
+            //serializer.Deserialize(ref reader);
+
+            serializer.Deserialize(ref buffer);
         });
     }
 
@@ -28,9 +33,10 @@ public class BooleanSerializerTests
         //var stream = new MemoryStream(value);
         //var br = new BinaryReader(stream);
         var serializer = CreateSerializer();
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
+        //var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(value));
+        ReadOnlyMemory<byte> buffer = value;
 
-        var actualValue = serializer.Deserialize(ref reader);
+        var actualValue = serializer.Deserialize(ref buffer);
 
         actualValue.ShouldBe(expectedValue);
     }

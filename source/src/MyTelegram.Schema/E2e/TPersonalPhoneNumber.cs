@@ -22,8 +22,8 @@ public sealed class TPersonalPhoneNumber : IPersonal
         writer.Write(PhoneNumber);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
+        PhoneNumber = buffer.ReadString();
     }
 }

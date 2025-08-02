@@ -28,8 +28,8 @@ public sealed class TInputChatlistDialogFilter : IInputChatlist
         writer.Write(FilterId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FilterId = reader.ReadInt32();
+        FilterId = buffer.ReadInt32();
     }
 }

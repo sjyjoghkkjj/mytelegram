@@ -35,9 +35,9 @@ public sealed class TPassportConfig : IPassportConfig
         writer.Write(CountriesLangs);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt32();
-        CountriesLangs = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Hash = buffer.ReadInt32();
+        CountriesLangs = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

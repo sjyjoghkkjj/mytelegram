@@ -35,9 +35,9 @@ public sealed class TUpdateUserTyping : IUpdate
         writer.Write(Action);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        Action = reader.Read<MyTelegram.Schema.ISendMessageAction>();
+        UserId = buffer.ReadInt64();
+        Action = buffer.Read<MyTelegram.Schema.ISendMessageAction>();
     }
 }

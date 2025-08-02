@@ -34,9 +34,9 @@ public sealed class TExportedContactToken : IExportedContactToken
         writer.Write(Expires);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        Expires = reader.ReadInt32();
+        Url = buffer.ReadString();
+        Expires = buffer.ReadInt32();
     }
 }

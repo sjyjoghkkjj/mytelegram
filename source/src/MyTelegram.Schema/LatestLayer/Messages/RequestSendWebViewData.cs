@@ -50,11 +50,11 @@ public sealed class RequestSendWebViewData : IRequest<MyTelegram.Schema.IUpdates
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        RandomId = reader.ReadInt64();
-        ButtonText = reader.ReadString();
-        Data = reader.ReadString();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        RandomId = buffer.ReadInt64();
+        ButtonText = buffer.ReadString();
+        Data = buffer.ReadString();
     }
 }

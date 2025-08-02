@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TEmojiStatusCollectible : IEmojiStatus
 {
     public uint ConstructorId => 0x7184603b;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public long CollectibleId { get; set; }
     public long DocumentId { get; set; }
     public string Title { get; set; }
@@ -24,7 +24,7 @@ public sealed class TEmojiStatusCollectible : IEmojiStatus
 
     public void ComputeFlag()
     {
-        if (/*Until != 0 && */Until.HasValue) { Flags[0] = true; }
+        if (/*Until != 0 && */Until.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -41,21 +41,21 @@ public sealed class TEmojiStatusCollectible : IEmojiStatus
         writer.Write(EdgeColor);
         writer.Write(PatternColor);
         writer.Write(TextColor);
-        if (Flags[0]) { writer.Write(Until.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Until.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        CollectibleId = reader.ReadInt64();
-        DocumentId = reader.ReadInt64();
-        Title = reader.ReadString();
-        Slug = reader.ReadString();
-        PatternDocumentId = reader.ReadInt64();
-        CenterColor = reader.ReadInt32();
-        EdgeColor = reader.ReadInt32();
-        PatternColor = reader.ReadInt32();
-        TextColor = reader.ReadInt32();
-        if (Flags[0]) { Until = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        CollectibleId = buffer.ReadInt64();
+        DocumentId = buffer.ReadInt64();
+        Title = buffer.ReadString();
+        Slug = buffer.ReadString();
+        PatternDocumentId = buffer.ReadInt64();
+        CenterColor = buffer.ReadInt32();
+        EdgeColor = buffer.ReadInt32();
+        PatternColor = buffer.ReadInt32();
+        TextColor = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Until = buffer.ReadInt32(); }
     }
 }

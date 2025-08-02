@@ -40,9 +40,9 @@ public sealed class RequestSetChatTheme : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Emoticon);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Emoticon = reader.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Emoticon = buffer.ReadString();
     }
 }

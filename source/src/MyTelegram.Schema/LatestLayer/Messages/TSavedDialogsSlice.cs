@@ -52,12 +52,12 @@ public sealed class TSavedDialogsSlice : ISavedDialogs
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        Dialogs = reader.Read<TVector<MyTelegram.Schema.ISavedDialog>>();
-        Messages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Count = buffer.ReadInt32();
+        Dialogs = buffer.Read<TVector<MyTelegram.Schema.ISavedDialog>>();
+        Messages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TUpdateServiceNotification : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the message must be displayed in a popup.
@@ -56,9 +56,9 @@ public sealed class TUpdateServiceNotification : IUpdate
 
     public void ComputeFlag()
     {
-        if (Popup) { Flags[0] = true; }
-        if (InvertMedia) { Flags[2] = true; }
-        if (/*InboxDate != 0 && */InboxDate.HasValue) { Flags[1] = true; }
+        if (Popup) { Flags = Flags.SetBit(0); }
+        if (InvertMedia) { Flags = Flags.SetBit(2); }
+        if (/*InboxDate != 0 && */InboxDate.HasValue) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -67,22 +67,22 @@ public sealed class TUpdateServiceNotification : IUpdate
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(InboxDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(InboxDate.Value); }
         writer.Write(Type);
         writer.Write(Message);
         writer.Write(Media);
         writer.Write(Entities);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Popup = true; }
-        if (Flags[2]) { InvertMedia = true; }
-        if (Flags[1]) { InboxDate = reader.ReadInt32(); }
-        Type = reader.ReadString();
-        Message = reader.ReadString();
-        Media = reader.Read<MyTelegram.Schema.IMessageMedia>();
-        Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Popup = true; }
+        if (Flags.IsBitSet(2)) { InvertMedia = true; }
+        if (Flags.IsBitSet(1)) { InboxDate = buffer.ReadInt32(); }
+        Type = buffer.ReadString();
+        Message = buffer.ReadString();
+        Media = buffer.Read<MyTelegram.Schema.IMessageMedia>();
+        Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
     }
 }

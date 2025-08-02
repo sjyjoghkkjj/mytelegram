@@ -61,6 +61,21 @@ public static class Extensions
         return new BigInteger(data, true, true);
     }
 
+    public static BigInteger ToBigEndianBigInteger(this ReadOnlySpan<byte> data)
+    {
+        return new BigInteger(data, true, true);
+    }
+
+    public static BigInteger ToBigEndianBigInteger(this Span<byte> data)
+    {
+        return new BigInteger(data, true, true);
+    }
+
+    public static BigInteger ToBigEndianBigInteger(this ReadOnlyMemory<byte> data)
+    {
+        return new BigInteger(data.Span, true, true);
+    }
+
     public static string ToBase64Url(this Span<byte> buffer)
     {
         return Base64Url.EncodeToString(buffer);
@@ -151,6 +166,34 @@ public static class Extensions
     public static string ToHexString(this byte[] buffer)
     {
         return BitConverter.ToString(buffer).Replace("-", string.Empty);
+    }
+
+    public static string ToHexString(this Span<byte> buffer)
+    {
+        return ToHexStringCore(buffer);
+    }
+
+    public static string ToHexString(this ReadOnlySpan<byte> buffer)
+    {
+        return ToHexStringCore(buffer);
+    }
+
+    public static string ToHexStringCore(this ReadOnlySpan<byte> buffer)
+    {
+        Span<char> chars = buffer.Length <= 512
+            ? stackalloc char[buffer.Length * 2]
+            : new char[buffer.Length * 2];
+
+        const string hexDigits = "0123456789abcdef";
+
+        for (int i = 0; i < buffer.Length; i++)
+        {
+            byte b = buffer[i];
+            chars[i * 2] = hexDigits[b >> 4];
+            chars[i * 2 + 1] = hexDigits[b & 0xF];
+        }
+
+        return new string(chars);
     }
 
     public static string ToPhoneNumber(this string phoneNumber)

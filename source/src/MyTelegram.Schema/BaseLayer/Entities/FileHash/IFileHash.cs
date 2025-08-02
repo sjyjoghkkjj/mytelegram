@@ -22,5 +22,5 @@ public interface IFileHash : IObject
     ///<summary>
     /// SHA-256 Hash of file chunk, to be checked for validity after download
     ///</summary>
-    byte[] Hash { get; set; }
+    ReadOnlyMemory<byte> Hash { get; set; }
 }

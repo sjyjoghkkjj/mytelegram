@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionDefaultBannedRights : IChannelAdm
         writer.Write(NewBannedRights);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevBannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>();
-        NewBannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>();
+        PrevBannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>();
+        NewBannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>();
     }
 }

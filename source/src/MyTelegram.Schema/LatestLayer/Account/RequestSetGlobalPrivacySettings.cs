@@ -33,8 +33,8 @@ public sealed class RequestSetGlobalPrivacySettings : IRequest<MyTelegram.Schema
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Settings = reader.Read<MyTelegram.Schema.IGlobalPrivacySettings>();
+        Settings = buffer.Read<MyTelegram.Schema.IGlobalPrivacySettings>();
     }
 }

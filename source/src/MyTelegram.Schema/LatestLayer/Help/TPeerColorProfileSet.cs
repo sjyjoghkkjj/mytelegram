@@ -40,10 +40,10 @@ public sealed class TPeerColorProfileSet : IPeerColorSet
         writer.Write(StoryColors);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PaletteColors = reader.Read<TVector<int>>();
-        BgColors = reader.Read<TVector<int>>();
-        StoryColors = reader.Read<TVector<int>>();
+        PaletteColors = buffer.Read<TVector<int>>();
+        BgColors = buffer.Read<TVector<int>>();
+        StoryColors = buffer.Read<TVector<int>>();
     }
 }

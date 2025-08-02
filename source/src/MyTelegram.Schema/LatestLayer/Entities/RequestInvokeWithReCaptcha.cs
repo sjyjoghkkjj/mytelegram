@@ -26,9 +26,9 @@ public sealed class RequestInvokeWithReCaptcha : IRequest<IObject>
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Token = reader.ReadString();
-        Query = reader.Read<IObject>();
+        Token = buffer.ReadString();
+        Query = buffer.Read<IObject>();
     }
 }

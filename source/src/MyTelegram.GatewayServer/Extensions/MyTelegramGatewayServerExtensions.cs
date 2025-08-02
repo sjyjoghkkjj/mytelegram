@@ -1,4 +1,5 @@
-﻿using MyTelegram.MTProto.Extensions;
+﻿using MyTelegram.EventBus.Extensions;
+using MyTelegram.MTProto.Extensions;
 
 namespace MyTelegram.GatewayServer.Extensions;
 
@@ -9,14 +10,15 @@ public static class MyTelegramGatewayServerExtensions
         services.RegisterServices(typeof(MyTelegramGatewayServerExtensions).Assembly);
         services.AddMyTelegramMtProto();
         services.AddMyTelegramCoreServices();
+        services.AddEventHandlers();
     }
 
-    public static void ConfigureEventBus(this IEventBus eventBus)
+    public static void AddEventHandlers(this IServiceCollection services)
     {
-        eventBus.Subscribe<EncryptedMessageResponse, EncryptedMessageResponseEventHandler>();
-        eventBus.Subscribe<UnencryptedMessageResponse, UnencryptedMessageResponseEventHandler>();
-        eventBus.Subscribe<AuthKeyNotFoundEvent, AuthKeyNotFoundEventHandler>();
-        eventBus.Subscribe<TransportErrorEvent, TransportErrorEventHandler>();
-        eventBus.Subscribe<PingTimeoutEvent, PingTimeoutEventHandler>();
+        services.AddSubscription<EncryptedMessageResponse, EncryptedMessageResponseEventHandler>();
+        services.AddSubscription<UnencryptedMessageResponse, UnencryptedMessageResponseEventHandler>();
+        services.AddSubscription<AuthKeyNotFoundEvent, AuthKeyNotFoundEventHandler>();
+        services.AddSubscription<TransportErrorEvent, TransportErrorEventHandler>();
+        services.AddSubscription<PingTimeoutEvent, PingTimeoutEventHandler>();
     }
 }

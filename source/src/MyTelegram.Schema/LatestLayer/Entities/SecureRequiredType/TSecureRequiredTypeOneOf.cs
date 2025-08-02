@@ -28,8 +28,8 @@ public sealed class TSecureRequiredTypeOneOf : ISecureRequiredType
         writer.Write(Types);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Types = reader.Read<TVector<MyTelegram.Schema.ISecureRequiredType>>();
+        Types = buffer.Read<TVector<MyTelegram.Schema.ISecureRequiredType>>();
     }
 }

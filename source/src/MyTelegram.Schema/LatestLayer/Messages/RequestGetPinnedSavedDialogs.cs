@@ -24,7 +24,7 @@ public sealed class RequestGetPinnedSavedDialogs : IRequest<MyTelegram.Schema.Me
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

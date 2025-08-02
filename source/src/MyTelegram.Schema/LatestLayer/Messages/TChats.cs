@@ -28,8 +28,8 @@ public sealed class TChats : IChats
         writer.Write(Chats);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
     }
 }

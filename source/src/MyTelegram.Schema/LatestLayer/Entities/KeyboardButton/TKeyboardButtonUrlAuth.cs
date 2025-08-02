@@ -14,7 +14,7 @@ public sealed class TKeyboardButtonUrlAuth : IKeyboardButton
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Button label
@@ -38,7 +38,7 @@ public sealed class TKeyboardButtonUrlAuth : IKeyboardButton
 
     public void ComputeFlag()
     {
-        if (FwdText != null) { Flags[0] = true; }
+        if (FwdText != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -48,17 +48,17 @@ public sealed class TKeyboardButtonUrlAuth : IKeyboardButton
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Text);
-        if (Flags[0]) { writer.Write(FwdText); }
+        if (Flags.IsBitSet(0)) { writer.Write(FwdText); }
         writer.Write(Url);
         writer.Write(ButtonId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Text = reader.ReadString();
-        if (Flags[0]) { FwdText = reader.ReadString(); }
-        Url = reader.ReadString();
-        ButtonId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        Text = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { FwdText = buffer.ReadString(); }
+        Url = buffer.ReadString();
+        ButtonId = buffer.ReadInt32();
     }
 }

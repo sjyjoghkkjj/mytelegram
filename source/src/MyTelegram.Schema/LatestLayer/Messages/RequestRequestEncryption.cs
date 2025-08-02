@@ -46,10 +46,10 @@ public sealed class RequestRequestEncryption : IRequest<MyTelegram.Schema.IEncry
         writer.Write(GA);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        RandomId = reader.ReadInt32();
-        GA = reader.ReadBytes();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        RandomId = buffer.ReadInt32();
+        GA = buffer.ReadBytes();
     }
 }

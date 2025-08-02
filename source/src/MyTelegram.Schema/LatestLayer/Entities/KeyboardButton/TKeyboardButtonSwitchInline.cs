@@ -14,7 +14,7 @@ public sealed class TKeyboardButtonSwitchInline : IKeyboardButton
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, pressing the button will insert the bot's username and the specified inline <code>query</code> in the current chat's input field.
@@ -39,8 +39,8 @@ public sealed class TKeyboardButtonSwitchInline : IKeyboardButton
 
     public void ComputeFlag()
     {
-        if (SamePeer) { Flags[0] = true; }
-        if (PeerTypes?.Count > 0) { Flags[1] = true; }
+        if (SamePeer) { Flags = Flags.SetBit(0); }
+        if (PeerTypes?.Count > 0) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,15 +50,15 @@ public sealed class TKeyboardButtonSwitchInline : IKeyboardButton
         writer.Write(Flags);
         writer.Write(Text);
         writer.Write(Query);
-        if (Flags[1]) { writer.Write(PeerTypes); }
+        if (Flags.IsBitSet(1)) { writer.Write(PeerTypes); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { SamePeer = true; }
-        Text = reader.ReadString();
-        Query = reader.ReadString();
-        if (Flags[1]) { PeerTypes = reader.Read<TVector<MyTelegram.Schema.IInlineQueryPeerType>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { SamePeer = true; }
+        Text = buffer.ReadString();
+        Query = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { PeerTypes = buffer.Read<TVector<MyTelegram.Schema.IInlineQueryPeerType>>(); }
     }
 }

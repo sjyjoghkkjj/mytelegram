@@ -14,7 +14,7 @@ public sealed class TReportResultAddComment : IReportResult
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this step can be skipped by the user, passing an empty <code>message</code> to <a href="https://corefork.telegram.org/method/messages.report">messages.report</a>, or if a non-empty <code>message</code> is mandatory.
@@ -25,11 +25,11 @@ public sealed class TReportResultAddComment : IReportResult
     ///<summary>
     /// The <a href="https://corefork.telegram.org/method/messages.report">messages.report</a> method must be re-invoked, passing this option to <code>option</code>
     ///</summary>
-    public byte[] Option { get; set; }
+    public ReadOnlyMemory<byte> Option { get; set; }
 
     public void ComputeFlag()
     {
-        if (Optional) { Flags[0] = true; }
+        if (Optional) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -41,10 +41,10 @@ public sealed class TReportResultAddComment : IReportResult
         writer.Write(Option);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Optional = true; }
-        Option = reader.ReadBytes();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Optional = true; }
+        Option = buffer.ReadBytes();
     }
 }

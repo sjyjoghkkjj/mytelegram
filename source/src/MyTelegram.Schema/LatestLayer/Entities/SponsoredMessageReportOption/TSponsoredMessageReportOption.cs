@@ -19,7 +19,7 @@ public sealed class TSponsoredMessageReportOption : ISponsoredMessageReportOptio
     ///<summary>
     /// Option identifier to pass to <a href="https://corefork.telegram.org/method/channels.reportSponsoredMessage">channels.reportSponsoredMessage</a>.
     ///</summary>
-    public byte[] Option { get; set; }
+    public ReadOnlyMemory<byte> Option { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,9 +34,9 @@ public sealed class TSponsoredMessageReportOption : ISponsoredMessageReportOptio
         writer.Write(Option);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        Option = reader.ReadBytes();
+        Text = buffer.ReadString();
+        Option = buffer.ReadBytes();
     }
 }

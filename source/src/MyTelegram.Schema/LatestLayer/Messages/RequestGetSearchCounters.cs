@@ -17,7 +17,7 @@ public sealed class RequestGetSearchCounters : IRequest<TVector<MyTelegram.Schem
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Peer where to search
@@ -43,8 +43,8 @@ public sealed class RequestGetSearchCounters : IRequest<TVector<MyTelegram.Schem
 
     public void ComputeFlag()
     {
-        if (SavedPeerId != null) { Flags[2] = true; }
-        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags[0] = true; }
+        if (SavedPeerId != null) { Flags = Flags.SetBit(2); }
+        if (/*TopMsgId != 0 && */TopMsgId.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -54,17 +54,17 @@ public sealed class RequestGetSearchCounters : IRequest<TVector<MyTelegram.Schem
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[2]) { writer.Write(SavedPeerId); }
-        if (Flags[0]) { writer.Write(TopMsgId.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(SavedPeerId); }
+        if (Flags.IsBitSet(0)) { writer.Write(TopMsgId.Value); }
         writer.Write(Filters);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[2]) { SavedPeerId = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[0]) { TopMsgId = reader.ReadInt32(); }
-        Filters = reader.Read<TVector<MyTelegram.Schema.IMessagesFilter>>();
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(2)) { SavedPeerId = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(0)) { TopMsgId = buffer.ReadInt32(); }
+        Filters = buffer.Read<TVector<MyTelegram.Schema.IMessagesFilter>>();
     }
 }

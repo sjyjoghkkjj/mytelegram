@@ -28,8 +28,8 @@ public sealed class TDocumentAttributeFilename : IDocumentAttribute
         writer.Write(FileName);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        FileName = reader.ReadString();
+        FileName = buffer.ReadString();
     }
 }

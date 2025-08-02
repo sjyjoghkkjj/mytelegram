@@ -46,11 +46,11 @@ public sealed class TInputEncryptedFileUploaded : IInputEncryptedFile
         writer.Write(KeyFingerprint);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Parts = reader.ReadInt32();
-        Md5Checksum = reader.ReadString();
-        KeyFingerprint = reader.ReadInt32();
+        Id = buffer.ReadInt64();
+        Parts = buffer.ReadInt32();
+        Md5Checksum = buffer.ReadString();
+        KeyFingerprint = buffer.ReadInt32();
     }
 }

@@ -10,8 +10,9 @@ namespace MyTelegram.Schema;
 public sealed class TMonoForumDialog : ISavedDialog
 {
     public uint ConstructorId => 0x64407ea7;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool UnreadMark { get; set; }
+    public bool NopaidMessagesException { get; set; }
     public MyTelegram.Schema.IPeer Peer { get; set; }
     public int TopMessage { get; set; }
     public int ReadInboxMaxId { get; set; }
@@ -22,8 +23,9 @@ public sealed class TMonoForumDialog : ISavedDialog
 
     public void ComputeFlag()
     {
-        if (UnreadMark) { Flags[3] = true; }
-        if (Draft != null) { Flags[1] = true; }
+        if (UnreadMark) { Flags = Flags.SetBit(3); }
+        if (NopaidMessagesException) { Flags = Flags.SetBit(4); }
+        if (Draft != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -37,19 +39,20 @@ public sealed class TMonoForumDialog : ISavedDialog
         writer.Write(ReadOutboxMaxId);
         writer.Write(UnreadCount);
         writer.Write(UnreadReactionsCount);
-        if (Flags[1]) { writer.Write(Draft); }
+        if (Flags.IsBitSet(1)) { writer.Write(Draft); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { UnreadMark = true; }
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        TopMessage = reader.ReadInt32();
-        ReadInboxMaxId = reader.ReadInt32();
-        ReadOutboxMaxId = reader.ReadInt32();
-        UnreadCount = reader.ReadInt32();
-        UnreadReactionsCount = reader.ReadInt32();
-        if (Flags[1]) { Draft = reader.Read<MyTelegram.Schema.IDraftMessage>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { UnreadMark = true; }
+        if (Flags.IsBitSet(4)) { NopaidMessagesException = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        TopMessage = buffer.ReadInt32();
+        ReadInboxMaxId = buffer.ReadInt32();
+        ReadOutboxMaxId = buffer.ReadInt32();
+        UnreadCount = buffer.ReadInt32();
+        UnreadReactionsCount = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Draft = buffer.Read<MyTelegram.Schema.IDraftMessage>(); }
     }
 }

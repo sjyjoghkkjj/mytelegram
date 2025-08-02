@@ -12,7 +12,7 @@ public interface IMessageReactions : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Similar to <a href="https://corefork.telegram.org/api/min">min</a> objects, used for <a href="https://corefork.telegram.org/api/reactions">message reaction »</a> constructors that are the same for all users so they don't have the reactions sent by the current user (you can use <a href="https://corefork.telegram.org/method/messages.getMessagesReactions">messages.getMessagesReactions</a> to get the full reaction info).

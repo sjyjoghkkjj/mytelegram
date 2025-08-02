@@ -14,7 +14,7 @@ public sealed class TExportedChatlistInvite : IExportedChatlistInvite
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Name of the link
@@ -46,11 +46,11 @@ public sealed class TExportedChatlistInvite : IExportedChatlistInvite
         writer.Write(Peers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Title = reader.ReadString();
-        Url = reader.ReadString();
-        Peers = reader.Read<TVector<MyTelegram.Schema.IPeer>>();
+        Flags = buffer.ReadInt32();
+        Title = buffer.ReadString();
+        Url = buffer.ReadString();
+        Peers = buffer.Read<TVector<MyTelegram.Schema.IPeer>>();
     }
 }

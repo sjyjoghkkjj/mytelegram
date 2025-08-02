@@ -53,12 +53,12 @@ public sealed class TGroupCall : IGroupCall
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IGroupCall>();
-        Participants = reader.Read<TVector<MyTelegram.Schema.IGroupCallParticipant>>();
-        ParticipantsNextOffset = reader.ReadString();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Call = buffer.Read<MyTelegram.Schema.IGroupCall>();
+        Participants = buffer.Read<TVector<MyTelegram.Schema.IGroupCallParticipant>>();
+        ParticipantsNextOffset = buffer.ReadString();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

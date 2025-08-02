@@ -14,7 +14,7 @@ public sealed class TMessageMediaGiveawayResults : IMessageMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, only new subscribers starting from the giveaway creation date participated in the giveaway.
@@ -80,12 +80,12 @@ public sealed class TMessageMediaGiveawayResults : IMessageMedia
 
     public void ComputeFlag()
     {
-        if (OnlyNewSubscribers) { Flags[0] = true; }
-        if (Refunded) { Flags[2] = true; }
-        if (/*AdditionalPeersCount != 0 && */AdditionalPeersCount.HasValue) { Flags[3] = true; }
-        if (/*Months != 0 && */Months.HasValue) { Flags[4] = true; }
-        if (/*Stars != 0 &&*/ Stars.HasValue) { Flags[5] = true; }
-        if (PrizeDescription != null) { Flags[1] = true; }
+        if (OnlyNewSubscribers) { Flags = Flags.SetBit(0); }
+        if (Refunded) { Flags = Flags.SetBit(2); }
+        if (/*AdditionalPeersCount != 0 && */AdditionalPeersCount.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*Months != 0 && */Months.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*Stars != 0 &&*/ Stars.HasValue) { Flags = Flags.SetBit(5); }
+        if (PrizeDescription != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -95,31 +95,31 @@ public sealed class TMessageMediaGiveawayResults : IMessageMedia
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ChannelId);
-        if (Flags[3]) { writer.Write(AdditionalPeersCount.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(AdditionalPeersCount.Value); }
         writer.Write(LaunchMsgId);
         writer.Write(WinnersCount);
         writer.Write(UnclaimedCount);
         writer.Write(Winners);
-        if (Flags[4]) { writer.Write(Months.Value); }
-        if (Flags[5]) { writer.Write(Stars.Value); }
-        if (Flags[1]) { writer.Write(PrizeDescription); }
+        if (Flags.IsBitSet(4)) { writer.Write(Months.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(Stars.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(PrizeDescription); }
         writer.Write(UntilDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { OnlyNewSubscribers = true; }
-        if (Flags[2]) { Refunded = true; }
-        ChannelId = reader.ReadInt64();
-        if (Flags[3]) { AdditionalPeersCount = reader.ReadInt32(); }
-        LaunchMsgId = reader.ReadInt32();
-        WinnersCount = reader.ReadInt32();
-        UnclaimedCount = reader.ReadInt32();
-        Winners = reader.Read<TVector<long>>();
-        if (Flags[4]) { Months = reader.ReadInt32(); }
-        if (Flags[5]) { Stars = reader.ReadInt64(); }
-        if (Flags[1]) { PrizeDescription = reader.ReadString(); }
-        UntilDate = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { OnlyNewSubscribers = true; }
+        if (Flags.IsBitSet(2)) { Refunded = true; }
+        ChannelId = buffer.ReadInt64();
+        if (Flags.IsBitSet(3)) { AdditionalPeersCount = buffer.ReadInt32(); }
+        LaunchMsgId = buffer.ReadInt32();
+        WinnersCount = buffer.ReadInt32();
+        UnclaimedCount = buffer.ReadInt32();
+        Winners = buffer.Read<TVector<long>>();
+        if (Flags.IsBitSet(4)) { Months = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { Stars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(1)) { PrizeDescription = buffer.ReadString(); }
+        UntilDate = buffer.ReadInt32();
     }
 }

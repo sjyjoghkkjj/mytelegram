@@ -32,18 +32,16 @@ public class TVector<T> : IObject, IList<T>
         }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        if (reader.TryReadLittleEndian(out int count))
+        var count = buffer.ReadInt32();
+        if (count > 0)
         {
-            if (count > 0)
+            _list.Capacity = count;
+            for (int i = 0; i < count; i++)
             {
-                _list.Capacity = count;
-                for (int i = 0; i < count; i++)
-                {
-                    var item = Serializer.Deserialize(ref reader);
-                    _list.Add(item);
-                }
+                var item = Serializer.Deserialize(ref buffer);
+                _list.Add(item);
             }
         }
     }

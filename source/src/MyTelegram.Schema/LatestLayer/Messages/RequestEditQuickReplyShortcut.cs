@@ -39,9 +39,9 @@ public sealed class RequestEditQuickReplyShortcut : IRequest<IBool>
         writer.Write(Shortcut);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ShortcutId = reader.ReadInt32();
-        Shortcut = reader.ReadString();
+        ShortcutId = buffer.ReadInt32();
+        Shortcut = buffer.ReadString();
     }
 }

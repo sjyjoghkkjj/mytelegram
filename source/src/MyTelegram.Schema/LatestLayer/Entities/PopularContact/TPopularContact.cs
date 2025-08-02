@@ -34,9 +34,9 @@ public sealed class TPopularContact : IPopularContact
         writer.Write(Importers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ClientId = reader.ReadInt64();
-        Importers = reader.ReadInt32();
+        ClientId = buffer.ReadInt64();
+        Importers = buffer.ReadInt32();
     }
 }

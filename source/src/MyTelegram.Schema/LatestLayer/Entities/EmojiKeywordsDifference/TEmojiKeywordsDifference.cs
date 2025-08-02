@@ -46,11 +46,11 @@ public sealed class TEmojiKeywordsDifference : IEmojiKeywordsDifference
         writer.Write(Keywords);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangCode = reader.ReadString();
-        FromVersion = reader.ReadInt32();
-        Version = reader.ReadInt32();
-        Keywords = reader.Read<TVector<MyTelegram.Schema.IEmojiKeyword>>();
+        LangCode = buffer.ReadString();
+        FromVersion = buffer.ReadInt32();
+        Version = buffer.ReadInt32();
+        Keywords = buffer.Read<TVector<MyTelegram.Schema.IEmojiKeyword>>();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TPageListItemBlocks : IPageListItem
         writer.Write(Blocks);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Blocks = reader.Read<TVector<MyTelegram.Schema.IPageBlock>>();
+        Blocks = buffer.Read<TVector<MyTelegram.Schema.IPageBlock>>();
     }
 }

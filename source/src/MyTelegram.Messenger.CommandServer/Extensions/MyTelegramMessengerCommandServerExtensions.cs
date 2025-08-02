@@ -1,30 +1,26 @@
 ﻿using EventFlow.Core.Caching;
 using EventFlow.MongoDB.Extensions;
-using MyTelegram.Caching.Redis;
-using MyTelegram.EventFlow;
+using MyTelegram.EventBus.Extensions;
 using MyTelegram.EventFlow.MongoDB.Extensions;
-using MyTelegram.Messenger.CommandServer.BackgroundServices;
 using MyTelegram.Messenger.CommandServer.EventHandlers;
 using MyTelegram.Messenger.NativeAot;
-using MyTelegram.Messenger.Services.Impl;
 using MyTelegram.QueryHandlers.MongoDB;
 using MyTelegram.ReadModel.MongoDB;
 using MyTelegram.Services.Extensions;
-using MyTelegram.Services.NativeAot;
 
 namespace MyTelegram.Messenger.CommandServer.Extensions;
 public static class MyTelegramMessengerCommandServerExtensions
 {
-    public static void ConfigureEventBus(this IEventBus eventBus)
+    public static void AddEventHandlers(this IServiceCollection services)
     {
-        eventBus.Subscribe<MessengerCommandDataReceivedEvent, MessengerEventHandler>();
-        eventBus.Subscribe<NewDeviceCreatedEvent, MessengerEventHandler>();
-        eventBus.Subscribe<BindUidToAuthKeyIntegrationEvent, MessengerEventHandler>();
-        eventBus.Subscribe<AuthKeyUnRegisteredIntegrationEvent, MessengerEventHandler>();
+        services.AddSubscription<MessengerCommandDataReceivedEvent, MessengerEventHandler>();
+        services.AddSubscription<NewDeviceCreatedEvent, MessengerEventHandler>();
+        services.AddSubscription<BindUserIdToAuthKeyIntegrationEvent, MessengerEventHandler>();
+        services.AddSubscription<AuthKeyUnRegisteredIntegrationEvent, MessengerEventHandler>();
 
-        eventBus.Subscribe<NewPtsMessageHasSentEvent, PtsEventHandler>();
-        eventBus.Subscribe<RpcMessageHasSentEvent, PtsEventHandler>();
-        eventBus.Subscribe<AcksDataReceivedEvent, PtsEventHandler>();
+        services.AddSubscription<NewPtsMessageHasSentEvent, PtsEventHandler>();
+        services.AddSubscription<RpcMessageHasSentEvent, PtsEventHandler>();
+        services.AddSubscription<AcksDataReceivedEvent, PtsEventHandler>();
 
     }
 
@@ -56,5 +52,6 @@ public static class MyTelegramMessengerCommandServerExtensions
         });
 		services.AddEventStoreMongoDbContext();
         services.AddReadModelMongoDbContext();
+        services.AddEventHandlers();
     }
 }

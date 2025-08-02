@@ -43,10 +43,10 @@ public sealed class RequestToggleForum : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Tabs);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Enabled = reader.Read();
-        Tabs = reader.Read();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Enabled = buffer.Read();
+        Tabs = buffer.Read();
     }
 }

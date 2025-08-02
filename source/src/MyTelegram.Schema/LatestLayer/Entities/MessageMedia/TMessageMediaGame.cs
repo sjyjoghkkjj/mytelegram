@@ -29,8 +29,8 @@ public sealed class TMessageMediaGame : IMessageMedia
         writer.Write(Game);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Game = reader.Read<MyTelegram.Schema.IGame>();
+        Game = buffer.Read<MyTelegram.Schema.IGame>();
     }
 }

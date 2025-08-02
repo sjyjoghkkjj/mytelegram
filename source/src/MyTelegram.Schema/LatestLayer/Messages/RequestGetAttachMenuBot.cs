@@ -32,8 +32,8 @@ public sealed class RequestGetAttachMenuBot : IRequest<MyTelegram.Schema.IAttach
         writer.Write(Bot);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

@@ -34,9 +34,9 @@ public sealed class TBusinessWeeklyOpen : IBusinessWeeklyOpen
         writer.Write(EndMinute);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        StartMinute = reader.ReadInt32();
-        EndMinute = reader.ReadInt32();
+        StartMinute = buffer.ReadInt32();
+        EndMinute = buffer.ReadInt32();
     }
 }

@@ -34,9 +34,9 @@ public sealed class TBankCardOpenUrl : IBankCardOpenUrl
         writer.Write(Name);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        Name = reader.ReadString();
+        Url = buffer.ReadString();
+        Name = buffer.ReadString();
     }
 }

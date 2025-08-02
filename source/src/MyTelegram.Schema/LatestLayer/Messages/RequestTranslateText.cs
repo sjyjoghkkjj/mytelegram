@@ -22,7 +22,7 @@ public sealed class RequestTranslateText : IRequest<MyTelegram.Schema.Messages.I
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If the text is a chat message, the peer ID
@@ -47,9 +47,9 @@ public sealed class RequestTranslateText : IRequest<MyTelegram.Schema.Messages.I
 
     public void ComputeFlag()
     {
-        if (Peer != null) { Flags[0] = true; }
-        if (Id?.Count > 0) { Flags[0] = true; }
-        if (Text?.Count > 0) { Flags[1] = true; }
+        if (Peer != null) { Flags = Flags.SetBit(0); }
+        if (Id?.Count > 0) { Flags = Flags.SetBit(0); }
+        if (Text?.Count > 0) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -58,18 +58,18 @@ public sealed class RequestTranslateText : IRequest<MyTelegram.Schema.Messages.I
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Peer); }
-        if (Flags[0]) { writer.Write(Id); }
-        if (Flags[1]) { writer.Write(Text); }
+        if (Flags.IsBitSet(0)) { writer.Write(Peer); }
+        if (Flags.IsBitSet(0)) { writer.Write(Id); }
+        if (Flags.IsBitSet(1)) { writer.Write(Text); }
         writer.Write(ToLang);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Peer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[0]) { Id = reader.Read<TVector<int>>(); }
-        if (Flags[1]) { Text = reader.Read<TVector<MyTelegram.Schema.ITextWithEntities>>(); }
-        ToLang = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Peer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(0)) { Id = buffer.Read<TVector<int>>(); }
+        if (Flags.IsBitSet(1)) { Text = buffer.Read<TVector<MyTelegram.Schema.ITextWithEntities>>(); }
+        ToLang = buffer.ReadString();
     }
 }

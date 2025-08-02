@@ -14,7 +14,7 @@ public sealed class TMessageExtendedMediaPreview : IMessageExtendedMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Width
@@ -39,10 +39,10 @@ public sealed class TMessageExtendedMediaPreview : IMessageExtendedMedia
 
     public void ComputeFlag()
     {
-        if (/*W != 0 && */W.HasValue) { Flags[0] = true; }
-        if (/*H != 0 && */H.HasValue) { Flags[0] = true; }
-        if (Thumb != null) { Flags[1] = true; }
-        if (/*VideoDuration != 0 && */VideoDuration.HasValue) { Flags[2] = true; }
+        if (/*W != 0 && */W.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*H != 0 && */H.HasValue) { Flags = Flags.SetBit(0); }
+        if (Thumb != null) { Flags = Flags.SetBit(1); }
+        if (/*VideoDuration != 0 && */VideoDuration.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,18 +50,18 @@ public sealed class TMessageExtendedMediaPreview : IMessageExtendedMedia
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(W.Value); }
-        if (Flags[0]) { writer.Write(H.Value); }
-        if (Flags[1]) { writer.Write(Thumb); }
-        if (Flags[2]) { writer.Write(VideoDuration.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(W.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(H.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Thumb); }
+        if (Flags.IsBitSet(2)) { writer.Write(VideoDuration.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { W = reader.ReadInt32(); }
-        if (Flags[0]) { H = reader.ReadInt32(); }
-        if (Flags[1]) { Thumb = reader.Read<MyTelegram.Schema.IPhotoSize>(); }
-        if (Flags[2]) { VideoDuration = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { W = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { H = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { Thumb = buffer.Read<MyTelegram.Schema.IPhotoSize>(); }
+        if (Flags.IsBitSet(2)) { VideoDuration = buffer.ReadInt32(); }
     }
 }

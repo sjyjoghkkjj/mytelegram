@@ -40,9 +40,9 @@ public sealed class RequestCheckGroupCall : IRequest<TVector<int>>
         writer.Write(Sources);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Sources = reader.Read<TVector<int>>();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Sources = buffer.Read<TVector<int>>();
     }
 }

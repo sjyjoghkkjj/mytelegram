@@ -28,8 +28,8 @@ public sealed class TDifferenceTooLong : IDifference
         writer.Write(Pts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Pts = reader.ReadInt32();
+        Pts = buffer.ReadInt32();
     }
 }

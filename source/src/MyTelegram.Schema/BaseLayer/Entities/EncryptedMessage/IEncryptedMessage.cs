@@ -28,5 +28,5 @@ public interface IEncryptedMessage : IObject
     ///<summary>
     /// TL-serialization of the <a href="https://corefork.telegram.org/type/DecryptedMessage">DecryptedMessage</a> type, encrypted with the key created at chat initialization
     ///</summary>
-    byte[] Bytes { get; set; }
+    ReadOnlyMemory<byte> Bytes { get; set; }
 }

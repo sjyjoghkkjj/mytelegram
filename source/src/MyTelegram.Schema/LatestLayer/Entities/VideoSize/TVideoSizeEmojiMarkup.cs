@@ -34,9 +34,9 @@ public sealed class TVideoSizeEmojiMarkup : IVideoSize
         writer.Write(BackgroundColors);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        EmojiId = reader.ReadInt64();
-        BackgroundColors = reader.Read<TVector<int>>();
+        EmojiId = buffer.ReadInt64();
+        BackgroundColors = buffer.Read<TVector<int>>();
     }
 }

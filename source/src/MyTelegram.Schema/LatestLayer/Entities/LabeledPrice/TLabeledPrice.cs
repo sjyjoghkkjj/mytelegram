@@ -34,9 +34,9 @@ public sealed class TLabeledPrice : ILabeledPrice
         writer.Write(Amount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Label = reader.ReadString();
-        Amount = reader.ReadInt64();
+        Label = buffer.ReadString();
+        Amount = buffer.ReadInt64();
     }
 }

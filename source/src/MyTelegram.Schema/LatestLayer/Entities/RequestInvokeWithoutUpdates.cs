@@ -28,8 +28,8 @@ public sealed class RequestInvokeWithoutUpdates : IRequest<IObject>, IHasSubQuer
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Query = reader.Read<IObject>();
+        Query = buffer.Read<IObject>();
     }
 }

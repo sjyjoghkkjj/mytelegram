@@ -36,9 +36,9 @@ public sealed class TMessageMediaPoll : IMessageMedia
         writer.Write(Results);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Poll = reader.Read<MyTelegram.Schema.IPoll>();
-        Results = reader.Read<MyTelegram.Schema.IPollResults>();
+        Poll = buffer.Read<MyTelegram.Schema.IPoll>();
+        Results = buffer.Read<MyTelegram.Schema.IPollResults>();
     }
 }

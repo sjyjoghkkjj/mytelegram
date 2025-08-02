@@ -40,10 +40,10 @@ public sealed class TRestrictionReason : IRestrictionReason
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Platform = reader.ReadString();
-        Reason = reader.ReadString();
-        Text = reader.ReadString();
+        Platform = buffer.ReadString();
+        Reason = buffer.ReadString();
+        Text = buffer.ReadString();
     }
 }

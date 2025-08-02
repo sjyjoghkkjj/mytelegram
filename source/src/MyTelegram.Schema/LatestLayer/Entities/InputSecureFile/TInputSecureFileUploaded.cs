@@ -29,12 +29,12 @@ public sealed class TInputSecureFileUploaded : IInputSecureFile
     ///<summary>
     /// File hash
     ///</summary>
-    public byte[] FileHash { get; set; }
+    public ReadOnlyMemory<byte> FileHash { get; set; }
 
     ///<summary>
     /// Secret
     ///</summary>
-    public byte[] Secret { get; set; }
+    public ReadOnlyMemory<byte> Secret { get; set; }
 
     public void ComputeFlag()
     {
@@ -52,12 +52,12 @@ public sealed class TInputSecureFileUploaded : IInputSecureFile
         writer.Write(Secret);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Parts = reader.ReadInt32();
-        Md5Checksum = reader.ReadString();
-        FileHash = reader.ReadBytes();
-        Secret = reader.ReadBytes();
+        Id = buffer.ReadInt64();
+        Parts = buffer.ReadInt32();
+        Md5Checksum = buffer.ReadString();
+        FileHash = buffer.ReadBytes();
+        Secret = buffer.ReadBytes();
     }
 }

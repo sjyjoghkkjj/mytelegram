@@ -14,7 +14,7 @@ public sealed class TGiveawayInfo : IGiveawayInfo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The current user is participating in the giveaway.
@@ -50,11 +50,11 @@ public sealed class TGiveawayInfo : IGiveawayInfo
 
     public void ComputeFlag()
     {
-        if (Participating) { Flags[0] = true; }
-        if (PreparingResults) { Flags[3] = true; }
-        if (/*JoinedTooEarlyDate != 0 && */JoinedTooEarlyDate.HasValue) { Flags[1] = true; }
-        if (/*AdminDisallowedChatId != 0 &&*/ AdminDisallowedChatId.HasValue) { Flags[2] = true; }
-        if (DisallowedCountry != null) { Flags[4] = true; }
+        if (Participating) { Flags = Flags.SetBit(0); }
+        if (PreparingResults) { Flags = Flags.SetBit(3); }
+        if (/*JoinedTooEarlyDate != 0 && */JoinedTooEarlyDate.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*AdminDisallowedChatId != 0 &&*/ AdminDisallowedChatId.HasValue) { Flags = Flags.SetBit(2); }
+        if (DisallowedCountry != null) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -63,19 +63,19 @@ public sealed class TGiveawayInfo : IGiveawayInfo
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(StartDate);
-        if (Flags[1]) { writer.Write(JoinedTooEarlyDate.Value); }
-        if (Flags[2]) { writer.Write(AdminDisallowedChatId.Value); }
-        if (Flags[4]) { writer.Write(DisallowedCountry); }
+        if (Flags.IsBitSet(1)) { writer.Write(JoinedTooEarlyDate.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(AdminDisallowedChatId.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(DisallowedCountry); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Participating = true; }
-        if (Flags[3]) { PreparingResults = true; }
-        StartDate = reader.ReadInt32();
-        if (Flags[1]) { JoinedTooEarlyDate = reader.ReadInt32(); }
-        if (Flags[2]) { AdminDisallowedChatId = reader.ReadInt64(); }
-        if (Flags[4]) { DisallowedCountry = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Participating = true; }
+        if (Flags.IsBitSet(3)) { PreparingResults = true; }
+        StartDate = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { JoinedTooEarlyDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { AdminDisallowedChatId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(4)) { DisallowedCountry = buffer.ReadString(); }
     }
 }

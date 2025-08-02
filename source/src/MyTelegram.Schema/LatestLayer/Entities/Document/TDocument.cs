@@ -8,13 +8,13 @@ namespace MyTelegram.Schema;
 /// See <a href="https://corefork.telegram.org/constructor/document" />
 ///</summary>
 [TlObject(0x8fd4c4d8)]
-public sealed class TDocument : IDocument
+public sealed class TDocument : ILayeredDocument
 {
     public uint ConstructorId => 0x8fd4c4d8;
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Document ID
@@ -29,7 +29,7 @@ public sealed class TDocument : IDocument
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/file_reference">File reference</a>
     ///</summary>
-    public byte[] FileReference { get; set; }
+    public ReadOnlyMemory<byte> FileReference { get; set; }
 
     ///<summary>
     /// Creation date
@@ -68,8 +68,8 @@ public sealed class TDocument : IDocument
 
     public void ComputeFlag()
     {
-        if (Thumbs?.Count > 0) { Flags[0] = true; }
-        if (VideoThumbs?.Count > 0) { Flags[1] = true; }
+        if (Thumbs?.Count > 0) { Flags = Flags.SetBit(0); }
+        if (VideoThumbs?.Count > 0) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -84,24 +84,24 @@ public sealed class TDocument : IDocument
         writer.Write(Date);
         writer.Write(MimeType);
         writer.Write(Size);
-        if (Flags[0]) { writer.Write(Thumbs); }
-        if (Flags[1]) { writer.Write(VideoThumbs); }
+        if (Flags.IsBitSet(0)) { writer.Write(Thumbs); }
+        if (Flags.IsBitSet(1)) { writer.Write(VideoThumbs); }
         writer.Write(DcId);
         writer.Write(Attributes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        FileReference = reader.ReadBytes();
-        Date = reader.ReadInt32();
-        MimeType = reader.ReadString();
-        Size = reader.ReadInt64();
-        if (Flags[0]) { Thumbs = reader.Read<TVector<MyTelegram.Schema.IPhotoSize>>(); }
-        if (Flags[1]) { VideoThumbs = reader.Read<TVector<MyTelegram.Schema.IVideoSize>>(); }
-        DcId = reader.ReadInt32();
-        Attributes = reader.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
+        Flags = buffer.ReadInt32();
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        FileReference = buffer.ReadBytes();
+        Date = buffer.ReadInt32();
+        MimeType = buffer.ReadString();
+        Size = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Thumbs = buffer.Read<TVector<MyTelegram.Schema.IPhotoSize>>(); }
+        if (Flags.IsBitSet(1)) { VideoThumbs = buffer.Read<TVector<MyTelegram.Schema.IVideoSize>>(); }
+        DcId = buffer.ReadInt32();
+        Attributes = buffer.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
     }
 }

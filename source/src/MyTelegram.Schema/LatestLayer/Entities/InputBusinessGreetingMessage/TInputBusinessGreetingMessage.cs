@@ -41,10 +41,10 @@ public sealed class TInputBusinessGreetingMessage : IInputBusinessGreetingMessag
         writer.Write(NoActivityDays);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ShortcutId = reader.ReadInt32();
-        Recipients = reader.Read<MyTelegram.Schema.IInputBusinessRecipients>();
-        NoActivityDays = reader.ReadInt32();
+        ShortcutId = buffer.ReadInt32();
+        Recipients = buffer.Read<MyTelegram.Schema.IInputBusinessRecipients>();
+        NoActivityDays = buffer.ReadInt32();
     }
 }

@@ -46,11 +46,11 @@ public sealed class TPostInteractionCountersMessage : IPostInteractionCounters
         writer.Write(Reactions);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MsgId = reader.ReadInt32();
-        Views = reader.ReadInt32();
-        Forwards = reader.ReadInt32();
-        Reactions = reader.ReadInt32();
+        MsgId = buffer.ReadInt32();
+        Views = buffer.ReadInt32();
+        Forwards = buffer.ReadInt32();
+        Reactions = buffer.ReadInt32();
     }
 }

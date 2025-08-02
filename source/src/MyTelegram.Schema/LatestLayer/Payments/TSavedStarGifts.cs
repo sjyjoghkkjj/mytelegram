@@ -10,7 +10,7 @@ namespace MyTelegram.Schema.Payments;
 public sealed class TSavedStarGifts : ISavedStarGifts
 {
     public uint ConstructorId => 0x95f389b1;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public int Count { get; set; }
     public bool? ChatNotificationsEnabled { get; set; }
     public TVector<MyTelegram.Schema.ISavedStarGift> Gifts { get; set; }
@@ -20,8 +20,8 @@ public sealed class TSavedStarGifts : ISavedStarGifts
 
     public void ComputeFlag()
     {
-        if (ChatNotificationsEnabled !=null) { Flags[1] = true; }
-        if (NextOffset != null) { Flags[0] = true; }
+        if (ChatNotificationsEnabled !=null) { Flags = Flags.SetBit(1); }
+        if (NextOffset != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -31,21 +31,21 @@ public sealed class TSavedStarGifts : ISavedStarGifts
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Count);
-        if (Flags[1]) { writer.Write(ChatNotificationsEnabled.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(ChatNotificationsEnabled.Value); }
         writer.Write(Gifts);
-        if (Flags[0]) { writer.Write(NextOffset); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextOffset); }
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Count = reader.ReadInt32();
-        if (Flags[1]) { ChatNotificationsEnabled = reader.Read(); }
-        Gifts = reader.Read<TVector<MyTelegram.Schema.ISavedStarGift>>();
-        if (Flags[0]) { NextOffset = reader.ReadString(); }
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        Count = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { ChatNotificationsEnabled = buffer.Read(); }
+        Gifts = buffer.Read<TVector<MyTelegram.Schema.ISavedStarGift>>();
+        if (Flags.IsBitSet(0)) { NextOffset = buffer.ReadString(); }
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class RequestClearSavedInfo : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Remove saved payment credentials
@@ -30,8 +30,8 @@ public sealed class RequestClearSavedInfo : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Credentials) { Flags[0] = true; }
-        if (Info) { Flags[1] = true; }
+        if (Credentials) { Flags = Flags.SetBit(0); }
+        if (Info) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,10 +42,10 @@ public sealed class RequestClearSavedInfo : IRequest<IBool>
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Credentials = true; }
-        if (Flags[1]) { Info = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Credentials = true; }
+        if (Flags.IsBitSet(1)) { Info = true; }
     }
 }

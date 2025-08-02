@@ -46,10 +46,10 @@ public sealed class RequestUpdatePinnedForumTopic : IRequest<MyTelegram.Schema.I
         writer.Write(Pinned);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        TopicId = reader.ReadInt32();
-        Pinned = reader.Read();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        TopicId = buffer.ReadInt32();
+        Pinned = buffer.Read();
     }
 }

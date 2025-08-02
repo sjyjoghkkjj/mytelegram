@@ -14,7 +14,7 @@ public sealed class TMessageMediaPhoto : IMessageMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this media should be hidden behind a spoiler warning
@@ -35,9 +35,9 @@ public sealed class TMessageMediaPhoto : IMessageMedia
 
     public void ComputeFlag()
     {
-        if (Spoiler) { Flags[3] = true; }
-        if (Photo != null) { Flags[0] = true; }
-        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[2] = true; }
+        if (Spoiler) { Flags = Flags.SetBit(3); }
+        if (Photo != null) { Flags = Flags.SetBit(0); }
+        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -45,15 +45,15 @@ public sealed class TMessageMediaPhoto : IMessageMedia
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Photo); }
-        if (Flags[2]) { writer.Write(TtlSeconds.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Photo); }
+        if (Flags.IsBitSet(2)) { writer.Write(TtlSeconds.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { Spoiler = true; }
-        if (Flags[0]) { Photo = reader.Read<MyTelegram.Schema.IPhoto>(); }
-        if (Flags[2]) { TtlSeconds = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Spoiler = true; }
+        if (Flags.IsBitSet(0)) { Photo = buffer.Read<MyTelegram.Schema.IPhoto>(); }
+        if (Flags.IsBitSet(2)) { TtlSeconds = buffer.ReadInt32(); }
     }
 }

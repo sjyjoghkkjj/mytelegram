@@ -47,11 +47,11 @@ public sealed class TUpdateChatParticipantAdmin : IUpdate
         writer.Write(Version);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt64();
-        UserId = reader.ReadInt64();
-        IsAdmin = reader.Read();
-        Version = reader.ReadInt32();
+        ChatId = buffer.ReadInt64();
+        UserId = buffer.ReadInt64();
+        IsAdmin = buffer.Read();
+        Version = buffer.ReadInt32();
     }
 }

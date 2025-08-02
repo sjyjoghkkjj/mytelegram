@@ -14,7 +14,7 @@ public sealed class TEncryptedChatDiscarded : IEncryptedChat
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether both users of this secret chat should also remove all of its messages
@@ -29,7 +29,7 @@ public sealed class TEncryptedChatDiscarded : IEncryptedChat
 
     public void ComputeFlag()
     {
-        if (HistoryDeleted) { Flags[0] = true; }
+        if (HistoryDeleted) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -41,10 +41,10 @@ public sealed class TEncryptedChatDiscarded : IEncryptedChat
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { HistoryDeleted = true; }
-        Id = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { HistoryDeleted = true; }
+        Id = buffer.ReadInt32();
     }
 }

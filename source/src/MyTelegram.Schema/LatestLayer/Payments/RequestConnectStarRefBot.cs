@@ -35,9 +35,9 @@ public sealed class RequestConnectStarRefBot : IRequest<MyTelegram.Schema.Paymen
         writer.Write(Bot);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

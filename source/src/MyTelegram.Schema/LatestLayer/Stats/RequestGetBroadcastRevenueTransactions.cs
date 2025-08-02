@@ -44,10 +44,10 @@ public sealed class RequestGetBroadcastRevenueTransactions : IRequest<MyTelegram
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Offset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Offset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

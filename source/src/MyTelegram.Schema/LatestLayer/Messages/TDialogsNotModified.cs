@@ -28,8 +28,8 @@ public sealed class TDialogsNotModified : IDialogs
         writer.Write(Count);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
+        Count = buffer.ReadInt32();
     }
 }

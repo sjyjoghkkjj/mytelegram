@@ -39,9 +39,9 @@ public sealed class RequestJoinChatlistInvite : IRequest<MyTelegram.Schema.IUpda
         writer.Write(Peers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Slug = reader.ReadString();
-        Peers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Slug = buffer.ReadString();
+        Peers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
     }
 }

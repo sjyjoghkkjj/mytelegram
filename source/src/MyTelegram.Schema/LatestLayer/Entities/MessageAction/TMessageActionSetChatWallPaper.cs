@@ -14,7 +14,7 @@ public sealed class TMessageActionSetChatWallPaper : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, indicates the user applied a <a href="https://corefork.telegram.org/api/wallpapers">wallpaper »</a> previously sent by the other user in a <a href="https://corefork.telegram.org/constructor/messageActionSetChatWallPaper">messageActionSetChatWallPaper</a> message.
@@ -36,8 +36,8 @@ public sealed class TMessageActionSetChatWallPaper : IMessageAction
 
     public void ComputeFlag()
     {
-        if (Same) { Flags[0] = true; }
-        if (ForBoth) { Flags[1] = true; }
+        if (Same) { Flags = Flags.SetBit(0); }
+        if (ForBoth) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -49,11 +49,11 @@ public sealed class TMessageActionSetChatWallPaper : IMessageAction
         writer.Write(Wallpaper);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Same = true; }
-        if (Flags[1]) { ForBoth = true; }
-        Wallpaper = reader.Read<MyTelegram.Schema.IWallPaper>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Same = true; }
+        if (Flags.IsBitSet(1)) { ForBoth = true; }
+        Wallpaper = buffer.Read<MyTelegram.Schema.IWallPaper>();
     }
 }

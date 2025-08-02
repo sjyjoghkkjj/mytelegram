@@ -41,10 +41,10 @@ public sealed class TPeerLocated : IPeerLocated
         writer.Write(Distance);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Expires = reader.ReadInt32();
-        Distance = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Expires = buffer.ReadInt32();
+        Distance = buffer.ReadInt32();
     }
 }

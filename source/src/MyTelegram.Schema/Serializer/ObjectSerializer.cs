@@ -17,9 +17,10 @@ public class ObjectSerializer<T> : ISerializer<T>
         }
     }
 
-    public T Deserialize(ref SequenceReader<byte> reader)
+    public T Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        var constructorId = reader.ReadUInt32();
+        var constructorId = buffer.ReadUInt32();
+        
         var typeOfT = typeof(T);
         if (!SerializerObjectMappings.TryGetTlObject(constructorId, out var func))
         {
@@ -29,7 +30,7 @@ public class ObjectSerializer<T> : ISerializer<T>
         if (func != null)
         {
             var obj = func();
-            obj.Deserialize(ref reader);
+            obj.Deserialize(ref buffer);
 
             return (T)obj;
         }
@@ -42,7 +43,7 @@ public class ObjectSerializer<T> : ISerializer<T>
                 // [0..4]=constructorId [4..8]=_list.Count [8..12]=constructorId of T (Vector<T>)
                 // Read 4 bytes from 8 to 12,the first 4 bytes already read by reader.ReadUInt32()
                 // So need to read 4 bytes from 4 to 8
-                var vectorOfTConstructorIdBytesSpan = reader.UnreadSpan[4..8];
+                var vectorOfTConstructorIdBytesSpan = buffer[4..8].Span;
                 var constructorId2 = BitConverter.ToUInt32(vectorOfTConstructorIdBytesSpan);
                 if (SerializerObjectMappings.TryGetTlObjectType(constructorId2, out var type))
                 {
@@ -61,7 +62,7 @@ public class ObjectSerializer<T> : ISerializer<T>
                     }
 
                     var vectorOfObj = vectorOfObjFunc();
-                    vectorOfObj.Deserialize(ref reader);
+                    vectorOfObj.Deserialize(ref buffer);
 
                     return (T)vectorOfObj;
                 }
@@ -80,7 +81,7 @@ public class ObjectSerializer<T> : ISerializer<T>
         }
 
         var vectorObj = vectorObjFunc();
-        vectorObj.Deserialize(ref reader);
+        vectorObj.Deserialize(ref buffer);
 
         return (T)vectorObj;
     }

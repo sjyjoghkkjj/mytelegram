@@ -34,9 +34,9 @@ public sealed class TSavedGifs : ISavedGifs
         writer.Write(Gifs);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Hash = reader.ReadInt64();
-        Gifs = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
+        Hash = buffer.ReadInt64();
+        Gifs = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
     }
 }

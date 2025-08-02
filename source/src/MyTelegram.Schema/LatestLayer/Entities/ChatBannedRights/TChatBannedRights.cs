@@ -14,7 +14,7 @@ public sealed class TChatBannedRights : IChatBannedRights
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, does not allow a user to view messages in a <a href="https://corefork.telegram.org/api/channel">supergroup/channel/chat</a>
@@ -143,26 +143,26 @@ public sealed class TChatBannedRights : IChatBannedRights
 
     public void ComputeFlag()
     {
-        if (ViewMessages) { Flags[0] = true; }
-        if (SendMessages) { Flags[1] = true; }
-        if (SendMedia) { Flags[2] = true; }
-        if (SendStickers) { Flags[3] = true; }
-        if (SendGifs) { Flags[4] = true; }
-        if (SendGames) { Flags[5] = true; }
-        if (SendInline) { Flags[6] = true; }
-        if (EmbedLinks) { Flags[7] = true; }
-        if (SendPolls) { Flags[8] = true; }
-        if (ChangeInfo) { Flags[10] = true; }
-        if (InviteUsers) { Flags[15] = true; }
-        if (PinMessages) { Flags[17] = true; }
-        if (ManageTopics) { Flags[18] = true; }
-        if (SendPhotos) { Flags[19] = true; }
-        if (SendVideos) { Flags[20] = true; }
-        if (SendRoundvideos) { Flags[21] = true; }
-        if (SendAudios) { Flags[22] = true; }
-        if (SendVoices) { Flags[23] = true; }
-        if (SendDocs) { Flags[24] = true; }
-        if (SendPlain) { Flags[25] = true; }
+        if (ViewMessages) { Flags = Flags.SetBit(0); }
+        if (SendMessages) { Flags = Flags.SetBit(1); }
+        if (SendMedia) { Flags = Flags.SetBit(2); }
+        if (SendStickers) { Flags = Flags.SetBit(3); }
+        if (SendGifs) { Flags = Flags.SetBit(4); }
+        if (SendGames) { Flags = Flags.SetBit(5); }
+        if (SendInline) { Flags = Flags.SetBit(6); }
+        if (EmbedLinks) { Flags = Flags.SetBit(7); }
+        if (SendPolls) { Flags = Flags.SetBit(8); }
+        if (ChangeInfo) { Flags = Flags.SetBit(10); }
+        if (InviteUsers) { Flags = Flags.SetBit(15); }
+        if (PinMessages) { Flags = Flags.SetBit(17); }
+        if (ManageTopics) { Flags = Flags.SetBit(18); }
+        if (SendPhotos) { Flags = Flags.SetBit(19); }
+        if (SendVideos) { Flags = Flags.SetBit(20); }
+        if (SendRoundvideos) { Flags = Flags.SetBit(21); }
+        if (SendAudios) { Flags = Flags.SetBit(22); }
+        if (SendVoices) { Flags = Flags.SetBit(23); }
+        if (SendDocs) { Flags = Flags.SetBit(24); }
+        if (SendPlain) { Flags = Flags.SetBit(25); }
 
     }
 
@@ -174,29 +174,29 @@ public sealed class TChatBannedRights : IChatBannedRights
         writer.Write(UntilDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ViewMessages = true; }
-        if (Flags[1]) { SendMessages = true; }
-        if (Flags[2]) { SendMedia = true; }
-        if (Flags[3]) { SendStickers = true; }
-        if (Flags[4]) { SendGifs = true; }
-        if (Flags[5]) { SendGames = true; }
-        if (Flags[6]) { SendInline = true; }
-        if (Flags[7]) { EmbedLinks = true; }
-        if (Flags[8]) { SendPolls = true; }
-        if (Flags[10]) { ChangeInfo = true; }
-        if (Flags[15]) { InviteUsers = true; }
-        if (Flags[17]) { PinMessages = true; }
-        if (Flags[18]) { ManageTopics = true; }
-        if (Flags[19]) { SendPhotos = true; }
-        if (Flags[20]) { SendVideos = true; }
-        if (Flags[21]) { SendRoundvideos = true; }
-        if (Flags[22]) { SendAudios = true; }
-        if (Flags[23]) { SendVoices = true; }
-        if (Flags[24]) { SendDocs = true; }
-        if (Flags[25]) { SendPlain = true; }
-        UntilDate = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ViewMessages = true; }
+        if (Flags.IsBitSet(1)) { SendMessages = true; }
+        if (Flags.IsBitSet(2)) { SendMedia = true; }
+        if (Flags.IsBitSet(3)) { SendStickers = true; }
+        if (Flags.IsBitSet(4)) { SendGifs = true; }
+        if (Flags.IsBitSet(5)) { SendGames = true; }
+        if (Flags.IsBitSet(6)) { SendInline = true; }
+        if (Flags.IsBitSet(7)) { EmbedLinks = true; }
+        if (Flags.IsBitSet(8)) { SendPolls = true; }
+        if (Flags.IsBitSet(10)) { ChangeInfo = true; }
+        if (Flags.IsBitSet(15)) { InviteUsers = true; }
+        if (Flags.IsBitSet(17)) { PinMessages = true; }
+        if (Flags.IsBitSet(18)) { ManageTopics = true; }
+        if (Flags.IsBitSet(19)) { SendPhotos = true; }
+        if (Flags.IsBitSet(20)) { SendVideos = true; }
+        if (Flags.IsBitSet(21)) { SendRoundvideos = true; }
+        if (Flags.IsBitSet(22)) { SendAudios = true; }
+        if (Flags.IsBitSet(23)) { SendVoices = true; }
+        if (Flags.IsBitSet(24)) { SendDocs = true; }
+        if (Flags.IsBitSet(25)) { SendPlain = true; }
+        UntilDate = buffer.ReadInt32();
     }
 }

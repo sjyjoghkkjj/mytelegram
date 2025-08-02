@@ -14,7 +14,7 @@ public sealed class TGroupCall : IGroupCall
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user should be muted upon joining the call
@@ -119,22 +119,22 @@ public sealed class TGroupCall : IGroupCall
 
     public void ComputeFlag()
     {
-        if (JoinMuted) { Flags[1] = true; }
-        if (CanChangeJoinMuted) { Flags[2] = true; }
-        if (JoinDateAsc) { Flags[6] = true; }
-        if (ScheduleStartSubscribed) { Flags[8] = true; }
-        if (CanStartVideo) { Flags[9] = true; }
-        if (RecordVideoActive) { Flags[11] = true; }
-        if (RtmpStream) { Flags[12] = true; }
-        if (ListenersHidden) { Flags[13] = true; }
-        if (Conference) { Flags[14] = true; }
-        if (Creator) { Flags[15] = true; }
-        if (Title != null) { Flags[3] = true; }
-        if (/*StreamDcId != 0 && */StreamDcId.HasValue) { Flags[4] = true; }
-        if (/*RecordStartDate != 0 && */RecordStartDate.HasValue) { Flags[5] = true; }
-        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[7] = true; }
-        if (/*UnmutedVideoCount != 0 && */UnmutedVideoCount.HasValue) { Flags[10] = true; }
-        if (InviteLink != null) { Flags[16] = true; }
+        if (JoinMuted) { Flags = Flags.SetBit(1); }
+        if (CanChangeJoinMuted) { Flags = Flags.SetBit(2); }
+        if (JoinDateAsc) { Flags = Flags.SetBit(6); }
+        if (ScheduleStartSubscribed) { Flags = Flags.SetBit(8); }
+        if (CanStartVideo) { Flags = Flags.SetBit(9); }
+        if (RecordVideoActive) { Flags = Flags.SetBit(11); }
+        if (RtmpStream) { Flags = Flags.SetBit(12); }
+        if (ListenersHidden) { Flags = Flags.SetBit(13); }
+        if (Conference) { Flags = Flags.SetBit(14); }
+        if (Creator) { Flags = Flags.SetBit(15); }
+        if (Title != null) { Flags = Flags.SetBit(3); }
+        if (/*StreamDcId != 0 && */StreamDcId.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*RecordStartDate != 0 && */RecordStartDate.HasValue) { Flags = Flags.SetBit(5); }
+        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags = Flags.SetBit(7); }
+        if (/*UnmutedVideoCount != 0 && */UnmutedVideoCount.HasValue) { Flags = Flags.SetBit(10); }
+        if (InviteLink != null) { Flags = Flags.SetBit(16); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -145,39 +145,39 @@ public sealed class TGroupCall : IGroupCall
         writer.Write(Id);
         writer.Write(AccessHash);
         writer.Write(ParticipantsCount);
-        if (Flags[3]) { writer.Write(Title); }
-        if (Flags[4]) { writer.Write(StreamDcId.Value); }
-        if (Flags[5]) { writer.Write(RecordStartDate.Value); }
-        if (Flags[7]) { writer.Write(ScheduleDate.Value); }
-        if (Flags[10]) { writer.Write(UnmutedVideoCount.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Title); }
+        if (Flags.IsBitSet(4)) { writer.Write(StreamDcId.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(RecordStartDate.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(ScheduleDate.Value); }
+        if (Flags.IsBitSet(10)) { writer.Write(UnmutedVideoCount.Value); }
         writer.Write(UnmutedVideoLimit);
         writer.Write(Version);
-        if (Flags[16]) { writer.Write(InviteLink); }
+        if (Flags.IsBitSet(16)) { writer.Write(InviteLink); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { JoinMuted = true; }
-        if (Flags[2]) { CanChangeJoinMuted = true; }
-        if (Flags[6]) { JoinDateAsc = true; }
-        if (Flags[8]) { ScheduleStartSubscribed = true; }
-        if (Flags[9]) { CanStartVideo = true; }
-        if (Flags[11]) { RecordVideoActive = true; }
-        if (Flags[12]) { RtmpStream = true; }
-        if (Flags[13]) { ListenersHidden = true; }
-        if (Flags[14]) { Conference = true; }
-        if (Flags[15]) { Creator = true; }
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        ParticipantsCount = reader.ReadInt32();
-        if (Flags[3]) { Title = reader.ReadString(); }
-        if (Flags[4]) { StreamDcId = reader.ReadInt32(); }
-        if (Flags[5]) { RecordStartDate = reader.ReadInt32(); }
-        if (Flags[7]) { ScheduleDate = reader.ReadInt32(); }
-        if (Flags[10]) { UnmutedVideoCount = reader.ReadInt32(); }
-        UnmutedVideoLimit = reader.ReadInt32();
-        Version = reader.ReadInt32();
-        if (Flags[16]) { InviteLink = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { JoinMuted = true; }
+        if (Flags.IsBitSet(2)) { CanChangeJoinMuted = true; }
+        if (Flags.IsBitSet(6)) { JoinDateAsc = true; }
+        if (Flags.IsBitSet(8)) { ScheduleStartSubscribed = true; }
+        if (Flags.IsBitSet(9)) { CanStartVideo = true; }
+        if (Flags.IsBitSet(11)) { RecordVideoActive = true; }
+        if (Flags.IsBitSet(12)) { RtmpStream = true; }
+        if (Flags.IsBitSet(13)) { ListenersHidden = true; }
+        if (Flags.IsBitSet(14)) { Conference = true; }
+        if (Flags.IsBitSet(15)) { Creator = true; }
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        ParticipantsCount = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { StreamDcId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { RecordStartDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(7)) { ScheduleDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(10)) { UnmutedVideoCount = buffer.ReadInt32(); }
+        UnmutedVideoLimit = buffer.ReadInt32();
+        Version = buffer.ReadInt32();
+        if (Flags.IsBitSet(16)) { InviteLink = buffer.ReadString(); }
     }
 }

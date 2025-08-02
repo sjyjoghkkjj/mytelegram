@@ -12,7 +12,7 @@ public interface IVotesList : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Total number of votes for all options (or only for the chosen <code>option</code>, if provided to <a href="https://corefork.telegram.org/method/messages.getPollVotes">messages.getPollVotes</a>)

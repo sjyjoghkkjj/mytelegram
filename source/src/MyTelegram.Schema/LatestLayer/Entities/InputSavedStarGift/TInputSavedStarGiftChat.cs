@@ -26,9 +26,9 @@ public sealed class TInputSavedStarGiftChat : IInputSavedStarGift
         writer.Write(SavedId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        SavedId = reader.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        SavedId = buffer.ReadInt64();
     }
 }

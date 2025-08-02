@@ -14,7 +14,7 @@ public sealed class TInputGeoPoint : IInputGeoPoint
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Latitude
@@ -33,7 +33,7 @@ public sealed class TInputGeoPoint : IInputGeoPoint
 
     public void ComputeFlag()
     {
-        if (/*AccuracyRadius != 0 && */AccuracyRadius.HasValue) { Flags[0] = true; }
+        if (/*AccuracyRadius != 0 && */AccuracyRadius.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -43,14 +43,14 @@ public sealed class TInputGeoPoint : IInputGeoPoint
         writer.Write(Flags);
         writer.Write(Lat);
         writer.Write(Long);
-        if (Flags[0]) { writer.Write(AccuracyRadius.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(AccuracyRadius.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Lat = reader.ReadDouble();
-        Long = reader.ReadDouble();
-        if (Flags[0]) { AccuracyRadius = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Lat = buffer.ReadDouble();
+        Long = buffer.ReadDouble();
+        if (Flags.IsBitSet(0)) { AccuracyRadius = buffer.ReadInt32(); }
     }
 }

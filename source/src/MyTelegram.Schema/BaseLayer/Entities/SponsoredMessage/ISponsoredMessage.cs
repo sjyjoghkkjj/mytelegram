@@ -12,7 +12,7 @@ public interface ISponsoredMessage : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether the message needs to be labeled as "recommended" instead of "sponsored"
@@ -27,7 +27,7 @@ public interface ISponsoredMessage : IObject
     ///<summary>
     /// Message ID
     ///</summary>
-    byte[] RandomId { get; set; }
+    ReadOnlyMemory<byte> RandomId { get; set; }
 
     ///<summary>
     /// Contains the URL to open when the user clicks on the sponsored message.
@@ -82,4 +82,6 @@ public interface ISponsoredMessage : IObject
     /// If set, contains additional information about the sponsored message to be shown along with the message.
     ///</summary>
     string? AdditionalInfo { get; set; }
+    int? MinDisplayDuration { get; set; }
+    int? MaxDisplayDuration { get; set; }
 }

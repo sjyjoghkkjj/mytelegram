@@ -10,17 +10,17 @@ namespace MyTelegram.Schema.Phone;
 public sealed class RequestDeleteConferenceCallParticipants : IRequest<MyTelegram.Schema.IUpdates>
 {
     public uint ConstructorId => 0x8ca60525;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool OnlyLeft { get; set; }
     public bool Kick { get; set; }
     public MyTelegram.Schema.IInputGroupCall Call { get; set; }
     public TVector<long> Ids { get; set; }
-    public byte[] Block { get; set; }
+    public ReadOnlyMemory<byte> Block { get; set; }
 
     public void ComputeFlag()
     {
-        if (OnlyLeft) { Flags[0] = true; }
-        if (Kick) { Flags[1] = true; }
+        if (OnlyLeft) { Flags = Flags.SetBit(0); }
+        if (Kick) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -34,13 +34,13 @@ public sealed class RequestDeleteConferenceCallParticipants : IRequest<MyTelegra
         writer.Write(Block);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { OnlyLeft = true; }
-        if (Flags[1]) { Kick = true; }
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Ids = reader.Read<TVector<long>>();
-        Block = reader.ReadBytes();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { OnlyLeft = true; }
+        if (Flags.IsBitSet(1)) { Kick = true; }
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Ids = buffer.Read<TVector<long>>();
+        Block = buffer.ReadBytes();
     }
 }

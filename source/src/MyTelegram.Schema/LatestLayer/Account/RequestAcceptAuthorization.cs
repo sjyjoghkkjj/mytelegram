@@ -57,12 +57,12 @@ public sealed class RequestAcceptAuthorization : IRequest<IBool>
         writer.Write(Credentials);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        BotId = reader.ReadInt64();
-        Scope = reader.ReadString();
-        PublicKey = reader.ReadString();
-        ValueHashes = reader.Read<TVector<MyTelegram.Schema.ISecureValueHash>>();
-        Credentials = reader.Read<MyTelegram.Schema.ISecureCredentialsEncrypted>();
+        BotId = buffer.ReadInt64();
+        Scope = buffer.ReadString();
+        PublicKey = buffer.ReadString();
+        ValueHashes = buffer.Read<TVector<MyTelegram.Schema.ISecureValueHash>>();
+        Credentials = buffer.Read<MyTelegram.Schema.ISecureCredentialsEncrypted>();
     }
 }

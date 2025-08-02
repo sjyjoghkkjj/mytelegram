@@ -39,9 +39,9 @@ public sealed class RequestSetEncryptedTyping : IRequest<IBool>
         writer.Write(Typing);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputEncryptedChat>();
-        Typing = reader.Read();
+        Peer = buffer.Read<MyTelegram.Schema.IInputEncryptedChat>();
+        Typing = buffer.Read();
     }
 }

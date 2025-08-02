@@ -24,7 +24,7 @@ public sealed class RequestGetBotCallbackAnswer : IRequest<MyTelegram.Schema.Mes
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a "play game" button
@@ -46,7 +46,7 @@ public sealed class RequestGetBotCallbackAnswer : IRequest<MyTelegram.Schema.Mes
     ///<summary>
     /// Callback data
     ///</summary>
-    public byte[]? Data { get; set; }
+    public ReadOnlyMemory<byte>? Data { get; set; }
 
     ///<summary>
     /// For buttons <a href="https://corefork.telegram.org/constructor/keyboardButtonCallback">requiring you to verify your identity with your 2FA password</a>, the SRP payload generated using <a href="https://corefork.telegram.org/api/srp">SRP</a>.
@@ -56,9 +56,9 @@ public sealed class RequestGetBotCallbackAnswer : IRequest<MyTelegram.Schema.Mes
 
     public void ComputeFlag()
     {
-        if (Game) { Flags[1] = true; }
-        if (Data != null) { Flags[0] = true; }
-        if (Password != null) { Flags[2] = true; }
+        if (Game) { Flags = Flags.SetBit(1); }
+        if (Data != null) { Flags = Flags.SetBit(0); }
+        if (Password != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -68,17 +68,17 @@ public sealed class RequestGetBotCallbackAnswer : IRequest<MyTelegram.Schema.Mes
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(MsgId);
-        if (Flags[0]) { writer.Write(Data); }
-        if (Flags[2]) { writer.Write(Password); }
+        if (Flags.IsBitSet(0)) { writer.Write(Data); }
+        if (Flags.IsBitSet(2)) { writer.Write(Password); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Game = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.ReadInt32();
-        if (Flags[0]) { Data = reader.ReadBytes(); }
-        if (Flags[2]) { Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Game = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Data = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(2)) { Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>(); }
     }
 }

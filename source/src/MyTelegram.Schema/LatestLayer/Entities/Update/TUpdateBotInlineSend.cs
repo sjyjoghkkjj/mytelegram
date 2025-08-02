@@ -14,7 +14,7 @@ public sealed class TUpdateBotInlineSend : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The user that chose the result
@@ -45,8 +45,8 @@ public sealed class TUpdateBotInlineSend : IUpdate
 
     public void ComputeFlag()
     {
-        if (Geo != null) { Flags[0] = true; }
-        if (MsgId != null) { Flags[1] = true; }
+        if (Geo != null) { Flags = Flags.SetBit(0); }
+        if (MsgId != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -56,18 +56,18 @@ public sealed class TUpdateBotInlineSend : IUpdate
         writer.Write(Flags);
         writer.Write(UserId);
         writer.Write(Query);
-        if (Flags[0]) { writer.Write(Geo); }
+        if (Flags.IsBitSet(0)) { writer.Write(Geo); }
         writer.Write(Id);
-        if (Flags[1]) { writer.Write(MsgId); }
+        if (Flags.IsBitSet(1)) { writer.Write(MsgId); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        UserId = reader.ReadInt64();
-        Query = reader.ReadString();
-        if (Flags[0]) { Geo = reader.Read<MyTelegram.Schema.IGeoPoint>(); }
-        Id = reader.ReadString();
-        if (Flags[1]) { MsgId = reader.Read<MyTelegram.Schema.IInputBotInlineMessageID>(); }
+        Flags = buffer.ReadInt32();
+        UserId = buffer.ReadInt64();
+        Query = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Geo = buffer.Read<MyTelegram.Schema.IGeoPoint>(); }
+        Id = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { MsgId = buffer.Read<MyTelegram.Schema.IInputBotInlineMessageID>(); }
     }
 }

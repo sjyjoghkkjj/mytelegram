@@ -28,8 +28,8 @@ public sealed class TTextConcat : IRichText
         writer.Write(Texts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Texts = reader.Read<TVector<MyTelegram.Schema.IRichText>>();
+        Texts = buffer.Read<TVector<MyTelegram.Schema.IRichText>>();
     }
 }

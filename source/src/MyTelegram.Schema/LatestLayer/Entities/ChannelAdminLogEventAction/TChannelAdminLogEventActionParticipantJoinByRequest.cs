@@ -35,9 +35,9 @@ public sealed class TChannelAdminLogEventActionParticipantJoinByRequest : IChann
         writer.Write(ApprovedBy);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Invite = reader.Read<MyTelegram.Schema.IExportedChatInvite>();
-        ApprovedBy = reader.ReadInt64();
+        Invite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>();
+        ApprovedBy = buffer.ReadInt64();
     }
 }

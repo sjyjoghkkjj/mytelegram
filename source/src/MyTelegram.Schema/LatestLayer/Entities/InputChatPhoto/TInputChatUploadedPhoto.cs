@@ -14,7 +14,7 @@ public sealed class TInputChatUploadedPhoto : IInputChatPhoto
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// File saved in parts using the method <a href="https://corefork.telegram.org/method/upload.saveFilePart">upload.saveFilePart</a>
@@ -41,10 +41,10 @@ public sealed class TInputChatUploadedPhoto : IInputChatPhoto
 
     public void ComputeFlag()
     {
-        if (File != null) { Flags[0] = true; }
-        if (Video != null) { Flags[1] = true; }
-        if (VideoStartTs>0) { Flags[2] = true; }
-        if (VideoEmojiMarkup != null) { Flags[3] = true; }
+        if (File != null) { Flags = Flags.SetBit(0); }
+        if (Video != null) { Flags = Flags.SetBit(1); }
+        if (VideoStartTs>0) { Flags = Flags.SetBit(2); }
+        if (VideoEmojiMarkup != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -52,18 +52,18 @@ public sealed class TInputChatUploadedPhoto : IInputChatPhoto
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(File); }
-        if (Flags[1]) { writer.Write(Video); }
-        if (Flags[2]) { writer.Write(VideoStartTs.Value); }
-        if (Flags[3]) { writer.Write(VideoEmojiMarkup); }
+        if (Flags.IsBitSet(0)) { writer.Write(File); }
+        if (Flags.IsBitSet(1)) { writer.Write(Video); }
+        if (Flags.IsBitSet(2)) { writer.Write(VideoStartTs.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(VideoEmojiMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { File = reader.Read<MyTelegram.Schema.IInputFile>(); }
-        if (Flags[1]) { Video = reader.Read<MyTelegram.Schema.IInputFile>(); }
-        if (Flags[2]) { VideoStartTs = reader.ReadDouble(); }
-        if (Flags[3]) { VideoEmojiMarkup = reader.Read<MyTelegram.Schema.IVideoSize>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { File = buffer.Read<MyTelegram.Schema.IInputFile>(); }
+        if (Flags.IsBitSet(1)) { Video = buffer.Read<MyTelegram.Schema.IInputFile>(); }
+        if (Flags.IsBitSet(2)) { VideoStartTs = buffer.ReadDouble(); }
+        if (Flags.IsBitSet(3)) { VideoEmojiMarkup = buffer.Read<MyTelegram.Schema.IVideoSize>(); }
     }
 }

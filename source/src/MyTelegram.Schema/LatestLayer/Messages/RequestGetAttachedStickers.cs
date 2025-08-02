@@ -32,8 +32,8 @@ public sealed class RequestGetAttachedStickers : IRequest<TVector<MyTelegram.Sch
         writer.Write(Media);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Media = reader.Read<MyTelegram.Schema.IInputStickeredMedia>();
+        Media = buffer.Read<MyTelegram.Schema.IInputStickeredMedia>();
     }
 }

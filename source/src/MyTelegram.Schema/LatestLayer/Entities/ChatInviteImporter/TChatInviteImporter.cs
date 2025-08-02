@@ -14,7 +14,7 @@ public sealed class TChatInviteImporter : IChatInviteImporter
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this user currently has a pending <a href="https://corefork.telegram.org/api/invites#join-requests">join request »</a>
@@ -50,10 +50,10 @@ public sealed class TChatInviteImporter : IChatInviteImporter
 
     public void ComputeFlag()
     {
-        if (Requested) { Flags[0] = true; }
-        if (ViaChatlist) { Flags[3] = true; }
-        if (About != null) { Flags[2] = true; }
-        if (/*ApprovedBy != 0 &&*/ ApprovedBy.HasValue) { Flags[1] = true; }
+        if (Requested) { Flags = Flags.SetBit(0); }
+        if (ViaChatlist) { Flags = Flags.SetBit(3); }
+        if (About != null) { Flags = Flags.SetBit(2); }
+        if (/*ApprovedBy != 0 &&*/ ApprovedBy.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -63,18 +63,18 @@ public sealed class TChatInviteImporter : IChatInviteImporter
         writer.Write(Flags);
         writer.Write(UserId);
         writer.Write(Date);
-        if (Flags[2]) { writer.Write(About); }
-        if (Flags[1]) { writer.Write(ApprovedBy.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(About); }
+        if (Flags.IsBitSet(1)) { writer.Write(ApprovedBy.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Requested = true; }
-        if (Flags[3]) { ViaChatlist = true; }
-        UserId = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        if (Flags[2]) { About = reader.ReadString(); }
-        if (Flags[1]) { ApprovedBy = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Requested = true; }
+        if (Flags.IsBitSet(3)) { ViaChatlist = true; }
+        UserId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { About = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { ApprovedBy = buffer.ReadInt64(); }
     }
 }

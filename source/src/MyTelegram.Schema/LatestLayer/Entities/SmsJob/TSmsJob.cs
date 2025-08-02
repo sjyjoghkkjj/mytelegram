@@ -40,10 +40,10 @@ public sealed class TSmsJob : ISmsJob
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        JobId = reader.ReadString();
-        PhoneNumber = reader.ReadString();
-        Text = reader.ReadString();
+        JobId = buffer.ReadString();
+        PhoneNumber = buffer.ReadString();
+        Text = buffer.ReadString();
     }
 }

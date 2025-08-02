@@ -20,7 +20,7 @@ public sealed class RequestToggleDialogPin : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to pin or unpin the dialog
@@ -36,7 +36,7 @@ public sealed class RequestToggleDialogPin : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Pinned) { Flags[0] = true; }
+        if (Pinned) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -48,10 +48,10 @@ public sealed class RequestToggleDialogPin : IRequest<IBool>
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Pinned = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputDialogPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Pinned = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputDialogPeer>();
     }
 }

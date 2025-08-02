@@ -40,10 +40,10 @@ public sealed class TRecentMeUrls : IRecentMeUrls
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Urls = reader.Read<TVector<MyTelegram.Schema.IRecentMeUrl>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Urls = buffer.Read<TVector<MyTelegram.Schema.IRecentMeUrl>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

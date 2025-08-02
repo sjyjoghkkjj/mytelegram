@@ -8,7 +8,7 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TChangeNoop : IChange
 {
     public uint ConstructorId => 0xDEB4A41B;
-    public byte[] Nonce { get; set; }
+    public ReadOnlyMemory<byte> Nonce { get; set; }
 
     public void ComputeFlag()
     {
@@ -22,8 +22,8 @@ public sealed class TChangeNoop : IChange
         writer.WriteRawBytes(Nonce);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Nonce = reader.ReadInt256();
+        Nonce = buffer.ReadInt256();
     }
 }

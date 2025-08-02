@@ -34,9 +34,9 @@ public sealed class TNotificationSoundLocal : INotificationSound
         writer.Write(Data);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
-        Data = reader.ReadString();
+        Title = buffer.ReadString();
+        Data = buffer.ReadString();
     }
 }

@@ -14,7 +14,7 @@ public sealed class RequestGetSavedReactionTags : IRequest<MyTelegram.Schema.Mes
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, returns tags only used in the specified <a href="https://corefork.telegram.org/api/saved-messages#saved-message-dialogs">saved message dialog</a>.
@@ -29,7 +29,7 @@ public sealed class RequestGetSavedReactionTags : IRequest<MyTelegram.Schema.Mes
 
     public void ComputeFlag()
     {
-        if (Peer != null) { Flags[0] = true; }
+        if (Peer != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -38,14 +38,14 @@ public sealed class RequestGetSavedReactionTags : IRequest<MyTelegram.Schema.Mes
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Peer); }
+        if (Flags.IsBitSet(0)) { writer.Write(Peer); }
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Peer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Peer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        Hash = buffer.ReadInt64();
     }
 }

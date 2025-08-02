@@ -14,7 +14,7 @@ public sealed class TMissingInvitee : IMissingInvitee
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, we could not add the user <em>only because</em> the current account needs to purchase a <a href="https://corefork.telegram.org/api/premium">Telegram Premium</a> subscription to complete the operation.
@@ -35,8 +35,8 @@ public sealed class TMissingInvitee : IMissingInvitee
 
     public void ComputeFlag()
     {
-        if (PremiumWouldAllowInvite) { Flags[0] = true; }
-        if (PremiumRequiredForPm) { Flags[1] = true; }
+        if (PremiumWouldAllowInvite) { Flags = Flags.SetBit(0); }
+        if (PremiumRequiredForPm) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class TMissingInvitee : IMissingInvitee
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { PremiumWouldAllowInvite = true; }
-        if (Flags[1]) { PremiumRequiredForPm = true; }
-        UserId = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { PremiumWouldAllowInvite = true; }
+        if (Flags.IsBitSet(1)) { PremiumRequiredForPm = true; }
+        UserId = buffer.ReadInt64();
     }
 }

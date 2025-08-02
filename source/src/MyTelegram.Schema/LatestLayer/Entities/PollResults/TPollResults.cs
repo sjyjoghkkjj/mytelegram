@@ -14,7 +14,7 @@ public sealed class TPollResults : IPollResults
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Similar to <a href="https://corefork.telegram.org/api/min">min</a> objects, used for poll constructors that are the same for all users so they don't have the option chosen by the current user (you can use <a href="https://corefork.telegram.org/method/messages.getPollResults">messages.getPollResults</a> to get the full poll results).
@@ -49,12 +49,12 @@ public sealed class TPollResults : IPollResults
 
     public void ComputeFlag()
     {
-        if (Min) { Flags[0] = true; }
-        if (Results?.Count > 0) { Flags[1] = true; }
-        if (/*TotalVoters != 0 && */TotalVoters.HasValue) { Flags[2] = true; }
-        if (RecentVoters?.Count > 0) { Flags[3] = true; }
-        if (Solution != null) { Flags[4] = true; }
-        if (SolutionEntities?.Count > 0) { Flags[4] = true; }
+        if (Min) { Flags = Flags.SetBit(0); }
+        if (Results?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (/*TotalVoters != 0 && */TotalVoters.HasValue) { Flags = Flags.SetBit(2); }
+        if (RecentVoters?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (Solution != null) { Flags = Flags.SetBit(4); }
+        if (SolutionEntities?.Count > 0) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -62,21 +62,21 @@ public sealed class TPollResults : IPollResults
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(Results); }
-        if (Flags[2]) { writer.Write(TotalVoters.Value); }
-        if (Flags[3]) { writer.Write(RecentVoters); }
-        if (Flags[4]) { writer.Write(Solution); }
-        if (Flags[4]) { writer.Write(SolutionEntities); }
+        if (Flags.IsBitSet(1)) { writer.Write(Results); }
+        if (Flags.IsBitSet(2)) { writer.Write(TotalVoters.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(RecentVoters); }
+        if (Flags.IsBitSet(4)) { writer.Write(Solution); }
+        if (Flags.IsBitSet(4)) { writer.Write(SolutionEntities); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Min = true; }
-        if (Flags[1]) { Results = reader.Read<TVector<MyTelegram.Schema.IPollAnswerVoters>>(); }
-        if (Flags[2]) { TotalVoters = reader.ReadInt32(); }
-        if (Flags[3]) { RecentVoters = reader.Read<TVector<MyTelegram.Schema.IPeer>>(); }
-        if (Flags[4]) { Solution = reader.ReadString(); }
-        if (Flags[4]) { SolutionEntities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Min = true; }
+        if (Flags.IsBitSet(1)) { Results = buffer.Read<TVector<MyTelegram.Schema.IPollAnswerVoters>>(); }
+        if (Flags.IsBitSet(2)) { TotalVoters = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { RecentVoters = buffer.Read<TVector<MyTelegram.Schema.IPeer>>(); }
+        if (Flags.IsBitSet(4)) { Solution = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { SolutionEntities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
     }
 }

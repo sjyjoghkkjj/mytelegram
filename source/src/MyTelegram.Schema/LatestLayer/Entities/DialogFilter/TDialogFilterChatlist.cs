@@ -14,7 +14,7 @@ public sealed class TDialogFilterChatlist : IDialogFilter
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the current user has created some <a href="https://corefork.telegram.org/api/links#chat-folder-links">chat folder deep links »</a> to share the folder as well.
@@ -56,10 +56,10 @@ public sealed class TDialogFilterChatlist : IDialogFilter
 
     public void ComputeFlag()
     {
-        if (HasMyInvites) { Flags[26] = true; }
-        if (TitleNoanimate) { Flags[28] = true; }
-        if (Emoticon != null) { Flags[25] = true; }
-        if (/*Color != 0 && */Color.HasValue) { Flags[27] = true; }
+        if (HasMyInvites) { Flags = Flags.SetBit(26); }
+        if (TitleNoanimate) { Flags = Flags.SetBit(28); }
+        if (Emoticon != null) { Flags = Flags.SetBit(25); }
+        if (/*Color != 0 && */Color.HasValue) { Flags = Flags.SetBit(27); }
 
     }
 
@@ -70,22 +70,22 @@ public sealed class TDialogFilterChatlist : IDialogFilter
         writer.Write(Flags);
         writer.Write(Id);
         writer.Write(Title);
-        if (Flags[25]) { writer.Write(Emoticon); }
-        if (Flags[27]) { writer.Write(Color.Value); }
+        if (Flags.IsBitSet(25)) { writer.Write(Emoticon); }
+        if (Flags.IsBitSet(27)) { writer.Write(Color.Value); }
         writer.Write(PinnedPeers);
         writer.Write(IncludePeers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[26]) { HasMyInvites = true; }
-        if (Flags[28]) { TitleNoanimate = true; }
-        Id = reader.ReadInt32();
-        Title = reader.Read<MyTelegram.Schema.ITextWithEntities>();
-        if (Flags[25]) { Emoticon = reader.ReadString(); }
-        if (Flags[27]) { Color = reader.ReadInt32(); }
-        PinnedPeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
-        IncludePeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(26)) { HasMyInvites = true; }
+        if (Flags.IsBitSet(28)) { TitleNoanimate = true; }
+        Id = buffer.ReadInt32();
+        Title = buffer.Read<MyTelegram.Schema.ITextWithEntities>();
+        if (Flags.IsBitSet(25)) { Emoticon = buffer.ReadString(); }
+        if (Flags.IsBitSet(27)) { Color = buffer.ReadInt32(); }
+        PinnedPeers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        IncludePeers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
     }
 }

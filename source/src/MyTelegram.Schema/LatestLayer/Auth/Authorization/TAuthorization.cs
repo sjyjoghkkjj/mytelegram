@@ -14,7 +14,7 @@ public sealed class TAuthorization : IAuthorization
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Suggests the user to set up a 2-step verification password to be able to log in again
@@ -35,7 +35,7 @@ public sealed class TAuthorization : IAuthorization
     ///<summary>
     /// A <a href="https://corefork.telegram.org/api/auth#future-auth-tokens">future auth token</a>
     ///</summary>
-    public byte[]? FutureAuthToken { get; set; }
+    public ReadOnlyMemory<byte>? FutureAuthToken { get; set; }
 
     ///<summary>
     /// Info on authorized user
@@ -45,10 +45,10 @@ public sealed class TAuthorization : IAuthorization
 
     public void ComputeFlag()
     {
-        if (SetupPasswordRequired) { Flags[1] = true; }
-        if (/*OtherwiseReloginDays != 0 && */OtherwiseReloginDays.HasValue) { Flags[1] = true; }
-        if (/*TmpSessions != 0 && */TmpSessions.HasValue) { Flags[0] = true; }
-        if (FutureAuthToken != null) { Flags[2] = true; }
+        if (SetupPasswordRequired) { Flags = Flags.SetBit(1); }
+        if (/*OtherwiseReloginDays != 0 && */OtherwiseReloginDays.HasValue) { Flags = Flags.SetBit(1); }
+        if (/*TmpSessions != 0 && */TmpSessions.HasValue) { Flags = Flags.SetBit(0); }
+        if (FutureAuthToken != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -57,19 +57,19 @@ public sealed class TAuthorization : IAuthorization
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(OtherwiseReloginDays.Value); }
-        if (Flags[0]) { writer.Write(TmpSessions.Value); }
-        if (Flags[2]) { writer.Write(FutureAuthToken); }
+        if (Flags.IsBitSet(1)) { writer.Write(OtherwiseReloginDays.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(TmpSessions.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(FutureAuthToken); }
         writer.Write(User);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { SetupPasswordRequired = true; }
-        if (Flags[1]) { OtherwiseReloginDays = reader.ReadInt32(); }
-        if (Flags[0]) { TmpSessions = reader.ReadInt32(); }
-        if (Flags[2]) { FutureAuthToken = reader.ReadBytes(); }
-        User = reader.Read<MyTelegram.Schema.IUser>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { SetupPasswordRequired = true; }
+        if (Flags.IsBitSet(1)) { OtherwiseReloginDays = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { TmpSessions = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { FutureAuthToken = buffer.ReadBytes(); }
+        User = buffer.Read<MyTelegram.Schema.IUser>();
     }
 }

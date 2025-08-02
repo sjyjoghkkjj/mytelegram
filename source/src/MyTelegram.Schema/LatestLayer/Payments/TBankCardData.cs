@@ -34,9 +34,9 @@ public sealed class TBankCardData : IBankCardData
         writer.Write(OpenUrls);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
-        OpenUrls = reader.Read<TVector<MyTelegram.Schema.IBankCardOpenUrl>>();
+        Title = buffer.ReadString();
+        OpenUrls = buffer.Read<TVector<MyTelegram.Schema.IBankCardOpenUrl>>();
     }
 }

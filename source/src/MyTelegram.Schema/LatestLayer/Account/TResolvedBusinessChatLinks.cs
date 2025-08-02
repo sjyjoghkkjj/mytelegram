@@ -14,7 +14,7 @@ public sealed class TResolvedBusinessChatLinks : IResolvedBusinessChatLinks
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Destination peer
@@ -44,7 +44,7 @@ public sealed class TResolvedBusinessChatLinks : IResolvedBusinessChatLinks
 
     public void ComputeFlag()
     {
-        if (Entities?.Count > 0) { Flags[0] = true; }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -55,18 +55,18 @@ public sealed class TResolvedBusinessChatLinks : IResolvedBusinessChatLinks
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Message);
-        if (Flags[0]) { writer.Write(Entities); }
+        if (Flags.IsBitSet(0)) { writer.Write(Entities); }
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Message = reader.ReadString();
-        if (Flags[0]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Message = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

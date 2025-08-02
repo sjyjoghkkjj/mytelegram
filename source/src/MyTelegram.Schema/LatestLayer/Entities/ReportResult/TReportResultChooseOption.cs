@@ -34,9 +34,9 @@ public sealed class TReportResultChooseOption : IReportResult
         writer.Write(Options);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
-        Options = reader.Read<TVector<MyTelegram.Schema.IMessageReportOption>>();
+        Title = buffer.ReadString();
+        Options = buffer.Read<TVector<MyTelegram.Schema.IMessageReportOption>>();
     }
 }

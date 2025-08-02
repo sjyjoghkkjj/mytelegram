@@ -24,8 +24,8 @@ public sealed class TCanSendStoryCount : ICanSendStoryCount
         writer.Write(CountRemains);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        CountRemains = reader.ReadInt32();
+        CountRemains = buffer.ReadInt32();
     }
 }

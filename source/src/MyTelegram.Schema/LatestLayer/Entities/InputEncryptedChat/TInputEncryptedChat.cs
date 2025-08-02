@@ -34,9 +34,9 @@ public sealed class TInputEncryptedChat : IInputEncryptedChat
         writer.Write(AccessHash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt32();
-        AccessHash = reader.ReadInt64();
+        ChatId = buffer.ReadInt32();
+        AccessHash = buffer.ReadInt64();
     }
 }

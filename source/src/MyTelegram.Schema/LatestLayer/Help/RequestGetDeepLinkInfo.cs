@@ -28,8 +28,8 @@ public sealed class RequestGetDeepLinkInfo : IRequest<MyTelegram.Schema.Help.IDe
         writer.Write(Path);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Path = reader.ReadString();
+        Path = buffer.ReadString();
     }
 }

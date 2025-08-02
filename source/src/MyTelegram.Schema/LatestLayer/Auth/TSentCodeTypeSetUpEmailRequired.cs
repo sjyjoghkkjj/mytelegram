@@ -14,7 +14,7 @@ public sealed class TSentCodeTypeSetUpEmailRequired : ISentCodeType
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether authorization through Apple ID is allowed
@@ -30,8 +30,8 @@ public sealed class TSentCodeTypeSetUpEmailRequired : ISentCodeType
 
     public void ComputeFlag()
     {
-        if (AppleSigninAllowed) { Flags[0] = true; }
-        if (GoogleSigninAllowed) { Flags[1] = true; }
+        if (AppleSigninAllowed) { Flags = Flags.SetBit(0); }
+        if (GoogleSigninAllowed) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,10 +42,10 @@ public sealed class TSentCodeTypeSetUpEmailRequired : ISentCodeType
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AppleSigninAllowed = true; }
-        if (Flags[1]) { GoogleSigninAllowed = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AppleSigninAllowed = true; }
+        if (Flags.IsBitSet(1)) { GoogleSigninAllowed = true; }
     }
 }

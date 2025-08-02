@@ -35,9 +35,9 @@ public sealed class TTextEmail : IRichText
         writer.Write(Email);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.Read<MyTelegram.Schema.IRichText>();
-        Email = reader.ReadString();
+        Text = buffer.Read<MyTelegram.Schema.IRichText>();
+        Email = buffer.ReadString();
     }
 }

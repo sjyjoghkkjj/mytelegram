@@ -14,7 +14,7 @@ public sealed class TCountry : ICountry
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this country should not be shown in the list
@@ -44,8 +44,8 @@ public sealed class TCountry : ICountry
 
     public void ComputeFlag()
     {
-        if (Hidden) { Flags[0] = true; }
-        if (Name != null) { Flags[1] = true; }
+        if (Hidden) { Flags = Flags.SetBit(0); }
+        if (Name != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -56,17 +56,17 @@ public sealed class TCountry : ICountry
         writer.Write(Flags);
         writer.Write(Iso2);
         writer.Write(DefaultName);
-        if (Flags[1]) { writer.Write(Name); }
+        if (Flags.IsBitSet(1)) { writer.Write(Name); }
         writer.Write(CountryCodes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Hidden = true; }
-        Iso2 = reader.ReadString();
-        DefaultName = reader.ReadString();
-        if (Flags[1]) { Name = reader.ReadString(); }
-        CountryCodes = reader.Read<TVector<MyTelegram.Schema.Help.ICountryCode>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Hidden = true; }
+        Iso2 = buffer.ReadString();
+        DefaultName = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { Name = buffer.ReadString(); }
+        CountryCodes = buffer.Read<TVector<MyTelegram.Schema.Help.ICountryCode>>();
     }
 }

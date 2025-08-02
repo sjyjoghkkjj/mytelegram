@@ -48,11 +48,11 @@ public sealed class TInputBotInlineResultPhoto : IInputBotInlineResult
         writer.Write(SendMessage);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadString();
-        Type = reader.ReadString();
-        Photo = reader.Read<MyTelegram.Schema.IInputPhoto>();
-        SendMessage = reader.Read<MyTelegram.Schema.IInputBotInlineMessage>();
+        Id = buffer.ReadString();
+        Type = buffer.ReadString();
+        Photo = buffer.Read<MyTelegram.Schema.IInputPhoto>();
+        SendMessage = buffer.Read<MyTelegram.Schema.IInputBotInlineMessage>();
     }
 }

@@ -46,10 +46,10 @@ public sealed class RequestReportPeer : IRequest<IBool>
         writer.Write(Message);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Reason = reader.Read<MyTelegram.Schema.IReportReason>();
-        Message = reader.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Reason = buffer.Read<MyTelegram.Schema.IReportReason>();
+        Message = buffer.ReadString();
     }
 }

@@ -24,7 +24,7 @@ public sealed class RequestCreateChannel : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to create a <a href="https://corefork.telegram.org/api/channel">channel</a>
@@ -78,13 +78,13 @@ public sealed class RequestCreateChannel : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (Broadcast) { Flags[0] = true; }
-        if (Megagroup) { Flags[1] = true; }
-        if (ForImport) { Flags[3] = true; }
-        if (Forum) { Flags[5] = true; }
-        if (GeoPoint != null) { Flags[2] = true; }
-        if (Address != null) { Flags[2] = true; }
-        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags[4] = true; }
+        if (Broadcast) { Flags = Flags.SetBit(0); }
+        if (Megagroup) { Flags = Flags.SetBit(1); }
+        if (ForImport) { Flags = Flags.SetBit(3); }
+        if (Forum) { Flags = Flags.SetBit(5); }
+        if (GeoPoint != null) { Flags = Flags.SetBit(2); }
+        if (Address != null) { Flags = Flags.SetBit(2); }
+        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -94,22 +94,22 @@ public sealed class RequestCreateChannel : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Flags);
         writer.Write(Title);
         writer.Write(About);
-        if (Flags[2]) { writer.Write(GeoPoint); }
-        if (Flags[2]) { writer.Write(Address); }
-        if (Flags[4]) { writer.Write(TtlPeriod.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(GeoPoint); }
+        if (Flags.IsBitSet(2)) { writer.Write(Address); }
+        if (Flags.IsBitSet(4)) { writer.Write(TtlPeriod.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Broadcast = true; }
-        if (Flags[1]) { Megagroup = true; }
-        if (Flags[3]) { ForImport = true; }
-        if (Flags[5]) { Forum = true; }
-        Title = reader.ReadString();
-        About = reader.ReadString();
-        if (Flags[2]) { GeoPoint = reader.Read<MyTelegram.Schema.IInputGeoPoint>(); }
-        if (Flags[2]) { Address = reader.ReadString(); }
-        if (Flags[4]) { TtlPeriod = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Broadcast = true; }
+        if (Flags.IsBitSet(1)) { Megagroup = true; }
+        if (Flags.IsBitSet(3)) { ForImport = true; }
+        if (Flags.IsBitSet(5)) { Forum = true; }
+        Title = buffer.ReadString();
+        About = buffer.ReadString();
+        if (Flags.IsBitSet(2)) { GeoPoint = buffer.Read<MyTelegram.Schema.IInputGeoPoint>(); }
+        if (Flags.IsBitSet(2)) { Address = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { TtlPeriod = buffer.ReadInt32(); }
     }
 }

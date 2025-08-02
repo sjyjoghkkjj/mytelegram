@@ -47,11 +47,11 @@ public sealed class TUpdateBotStopped : IUpdate
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        Stopped = reader.Read();
-        Qts = reader.ReadInt32();
+        UserId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        Stopped = buffer.Read();
+        Qts = buffer.ReadInt32();
     }
 }

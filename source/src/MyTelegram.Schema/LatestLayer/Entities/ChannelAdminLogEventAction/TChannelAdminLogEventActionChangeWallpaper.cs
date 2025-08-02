@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionChangeWallpaper : IChannelAdminLo
         writer.Write(NewValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevValue = reader.Read<MyTelegram.Schema.IWallPaper>();
-        NewValue = reader.Read<MyTelegram.Schema.IWallPaper>();
+        PrevValue = buffer.Read<MyTelegram.Schema.IWallPaper>();
+        NewValue = buffer.Read<MyTelegram.Schema.IWallPaper>();
     }
 }

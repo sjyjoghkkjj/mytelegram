@@ -14,7 +14,7 @@ public sealed class TUpdateShortChatMessage : IUpdates
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the message is outgoing
@@ -104,15 +104,15 @@ public sealed class TUpdateShortChatMessage : IUpdates
 
     public void ComputeFlag()
     {
-        if (Out) { Flags[1] = true; }
-        if (Mentioned) { Flags[4] = true; }
-        if (MediaUnread) { Flags[5] = true; }
-        if (Silent) { Flags[13] = true; }
-        if (FwdFrom != null) { Flags[2] = true; }
-        if (/*ViaBotId != 0 &&*/ ViaBotId.HasValue) { Flags[11] = true; }
-        if (ReplyTo != null) { Flags[3] = true; }
-        if (Entities?.Count > 0) { Flags[7] = true; }
-        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags[25] = true; }
+        if (Out) { Flags = Flags.SetBit(1); }
+        if (Mentioned) { Flags = Flags.SetBit(4); }
+        if (MediaUnread) { Flags = Flags.SetBit(5); }
+        if (Silent) { Flags = Flags.SetBit(13); }
+        if (FwdFrom != null) { Flags = Flags.SetBit(2); }
+        if (/*ViaBotId != 0 &&*/ ViaBotId.HasValue) { Flags = Flags.SetBit(11); }
+        if (ReplyTo != null) { Flags = Flags.SetBit(3); }
+        if (Entities?.Count > 0) { Flags = Flags.SetBit(7); }
+        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags = Flags.SetBit(25); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -127,31 +127,31 @@ public sealed class TUpdateShortChatMessage : IUpdates
         writer.Write(Pts);
         writer.Write(PtsCount);
         writer.Write(Date);
-        if (Flags[2]) { writer.Write(FwdFrom); }
-        if (Flags[11]) { writer.Write(ViaBotId.Value); }
-        if (Flags[3]) { writer.Write(ReplyTo); }
-        if (Flags[7]) { writer.Write(Entities); }
-        if (Flags[25]) { writer.Write(TtlPeriod.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(FwdFrom); }
+        if (Flags.IsBitSet(11)) { writer.Write(ViaBotId.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(ReplyTo); }
+        if (Flags.IsBitSet(7)) { writer.Write(Entities); }
+        if (Flags.IsBitSet(25)) { writer.Write(TtlPeriod.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Out = true; }
-        if (Flags[4]) { Mentioned = true; }
-        if (Flags[5]) { MediaUnread = true; }
-        if (Flags[13]) { Silent = true; }
-        Id = reader.ReadInt32();
-        FromId = reader.ReadInt64();
-        ChatId = reader.ReadInt64();
-        Message = reader.ReadString();
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        if (Flags[2]) { FwdFrom = reader.Read<MyTelegram.Schema.IMessageFwdHeader>(); }
-        if (Flags[11]) { ViaBotId = reader.ReadInt64(); }
-        if (Flags[3]) { ReplyTo = reader.Read<MyTelegram.Schema.IMessageReplyHeader>(); }
-        if (Flags[7]) { Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        if (Flags[25]) { TtlPeriod = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Out = true; }
+        if (Flags.IsBitSet(4)) { Mentioned = true; }
+        if (Flags.IsBitSet(5)) { MediaUnread = true; }
+        if (Flags.IsBitSet(13)) { Silent = true; }
+        Id = buffer.ReadInt32();
+        FromId = buffer.ReadInt64();
+        ChatId = buffer.ReadInt64();
+        Message = buffer.ReadString();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { FwdFrom = buffer.Read<MyTelegram.Schema.IMessageFwdHeader>(); }
+        if (Flags.IsBitSet(11)) { ViaBotId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(3)) { ReplyTo = buffer.Read<MyTelegram.Schema.IMessageReplyHeader>(); }
+        if (Flags.IsBitSet(7)) { Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        if (Flags.IsBitSet(25)) { TtlPeriod = buffer.ReadInt32(); }
     }
 }

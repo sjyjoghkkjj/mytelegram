@@ -24,8 +24,8 @@ public sealed class TUsers : IUsers
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

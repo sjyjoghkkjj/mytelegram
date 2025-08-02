@@ -43,9 +43,9 @@ public sealed class RequestEditTitle : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Title);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Title = reader.ReadString();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Title = buffer.ReadString();
     }
 }

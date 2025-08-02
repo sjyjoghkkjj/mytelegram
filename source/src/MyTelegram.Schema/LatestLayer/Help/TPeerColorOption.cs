@@ -14,7 +14,7 @@ public sealed class TPeerColorOption : IPeerColorOption
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this palette should not be displayed as an option to the user when choosing a palette to apply to profile pages or message accents.
@@ -51,11 +51,11 @@ public sealed class TPeerColorOption : IPeerColorOption
 
     public void ComputeFlag()
     {
-        if (Hidden) { Flags[0] = true; }
-        if (Colors != null) { Flags[1] = true; }
-        if (DarkColors != null) { Flags[2] = true; }
-        if (/*ChannelMinLevel != 0 && */ChannelMinLevel.HasValue) { Flags[3] = true; }
-        if (/*GroupMinLevel != 0 && */GroupMinLevel.HasValue) { Flags[4] = true; }
+        if (Hidden) { Flags = Flags.SetBit(0); }
+        if (Colors != null) { Flags = Flags.SetBit(1); }
+        if (DarkColors != null) { Flags = Flags.SetBit(2); }
+        if (/*ChannelMinLevel != 0 && */ChannelMinLevel.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*GroupMinLevel != 0 && */GroupMinLevel.HasValue) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -64,20 +64,20 @@ public sealed class TPeerColorOption : IPeerColorOption
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(ColorId);
-        if (Flags[1]) { writer.Write(Colors); }
-        if (Flags[2]) { writer.Write(DarkColors); }
-        if (Flags[3]) { writer.Write(ChannelMinLevel.Value); }
-        if (Flags[4]) { writer.Write(GroupMinLevel.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Colors); }
+        if (Flags.IsBitSet(2)) { writer.Write(DarkColors); }
+        if (Flags.IsBitSet(3)) { writer.Write(ChannelMinLevel.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(GroupMinLevel.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Hidden = true; }
-        ColorId = reader.ReadInt32();
-        if (Flags[1]) { Colors = reader.Read<MyTelegram.Schema.Help.IPeerColorSet>(); }
-        if (Flags[2]) { DarkColors = reader.Read<MyTelegram.Schema.Help.IPeerColorSet>(); }
-        if (Flags[3]) { ChannelMinLevel = reader.ReadInt32(); }
-        if (Flags[4]) { GroupMinLevel = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Hidden = true; }
+        ColorId = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Colors = buffer.Read<MyTelegram.Schema.Help.IPeerColorSet>(); }
+        if (Flags.IsBitSet(2)) { DarkColors = buffer.Read<MyTelegram.Schema.Help.IPeerColorSet>(); }
+        if (Flags.IsBitSet(3)) { ChannelMinLevel = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { GroupMinLevel = buffer.ReadInt32(); }
     }
 }

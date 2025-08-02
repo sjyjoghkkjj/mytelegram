@@ -20,7 +20,7 @@ public sealed class TSecureValueErrorData : ISecureValueError
     ///<summary>
     /// Data hash
     ///</summary>
-    public byte[] DataHash { get; set; }
+    public ReadOnlyMemory<byte> DataHash { get; set; }
 
     ///<summary>
     /// Name of the data field which has the error
@@ -47,11 +47,11 @@ public sealed class TSecureValueErrorData : ISecureValueError
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Type = reader.Read<MyTelegram.Schema.ISecureValueType>();
-        DataHash = reader.ReadBytes();
-        Field = reader.ReadString();
-        Text = reader.ReadString();
+        Type = buffer.Read<MyTelegram.Schema.ISecureValueType>();
+        DataHash = buffer.ReadBytes();
+        Field = buffer.ReadString();
+        Text = buffer.ReadString();
     }
 }

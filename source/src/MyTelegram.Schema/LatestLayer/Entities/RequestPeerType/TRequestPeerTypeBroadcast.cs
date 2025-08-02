@@ -14,7 +14,7 @@ public sealed class TRequestPeerTypeBroadcast : IRequestPeerType
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to allow only choosing channels that were created by the current user.
@@ -42,10 +42,10 @@ public sealed class TRequestPeerTypeBroadcast : IRequestPeerType
 
     public void ComputeFlag()
     {
-        if (Creator) { Flags[0] = true; }
-        if (HasUsername !=null) { Flags[3] = true; }
-        if (UserAdminRights != null) { Flags[1] = true; }
-        if (BotAdminRights != null) { Flags[2] = true; }
+        if (Creator) { Flags = Flags.SetBit(0); }
+        if (HasUsername !=null) { Flags = Flags.SetBit(3); }
+        if (UserAdminRights != null) { Flags = Flags.SetBit(1); }
+        if (BotAdminRights != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -53,17 +53,17 @@ public sealed class TRequestPeerTypeBroadcast : IRequestPeerType
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[3]) { writer.Write(HasUsername.Value); }
-        if (Flags[1]) { writer.Write(UserAdminRights); }
-        if (Flags[2]) { writer.Write(BotAdminRights); }
+        if (Flags.IsBitSet(3)) { writer.Write(HasUsername.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(UserAdminRights); }
+        if (Flags.IsBitSet(2)) { writer.Write(BotAdminRights); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Creator = true; }
-        if (Flags[3]) { HasUsername = reader.Read(); }
-        if (Flags[1]) { UserAdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>(); }
-        if (Flags[2]) { BotAdminRights = reader.Read<MyTelegram.Schema.IChatAdminRights>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Creator = true; }
+        if (Flags.IsBitSet(3)) { HasUsername = buffer.Read(); }
+        if (Flags.IsBitSet(1)) { UserAdminRights = buffer.Read<MyTelegram.Schema.IChatAdminRights>(); }
+        if (Flags.IsBitSet(2)) { BotAdminRights = buffer.Read<MyTelegram.Schema.IChatAdminRights>(); }
     }
 }

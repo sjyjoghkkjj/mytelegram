@@ -14,7 +14,7 @@ public sealed class RequestGetBlocked : IRequest<MyTelegram.Schema.Contacts.IBlo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to fetch the story blocklist; if not set, will fetch the main blocklist. See <a href="https://corefork.telegram.org/api/block">here »</a> for differences between the two.
@@ -34,7 +34,7 @@ public sealed class RequestGetBlocked : IRequest<MyTelegram.Schema.Contacts.IBlo
 
     public void ComputeFlag()
     {
-        if (MyStoriesFrom) { Flags[0] = true; }
+        if (MyStoriesFrom) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class RequestGetBlocked : IRequest<MyTelegram.Schema.Contacts.IBlo
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { MyStoriesFrom = true; }
-        Offset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { MyStoriesFrom = true; }
+        Offset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

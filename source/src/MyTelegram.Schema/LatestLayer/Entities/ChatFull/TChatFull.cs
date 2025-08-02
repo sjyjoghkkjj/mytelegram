@@ -14,7 +14,7 @@ public sealed class TChatFull : MyTelegram.Schema.IChatFull, ILayeredChatFull
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Can we change the username of this chat
@@ -128,22 +128,22 @@ public sealed class TChatFull : MyTelegram.Schema.IChatFull, ILayeredChatFull
 
     public void ComputeFlag()
     {
-        if (CanSetUsername) { Flags[7] = true; }
-        if (HasScheduled) { Flags[8] = true; }
-        if (TranslationsDisabled) { Flags[19] = true; }
-        if (ChatPhoto != null) { Flags[2] = true; }
-        if (ExportedInvite != null) { Flags[13] = true; }
-        if (BotInfo?.Count > 0) { Flags[3] = true; }
-        if (/*PinnedMsgId != 0 && */PinnedMsgId.HasValue) { Flags[6] = true; }
-        if (/*FolderId != 0 && */FolderId.HasValue) { Flags[11] = true; }
-        if (Call != null) { Flags[12] = true; }
-        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags[14] = true; }
-        if (GroupcallDefaultJoinAs != null) { Flags[15] = true; }
-        if (ThemeEmoticon != null) { Flags[16] = true; }
-        if (/*RequestsPending != 0 && */RequestsPending.HasValue) { Flags[17] = true; }
-        if (RecentRequesters?.Count > 0) { Flags[17] = true; }
-        if (AvailableReactions != null) { Flags[18] = true; }
-        if (/*ReactionsLimit != 0 && */ReactionsLimit.HasValue) { Flags[20] = true; }
+        if (CanSetUsername) { Flags = Flags.SetBit(7); }
+        if (HasScheduled) { Flags = Flags.SetBit(8); }
+        if (TranslationsDisabled) { Flags = Flags.SetBit(19); }
+        if (ChatPhoto != null) { Flags = Flags.SetBit(2); }
+        if (ExportedInvite != null) { Flags = Flags.SetBit(13); }
+        if (BotInfo?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (/*PinnedMsgId != 0 && */PinnedMsgId.HasValue) { Flags = Flags.SetBit(6); }
+        if (/*FolderId != 0 && */FolderId.HasValue) { Flags = Flags.SetBit(11); }
+        if (Call != null) { Flags = Flags.SetBit(12); }
+        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags = Flags.SetBit(14); }
+        if (GroupcallDefaultJoinAs != null) { Flags = Flags.SetBit(15); }
+        if (ThemeEmoticon != null) { Flags = Flags.SetBit(16); }
+        if (/*RequestsPending != 0 && */RequestsPending.HasValue) { Flags = Flags.SetBit(17); }
+        if (RecentRequesters?.Count > 0) { Flags = Flags.SetBit(17); }
+        if (AvailableReactions != null) { Flags = Flags.SetBit(18); }
+        if (/*ReactionsLimit != 0 && */ReactionsLimit.HasValue) { Flags = Flags.SetBit(20); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -154,44 +154,44 @@ public sealed class TChatFull : MyTelegram.Schema.IChatFull, ILayeredChatFull
         writer.Write(Id);
         writer.Write(About);
         writer.Write(Participants);
-        if (Flags[2]) { writer.Write(ChatPhoto); }
+        if (Flags.IsBitSet(2)) { writer.Write(ChatPhoto); }
         writer.Write(NotifySettings);
-        if (Flags[13]) { writer.Write(ExportedInvite); }
-        if (Flags[3]) { writer.Write(BotInfo); }
-        if (Flags[6]) { writer.Write(PinnedMsgId.Value); }
-        if (Flags[11]) { writer.Write(FolderId.Value); }
-        if (Flags[12]) { writer.Write(Call); }
-        if (Flags[14]) { writer.Write(TtlPeriod.Value); }
-        if (Flags[15]) { writer.Write(GroupcallDefaultJoinAs); }
-        if (Flags[16]) { writer.Write(ThemeEmoticon); }
-        if (Flags[17]) { writer.Write(RequestsPending.Value); }
-        if (Flags[17]) { writer.Write(RecentRequesters); }
-        if (Flags[18]) { writer.Write(AvailableReactions); }
-        if (Flags[20]) { writer.Write(ReactionsLimit.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(ExportedInvite); }
+        if (Flags.IsBitSet(3)) { writer.Write(BotInfo); }
+        if (Flags.IsBitSet(6)) { writer.Write(PinnedMsgId.Value); }
+        if (Flags.IsBitSet(11)) { writer.Write(FolderId.Value); }
+        if (Flags.IsBitSet(12)) { writer.Write(Call); }
+        if (Flags.IsBitSet(14)) { writer.Write(TtlPeriod.Value); }
+        if (Flags.IsBitSet(15)) { writer.Write(GroupcallDefaultJoinAs); }
+        if (Flags.IsBitSet(16)) { writer.Write(ThemeEmoticon); }
+        if (Flags.IsBitSet(17)) { writer.Write(RequestsPending.Value); }
+        if (Flags.IsBitSet(17)) { writer.Write(RecentRequesters); }
+        if (Flags.IsBitSet(18)) { writer.Write(AvailableReactions); }
+        if (Flags.IsBitSet(20)) { writer.Write(ReactionsLimit.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[7]) { CanSetUsername = true; }
-        if (Flags[8]) { HasScheduled = true; }
-        if (Flags[19]) { TranslationsDisabled = true; }
-        Id = reader.ReadInt64();
-        About = reader.ReadString();
-        Participants = reader.Read<MyTelegram.Schema.IChatParticipants>();
-        if (Flags[2]) { ChatPhoto = reader.Read<MyTelegram.Schema.IPhoto>(); }
-        NotifySettings = reader.Read<MyTelegram.Schema.IPeerNotifySettings>();
-        if (Flags[13]) { ExportedInvite = reader.Read<MyTelegram.Schema.IExportedChatInvite>(); }
-        if (Flags[3]) { BotInfo = reader.Read<TVector<MyTelegram.Schema.IBotInfo>>(); }
-        if (Flags[6]) { PinnedMsgId = reader.ReadInt32(); }
-        if (Flags[11]) { FolderId = reader.ReadInt32(); }
-        if (Flags[12]) { Call = reader.Read<MyTelegram.Schema.IInputGroupCall>(); }
-        if (Flags[14]) { TtlPeriod = reader.ReadInt32(); }
-        if (Flags[15]) { GroupcallDefaultJoinAs = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[16]) { ThemeEmoticon = reader.ReadString(); }
-        if (Flags[17]) { RequestsPending = reader.ReadInt32(); }
-        if (Flags[17]) { RecentRequesters = reader.Read<TVector<long>>(); }
-        if (Flags[18]) { AvailableReactions = reader.Read<MyTelegram.Schema.IChatReactions>(); }
-        if (Flags[20]) { ReactionsLimit = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(7)) { CanSetUsername = true; }
+        if (Flags.IsBitSet(8)) { HasScheduled = true; }
+        if (Flags.IsBitSet(19)) { TranslationsDisabled = true; }
+        Id = buffer.ReadInt64();
+        About = buffer.ReadString();
+        Participants = buffer.Read<MyTelegram.Schema.IChatParticipants>();
+        if (Flags.IsBitSet(2)) { ChatPhoto = buffer.Read<MyTelegram.Schema.IPhoto>(); }
+        NotifySettings = buffer.Read<MyTelegram.Schema.IPeerNotifySettings>();
+        if (Flags.IsBitSet(13)) { ExportedInvite = buffer.Read<MyTelegram.Schema.IExportedChatInvite>(); }
+        if (Flags.IsBitSet(3)) { BotInfo = buffer.Read<TVector<MyTelegram.Schema.IBotInfo>>(); }
+        if (Flags.IsBitSet(6)) { PinnedMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(11)) { FolderId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(12)) { Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>(); }
+        if (Flags.IsBitSet(14)) { TtlPeriod = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(15)) { GroupcallDefaultJoinAs = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(16)) { ThemeEmoticon = buffer.ReadString(); }
+        if (Flags.IsBitSet(17)) { RequestsPending = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(17)) { RecentRequesters = buffer.Read<TVector<long>>(); }
+        if (Flags.IsBitSet(18)) { AvailableReactions = buffer.Read<MyTelegram.Schema.IChatReactions>(); }
+        if (Flags.IsBitSet(20)) { ReactionsLimit = buffer.ReadInt32(); }
     }
 }

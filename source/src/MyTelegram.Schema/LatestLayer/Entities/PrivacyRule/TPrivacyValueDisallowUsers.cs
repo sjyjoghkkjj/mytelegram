@@ -28,8 +28,8 @@ public sealed class TPrivacyValueDisallowUsers : IPrivacyRule
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Users = reader.Read<TVector<long>>();
+        Users = buffer.Read<TVector<long>>();
     }
 }

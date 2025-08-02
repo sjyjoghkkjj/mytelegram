@@ -28,8 +28,8 @@ public sealed class TUpdateSmsJob : IUpdate
         writer.Write(JobId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        JobId = reader.ReadString();
+        JobId = buffer.ReadString();
     }
 }

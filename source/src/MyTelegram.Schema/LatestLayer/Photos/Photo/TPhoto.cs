@@ -35,9 +35,9 @@ public sealed class TPhoto : IPhoto
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Photo = reader.Read<MyTelegram.Schema.IPhoto>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Photo = buffer.Read<MyTelegram.Schema.IPhoto>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

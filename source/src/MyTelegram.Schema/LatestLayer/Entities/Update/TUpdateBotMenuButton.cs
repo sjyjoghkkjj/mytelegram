@@ -35,9 +35,9 @@ public sealed class TUpdateBotMenuButton : IUpdate
         writer.Write(Button);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        BotId = reader.ReadInt64();
-        Button = reader.Read<MyTelegram.Schema.IBotMenuButton>();
+        BotId = buffer.ReadInt64();
+        Button = buffer.Read<MyTelegram.Schema.IBotMenuButton>();
     }
 }

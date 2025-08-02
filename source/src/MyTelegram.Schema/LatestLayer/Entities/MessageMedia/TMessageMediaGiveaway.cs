@@ -14,7 +14,7 @@ public sealed class TMessageMediaGiveaway : IMessageMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, only new subscribers starting from the giveaway creation date will be able to participate to the giveaway.
@@ -65,12 +65,12 @@ public sealed class TMessageMediaGiveaway : IMessageMedia
 
     public void ComputeFlag()
     {
-        if (OnlyNewSubscribers) { Flags[0] = true; }
-        if (WinnersAreVisible) { Flags[2] = true; }
-        if (CountriesIso2?.Count > 0) { Flags[1] = true; }
-        if (PrizeDescription != null) { Flags[3] = true; }
-        if (/*Months != 0 && */Months.HasValue) { Flags[4] = true; }
-        if (/*Stars != 0 &&*/ Stars.HasValue) { Flags[5] = true; }
+        if (OnlyNewSubscribers) { Flags = Flags.SetBit(0); }
+        if (WinnersAreVisible) { Flags = Flags.SetBit(2); }
+        if (CountriesIso2?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (PrizeDescription != null) { Flags = Flags.SetBit(3); }
+        if (/*Months != 0 && */Months.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*Stars != 0 &&*/ Stars.HasValue) { Flags = Flags.SetBit(5); }
 
     }
 
@@ -80,25 +80,25 @@ public sealed class TMessageMediaGiveaway : IMessageMedia
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Channels);
-        if (Flags[1]) { writer.Write(CountriesIso2); }
-        if (Flags[3]) { writer.Write(PrizeDescription); }
+        if (Flags.IsBitSet(1)) { writer.Write(CountriesIso2); }
+        if (Flags.IsBitSet(3)) { writer.Write(PrizeDescription); }
         writer.Write(Quantity);
-        if (Flags[4]) { writer.Write(Months.Value); }
-        if (Flags[5]) { writer.Write(Stars.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(Months.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(Stars.Value); }
         writer.Write(UntilDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { OnlyNewSubscribers = true; }
-        if (Flags[2]) { WinnersAreVisible = true; }
-        Channels = reader.Read<TVector<long>>();
-        if (Flags[1]) { CountriesIso2 = reader.Read<TVector<string>>(); }
-        if (Flags[3]) { PrizeDescription = reader.ReadString(); }
-        Quantity = reader.ReadInt32();
-        if (Flags[4]) { Months = reader.ReadInt32(); }
-        if (Flags[5]) { Stars = reader.ReadInt64(); }
-        UntilDate = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { OnlyNewSubscribers = true; }
+        if (Flags.IsBitSet(2)) { WinnersAreVisible = true; }
+        Channels = buffer.Read<TVector<long>>();
+        if (Flags.IsBitSet(1)) { CountriesIso2 = buffer.Read<TVector<string>>(); }
+        if (Flags.IsBitSet(3)) { PrizeDescription = buffer.ReadString(); }
+        Quantity = buffer.ReadInt32();
+        if (Flags.IsBitSet(4)) { Months = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { Stars = buffer.ReadInt64(); }
+        UntilDate = buffer.ReadInt32();
     }
 }

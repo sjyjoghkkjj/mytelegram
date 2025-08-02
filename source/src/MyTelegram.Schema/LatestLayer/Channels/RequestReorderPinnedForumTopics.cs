@@ -17,7 +17,7 @@ public sealed class RequestReorderPinnedForumTopics : IRequest<MyTelegram.Schema
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If not set, the order of only the topics present both server-side and in <code>order</code> will be changed (i.e. mentioning topics not pinned server-side in <code>order</code> will not pin them, and not mentioning topics pinned server-side will not unpin them).  <br>If set, the entire server-side pinned topic list will be replaced with <code>order</code> (i.e. mentioning topics not pinned server-side in <code>order</code> will pin them, and not mentioning topics pinned server-side will unpin them)
@@ -38,7 +38,7 @@ public sealed class RequestReorderPinnedForumTopics : IRequest<MyTelegram.Schema
 
     public void ComputeFlag()
     {
-        if (Force) { Flags[0] = true; }
+        if (Force) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -51,11 +51,11 @@ public sealed class RequestReorderPinnedForumTopics : IRequest<MyTelegram.Schema
         writer.Write(Order);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Force = true; }
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Order = reader.Read<TVector<int>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Force = true; }
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Order = buffer.Read<TVector<int>>();
     }
 }

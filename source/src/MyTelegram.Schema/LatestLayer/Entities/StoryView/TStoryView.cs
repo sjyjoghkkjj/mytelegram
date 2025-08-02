@@ -14,7 +14,7 @@ public sealed class TStoryView : IStoryView
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether we have <a href="https://corefork.telegram.org/api/block">completely blocked</a> this user, including from viewing more of our stories.
@@ -46,9 +46,9 @@ public sealed class TStoryView : IStoryView
 
     public void ComputeFlag()
     {
-        if (Blocked) { Flags[0] = true; }
-        if (BlockedMyStoriesFrom) { Flags[1] = true; }
-        if (Reaction != null) { Flags[2] = true; }
+        if (Blocked) { Flags = Flags.SetBit(0); }
+        if (BlockedMyStoriesFrom) { Flags = Flags.SetBit(1); }
+        if (Reaction != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -58,16 +58,16 @@ public sealed class TStoryView : IStoryView
         writer.Write(Flags);
         writer.Write(UserId);
         writer.Write(Date);
-        if (Flags[2]) { writer.Write(Reaction); }
+        if (Flags.IsBitSet(2)) { writer.Write(Reaction); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Blocked = true; }
-        if (Flags[1]) { BlockedMyStoriesFrom = true; }
-        UserId = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        if (Flags[2]) { Reaction = reader.Read<MyTelegram.Schema.IReaction>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Blocked = true; }
+        if (Flags.IsBitSet(1)) { BlockedMyStoriesFrom = true; }
+        UserId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Reaction = buffer.Read<MyTelegram.Schema.IReaction>(); }
     }
 }

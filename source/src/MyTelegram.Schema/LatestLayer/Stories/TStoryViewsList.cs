@@ -14,7 +14,7 @@ public sealed class TStoryViewsList : IStoryViewsList
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Total number of results that can be fetched
@@ -58,7 +58,7 @@ public sealed class TStoryViewsList : IStoryViewsList
 
     public void ComputeFlag()
     {
-        if (NextOffset != null) { Flags[0] = true; }
+        if (NextOffset != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -73,19 +73,19 @@ public sealed class TStoryViewsList : IStoryViewsList
         writer.Write(Views);
         writer.Write(Chats);
         writer.Write(Users);
-        if (Flags[0]) { writer.Write(NextOffset); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextOffset); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Count = reader.ReadInt32();
-        ViewsCount = reader.ReadInt32();
-        ForwardsCount = reader.ReadInt32();
-        ReactionsCount = reader.ReadInt32();
-        Views = reader.Read<TVector<MyTelegram.Schema.IStoryView>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
-        if (Flags[0]) { NextOffset = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Count = buffer.ReadInt32();
+        ViewsCount = buffer.ReadInt32();
+        ForwardsCount = buffer.ReadInt32();
+        ReactionsCount = buffer.ReadInt32();
+        Views = buffer.Read<TVector<MyTelegram.Schema.IStoryView>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
+        if (Flags.IsBitSet(0)) { NextOffset = buffer.ReadString(); }
     }
 }

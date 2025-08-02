@@ -7,10 +7,13 @@ namespace MyTelegram.Schema.Payments;
 /// <a href="https://corefork.telegram.org/api/stars">Star revenue statistics, see here »</a> for more info.Note that all balances and currency amounts and graph values are in Stars.
 /// See <a href="https://corefork.telegram.org/constructor/payments.starsRevenueStats" />
 ///</summary>
-[TlObject(0xc92bb73b)]
+[TlObject(0x6c207376)]
 public sealed class TStarsRevenueStats : IStarsRevenueStats
 {
-    public uint ConstructorId => 0xc92bb73b;
+    public uint ConstructorId => 0x6c207376;
+    public int Flags { get; set; }
+    public MyTelegram.Schema.IStatsGraph? TopHoursGraph { get; set; }
+
     ///<summary>
     /// Star revenue graph (number of earned stars)
     /// See <a href="https://corefork.telegram.org/type/StatsGraph" />
@@ -30,6 +33,7 @@ public sealed class TStarsRevenueStats : IStarsRevenueStats
 
     public void ComputeFlag()
     {
+        if (TopHoursGraph != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -37,15 +41,19 @@ public sealed class TStarsRevenueStats : IStarsRevenueStats
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
+        if (Flags.IsBitSet(0)) { writer.Write(TopHoursGraph); }
         writer.Write(RevenueGraph);
         writer.Write(Status);
         writer.Write(UsdRate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        RevenueGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        Status = reader.Read<MyTelegram.Schema.IStarsRevenueStatus>();
-        UsdRate = reader.ReadDouble();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { TopHoursGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>(); }
+        RevenueGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        Status = buffer.Read<MyTelegram.Schema.IStarsRevenueStatus>();
+        UsdRate = buffer.ReadDouble();
     }
 }

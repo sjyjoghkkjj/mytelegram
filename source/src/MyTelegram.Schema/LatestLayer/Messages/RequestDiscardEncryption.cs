@@ -20,7 +20,7 @@ public sealed class RequestDiscardEncryption : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to delete the entire chat history for the other user as well
@@ -35,7 +35,7 @@ public sealed class RequestDiscardEncryption : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (DeleteHistory) { Flags[0] = true; }
+        if (DeleteHistory) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,10 +47,10 @@ public sealed class RequestDiscardEncryption : IRequest<IBool>
         writer.Write(ChatId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { DeleteHistory = true; }
-        ChatId = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { DeleteHistory = true; }
+        ChatId = buffer.ReadInt32();
     }
 }

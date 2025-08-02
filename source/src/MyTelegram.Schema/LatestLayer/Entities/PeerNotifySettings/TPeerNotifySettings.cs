@@ -14,7 +14,7 @@ public sealed class TPeerNotifySettings : IPeerNotifySettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// (Ternary value) If set, indicates whether or not to display previews of messages in notifications; otherwise the default behavior should be used.
@@ -83,17 +83,17 @@ public sealed class TPeerNotifySettings : IPeerNotifySettings
 
     public void ComputeFlag()
     {
-        if (ShowPreviews !=null) { Flags[0] = true; }
-        if (Silent !=null) { Flags[1] = true; }
-        if (/*MuteUntil != 0 && */MuteUntil.HasValue) { Flags[2] = true; }
-        if (IosSound != null) { Flags[3] = true; }
-        if (AndroidSound != null) { Flags[4] = true; }
-        if (OtherSound != null) { Flags[5] = true; }
-        if (StoriesMuted !=null) { Flags[6] = true; }
-        if (StoriesHideSender !=null) { Flags[7] = true; }
-        if (StoriesIosSound != null) { Flags[8] = true; }
-        if (StoriesAndroidSound != null) { Flags[9] = true; }
-        if (StoriesOtherSound != null) { Flags[10] = true; }
+        if (ShowPreviews !=null) { Flags = Flags.SetBit(0); }
+        if (Silent !=null) { Flags = Flags.SetBit(1); }
+        if (/*MuteUntil != 0 && */MuteUntil.HasValue) { Flags = Flags.SetBit(2); }
+        if (IosSound != null) { Flags = Flags.SetBit(3); }
+        if (AndroidSound != null) { Flags = Flags.SetBit(4); }
+        if (OtherSound != null) { Flags = Flags.SetBit(5); }
+        if (StoriesMuted !=null) { Flags = Flags.SetBit(6); }
+        if (StoriesHideSender !=null) { Flags = Flags.SetBit(7); }
+        if (StoriesIosSound != null) { Flags = Flags.SetBit(8); }
+        if (StoriesAndroidSound != null) { Flags = Flags.SetBit(9); }
+        if (StoriesOtherSound != null) { Flags = Flags.SetBit(10); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -101,32 +101,32 @@ public sealed class TPeerNotifySettings : IPeerNotifySettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(ShowPreviews.Value); }
-        if (Flags[1]) { writer.Write(Silent.Value); }
-        if (Flags[2]) { writer.Write(MuteUntil.Value); }
-        if (Flags[3]) { writer.Write(IosSound); }
-        if (Flags[4]) { writer.Write(AndroidSound); }
-        if (Flags[5]) { writer.Write(OtherSound); }
-        if (Flags[6]) { writer.Write(StoriesMuted.Value); }
-        if (Flags[7]) { writer.Write(StoriesHideSender.Value); }
-        if (Flags[8]) { writer.Write(StoriesIosSound); }
-        if (Flags[9]) { writer.Write(StoriesAndroidSound); }
-        if (Flags[10]) { writer.Write(StoriesOtherSound); }
+        if (Flags.IsBitSet(0)) { writer.Write(ShowPreviews.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Silent.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(MuteUntil.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(IosSound); }
+        if (Flags.IsBitSet(4)) { writer.Write(AndroidSound); }
+        if (Flags.IsBitSet(5)) { writer.Write(OtherSound); }
+        if (Flags.IsBitSet(6)) { writer.Write(StoriesMuted.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(StoriesHideSender.Value); }
+        if (Flags.IsBitSet(8)) { writer.Write(StoriesIosSound); }
+        if (Flags.IsBitSet(9)) { writer.Write(StoriesAndroidSound); }
+        if (Flags.IsBitSet(10)) { writer.Write(StoriesOtherSound); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ShowPreviews = reader.Read(); }
-        if (Flags[1]) { Silent = reader.Read(); }
-        if (Flags[2]) { MuteUntil = reader.ReadInt32(); }
-        if (Flags[3]) { IosSound = reader.Read<MyTelegram.Schema.INotificationSound>(); }
-        if (Flags[4]) { AndroidSound = reader.Read<MyTelegram.Schema.INotificationSound>(); }
-        if (Flags[5]) { OtherSound = reader.Read<MyTelegram.Schema.INotificationSound>(); }
-        if (Flags[6]) { StoriesMuted = reader.Read(); }
-        if (Flags[7]) { StoriesHideSender = reader.Read(); }
-        if (Flags[8]) { StoriesIosSound = reader.Read<MyTelegram.Schema.INotificationSound>(); }
-        if (Flags[9]) { StoriesAndroidSound = reader.Read<MyTelegram.Schema.INotificationSound>(); }
-        if (Flags[10]) { StoriesOtherSound = reader.Read<MyTelegram.Schema.INotificationSound>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ShowPreviews = buffer.Read(); }
+        if (Flags.IsBitSet(1)) { Silent = buffer.Read(); }
+        if (Flags.IsBitSet(2)) { MuteUntil = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { IosSound = buffer.Read<MyTelegram.Schema.INotificationSound>(); }
+        if (Flags.IsBitSet(4)) { AndroidSound = buffer.Read<MyTelegram.Schema.INotificationSound>(); }
+        if (Flags.IsBitSet(5)) { OtherSound = buffer.Read<MyTelegram.Schema.INotificationSound>(); }
+        if (Flags.IsBitSet(6)) { StoriesMuted = buffer.Read(); }
+        if (Flags.IsBitSet(7)) { StoriesHideSender = buffer.Read(); }
+        if (Flags.IsBitSet(8)) { StoriesIosSound = buffer.Read<MyTelegram.Schema.INotificationSound>(); }
+        if (Flags.IsBitSet(9)) { StoriesAndroidSound = buffer.Read<MyTelegram.Schema.INotificationSound>(); }
+        if (Flags.IsBitSet(10)) { StoriesOtherSound = buffer.Read<MyTelegram.Schema.INotificationSound>(); }
     }
 }

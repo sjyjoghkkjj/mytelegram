@@ -14,7 +14,7 @@ public sealed class TSendAsPeer : ISendAsPeer
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether a Telegram Premium account is required to send messages as this peer
@@ -30,7 +30,7 @@ public sealed class TSendAsPeer : ISendAsPeer
 
     public void ComputeFlag()
     {
-        if (PremiumRequired) { Flags[0] = true; }
+        if (PremiumRequired) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -42,10 +42,10 @@ public sealed class TSendAsPeer : ISendAsPeer
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { PremiumRequired = true; }
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { PremiumRequired = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
     }
 }

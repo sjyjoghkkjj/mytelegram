@@ -14,7 +14,7 @@ public sealed class TCdnFile : ICdnFile
     ///<summary>
     /// The data
     ///</summary>
-    public byte[] Bytes { get; set; }
+    public ReadOnlyMemory<byte> Bytes { get; set; }
 
     public void ComputeFlag()
     {
@@ -28,8 +28,8 @@ public sealed class TCdnFile : ICdnFile
         writer.Write(Bytes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bytes = reader.ReadBytes();
+        Bytes = buffer.ReadBytes();
     }
 }

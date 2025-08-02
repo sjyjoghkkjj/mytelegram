@@ -93,6 +93,7 @@ public class MessageReadModel : IMessageReadModel,
     public bool PublicPosts { get; private set; }
     public List<string> Hashtags { get; private set; } = [];
     public List<long>? MentionedUserIds { get; private set; }
+    public long? TodoId { get; private set; }
 
     public Task ApplyAsync(IReadModelContext context,
         IDomainEvent<MessageAggregate, MessageId, OutboxMessageCreatedEvent> domainEvent,

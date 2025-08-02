@@ -28,8 +28,8 @@ public sealed class TUpdateChannel : IUpdate
         writer.Write(ChannelId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
+        ChannelId = buffer.ReadInt64();
     }
 }

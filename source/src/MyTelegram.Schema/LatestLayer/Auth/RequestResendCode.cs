@@ -21,7 +21,7 @@ public sealed class RequestResendCode : IRequest<MyTelegram.Schema.Auth.ISentCod
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The phone number
@@ -40,7 +40,7 @@ public sealed class RequestResendCode : IRequest<MyTelegram.Schema.Auth.ISentCod
 
     public void ComputeFlag()
     {
-        if (Reason != null) { Flags[0] = true; }
+        if (Reason != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -50,14 +50,14 @@ public sealed class RequestResendCode : IRequest<MyTelegram.Schema.Auth.ISentCod
         writer.Write(Flags);
         writer.Write(PhoneNumber);
         writer.Write(PhoneCodeHash);
-        if (Flags[0]) { writer.Write(Reason); }
+        if (Flags.IsBitSet(0)) { writer.Write(Reason); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        PhoneNumber = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
-        if (Flags[0]) { Reason = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        PhoneNumber = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Reason = buffer.ReadString(); }
     }
 }

@@ -14,7 +14,7 @@ public sealed class RequestInstallTheme : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to install the dark version
@@ -33,14 +33,11 @@ public sealed class RequestInstallTheme : IRequest<IBool>
     ///</summary>
     public MyTelegram.Schema.IInputTheme? Theme { get; set; }
 
-
-    //account.installTheme#7ae43737 flags:# dark:flags.0?true format:flags.1?string theme:flags.1?InputTheme = Bool;
-
     public void ComputeFlag()
     {
-        if (Dark) { Flags[0] = true; }
-        if (Format != null) { Flags[1] = true; }
-        if (Theme != null) { Flags[1] = true; }
+        if (Dark) { Flags = Flags.SetBit(0); }
+        if (Format != null) { Flags = Flags.SetBit(1); }
+        if (Theme != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -48,15 +45,15 @@ public sealed class RequestInstallTheme : IRequest<IBool>
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(Format); }
-        if (Flags[1]) { writer.Write(Theme); }
+        if (Flags.IsBitSet(1)) { writer.Write(Format); }
+        if (Flags.IsBitSet(1)) { writer.Write(Theme); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Dark = true; }
-        if (Flags[1]) { Format = reader.ReadString(); }
-        if (Flags[1]) { Theme = reader.Read<MyTelegram.Schema.IInputTheme>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Dark = true; }
+        if (Flags.IsBitSet(1)) { Format = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Theme = buffer.Read<MyTelegram.Schema.IInputTheme>(); }
     }
 }

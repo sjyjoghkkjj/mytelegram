@@ -14,7 +14,7 @@ public sealed class TInputWebFileAudioAlbumThumbLocation : IInputWebFileLocation
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Used to return a thumbnail with <code>100x100</code> resolution (instead of the default <code>600x600</code>)
@@ -40,10 +40,10 @@ public sealed class TInputWebFileAudioAlbumThumbLocation : IInputWebFileLocation
 
     public void ComputeFlag()
     {
-        if (Small) { Flags[2] = true; }
-        if (Document != null) { Flags[0] = true; }
-        if (Title != null) { Flags[1] = true; }
-        if (Performer != null) { Flags[1] = true; }
+        if (Small) { Flags = Flags.SetBit(2); }
+        if (Document != null) { Flags = Flags.SetBit(0); }
+        if (Title != null) { Flags = Flags.SetBit(1); }
+        if (Performer != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -51,17 +51,17 @@ public sealed class TInputWebFileAudioAlbumThumbLocation : IInputWebFileLocation
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Document); }
-        if (Flags[1]) { writer.Write(Title); }
-        if (Flags[1]) { writer.Write(Performer); }
+        if (Flags.IsBitSet(0)) { writer.Write(Document); }
+        if (Flags.IsBitSet(1)) { writer.Write(Title); }
+        if (Flags.IsBitSet(1)) { writer.Write(Performer); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Small = true; }
-        if (Flags[0]) { Document = reader.Read<MyTelegram.Schema.IInputDocument>(); }
-        if (Flags[1]) { Title = reader.ReadString(); }
-        if (Flags[1]) { Performer = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Small = true; }
+        if (Flags.IsBitSet(0)) { Document = buffer.Read<MyTelegram.Schema.IInputDocument>(); }
+        if (Flags.IsBitSet(1)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Performer = buffer.ReadString(); }
     }
 }

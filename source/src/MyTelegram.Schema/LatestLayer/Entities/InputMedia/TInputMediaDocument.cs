@@ -14,7 +14,7 @@ public sealed class TInputMediaDocument : IInputMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this media should be hidden behind a spoiler warning
@@ -42,11 +42,11 @@ public sealed class TInputMediaDocument : IInputMedia
 
     public void ComputeFlag()
     {
-        if (Spoiler) { Flags[2] = true; }
-        if (VideoCover != null) { Flags[3] = true; }
-        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags[4] = true; }
-        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags[0] = true; }
-        if (Query != null) { Flags[1] = true; }
+        if (Spoiler) { Flags = Flags.SetBit(2); }
+        if (VideoCover != null) { Flags = Flags.SetBit(3); }
+        if (/*VideoTimestamp != 0 && */VideoTimestamp.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*TtlSeconds != 0 && */TtlSeconds.HasValue) { Flags = Flags.SetBit(0); }
+        if (Query != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,20 +55,20 @@ public sealed class TInputMediaDocument : IInputMedia
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Id);
-        if (Flags[3]) { writer.Write(VideoCover); }
-        if (Flags[4]) { writer.Write(VideoTimestamp.Value); }
-        if (Flags[0]) { writer.Write(TtlSeconds.Value); }
-        if (Flags[1]) { writer.Write(Query); }
+        if (Flags.IsBitSet(3)) { writer.Write(VideoCover); }
+        if (Flags.IsBitSet(4)) { writer.Write(VideoTimestamp.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(TtlSeconds.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Query); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Spoiler = true; }
-        Id = reader.Read<MyTelegram.Schema.IInputDocument>();
-        if (Flags[3]) { VideoCover = reader.Read<MyTelegram.Schema.IInputPhoto>(); }
-        if (Flags[4]) { VideoTimestamp = reader.ReadInt32(); }
-        if (Flags[0]) { TtlSeconds = reader.ReadInt32(); }
-        if (Flags[1]) { Query = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Spoiler = true; }
+        Id = buffer.Read<MyTelegram.Schema.IInputDocument>();
+        if (Flags.IsBitSet(3)) { VideoCover = buffer.Read<MyTelegram.Schema.IInputPhoto>(); }
+        if (Flags.IsBitSet(4)) { VideoTimestamp = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { TtlSeconds = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { Query = buffer.ReadString(); }
     }
 }

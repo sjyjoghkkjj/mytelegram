@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionChangePeerColor : IChannelAdminLo
         writer.Write(NewValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevValue = reader.Read<MyTelegram.Schema.IPeerColor>();
-        NewValue = reader.Read<MyTelegram.Schema.IPeerColor>();
+        PrevValue = buffer.Read<MyTelegram.Schema.IPeerColor>();
+        NewValue = buffer.Read<MyTelegram.Schema.IPeerColor>();
     }
 }

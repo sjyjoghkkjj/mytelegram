@@ -24,7 +24,7 @@ public sealed class RequestEditExportedChatInvite : IRequest<MyTelegram.Schema.M
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to revoke the chat invite
@@ -66,11 +66,11 @@ public sealed class RequestEditExportedChatInvite : IRequest<MyTelegram.Schema.M
 
     public void ComputeFlag()
     {
-        if (Revoked) { Flags[2] = true; }
-        if (/*ExpireDate != 0 && */ExpireDate.HasValue) { Flags[0] = true; }
-        if (/*UsageLimit != 0 && */UsageLimit.HasValue) { Flags[1] = true; }
-        if (RequestNeeded !=null) { Flags[3] = true; }
-        if (Title != null) { Flags[4] = true; }
+        if (Revoked) { Flags = Flags.SetBit(2); }
+        if (/*ExpireDate != 0 && */ExpireDate.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*UsageLimit != 0 && */UsageLimit.HasValue) { Flags = Flags.SetBit(1); }
+        if (RequestNeeded !=null) { Flags = Flags.SetBit(3); }
+        if (Title != null) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -80,21 +80,21 @@ public sealed class RequestEditExportedChatInvite : IRequest<MyTelegram.Schema.M
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Link);
-        if (Flags[0]) { writer.Write(ExpireDate.Value); }
-        if (Flags[1]) { writer.Write(UsageLimit.Value); }
-        if (Flags[3]) { writer.Write(RequestNeeded.Value); }
-        if (Flags[4]) { writer.Write(Title); }
+        if (Flags.IsBitSet(0)) { writer.Write(ExpireDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(UsageLimit.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(RequestNeeded.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(Title); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Revoked = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Link = reader.ReadString();
-        if (Flags[0]) { ExpireDate = reader.ReadInt32(); }
-        if (Flags[1]) { UsageLimit = reader.ReadInt32(); }
-        if (Flags[3]) { RequestNeeded = reader.Read(); }
-        if (Flags[4]) { Title = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Revoked = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Link = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { ExpireDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { UsageLimit = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { RequestNeeded = buffer.Read(); }
+        if (Flags.IsBitSet(4)) { Title = buffer.ReadString(); }
     }
 }

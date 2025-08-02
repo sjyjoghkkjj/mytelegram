@@ -29,8 +29,8 @@ public sealed class RequestGetRecentMeUrls : IRequest<MyTelegram.Schema.Help.IRe
         writer.Write(Referer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Referer = reader.ReadString();
+        Referer = buffer.ReadString();
     }
 }

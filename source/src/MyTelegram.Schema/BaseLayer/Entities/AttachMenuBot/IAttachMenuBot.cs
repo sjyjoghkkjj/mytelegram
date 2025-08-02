@@ -12,7 +12,7 @@ public interface IAttachMenuBot : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// If set, before launching the mini app the client should ask the user to add the mini app to the attachment/side menu, and only if the user accepts, after invoking <a href="https://corefork.telegram.org/method/messages.toggleBotInAttachMenu">messages.toggleBotInAttachMenu</a> the app should be opened.

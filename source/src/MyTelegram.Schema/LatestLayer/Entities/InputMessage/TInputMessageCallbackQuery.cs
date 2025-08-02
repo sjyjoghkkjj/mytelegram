@@ -34,9 +34,9 @@ public sealed class TInputMessageCallbackQuery : IInputMessage
         writer.Write(QueryId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt32();
-        QueryId = reader.ReadInt64();
+        Id = buffer.ReadInt32();
+        QueryId = buffer.ReadInt64();
     }
 }

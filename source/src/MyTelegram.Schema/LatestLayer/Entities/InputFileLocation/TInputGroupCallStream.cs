@@ -14,7 +14,7 @@ public sealed class TInputGroupCallStream : IInputFileLocation
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Livestream info
@@ -44,8 +44,8 @@ public sealed class TInputGroupCallStream : IInputFileLocation
 
     public void ComputeFlag()
     {
-        if (/*VideoChannel != 0 && */VideoChannel.HasValue) { Flags[0] = true; }
-        if (/*VideoQuality != 0 && */VideoQuality.HasValue) { Flags[0] = true; }
+        if (/*VideoChannel != 0 && */VideoChannel.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*VideoQuality != 0 && */VideoQuality.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -56,17 +56,17 @@ public sealed class TInputGroupCallStream : IInputFileLocation
         writer.Write(Call);
         writer.Write(TimeMs);
         writer.Write(Scale);
-        if (Flags[0]) { writer.Write(VideoChannel.Value); }
-        if (Flags[0]) { writer.Write(VideoQuality.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(VideoChannel.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(VideoQuality.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        TimeMs = reader.ReadInt64();
-        Scale = reader.ReadInt32();
-        if (Flags[0]) { VideoChannel = reader.ReadInt32(); }
-        if (Flags[0]) { VideoQuality = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        TimeMs = buffer.ReadInt64();
+        Scale = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { VideoChannel = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { VideoQuality = buffer.ReadInt32(); }
     }
 }

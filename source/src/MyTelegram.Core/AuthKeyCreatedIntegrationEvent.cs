@@ -1,11 +1,16 @@
-﻿namespace MyTelegram.Core;
+﻿using System.Buffers;
+
+namespace MyTelegram.Core;
 
 public record AuthKeyCreatedIntegrationEvent(
     string ConnectionId,
     long ReqMsgId,
-    byte[] Data,
+    ReadOnlyMemory<byte> Data,
     long ServerSalt,
     bool IsPermanent,
-    byte[] SetClientDhParamsAnswer,
+    ReadOnlyMemory<byte> SetClientDhParamsAnswer,
     int? DcId
-);
+) : IMayHaveMemoryOwner
+{
+    public IMemoryOwner<byte>? MemoryOwner { get; set; }
+}

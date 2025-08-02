@@ -39,9 +39,9 @@ public sealed class RequestEditGroupCallTitle : IRequest<MyTelegram.Schema.IUpda
         writer.Write(Title);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Title = reader.ReadString();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Title = buffer.ReadString();
     }
 }

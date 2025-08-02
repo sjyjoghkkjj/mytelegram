@@ -54,11 +54,11 @@ public sealed class RequestGetMessagePublicForwards : IRequest<MyTelegram.Schema
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        MsgId = reader.ReadInt32();
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        MsgId = buffer.ReadInt32();
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

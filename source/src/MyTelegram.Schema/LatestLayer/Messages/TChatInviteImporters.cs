@@ -40,10 +40,10 @@ public sealed class TChatInviteImporters : IChatInviteImporters
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        Importers = reader.Read<TVector<MyTelegram.Schema.IChatInviteImporter>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Count = buffer.ReadInt32();
+        Importers = buffer.Read<TVector<MyTelegram.Schema.IChatInviteImporter>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

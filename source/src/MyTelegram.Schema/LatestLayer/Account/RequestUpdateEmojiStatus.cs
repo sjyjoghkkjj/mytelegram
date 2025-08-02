@@ -32,8 +32,8 @@ public sealed class RequestUpdateEmojiStatus : IRequest<IBool>
         writer.Write(EmojiStatus);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        EmojiStatus = reader.Read<MyTelegram.Schema.IEmojiStatus>();
+        EmojiStatus = buffer.Read<MyTelegram.Schema.IEmojiStatus>();
     }
 }

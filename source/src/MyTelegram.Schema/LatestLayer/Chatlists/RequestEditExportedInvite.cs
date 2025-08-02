@@ -22,7 +22,7 @@ public sealed class RequestEditExportedInvite : IRequest<MyTelegram.Schema.IExpo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Folder ID
@@ -47,8 +47,8 @@ public sealed class RequestEditExportedInvite : IRequest<MyTelegram.Schema.IExpo
 
     public void ComputeFlag()
     {
-        if (Title != null) { Flags[1] = true; }
-        if (Peers?.Count > 0) { Flags[2] = true; }
+        if (Title != null) { Flags = Flags.SetBit(1); }
+        if (Peers?.Count > 0) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -58,16 +58,16 @@ public sealed class RequestEditExportedInvite : IRequest<MyTelegram.Schema.IExpo
         writer.Write(Flags);
         writer.Write(Chatlist);
         writer.Write(Slug);
-        if (Flags[1]) { writer.Write(Title); }
-        if (Flags[2]) { writer.Write(Peers); }
+        if (Flags.IsBitSet(1)) { writer.Write(Title); }
+        if (Flags.IsBitSet(2)) { writer.Write(Peers); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Chatlist = reader.Read<MyTelegram.Schema.IInputChatlist>();
-        Slug = reader.ReadString();
-        if (Flags[1]) { Title = reader.ReadString(); }
-        if (Flags[2]) { Peers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>(); }
+        Flags = buffer.ReadInt32();
+        Chatlist = buffer.Read<MyTelegram.Schema.IInputChatlist>();
+        Slug = buffer.ReadString();
+        if (Flags.IsBitSet(1)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Peers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>(); }
     }
 }

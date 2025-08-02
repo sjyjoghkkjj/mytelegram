@@ -43,7 +43,7 @@ public sealed class RequestSendMultiMedia : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to send the album silently (no notification triggered)
@@ -129,19 +129,19 @@ public sealed class RequestSendMultiMedia : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (Silent) { Flags[5] = true; }
-        if (Background) { Flags[6] = true; }
-        if (ClearDraft) { Flags[7] = true; }
-        if (Noforwards) { Flags[14] = true; }
-        if (UpdateStickersetsOrder) { Flags[15] = true; }
-        if (InvertMedia) { Flags[16] = true; }
-        if (AllowPaidFloodskip) { Flags[19] = true; }
-        if (ReplyTo != null) { Flags[0] = true; }
-        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags[10] = true; }
-        if (SendAs != null) { Flags[13] = true; }
-        if (QuickReplyShortcut != null) { Flags[17] = true; }
-        if (/*Effect != 0 &&*/ Effect.HasValue) { Flags[18] = true; }
-        if (/*AllowPaidStars != 0 &&*/ AllowPaidStars.HasValue) { Flags[21] = true; }
+        if (Silent) { Flags = Flags.SetBit(5); }
+        if (Background) { Flags = Flags.SetBit(6); }
+        if (ClearDraft) { Flags = Flags.SetBit(7); }
+        if (Noforwards) { Flags = Flags.SetBit(14); }
+        if (UpdateStickersetsOrder) { Flags = Flags.SetBit(15); }
+        if (InvertMedia) { Flags = Flags.SetBit(16); }
+        if (AllowPaidFloodskip) { Flags = Flags.SetBit(19); }
+        if (ReplyTo != null) { Flags = Flags.SetBit(0); }
+        if (/*ScheduleDate != 0 && */ScheduleDate.HasValue) { Flags = Flags.SetBit(10); }
+        if (SendAs != null) { Flags = Flags.SetBit(13); }
+        if (QuickReplyShortcut != null) { Flags = Flags.SetBit(17); }
+        if (/*Effect != 0 &&*/ Effect.HasValue) { Flags = Flags.SetBit(18); }
+        if (/*AllowPaidStars != 0 &&*/ AllowPaidStars.HasValue) { Flags = Flags.SetBit(21); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -150,32 +150,32 @@ public sealed class RequestSendMultiMedia : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(ReplyTo); }
+        if (Flags.IsBitSet(0)) { writer.Write(ReplyTo); }
         writer.Write(MultiMedia);
-        if (Flags[10]) { writer.Write(ScheduleDate.Value); }
-        if (Flags[13]) { writer.Write(SendAs); }
-        if (Flags[17]) { writer.Write(QuickReplyShortcut); }
-        if (Flags[18]) { writer.Write(Effect.Value); }
-        if (Flags[21]) { writer.Write(AllowPaidStars.Value); }
+        if (Flags.IsBitSet(10)) { writer.Write(ScheduleDate.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(SendAs); }
+        if (Flags.IsBitSet(17)) { writer.Write(QuickReplyShortcut); }
+        if (Flags.IsBitSet(18)) { writer.Write(Effect.Value); }
+        if (Flags.IsBitSet(21)) { writer.Write(AllowPaidStars.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[5]) { Silent = true; }
-        if (Flags[6]) { Background = true; }
-        if (Flags[7]) { ClearDraft = true; }
-        if (Flags[14]) { Noforwards = true; }
-        if (Flags[15]) { UpdateStickersetsOrder = true; }
-        if (Flags[16]) { InvertMedia = true; }
-        if (Flags[19]) { AllowPaidFloodskip = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        if (Flags[0]) { ReplyTo = reader.Read<MyTelegram.Schema.IInputReplyTo>(); }
-        MultiMedia = reader.Read<TVector<MyTelegram.Schema.IInputSingleMedia>>();
-        if (Flags[10]) { ScheduleDate = reader.ReadInt32(); }
-        if (Flags[13]) { SendAs = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        if (Flags[17]) { QuickReplyShortcut = reader.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }
-        if (Flags[18]) { Effect = reader.ReadInt64(); }
-        if (Flags[21]) { AllowPaidStars = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(5)) { Silent = true; }
+        if (Flags.IsBitSet(6)) { Background = true; }
+        if (Flags.IsBitSet(7)) { ClearDraft = true; }
+        if (Flags.IsBitSet(14)) { Noforwards = true; }
+        if (Flags.IsBitSet(15)) { UpdateStickersetsOrder = true; }
+        if (Flags.IsBitSet(16)) { InvertMedia = true; }
+        if (Flags.IsBitSet(19)) { AllowPaidFloodskip = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(0)) { ReplyTo = buffer.Read<MyTelegram.Schema.IInputReplyTo>(); }
+        MultiMedia = buffer.Read<TVector<MyTelegram.Schema.IInputSingleMedia>>();
+        if (Flags.IsBitSet(10)) { ScheduleDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(13)) { SendAs = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        if (Flags.IsBitSet(17)) { QuickReplyShortcut = buffer.Read<MyTelegram.Schema.IInputQuickReplyShortcut>(); }
+        if (Flags.IsBitSet(18)) { Effect = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(21)) { AllowPaidStars = buffer.ReadInt64(); }
     }
 }

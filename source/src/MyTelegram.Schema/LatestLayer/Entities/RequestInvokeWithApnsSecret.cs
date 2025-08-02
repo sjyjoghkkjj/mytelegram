@@ -39,10 +39,10 @@ public sealed class RequestInvokeWithApnsSecret : IRequest<IObject>, IHasSubQuer
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Nonce = reader.ReadString();
-        Secret = reader.ReadString();
-        Query = reader.Read<IObject>();
+        Nonce = buffer.ReadString();
+        Secret = buffer.ReadString();
+        Query = buffer.Read<IObject>();
     }
 }

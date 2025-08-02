@@ -8,7 +8,7 @@ namespace MyTelegram.Schema;
 [JsonDerivedType(typeof(TBusinessBotRights), nameof(TBusinessBotRights))]
 public interface IBusinessBotRights : IObject
 {
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
     bool Reply { get; set; }
     bool ReadMessages { get; set; }
     bool DeleteSentMessages { get; set; }

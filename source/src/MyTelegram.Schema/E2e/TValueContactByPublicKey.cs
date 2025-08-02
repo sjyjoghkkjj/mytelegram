@@ -22,8 +22,8 @@ public sealed class TValueContactByPublicKey : IValue
         writer.WriteVector(Entries);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Entries = reader.ReadVector<MyTelegram.Schema.E2e.IPersonalOnClient>();
+        Entries = buffer.ReadVector<MyTelegram.Schema.E2e.IPersonalOnClient>();
     }
 }

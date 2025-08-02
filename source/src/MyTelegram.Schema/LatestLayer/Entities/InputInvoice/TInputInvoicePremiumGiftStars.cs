@@ -10,14 +10,14 @@ namespace MyTelegram.Schema;
 public sealed class TInputInvoicePremiumGiftStars : IInputInvoice
 {
     public uint ConstructorId => 0xdabab2ef;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public MyTelegram.Schema.IInputUser UserId { get; set; }
     public int Months { get; set; }
     public MyTelegram.Schema.ITextWithEntities? Message { get; set; }
 
     public void ComputeFlag()
     {
-        if (Message != null) { Flags[0] = true; }
+        if (Message != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -27,14 +27,14 @@ public sealed class TInputInvoicePremiumGiftStars : IInputInvoice
         writer.Write(Flags);
         writer.Write(UserId);
         writer.Write(Months);
-        if (Flags[0]) { writer.Write(Message); }
+        if (Flags.IsBitSet(0)) { writer.Write(Message); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        Months = reader.ReadInt32();
-        if (Flags[0]) { Message = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        Flags = buffer.ReadInt32();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Months = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Message = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
     }
 }

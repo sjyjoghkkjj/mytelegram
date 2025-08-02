@@ -14,7 +14,7 @@ public sealed class TWallPaperSettings : IWallPaperSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// For <a href="https://corefork.telegram.org/api/wallpapers#image-wallpapers">image wallpapers »</a>: if set, the JPEG must be downscaled to fit in 450x450 square and then box-blurred with radius 12.
@@ -65,15 +65,15 @@ public sealed class TWallPaperSettings : IWallPaperSettings
 
     public void ComputeFlag()
     {
-        if (Blur) { Flags[1] = true; }
-        if (Motion) { Flags[2] = true; }
-        if (/*BackgroundColor != 0 && */BackgroundColor.HasValue) { Flags[0] = true; }
-        if (/*SecondBackgroundColor != 0 && */SecondBackgroundColor.HasValue) { Flags[4] = true; }
-        if (/*ThirdBackgroundColor != 0 && */ThirdBackgroundColor.HasValue) { Flags[5] = true; }
-        if (/*FourthBackgroundColor != 0 && */FourthBackgroundColor.HasValue) { Flags[6] = true; }
-        if (/*Intensity != 0 && */Intensity.HasValue) { Flags[3] = true; }
-        if (/*Rotation != 0 && */Rotation.HasValue) { Flags[4] = true; }
-        if (Emoticon != null) { Flags[7] = true; }
+        if (Blur) { Flags = Flags.SetBit(1); }
+        if (Motion) { Flags = Flags.SetBit(2); }
+        if (/*BackgroundColor != 0 && */BackgroundColor.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*SecondBackgroundColor != 0 && */SecondBackgroundColor.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*ThirdBackgroundColor != 0 && */ThirdBackgroundColor.HasValue) { Flags = Flags.SetBit(5); }
+        if (/*FourthBackgroundColor != 0 && */FourthBackgroundColor.HasValue) { Flags = Flags.SetBit(6); }
+        if (/*Intensity != 0 && */Intensity.HasValue) { Flags = Flags.SetBit(3); }
+        if (/*Rotation != 0 && */Rotation.HasValue) { Flags = Flags.SetBit(4); }
+        if (Emoticon != null) { Flags = Flags.SetBit(7); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -81,26 +81,26 @@ public sealed class TWallPaperSettings : IWallPaperSettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(BackgroundColor.Value); }
-        if (Flags[4]) { writer.Write(SecondBackgroundColor.Value); }
-        if (Flags[5]) { writer.Write(ThirdBackgroundColor.Value); }
-        if (Flags[6]) { writer.Write(FourthBackgroundColor.Value); }
-        if (Flags[3]) { writer.Write(Intensity.Value); }
-        if (Flags[4]) { writer.Write(Rotation.Value); }
-        if (Flags[7]) { writer.Write(Emoticon); }
+        if (Flags.IsBitSet(0)) { writer.Write(BackgroundColor.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(SecondBackgroundColor.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(ThirdBackgroundColor.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(FourthBackgroundColor.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Intensity.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(Rotation.Value); }
+        if (Flags.IsBitSet(7)) { writer.Write(Emoticon); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Blur = true; }
-        if (Flags[2]) { Motion = true; }
-        if (Flags[0]) { BackgroundColor = reader.ReadInt32(); }
-        if (Flags[4]) { SecondBackgroundColor = reader.ReadInt32(); }
-        if (Flags[5]) { ThirdBackgroundColor = reader.ReadInt32(); }
-        if (Flags[6]) { FourthBackgroundColor = reader.ReadInt32(); }
-        if (Flags[3]) { Intensity = reader.ReadInt32(); }
-        if (Flags[4]) { Rotation = reader.ReadInt32(); }
-        if (Flags[7]) { Emoticon = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Blur = true; }
+        if (Flags.IsBitSet(2)) { Motion = true; }
+        if (Flags.IsBitSet(0)) { BackgroundColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { SecondBackgroundColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { ThirdBackgroundColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(6)) { FourthBackgroundColor = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { Intensity = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { Rotation = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(7)) { Emoticon = buffer.ReadString(); }
     }
 }

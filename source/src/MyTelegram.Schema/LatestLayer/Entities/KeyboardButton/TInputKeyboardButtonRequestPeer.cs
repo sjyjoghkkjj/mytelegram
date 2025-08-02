@@ -14,7 +14,7 @@ public sealed class TInputKeyboardButtonRequestPeer : IKeyboardButton
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Set this flag to request the peer's name.
@@ -57,9 +57,9 @@ public sealed class TInputKeyboardButtonRequestPeer : IKeyboardButton
 
     public void ComputeFlag()
     {
-        if (NameRequested) { Flags[0] = true; }
-        if (UsernameRequested) { Flags[1] = true; }
-        if (PhotoRequested) { Flags[2] = true; }
+        if (NameRequested) { Flags = Flags.SetBit(0); }
+        if (UsernameRequested) { Flags = Flags.SetBit(1); }
+        if (PhotoRequested) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -74,15 +74,15 @@ public sealed class TInputKeyboardButtonRequestPeer : IKeyboardButton
         writer.Write(MaxQuantity);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NameRequested = true; }
-        if (Flags[1]) { UsernameRequested = true; }
-        if (Flags[2]) { PhotoRequested = true; }
-        Text = reader.ReadString();
-        ButtonId = reader.ReadInt32();
-        PeerType = reader.Read<MyTelegram.Schema.IRequestPeerType>();
-        MaxQuantity = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NameRequested = true; }
+        if (Flags.IsBitSet(1)) { UsernameRequested = true; }
+        if (Flags.IsBitSet(2)) { PhotoRequested = true; }
+        Text = buffer.ReadString();
+        ButtonId = buffer.ReadInt32();
+        PeerType = buffer.Read<MyTelegram.Schema.IRequestPeerType>();
+        MaxQuantity = buffer.ReadInt32();
     }
 }

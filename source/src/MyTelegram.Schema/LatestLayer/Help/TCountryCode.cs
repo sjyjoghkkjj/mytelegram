@@ -14,7 +14,7 @@ public sealed class TCountryCode : ICountryCode
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// ISO country code
@@ -33,8 +33,8 @@ public sealed class TCountryCode : ICountryCode
 
     public void ComputeFlag()
     {
-        if (Prefixes?.Count > 0) { Flags[0] = true; }
-        if (Patterns?.Count > 0) { Flags[1] = true; }
+        if (Prefixes?.Count > 0) { Flags = Flags.SetBit(0); }
+        if (Patterns?.Count > 0) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -43,15 +43,15 @@ public sealed class TCountryCode : ICountryCode
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(CountryCode);
-        if (Flags[0]) { writer.Write(Prefixes); }
-        if (Flags[1]) { writer.Write(Patterns); }
+        if (Flags.IsBitSet(0)) { writer.Write(Prefixes); }
+        if (Flags.IsBitSet(1)) { writer.Write(Patterns); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        CountryCode = reader.ReadString();
-        if (Flags[0]) { Prefixes = reader.Read<TVector<string>>(); }
-        if (Flags[1]) { Patterns = reader.Read<TVector<string>>(); }
+        Flags = buffer.ReadInt32();
+        CountryCode = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Prefixes = buffer.Read<TVector<string>>(); }
+        if (Flags.IsBitSet(1)) { Patterns = buffer.Read<TVector<string>>(); }
     }
 }

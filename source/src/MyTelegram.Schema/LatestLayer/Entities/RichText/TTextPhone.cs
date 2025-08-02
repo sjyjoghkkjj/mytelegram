@@ -35,9 +35,9 @@ public sealed class TTextPhone : IRichText
         writer.Write(Phone);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.Read<MyTelegram.Schema.IRichText>();
-        Phone = reader.ReadString();
+        Text = buffer.Read<MyTelegram.Schema.IRichText>();
+        Phone = buffer.ReadString();
     }
 }

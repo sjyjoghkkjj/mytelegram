@@ -18,7 +18,7 @@ public sealed class RequestRequestSimpleWebView : IRequest<MyTelegram.Schema.IWe
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the webapp was opened by clicking on the <code>switch_webview</code> button shown on top of the inline results list returned by <a href="https://corefork.telegram.org/method/messages.getInlineBotResults">messages.getInlineBotResults</a>.
@@ -73,13 +73,13 @@ public sealed class RequestRequestSimpleWebView : IRequest<MyTelegram.Schema.IWe
 
     public void ComputeFlag()
     {
-        if (FromSwitchWebview) { Flags[1] = true; }
-        if (FromSideMenu) { Flags[2] = true; }
-        if (Compact) { Flags[7] = true; }
-        if (Fullscreen) { Flags[8] = true; }
-        if (Url != null) { Flags[3] = true; }
-        if (StartParam != null) { Flags[4] = true; }
-        if (ThemeParams != null) { Flags[0] = true; }
+        if (FromSwitchWebview) { Flags = Flags.SetBit(1); }
+        if (FromSideMenu) { Flags = Flags.SetBit(2); }
+        if (Compact) { Flags = Flags.SetBit(7); }
+        if (Fullscreen) { Flags = Flags.SetBit(8); }
+        if (Url != null) { Flags = Flags.SetBit(3); }
+        if (StartParam != null) { Flags = Flags.SetBit(4); }
+        if (ThemeParams != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -89,23 +89,23 @@ public sealed class RequestRequestSimpleWebView : IRequest<MyTelegram.Schema.IWe
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Bot);
-        if (Flags[3]) { writer.Write(Url); }
-        if (Flags[4]) { writer.Write(StartParam); }
-        if (Flags[0]) { writer.Write(ThemeParams); }
+        if (Flags.IsBitSet(3)) { writer.Write(Url); }
+        if (Flags.IsBitSet(4)) { writer.Write(StartParam); }
+        if (Flags.IsBitSet(0)) { writer.Write(ThemeParams); }
         writer.Write(Platform);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { FromSwitchWebview = true; }
-        if (Flags[2]) { FromSideMenu = true; }
-        if (Flags[7]) { Compact = true; }
-        if (Flags[8]) { Fullscreen = true; }
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        if (Flags[3]) { Url = reader.ReadString(); }
-        if (Flags[4]) { StartParam = reader.ReadString(); }
-        if (Flags[0]) { ThemeParams = reader.Read<MyTelegram.Schema.IDataJSON>(); }
-        Platform = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { FromSwitchWebview = true; }
+        if (Flags.IsBitSet(2)) { FromSideMenu = true; }
+        if (Flags.IsBitSet(7)) { Compact = true; }
+        if (Flags.IsBitSet(8)) { Fullscreen = true; }
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        if (Flags.IsBitSet(3)) { Url = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { StartParam = buffer.ReadString(); }
+        if (Flags.IsBitSet(0)) { ThemeParams = buffer.Read<MyTelegram.Schema.IDataJSON>(); }
+        Platform = buffer.ReadString();
     }
 }

@@ -42,10 +42,10 @@ public sealed class RequestTogglePaidReactionPrivacy : IRequest<IBool>
         writer.Write(Private);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.ReadInt32();
-        Private = reader.Read<MyTelegram.Schema.IPaidReactionPrivacy>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.ReadInt32();
+        Private = buffer.Read<MyTelegram.Schema.IPaidReactionPrivacy>();
     }
 }

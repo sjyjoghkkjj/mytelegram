@@ -18,7 +18,7 @@ public interface ISecureSecretSettings : IObject
     ///<summary>
     /// Secure secret
     ///</summary>
-    byte[] SecureSecret { get; set; }
+    ReadOnlyMemory<byte> SecureSecret { get; set; }
 
     ///<summary>
     /// Secret ID

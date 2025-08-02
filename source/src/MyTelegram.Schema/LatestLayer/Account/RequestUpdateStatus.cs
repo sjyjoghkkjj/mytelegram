@@ -29,8 +29,8 @@ public sealed class RequestUpdateStatus : IRequest<IBool>
         writer.Write(Offline);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offline = reader.Read();
+        Offline = buffer.Read();
     }
 }

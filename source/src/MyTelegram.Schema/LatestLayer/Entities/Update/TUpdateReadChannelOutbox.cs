@@ -34,9 +34,9 @@ public sealed class TUpdateReadChannelOutbox : IUpdate
         writer.Write(MaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
-        MaxId = reader.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        MaxId = buffer.ReadInt32();
     }
 }

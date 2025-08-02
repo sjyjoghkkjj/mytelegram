@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Schema.Serializer;
+﻿using MyTelegram.Schema.Extensions;
+
+namespace MyTelegram.Schema.Serializer;
 
 //public abstract class SerializeTestBase
 //{
@@ -34,9 +36,9 @@ public class UInt32SerializerTests
         //var buffer = new ReadOnlySequence<byte>(expectedBytes);
         var expectedValue = int.MaxValue + 10u;
         var serializer = CreateSerializer();
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(expectedBytes));
+        ReadOnlyMemory<byte> buffer = expectedBytes;
 
-        var actualBytes = serializer.Deserialize(ref reader);
+        var actualBytes = serializer.Deserialize(ref buffer);
 
         actualBytes.ShouldBeEquivalentTo(expectedValue);
     }

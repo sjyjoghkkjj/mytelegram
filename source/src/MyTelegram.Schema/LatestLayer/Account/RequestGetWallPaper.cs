@@ -32,8 +32,8 @@ public sealed class RequestGetWallPaper : IRequest<MyTelegram.Schema.IWallPaper>
         writer.Write(Wallpaper);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Wallpaper = reader.Read<MyTelegram.Schema.IInputWallPaper>();
+        Wallpaper = buffer.Read<MyTelegram.Schema.IInputWallPaper>();
     }
 }

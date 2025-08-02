@@ -39,9 +39,9 @@ public sealed class RequestSaveSecureValue : IRequest<MyTelegram.Schema.ISecureV
         writer.Write(SecureSecretId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Value = reader.Read<MyTelegram.Schema.IInputSecureValue>();
-        SecureSecretId = reader.ReadInt64();
+        Value = buffer.Read<MyTelegram.Schema.IInputSecureValue>();
+        SecureSecretId = buffer.ReadInt64();
     }
 }

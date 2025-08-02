@@ -29,8 +29,8 @@ public sealed class RequestGetAppChangelog : IRequest<MyTelegram.Schema.IUpdates
         writer.Write(PrevAppVersion);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevAppVersion = reader.ReadString();
+        PrevAppVersion = buffer.ReadString();
     }
 }

@@ -29,8 +29,8 @@ public sealed class RequestSetReactionsNotifySettings : IRequest<MyTelegram.Sche
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Settings = reader.Read<MyTelegram.Schema.IReactionsNotifySettings>();
+        Settings = buffer.Read<MyTelegram.Schema.IReactionsNotifySettings>();
     }
 }

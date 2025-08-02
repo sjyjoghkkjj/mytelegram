@@ -14,7 +14,7 @@ public sealed class TUpdatePeerHistoryTTL : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The chat
@@ -29,7 +29,7 @@ public sealed class TUpdatePeerHistoryTTL : IUpdate
 
     public void ComputeFlag()
     {
-        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags[0] = true; }
+        if (/*TtlPeriod != 0 && */TtlPeriod.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -38,13 +38,13 @@ public sealed class TUpdatePeerHistoryTTL : IUpdate
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Peer);
-        if (Flags[0]) { writer.Write(TtlPeriod.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(TtlPeriod.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        if (Flags[0]) { TtlPeriod = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        if (Flags.IsBitSet(0)) { TtlPeriod = buffer.ReadInt32(); }
     }
 }

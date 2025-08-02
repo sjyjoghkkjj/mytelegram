@@ -14,7 +14,7 @@ public sealed class TGiveawayInfoResults : IGiveawayInfo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether we're one of the winners of this giveaway.
@@ -60,11 +60,11 @@ public sealed class TGiveawayInfoResults : IGiveawayInfo
 
     public void ComputeFlag()
     {
-        if (Winner) { Flags[0] = true; }
-        if (Refunded) { Flags[1] = true; }
-        if (GiftCodeSlug != null) { Flags[3] = true; }
-        if (/*StarsPrize != 0 &&*/ StarsPrize.HasValue) { Flags[4] = true; }
-        if (/*ActivatedCount != 0 && */ActivatedCount.HasValue) { Flags[2] = true; }
+        if (Winner) { Flags = Flags.SetBit(0); }
+        if (Refunded) { Flags = Flags.SetBit(1); }
+        if (GiftCodeSlug != null) { Flags = Flags.SetBit(3); }
+        if (/*StarsPrize != 0 &&*/ StarsPrize.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*ActivatedCount != 0 && */ActivatedCount.HasValue) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -73,23 +73,23 @@ public sealed class TGiveawayInfoResults : IGiveawayInfo
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(StartDate);
-        if (Flags[3]) { writer.Write(GiftCodeSlug); }
-        if (Flags[4]) { writer.Write(StarsPrize.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(GiftCodeSlug); }
+        if (Flags.IsBitSet(4)) { writer.Write(StarsPrize.Value); }
         writer.Write(FinishDate);
         writer.Write(WinnersCount);
-        if (Flags[2]) { writer.Write(ActivatedCount.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(ActivatedCount.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Winner = true; }
-        if (Flags[1]) { Refunded = true; }
-        StartDate = reader.ReadInt32();
-        if (Flags[3]) { GiftCodeSlug = reader.ReadString(); }
-        if (Flags[4]) { StarsPrize = reader.ReadInt64(); }
-        FinishDate = reader.ReadInt32();
-        WinnersCount = reader.ReadInt32();
-        if (Flags[2]) { ActivatedCount = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Winner = true; }
+        if (Flags.IsBitSet(1)) { Refunded = true; }
+        StartDate = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { GiftCodeSlug = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { StarsPrize = buffer.ReadInt64(); }
+        FinishDate = buffer.ReadInt32();
+        WinnersCount = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { ActivatedCount = buffer.ReadInt32(); }
     }
 }

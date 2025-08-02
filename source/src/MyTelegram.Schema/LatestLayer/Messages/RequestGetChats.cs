@@ -32,8 +32,8 @@ public sealed class RequestGetChats : IRequest<MyTelegram.Schema.Messages.IChats
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<TVector<long>>();
+        Id = buffer.Read<TVector<long>>();
     }
 }

@@ -24,7 +24,7 @@ public sealed class TInputDocumentFileLocation : IInputFileLocation
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/file_reference">File reference</a>
     ///</summary>
-    public byte[] FileReference { get; set; }
+    public ReadOnlyMemory<byte> FileReference { get; set; }
 
     ///<summary>
     /// Thumbnail size to download the thumbnail
@@ -46,11 +46,11 @@ public sealed class TInputDocumentFileLocation : IInputFileLocation
         writer.Write(ThumbSize);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        AccessHash = reader.ReadInt64();
-        FileReference = reader.ReadBytes();
-        ThumbSize = reader.ReadString();
+        Id = buffer.ReadInt64();
+        AccessHash = buffer.ReadInt64();
+        FileReference = buffer.ReadBytes();
+        ThumbSize = buffer.ReadString();
     }
 }

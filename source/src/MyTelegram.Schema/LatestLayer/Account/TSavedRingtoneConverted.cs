@@ -29,8 +29,8 @@ public sealed class TSavedRingtoneConverted : ISavedRingtone
         writer.Write(Document);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Document = reader.Read<MyTelegram.Schema.IDocument>();
+        Document = buffer.Read<MyTelegram.Schema.IDocument>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TPageBlockEmbed : IPageBlock
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the block should be full width
@@ -61,13 +61,13 @@ public sealed class TPageBlockEmbed : IPageBlock
 
     public void ComputeFlag()
     {
-        if (FullWidth) { Flags[0] = true; }
-        if (AllowScrolling) { Flags[3] = true; }
-        if (Url != null) { Flags[1] = true; }
-        if (Html != null) { Flags[2] = true; }
-        if (/*PosterPhotoId != 0 &&*/ PosterPhotoId.HasValue) { Flags[4] = true; }
-        if (/*W != 0 && */W.HasValue) { Flags[5] = true; }
-        if (/*H != 0 && */H.HasValue) { Flags[5] = true; }
+        if (FullWidth) { Flags = Flags.SetBit(0); }
+        if (AllowScrolling) { Flags = Flags.SetBit(3); }
+        if (Url != null) { Flags = Flags.SetBit(1); }
+        if (Html != null) { Flags = Flags.SetBit(2); }
+        if (/*PosterPhotoId != 0 &&*/ PosterPhotoId.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*W != 0 && */W.HasValue) { Flags = Flags.SetBit(5); }
+        if (/*H != 0 && */H.HasValue) { Flags = Flags.SetBit(5); }
 
     }
 
@@ -76,24 +76,24 @@ public sealed class TPageBlockEmbed : IPageBlock
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(Url); }
-        if (Flags[2]) { writer.Write(Html); }
-        if (Flags[4]) { writer.Write(PosterPhotoId.Value); }
-        if (Flags[5]) { writer.Write(W.Value); }
-        if (Flags[5]) { writer.Write(H.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Url); }
+        if (Flags.IsBitSet(2)) { writer.Write(Html); }
+        if (Flags.IsBitSet(4)) { writer.Write(PosterPhotoId.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(W.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(H.Value); }
         writer.Write(Caption);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { FullWidth = true; }
-        if (Flags[3]) { AllowScrolling = true; }
-        if (Flags[1]) { Url = reader.ReadString(); }
-        if (Flags[2]) { Html = reader.ReadString(); }
-        if (Flags[4]) { PosterPhotoId = reader.ReadInt64(); }
-        if (Flags[5]) { W = reader.ReadInt32(); }
-        if (Flags[5]) { H = reader.ReadInt32(); }
-        Caption = reader.Read<MyTelegram.Schema.IPageCaption>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { FullWidth = true; }
+        if (Flags.IsBitSet(3)) { AllowScrolling = true; }
+        if (Flags.IsBitSet(1)) { Url = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Html = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { PosterPhotoId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(5)) { W = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(5)) { H = buffer.ReadInt32(); }
+        Caption = buffer.Read<MyTelegram.Schema.IPageCaption>();
     }
 }

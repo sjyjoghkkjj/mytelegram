@@ -137,24 +137,24 @@ public sealed class TMegagroupStats : IMegagroupStats
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Period = reader.Read<MyTelegram.Schema.IStatsDateRangeDays>();
-        Members = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        Messages = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        Viewers = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        Posters = reader.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
-        GrowthGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        MembersGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        NewMembersBySourceGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        LanguagesGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        MessagesGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        ActionsGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        TopHoursGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        WeekdaysGraph = reader.Read<MyTelegram.Schema.IStatsGraph>();
-        TopPosters = reader.Read<TVector<MyTelegram.Schema.IStatsGroupTopPoster>>();
-        TopAdmins = reader.Read<TVector<MyTelegram.Schema.IStatsGroupTopAdmin>>();
-        TopInviters = reader.Read<TVector<MyTelegram.Schema.IStatsGroupTopInviter>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Period = buffer.Read<MyTelegram.Schema.IStatsDateRangeDays>();
+        Members = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        Messages = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        Viewers = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        Posters = buffer.Read<MyTelegram.Schema.IStatsAbsValueAndPrev>();
+        GrowthGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        MembersGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        NewMembersBySourceGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        LanguagesGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        MessagesGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        ActionsGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        TopHoursGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        WeekdaysGraph = buffer.Read<MyTelegram.Schema.IStatsGraph>();
+        TopPosters = buffer.Read<TVector<MyTelegram.Schema.IStatsGroupTopPoster>>();
+        TopAdmins = buffer.Read<TVector<MyTelegram.Schema.IStatsGroupTopAdmin>>();
+        TopInviters = buffer.Read<TVector<MyTelegram.Schema.IStatsGroupTopInviter>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

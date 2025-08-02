@@ -29,8 +29,8 @@ public sealed class TChannelAdminLogEventActionToggleGroupCallSetting : IChannel
         writer.Write(JoinMuted);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        JoinMuted = reader.Read();
+        JoinMuted = buffer.Read();
     }
 }

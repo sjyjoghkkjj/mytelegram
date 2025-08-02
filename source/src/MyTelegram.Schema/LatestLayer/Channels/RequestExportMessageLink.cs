@@ -20,7 +20,7 @@ public sealed class RequestExportMessageLink : IRequest<MyTelegram.Schema.IExpor
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to include other grouped media (for albums)
@@ -47,8 +47,8 @@ public sealed class RequestExportMessageLink : IRequest<MyTelegram.Schema.IExpor
 
     public void ComputeFlag()
     {
-        if (Grouped) { Flags[0] = true; }
-        if (Thread) { Flags[1] = true; }
+        if (Grouped) { Flags = Flags.SetBit(0); }
+        if (Thread) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -61,12 +61,12 @@ public sealed class RequestExportMessageLink : IRequest<MyTelegram.Schema.IExpor
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Grouped = true; }
-        if (Flags[1]) { Thread = true; }
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Id = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Grouped = true; }
+        if (Flags.IsBitSet(1)) { Thread = true; }
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Id = buffer.ReadInt32();
     }
 }

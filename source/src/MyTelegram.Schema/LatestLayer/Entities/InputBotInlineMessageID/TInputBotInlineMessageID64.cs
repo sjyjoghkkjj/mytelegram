@@ -46,11 +46,11 @@ public sealed class TInputBotInlineMessageID64 : IInputBotInlineMessageID
         writer.Write(AccessHash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DcId = reader.ReadInt32();
-        OwnerId = reader.ReadInt64();
-        Id = reader.ReadInt32();
-        AccessHash = reader.ReadInt64();
+        DcId = buffer.ReadInt32();
+        OwnerId = buffer.ReadInt64();
+        Id = buffer.ReadInt32();
+        AccessHash = buffer.ReadInt64();
     }
 }

@@ -1,16 +1,15 @@
 ﻿using System.Buffers.Binary;
+using System.Security.Cryptography;
 
 namespace MyTelegram.Core;
 
-public class AuthKeyIdHelper(IHashHelper hashHelper) : IAuthKeyIdHelper, ISingletonDependency
+public class AuthKeyIdHelper : IAuthKeyIdHelper, ISingletonDependency
 {
-    public long GetAuthKeyId(byte[] authKey)
+    public long GetAuthKeyId(ReadOnlyMemory<byte> authKey)
     {
-        var shaHash = hashHelper.Sha1(authKey);
-        //var auxHash = BitConverter.ToUInt64(shaHash, 0);
+        Span<byte> hash = stackalloc byte[20];
+        SHA1.HashData(authKey.Span, hash);
 
-        //return BitConverter.ToInt64(shaHash, 8 + 4);
-
-        return BinaryPrimitives.ReadInt64LittleEndian(shaHash.AsSpan(8 + 4));
+        return BinaryPrimitives.ReadInt64LittleEndian(hash.Slice(8 + 4));
     }
 }

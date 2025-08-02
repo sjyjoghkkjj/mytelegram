@@ -35,9 +35,9 @@ public sealed class TInputGameShortName : IInputGame
         writer.Write(ShortName);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        BotId = reader.Read<MyTelegram.Schema.IInputUser>();
-        ShortName = reader.ReadString();
+        BotId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        ShortName = buffer.ReadString();
     }
 }

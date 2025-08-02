@@ -14,7 +14,7 @@ public sealed class TFactCheck : IFactCheck
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the <code>country</code>/<code>text</code> fields will <strong>not</strong> be set, and the fact check must be fetched manually by the client (if it isn't already cached with the key specified in <code>hash</code>) using bundled <a href="https://corefork.telegram.org/method/messages.getFactCheck">messages.getFactCheck</a> requests, when the message with the factcheck scrolls into view.
@@ -40,9 +40,9 @@ public sealed class TFactCheck : IFactCheck
 
     public void ComputeFlag()
     {
-        if (NeedCheck) { Flags[0] = true; }
-        if (Country != null) { Flags[1] = true; }
-        if (Text != null) { Flags[1] = true; }
+        if (NeedCheck) { Flags = Flags.SetBit(0); }
+        if (Country != null) { Flags = Flags.SetBit(1); }
+        if (Text != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -51,17 +51,17 @@ public sealed class TFactCheck : IFactCheck
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[1]) { writer.Write(Country); }
-        if (Flags[1]) { writer.Write(Text); }
+        if (Flags.IsBitSet(1)) { writer.Write(Country); }
+        if (Flags.IsBitSet(1)) { writer.Write(Text); }
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NeedCheck = true; }
-        if (Flags[1]) { Country = reader.ReadString(); }
-        if (Flags[1]) { Text = reader.Read<MyTelegram.Schema.ITextWithEntities>(); }
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NeedCheck = true; }
+        if (Flags.IsBitSet(1)) { Country = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Text = buffer.Read<MyTelegram.Schema.ITextWithEntities>(); }
+        Hash = buffer.ReadInt64();
     }
 }

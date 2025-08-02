@@ -46,9 +46,9 @@ public sealed class RequestEditChatDefaultBannedRights : IRequest<MyTelegram.Sch
         writer.Write(BannedRights);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        BannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        BannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>();
     }
 }

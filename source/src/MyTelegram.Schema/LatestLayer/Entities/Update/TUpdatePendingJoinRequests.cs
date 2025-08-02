@@ -41,10 +41,10 @@ public sealed class TUpdatePendingJoinRequests : IUpdate
         writer.Write(RecentRequesters);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        RequestsPending = reader.ReadInt32();
-        RecentRequesters = reader.Read<TVector<long>>();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        RequestsPending = buffer.ReadInt32();
+        RecentRequesters = buffer.Read<TVector<long>>();
     }
 }

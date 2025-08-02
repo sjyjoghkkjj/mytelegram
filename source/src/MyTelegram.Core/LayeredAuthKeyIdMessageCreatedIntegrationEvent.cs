@@ -1,9 +1,13 @@
-﻿namespace MyTelegram.Core;
+﻿using System.Buffers;
+
+namespace MyTelegram.Core;
 
 public record LayeredAuthKeyIdMessageCreatedIntegrationEvent(
     long AuthKeyId,
-    byte[] Data,
+    ReadOnlyMemory<byte> Data,
     int Pts,
     int? Qts,
-    long GlobalSeqNo,
-    LayeredData<byte[]>? LayeredData) : ISessionMessage;
+    long GlobalSeqNo) : ISessionMessage
+{
+    public IMemoryOwner<byte>? MemoryOwner { get; set; }
+}

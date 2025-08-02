@@ -104,10 +104,10 @@ public class Step2Helper(
         var span = innerDataWithHash.AsSpan();
         var shaHash = span[..20];
         var innerData = span[20..];
-
-        var reader = new SequenceReader<byte>(new ReadOnlySequence<byte>(innerDataWithHash, 20, innerDataWithHash.Length - 20));
-        var tPqInnerData = reader.Read<IPQInnerData>();
-        var length = (int)reader.Consumed;
+        ReadOnlyMemory<byte> buffer = innerDataWithHash.AsMemory(20, innerDataWithHash.Length - 20);
+        var oldLength = buffer.Length;
+        var tPqInnerData = buffer.Read<IPQInnerData>();
+        var length = oldLength - buffer.Length;
         var realInnerData = innerData[..length];
 
         Span<byte> calcHash = stackalloc byte[20];

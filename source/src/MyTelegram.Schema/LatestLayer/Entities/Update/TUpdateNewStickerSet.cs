@@ -29,8 +29,8 @@ public sealed class TUpdateNewStickerSet : IUpdate
         writer.Write(Stickerset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stickerset = reader.Read<MyTelegram.Schema.Messages.IStickerSet>();
+        Stickerset = buffer.Read<MyTelegram.Schema.Messages.IStickerSet>();
     }
 }

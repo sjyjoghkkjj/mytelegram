@@ -14,7 +14,7 @@ public sealed class RequestGetNotifyExceptions : IRequest<MyTelegram.Schema.IUpd
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, chats with non-default sound will be returned
@@ -36,9 +36,9 @@ public sealed class RequestGetNotifyExceptions : IRequest<MyTelegram.Schema.IUpd
 
     public void ComputeFlag()
     {
-        if (CompareSound) { Flags[1] = true; }
-        if (CompareStories) { Flags[2] = true; }
-        if (Peer != null) { Flags[0] = true; }
+        if (CompareSound) { Flags = Flags.SetBit(1); }
+        if (CompareStories) { Flags = Flags.SetBit(2); }
+        if (Peer != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -46,14 +46,14 @@ public sealed class RequestGetNotifyExceptions : IRequest<MyTelegram.Schema.IUpd
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Peer); }
+        if (Flags.IsBitSet(0)) { writer.Write(Peer); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { CompareSound = true; }
-        if (Flags[2]) { CompareStories = true; }
-        if (Flags[0]) { Peer = reader.Read<MyTelegram.Schema.IInputNotifyPeer>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { CompareSound = true; }
+        if (Flags.IsBitSet(2)) { CompareStories = true; }
+        if (Flags.IsBitSet(0)) { Peer = buffer.Read<MyTelegram.Schema.IInputNotifyPeer>(); }
     }
 }

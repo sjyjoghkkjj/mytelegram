@@ -40,10 +40,10 @@ public sealed class TContacts : IContacts
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Contacts = reader.Read<TVector<MyTelegram.Schema.IContact>>();
-        SavedCount = reader.ReadInt32();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Contacts = buffer.Read<TVector<MyTelegram.Schema.IContact>>();
+        SavedCount = buffer.ReadInt32();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

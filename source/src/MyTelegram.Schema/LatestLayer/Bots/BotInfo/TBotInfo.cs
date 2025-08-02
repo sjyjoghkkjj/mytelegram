@@ -40,10 +40,10 @@ public sealed class TBotInfo : IBotInfo
         writer.Write(Description);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Name = reader.ReadString();
-        About = reader.ReadString();
-        Description = reader.ReadString();
+        Name = buffer.ReadString();
+        About = buffer.ReadString();
+        Description = buffer.ReadString();
     }
 }

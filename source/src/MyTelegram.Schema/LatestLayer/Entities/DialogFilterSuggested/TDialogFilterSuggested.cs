@@ -35,9 +35,9 @@ public sealed class TDialogFilterSuggested : IDialogFilterSuggested
         writer.Write(Description);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Filter = reader.Read<MyTelegram.Schema.IDialogFilter>();
-        Description = reader.ReadString();
+        Filter = buffer.Read<MyTelegram.Schema.IDialogFilter>();
+        Description = buffer.ReadString();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TMessageActionChatJoinedByLink : IMessageAction
         writer.Write(InviterId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        InviterId = reader.ReadInt64();
+        InviterId = buffer.ReadInt64();
     }
 }

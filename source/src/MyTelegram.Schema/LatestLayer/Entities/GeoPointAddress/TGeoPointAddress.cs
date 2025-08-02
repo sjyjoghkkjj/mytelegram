@@ -14,7 +14,7 @@ public sealed class TGeoPointAddress : IGeoPointAddress
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Two-letter ISO 3166-1 alpha-2 country code
@@ -38,9 +38,9 @@ public sealed class TGeoPointAddress : IGeoPointAddress
 
     public void ComputeFlag()
     {
-        if (State != null) { Flags[0] = true; }
-        if (City != null) { Flags[1] = true; }
-        if (Street != null) { Flags[2] = true; }
+        if (State != null) { Flags = Flags.SetBit(0); }
+        if (City != null) { Flags = Flags.SetBit(1); }
+        if (Street != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -49,17 +49,17 @@ public sealed class TGeoPointAddress : IGeoPointAddress
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(CountryIso2);
-        if (Flags[0]) { writer.Write(State); }
-        if (Flags[1]) { writer.Write(City); }
-        if (Flags[2]) { writer.Write(Street); }
+        if (Flags.IsBitSet(0)) { writer.Write(State); }
+        if (Flags.IsBitSet(1)) { writer.Write(City); }
+        if (Flags.IsBitSet(2)) { writer.Write(Street); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        CountryIso2 = reader.ReadString();
-        if (Flags[0]) { State = reader.ReadString(); }
-        if (Flags[1]) { City = reader.ReadString(); }
-        if (Flags[2]) { Street = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        CountryIso2 = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { State = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { City = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { Street = buffer.ReadString(); }
     }
 }

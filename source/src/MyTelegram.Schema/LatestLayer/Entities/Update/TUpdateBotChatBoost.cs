@@ -42,10 +42,10 @@ public sealed class TUpdateBotChatBoost : IUpdate
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Boost = reader.Read<MyTelegram.Schema.IBoost>();
-        Qts = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Boost = buffer.Read<MyTelegram.Schema.IBoost>();
+        Qts = buffer.ReadInt32();
     }
 }

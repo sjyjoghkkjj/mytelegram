@@ -14,7 +14,7 @@ public sealed class TPasswordInputSettings : IPasswordInputSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The <a href="https://corefork.telegram.org/api/srp">SRP algorithm</a> to use
@@ -45,11 +45,11 @@ public sealed class TPasswordInputSettings : IPasswordInputSettings
 
     public void ComputeFlag()
     {
-        if (NewAlgo != null) { Flags[0] = true; }
-        if (NewPasswordHash != null) { Flags[0] = true; }
-        if (Hint != null) { Flags[0] = true; }
-        if (Email != null) { Flags[1] = true; }
-        if (NewSecureSettings != null) { Flags[2] = true; }
+        if (NewAlgo != null) { Flags = Flags.SetBit(0); }
+        if (NewPasswordHash != null) { Flags = Flags.SetBit(0); }
+        if (Hint != null) { Flags = Flags.SetBit(0); }
+        if (Email != null) { Flags = Flags.SetBit(1); }
+        if (NewSecureSettings != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -57,20 +57,20 @@ public sealed class TPasswordInputSettings : IPasswordInputSettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(NewAlgo); }
-        if (Flags[0]) { writer.Write(NewPasswordHash); }
-        if (Flags[0]) { writer.Write(Hint); }
-        if (Flags[1]) { writer.Write(Email); }
-        if (Flags[2]) { writer.Write(NewSecureSettings); }
+        if (Flags.IsBitSet(0)) { writer.Write(NewAlgo); }
+        if (Flags.IsBitSet(0)) { writer.Write(NewPasswordHash); }
+        if (Flags.IsBitSet(0)) { writer.Write(Hint); }
+        if (Flags.IsBitSet(1)) { writer.Write(Email); }
+        if (Flags.IsBitSet(2)) { writer.Write(NewSecureSettings); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NewAlgo = reader.Read<MyTelegram.Schema.IPasswordKdfAlgo>(); }
-        if (Flags[0]) { NewPasswordHash = reader.ReadBytes(); }
-        if (Flags[0]) { Hint = reader.ReadString(); }
-        if (Flags[1]) { Email = reader.ReadString(); }
-        if (Flags[2]) { NewSecureSettings = reader.Read<MyTelegram.Schema.ISecureSecretSettings>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NewAlgo = buffer.Read<MyTelegram.Schema.IPasswordKdfAlgo>(); }
+        if (Flags.IsBitSet(0)) { NewPasswordHash = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(0)) { Hint = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Email = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { NewSecureSettings = buffer.Read<MyTelegram.Schema.ISecureSecretSettings>(); }
     }
 }

@@ -29,8 +29,8 @@ public sealed class TUpdatePaidReactionPrivacy : IUpdate
         writer.Write(Private);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Private = reader.Read<MyTelegram.Schema.IPaidReactionPrivacy>();
+        Private = buffer.Read<MyTelegram.Schema.IPaidReactionPrivacy>();
     }
 }

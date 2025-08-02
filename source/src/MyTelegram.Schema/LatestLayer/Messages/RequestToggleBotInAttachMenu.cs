@@ -17,7 +17,7 @@ public sealed class RequestToggleBotInAttachMenu : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user authorizes the bot to write messages to them, if requested by <a href="https://corefork.telegram.org/constructor/attachMenuBot">attachMenuBot</a>.<code>request_write_access</code>
@@ -39,7 +39,7 @@ public sealed class RequestToggleBotInAttachMenu : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (WriteAllowed) { Flags[0] = true; }
+        if (WriteAllowed) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -52,11 +52,11 @@ public sealed class RequestToggleBotInAttachMenu : IRequest<IBool>
         writer.Write(Enabled);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { WriteAllowed = true; }
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        Enabled = reader.Read();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { WriteAllowed = true; }
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Enabled = buffer.Read();
     }
 }

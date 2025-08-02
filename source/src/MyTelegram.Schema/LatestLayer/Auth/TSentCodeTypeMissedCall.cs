@@ -34,9 +34,9 @@ public sealed class TSentCodeTypeMissedCall : ISentCodeType
         writer.Write(Length);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Prefix = reader.ReadString();
-        Length = reader.ReadInt32();
+        Prefix = buffer.ReadString();
+        Length = buffer.ReadInt32();
     }
 }

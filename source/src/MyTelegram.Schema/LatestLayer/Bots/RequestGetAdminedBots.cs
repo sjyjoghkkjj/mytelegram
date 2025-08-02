@@ -23,7 +23,7 @@ public sealed class RequestGetAdminedBots : IRequest<TVector<MyTelegram.Schema.I
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

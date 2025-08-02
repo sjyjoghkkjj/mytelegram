@@ -19,7 +19,7 @@ public sealed class TWallPaperNoFile : IWallPaper
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is the default wallpaper
@@ -41,9 +41,9 @@ public sealed class TWallPaperNoFile : IWallPaper
 
     public void ComputeFlag()
     {
-        if (Default) { Flags[1] = true; }
-        if (Dark) { Flags[4] = true; }
-        if (Settings != null) { Flags[2] = true; }
+        if (Default) { Flags = Flags.SetBit(1); }
+        if (Dark) { Flags = Flags.SetBit(4); }
+        if (Settings != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -52,15 +52,15 @@ public sealed class TWallPaperNoFile : IWallPaper
         writer.Write(ConstructorId);
         writer.Write(Id);
         writer.Write(Flags);
-        if (Flags[2]) { writer.Write(Settings); }
+        if (Flags.IsBitSet(2)) { writer.Write(Settings); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Default = true; }
-        if (Flags[4]) { Dark = true; }
-        if (Flags[2]) { Settings = reader.Read<MyTelegram.Schema.IWallPaperSettings>(); }
+        Id = buffer.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Default = true; }
+        if (Flags.IsBitSet(4)) { Dark = true; }
+        if (Flags.IsBitSet(2)) { Settings = buffer.Read<MyTelegram.Schema.IWallPaperSettings>(); }
     }
 }

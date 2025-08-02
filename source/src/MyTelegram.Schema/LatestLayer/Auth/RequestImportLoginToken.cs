@@ -20,7 +20,7 @@ public sealed class RequestImportLoginToken : IRequest<MyTelegram.Schema.Auth.IL
     ///<summary>
     /// Login token
     ///</summary>
-    public byte[] Token { get; set; }
+    public ReadOnlyMemory<byte> Token { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,8 +34,8 @@ public sealed class RequestImportLoginToken : IRequest<MyTelegram.Schema.Auth.IL
         writer.Write(Token);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Token = reader.ReadBytes();
+        Token = buffer.ReadBytes();
     }
 }

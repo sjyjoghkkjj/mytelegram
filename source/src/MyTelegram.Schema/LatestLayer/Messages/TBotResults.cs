@@ -14,7 +14,7 @@ public sealed class TBotResults : IBotResults
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the result is a picture gallery
@@ -61,10 +61,10 @@ public sealed class TBotResults : IBotResults
 
     public void ComputeFlag()
     {
-        if (Gallery) { Flags[0] = true; }
-        if (NextOffset != null) { Flags[1] = true; }
-        if (SwitchPm != null) { Flags[2] = true; }
-        if (SwitchWebview != null) { Flags[3] = true; }
+        if (Gallery) { Flags = Flags.SetBit(0); }
+        if (NextOffset != null) { Flags = Flags.SetBit(1); }
+        if (SwitchPm != null) { Flags = Flags.SetBit(2); }
+        if (SwitchWebview != null) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -74,24 +74,24 @@ public sealed class TBotResults : IBotResults
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(QueryId);
-        if (Flags[1]) { writer.Write(NextOffset); }
-        if (Flags[2]) { writer.Write(SwitchPm); }
-        if (Flags[3]) { writer.Write(SwitchWebview); }
+        if (Flags.IsBitSet(1)) { writer.Write(NextOffset); }
+        if (Flags.IsBitSet(2)) { writer.Write(SwitchPm); }
+        if (Flags.IsBitSet(3)) { writer.Write(SwitchWebview); }
         writer.Write(Results);
         writer.Write(CacheTime);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Gallery = true; }
-        QueryId = reader.ReadInt64();
-        if (Flags[1]) { NextOffset = reader.ReadString(); }
-        if (Flags[2]) { SwitchPm = reader.Read<MyTelegram.Schema.IInlineBotSwitchPM>(); }
-        if (Flags[3]) { SwitchWebview = reader.Read<MyTelegram.Schema.IInlineBotWebView>(); }
-        Results = reader.Read<TVector<MyTelegram.Schema.IBotInlineResult>>();
-        CacheTime = reader.ReadInt32();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Gallery = true; }
+        QueryId = buffer.ReadInt64();
+        if (Flags.IsBitSet(1)) { NextOffset = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { SwitchPm = buffer.Read<MyTelegram.Schema.IInlineBotSwitchPM>(); }
+        if (Flags.IsBitSet(3)) { SwitchWebview = buffer.Read<MyTelegram.Schema.IInlineBotWebView>(); }
+        Results = buffer.Read<TVector<MyTelegram.Schema.IBotInlineResult>>();
+        CacheTime = buffer.ReadInt32();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

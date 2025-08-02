@@ -40,10 +40,10 @@ public sealed class TGroupCallStreamChannel : IGroupCallStreamChannel
         writer.Write(LastTimestampMs);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.ReadInt32();
-        Scale = reader.ReadInt32();
-        LastTimestampMs = reader.ReadInt64();
+        Channel = buffer.ReadInt32();
+        Scale = buffer.ReadInt32();
+        LastTimestampMs = buffer.ReadInt64();
     }
 }

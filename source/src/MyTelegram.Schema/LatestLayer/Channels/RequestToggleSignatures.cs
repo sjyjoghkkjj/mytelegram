@@ -20,7 +20,7 @@ public sealed class RequestToggleSignatures : IRequest<MyTelegram.Schema.IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, enables message signatures.
@@ -42,8 +42,8 @@ public sealed class RequestToggleSignatures : IRequest<MyTelegram.Schema.IUpdate
 
     public void ComputeFlag()
     {
-        if (SignaturesEnabled) { Flags[0] = true; }
-        if (ProfilesEnabled) { Flags[1] = true; }
+        if (SignaturesEnabled) { Flags = Flags.SetBit(0); }
+        if (ProfilesEnabled) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -55,11 +55,11 @@ public sealed class RequestToggleSignatures : IRequest<MyTelegram.Schema.IUpdate
         writer.Write(Channel);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { SignaturesEnabled = true; }
-        if (Flags[1]) { ProfilesEnabled = true; }
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { SignaturesEnabled = true; }
+        if (Flags.IsBitSet(1)) { ProfilesEnabled = true; }
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
     }
 }

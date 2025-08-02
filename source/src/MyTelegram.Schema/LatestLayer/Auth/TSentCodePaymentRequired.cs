@@ -26,9 +26,9 @@ public sealed class TSentCodePaymentRequired : ISentCode
         writer.Write(PhoneCodeHash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        StoreProduct = reader.ReadString();
-        PhoneCodeHash = reader.ReadString();
+        StoreProduct = buffer.ReadString();
+        PhoneCodeHash = buffer.ReadString();
     }
 }

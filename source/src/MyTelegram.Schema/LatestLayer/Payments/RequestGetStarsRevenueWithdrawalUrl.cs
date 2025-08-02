@@ -12,20 +12,19 @@ namespace MyTelegram.Schema.Payments;
 /// 400 PASSWORD_TOO_FRESH_%d The password was modified less than 24 hours ago, try again in %d seconds.
 /// See <a href="https://corefork.telegram.org/method/payments.getStarsRevenueWithdrawalUrl" />
 ///</summary>
-[TlObject(0x13bbe8b3)]
+[TlObject(0x2433dc92)]
 public sealed class RequestGetStarsRevenueWithdrawalUrl : IRequest<MyTelegram.Schema.Payments.IStarsRevenueWithdrawalUrl>
 {
-    public uint ConstructorId => 0x13bbe8b3;
+    public uint ConstructorId => 0x2433dc92;
+    public int Flags { get; set; }
+    public bool Ton { get; set; }
+
     ///<summary>
     /// Channel or bot from which to withdraw funds.
     /// See <a href="https://corefork.telegram.org/type/InputPeer" />
     ///</summary>
     public MyTelegram.Schema.IInputPeer Peer { get; set; }
-
-    ///<summary>
-    /// Amount of stars to withdraw.
-    ///</summary>
-    public long Stars { get; set; }
+    public long? Amount { get; set; }
 
     ///<summary>
     /// 2FA password, see <a href="https://corefork.telegram.org/api/srp#using-the-2fa-password">here »</a> for more info.
@@ -35,6 +34,8 @@ public sealed class RequestGetStarsRevenueWithdrawalUrl : IRequest<MyTelegram.Sc
 
     public void ComputeFlag()
     {
+        if (Ton) { Flags = Flags.SetBit(0); }
+        if (/*Amount != 0 &&*/ Amount.HasValue) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -42,15 +43,18 @@ public sealed class RequestGetStarsRevenueWithdrawalUrl : IRequest<MyTelegram.Sc
     {
         ComputeFlag();
         writer.Write(ConstructorId);
+        writer.Write(Flags);
         writer.Write(Peer);
-        writer.Write(Stars);
+        if (Flags.IsBitSet(1)) { writer.Write(Amount.Value); }
         writer.Write(Password);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Stars = reader.ReadInt64();
-        Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Ton = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        if (Flags.IsBitSet(1)) { Amount = buffer.ReadInt64(); }
+        Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
     }
 }

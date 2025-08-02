@@ -40,10 +40,10 @@ public sealed class TPrivacyRules : IPrivacyRules
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Rules = reader.Read<TVector<MyTelegram.Schema.IPrivacyRule>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Rules = buffer.Read<TVector<MyTelegram.Schema.IPrivacyRule>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

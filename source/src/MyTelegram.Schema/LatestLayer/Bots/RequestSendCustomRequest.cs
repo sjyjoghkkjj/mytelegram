@@ -41,9 +41,9 @@ public sealed class RequestSendCustomRequest : IRequest<MyTelegram.Schema.IDataJ
         writer.Write(Params);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        CustomMethod = reader.ReadString();
-        Params = reader.Read<MyTelegram.Schema.IDataJSON>();
+        CustomMethod = buffer.ReadString();
+        Params = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

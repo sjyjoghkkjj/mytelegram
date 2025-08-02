@@ -34,9 +34,9 @@ public sealed class TBusinessAwayMessageScheduleCustom : IBusinessAwayMessageSch
         writer.Write(EndDate);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        StartDate = reader.ReadInt32();
-        EndDate = reader.ReadInt32();
+        StartDate = buffer.ReadInt32();
+        EndDate = buffer.ReadInt32();
     }
 }

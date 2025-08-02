@@ -14,7 +14,7 @@ public sealed class TPageRelatedArticle : IPageRelatedArticle
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// URL of article
@@ -53,11 +53,11 @@ public sealed class TPageRelatedArticle : IPageRelatedArticle
 
     public void ComputeFlag()
     {
-        if (Title != null) { Flags[0] = true; }
-        if (Description != null) { Flags[1] = true; }
-        if (/*PhotoId != 0 &&*/ PhotoId.HasValue) { Flags[2] = true; }
-        if (Author != null) { Flags[3] = true; }
-        if (/*PublishedDate != 0 && */PublishedDate.HasValue) { Flags[4] = true; }
+        if (Title != null) { Flags = Flags.SetBit(0); }
+        if (Description != null) { Flags = Flags.SetBit(1); }
+        if (/*PhotoId != 0 &&*/ PhotoId.HasValue) { Flags = Flags.SetBit(2); }
+        if (Author != null) { Flags = Flags.SetBit(3); }
+        if (/*PublishedDate != 0 && */PublishedDate.HasValue) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -67,22 +67,22 @@ public sealed class TPageRelatedArticle : IPageRelatedArticle
         writer.Write(Flags);
         writer.Write(Url);
         writer.Write(WebpageId);
-        if (Flags[0]) { writer.Write(Title); }
-        if (Flags[1]) { writer.Write(Description); }
-        if (Flags[2]) { writer.Write(PhotoId.Value); }
-        if (Flags[3]) { writer.Write(Author); }
-        if (Flags[4]) { writer.Write(PublishedDate.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Title); }
+        if (Flags.IsBitSet(1)) { writer.Write(Description); }
+        if (Flags.IsBitSet(2)) { writer.Write(PhotoId.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(Author); }
+        if (Flags.IsBitSet(4)) { writer.Write(PublishedDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Url = reader.ReadString();
-        WebpageId = reader.ReadInt64();
-        if (Flags[0]) { Title = reader.ReadString(); }
-        if (Flags[1]) { Description = reader.ReadString(); }
-        if (Flags[2]) { PhotoId = reader.ReadInt64(); }
-        if (Flags[3]) { Author = reader.ReadString(); }
-        if (Flags[4]) { PublishedDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Url = buffer.ReadString();
+        WebpageId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Description = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { PhotoId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(3)) { Author = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { PublishedDate = buffer.ReadInt32(); }
     }
 }

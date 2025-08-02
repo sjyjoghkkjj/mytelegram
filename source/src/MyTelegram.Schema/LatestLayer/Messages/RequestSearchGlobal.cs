@@ -19,7 +19,7 @@ public sealed class RequestSearchGlobal : IRequest<MyTelegram.Schema.Messages.IM
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, only returns results from channels (used in the <a href="https://corefork.telegram.org/api/search#global-search">global channel search tab »</a>).
@@ -88,10 +88,10 @@ public sealed class RequestSearchGlobal : IRequest<MyTelegram.Schema.Messages.IM
 
     public void ComputeFlag()
     {
-        if (BroadcastsOnly) { Flags[1] = true; }
-        if (GroupsOnly) { Flags[2] = true; }
-        if (UsersOnly) { Flags[3] = true; }
-        if (/*FolderId != 0 && */FolderId.HasValue) { Flags[0] = true; }
+        if (BroadcastsOnly) { Flags = Flags.SetBit(1); }
+        if (GroupsOnly) { Flags = Flags.SetBit(2); }
+        if (UsersOnly) { Flags = Flags.SetBit(3); }
+        if (/*FolderId != 0 && */FolderId.HasValue) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -100,7 +100,7 @@ public sealed class RequestSearchGlobal : IRequest<MyTelegram.Schema.Messages.IM
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(FolderId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(FolderId.Value); }
         writer.Write(Q);
         writer.Write(Filter);
         writer.Write(MinDate);
@@ -111,20 +111,20 @@ public sealed class RequestSearchGlobal : IRequest<MyTelegram.Schema.Messages.IM
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { BroadcastsOnly = true; }
-        if (Flags[2]) { GroupsOnly = true; }
-        if (Flags[3]) { UsersOnly = true; }
-        if (Flags[0]) { FolderId = reader.ReadInt32(); }
-        Q = reader.ReadString();
-        Filter = reader.Read<MyTelegram.Schema.IMessagesFilter>();
-        MinDate = reader.ReadInt32();
-        MaxDate = reader.ReadInt32();
-        OffsetRate = reader.ReadInt32();
-        OffsetPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        OffsetId = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { BroadcastsOnly = true; }
+        if (Flags.IsBitSet(2)) { GroupsOnly = true; }
+        if (Flags.IsBitSet(3)) { UsersOnly = true; }
+        if (Flags.IsBitSet(0)) { FolderId = buffer.ReadInt32(); }
+        Q = buffer.ReadString();
+        Filter = buffer.Read<MyTelegram.Schema.IMessagesFilter>();
+        MinDate = buffer.ReadInt32();
+        MaxDate = buffer.ReadInt32();
+        OffsetRate = buffer.ReadInt32();
+        OffsetPeer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        OffsetId = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

@@ -26,9 +26,9 @@ public sealed class RequestGetStarGiftWithdrawalUrl : IRequest<MyTelegram.Schema
         writer.Write(Password);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Stargift = reader.Read<MyTelegram.Schema.IInputSavedStarGift>();
-        Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
+        Stargift = buffer.Read<MyTelegram.Schema.IInputSavedStarGift>();
+        Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
     }
 }

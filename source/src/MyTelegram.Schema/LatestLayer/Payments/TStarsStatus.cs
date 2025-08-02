@@ -14,7 +14,7 @@ public sealed class TStarsStatus : IStarsStatus
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Current Telegram Star balance.
@@ -59,11 +59,11 @@ public sealed class TStarsStatus : IStarsStatus
 
     public void ComputeFlag()
     {
-        if (Subscriptions?.Count > 0) { Flags[1] = true; }
-        if (SubscriptionsNextOffset != null) { Flags[2] = true; }
-        if (/*SubscriptionsMissingBalance != 0 &&*/ SubscriptionsMissingBalance.HasValue) { Flags[4] = true; }
-        if (History?.Count > 0) { Flags[3] = true; }
-        if (NextOffset != null) { Flags[0] = true; }
+        if (Subscriptions?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (SubscriptionsNextOffset != null) { Flags = Flags.SetBit(2); }
+        if (/*SubscriptionsMissingBalance != 0 &&*/ SubscriptionsMissingBalance.HasValue) { Flags = Flags.SetBit(4); }
+        if (History?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (NextOffset != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -73,25 +73,25 @@ public sealed class TStarsStatus : IStarsStatus
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Balance);
-        if (Flags[1]) { writer.Write(Subscriptions); }
-        if (Flags[2]) { writer.Write(SubscriptionsNextOffset); }
-        if (Flags[4]) { writer.Write(SubscriptionsMissingBalance.Value); }
-        if (Flags[3]) { writer.Write(History); }
-        if (Flags[0]) { writer.Write(NextOffset); }
+        if (Flags.IsBitSet(1)) { writer.Write(Subscriptions); }
+        if (Flags.IsBitSet(2)) { writer.Write(SubscriptionsNextOffset); }
+        if (Flags.IsBitSet(4)) { writer.Write(SubscriptionsMissingBalance.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(History); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextOffset); }
         writer.Write(Chats);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Balance = reader.Read<MyTelegram.Schema.IStarsAmount>();
-        if (Flags[1]) { Subscriptions = reader.Read<TVector<MyTelegram.Schema.IStarsSubscription>>(); }
-        if (Flags[2]) { SubscriptionsNextOffset = reader.ReadString(); }
-        if (Flags[4]) { SubscriptionsMissingBalance = reader.ReadInt64(); }
-        if (Flags[3]) { History = reader.Read<TVector<MyTelegram.Schema.IStarsTransaction>>(); }
-        if (Flags[0]) { NextOffset = reader.ReadString(); }
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        Balance = buffer.Read<MyTelegram.Schema.IStarsAmount>();
+        if (Flags.IsBitSet(1)) { Subscriptions = buffer.Read<TVector<MyTelegram.Schema.IStarsSubscription>>(); }
+        if (Flags.IsBitSet(2)) { SubscriptionsNextOffset = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { SubscriptionsMissingBalance = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(3)) { History = buffer.Read<TVector<MyTelegram.Schema.IStarsTransaction>>(); }
+        if (Flags.IsBitSet(0)) { NextOffset = buffer.ReadString(); }
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

@@ -47,11 +47,11 @@ public sealed class TUpdateReadHistoryOutbox : IUpdate
         writer.Write(PtsCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        MaxId = reader.ReadInt32();
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        MaxId = buffer.ReadInt32();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
     }
 }

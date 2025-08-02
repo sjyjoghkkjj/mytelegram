@@ -28,8 +28,8 @@ public sealed class TKeyboardButtonRequestGeoLocation : IKeyboardButton
         writer.Write(Text);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
+        Text = buffer.ReadString();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TOutboxReadDate : IOutboxReadDate
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Date = reader.ReadInt32();
+        Date = buffer.ReadInt32();
     }
 }

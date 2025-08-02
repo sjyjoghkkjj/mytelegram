@@ -14,7 +14,7 @@ public sealed class TPageBlockTable : IPageBlock
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Does the table have a visible border?
@@ -41,8 +41,8 @@ public sealed class TPageBlockTable : IPageBlock
 
     public void ComputeFlag()
     {
-        if (Bordered) { Flags[0] = true; }
-        if (Striped) { Flags[1] = true; }
+        if (Bordered) { Flags = Flags.SetBit(0); }
+        if (Striped) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -55,12 +55,12 @@ public sealed class TPageBlockTable : IPageBlock
         writer.Write(Rows);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Bordered = true; }
-        if (Flags[1]) { Striped = true; }
-        Title = reader.Read<MyTelegram.Schema.IRichText>();
-        Rows = reader.Read<TVector<MyTelegram.Schema.IPageTableRow>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Bordered = true; }
+        if (Flags.IsBitSet(1)) { Striped = true; }
+        Title = buffer.Read<MyTelegram.Schema.IRichText>();
+        Rows = buffer.Read<TVector<MyTelegram.Schema.IPageTableRow>>();
     }
 }

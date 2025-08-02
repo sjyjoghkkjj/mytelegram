@@ -14,7 +14,7 @@ public sealed class TBotInfo : IBotInfo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the bot has some <a href="https://corefork.telegram.org/api/bots/webapps#main-mini-app-previews">preview medias for the configured Main Mini App, see here »</a> for more info on Main Mini App preview medias.
@@ -69,16 +69,16 @@ public sealed class TBotInfo : IBotInfo
 
     public void ComputeFlag()
     {
-        if (HasPreviewMedias) { Flags[6] = true; }
-        if (/*UserId != 0 &&*/ UserId.HasValue) { Flags[0] = true; }
-        if (Description != null) { Flags[1] = true; }
-        if (DescriptionPhoto != null) { Flags[4] = true; }
-        if (DescriptionDocument != null) { Flags[5] = true; }
-        if (Commands?.Count > 0) { Flags[2] = true; }
-        if (MenuButton != null) { Flags[3] = true; }
-        if (PrivacyPolicyUrl != null) { Flags[7] = true; }
-        if (AppSettings != null) { Flags[8] = true; }
-        if (VerifierSettings != null) { Flags[9] = true; }
+        if (HasPreviewMedias) { Flags = Flags.SetBit(6); }
+        if (/*UserId != 0 &&*/ UserId.HasValue) { Flags = Flags.SetBit(0); }
+        if (Description != null) { Flags = Flags.SetBit(1); }
+        if (DescriptionPhoto != null) { Flags = Flags.SetBit(4); }
+        if (DescriptionDocument != null) { Flags = Flags.SetBit(5); }
+        if (Commands?.Count > 0) { Flags = Flags.SetBit(2); }
+        if (MenuButton != null) { Flags = Flags.SetBit(3); }
+        if (PrivacyPolicyUrl != null) { Flags = Flags.SetBit(7); }
+        if (AppSettings != null) { Flags = Flags.SetBit(8); }
+        if (VerifierSettings != null) { Flags = Flags.SetBit(9); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -86,29 +86,29 @@ public sealed class TBotInfo : IBotInfo
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(UserId.Value); }
-        if (Flags[1]) { writer.Write(Description); }
-        if (Flags[4]) { writer.Write(DescriptionPhoto); }
-        if (Flags[5]) { writer.Write(DescriptionDocument); }
-        if (Flags[2]) { writer.Write(Commands); }
-        if (Flags[3]) { writer.Write(MenuButton); }
-        if (Flags[7]) { writer.Write(PrivacyPolicyUrl); }
-        if (Flags[8]) { writer.Write(AppSettings); }
-        if (Flags[9]) { writer.Write(VerifierSettings); }
+        if (Flags.IsBitSet(0)) { writer.Write(UserId.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Description); }
+        if (Flags.IsBitSet(4)) { writer.Write(DescriptionPhoto); }
+        if (Flags.IsBitSet(5)) { writer.Write(DescriptionDocument); }
+        if (Flags.IsBitSet(2)) { writer.Write(Commands); }
+        if (Flags.IsBitSet(3)) { writer.Write(MenuButton); }
+        if (Flags.IsBitSet(7)) { writer.Write(PrivacyPolicyUrl); }
+        if (Flags.IsBitSet(8)) { writer.Write(AppSettings); }
+        if (Flags.IsBitSet(9)) { writer.Write(VerifierSettings); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[6]) { HasPreviewMedias = true; }
-        if (Flags[0]) { UserId = reader.ReadInt64(); }
-        if (Flags[1]) { Description = reader.ReadString(); }
-        if (Flags[4]) { DescriptionPhoto = reader.Read<MyTelegram.Schema.IPhoto>(); }
-        if (Flags[5]) { DescriptionDocument = reader.Read<MyTelegram.Schema.IDocument>(); }
-        if (Flags[2]) { Commands = reader.Read<TVector<MyTelegram.Schema.IBotCommand>>(); }
-        if (Flags[3]) { MenuButton = reader.Read<MyTelegram.Schema.IBotMenuButton>(); }
-        if (Flags[7]) { PrivacyPolicyUrl = reader.ReadString(); }
-        if (Flags[8]) { AppSettings = reader.Read<MyTelegram.Schema.IBotAppSettings>(); }
-        if (Flags[9]) { VerifierSettings = reader.Read<MyTelegram.Schema.IBotVerifierSettings>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(6)) { HasPreviewMedias = true; }
+        if (Flags.IsBitSet(0)) { UserId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(1)) { Description = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { DescriptionPhoto = buffer.Read<MyTelegram.Schema.IPhoto>(); }
+        if (Flags.IsBitSet(5)) { DescriptionDocument = buffer.Read<MyTelegram.Schema.IDocument>(); }
+        if (Flags.IsBitSet(2)) { Commands = buffer.Read<TVector<MyTelegram.Schema.IBotCommand>>(); }
+        if (Flags.IsBitSet(3)) { MenuButton = buffer.Read<MyTelegram.Schema.IBotMenuButton>(); }
+        if (Flags.IsBitSet(7)) { PrivacyPolicyUrl = buffer.ReadString(); }
+        if (Flags.IsBitSet(8)) { AppSettings = buffer.Read<MyTelegram.Schema.IBotAppSettings>(); }
+        if (Flags.IsBitSet(9)) { VerifierSettings = buffer.Read<MyTelegram.Schema.IBotVerifierSettings>(); }
     }
 }

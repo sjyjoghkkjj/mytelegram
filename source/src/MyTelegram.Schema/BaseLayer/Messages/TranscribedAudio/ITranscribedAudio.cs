@@ -12,7 +12,7 @@ public interface ITranscribedAudio : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether the transcription is partial because audio transcription is still in progress, if set the user may receive further <a href="https://corefork.telegram.org/constructor/updateTranscribedAudio">updateTranscribedAudio</a> updates with the updated transcription.

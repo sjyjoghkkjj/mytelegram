@@ -46,11 +46,11 @@ public sealed class TPhotoSize : IPhotoSize
         writer.Write(Size);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Type = reader.ReadString();
-        W = reader.ReadInt32();
-        H = reader.ReadInt32();
-        Size = reader.ReadInt32();
+        Type = buffer.ReadString();
+        W = buffer.ReadInt32();
+        H = buffer.ReadInt32();
+        Size = buffer.ReadInt32();
     }
 }

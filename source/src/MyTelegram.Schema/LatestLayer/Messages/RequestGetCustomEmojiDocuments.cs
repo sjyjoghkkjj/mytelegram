@@ -28,8 +28,8 @@ public sealed class RequestGetCustomEmojiDocuments : IRequest<TVector<MyTelegram
         writer.Write(DocumentId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DocumentId = reader.Read<TVector<long>>();
+        DocumentId = buffer.Read<TVector<long>>();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TReplyInlineMarkup : IReplyMarkup
         writer.Write(Rows);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Rows = reader.Read<TVector<MyTelegram.Schema.IKeyboardButtonRow>>();
+        Rows = buffer.Read<TVector<MyTelegram.Schema.IKeyboardButtonRow>>();
     }
 }

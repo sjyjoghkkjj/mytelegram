@@ -14,7 +14,7 @@ public sealed class TMessageReactions : IMessageReactions
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Similar to <a href="https://corefork.telegram.org/api/min">min</a> objects, used for <a href="https://corefork.telegram.org/api/reactions">message reaction »</a> constructors that are the same for all users so they don't have the reactions sent by the current user (you can use <a href="https://corefork.telegram.org/method/messages.getMessagesReactions">messages.getMessagesReactions</a> to get the full reaction info).
@@ -51,11 +51,11 @@ public sealed class TMessageReactions : IMessageReactions
 
     public void ComputeFlag()
     {
-        if (Min) { Flags[0] = true; }
-        if (CanSeeList) { Flags[2] = true; }
-        if (ReactionsAsTags) { Flags[3] = true; }
-        if (RecentReactions?.Count > 0) { Flags[1] = true; }
-        if (TopReactors?.Count > 0) { Flags[4] = true; }
+        if (Min) { Flags = Flags.SetBit(0); }
+        if (CanSeeList) { Flags = Flags.SetBit(2); }
+        if (ReactionsAsTags) { Flags = Flags.SetBit(3); }
+        if (RecentReactions?.Count > 0) { Flags = Flags.SetBit(1); }
+        if (TopReactors?.Count > 0) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -64,18 +64,18 @@ public sealed class TMessageReactions : IMessageReactions
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Results);
-        if (Flags[1]) { writer.Write(RecentReactions); }
-        if (Flags[4]) { writer.Write(TopReactors); }
+        if (Flags.IsBitSet(1)) { writer.Write(RecentReactions); }
+        if (Flags.IsBitSet(4)) { writer.Write(TopReactors); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Min = true; }
-        if (Flags[2]) { CanSeeList = true; }
-        if (Flags[3]) { ReactionsAsTags = true; }
-        Results = reader.Read<TVector<MyTelegram.Schema.IReactionCount>>();
-        if (Flags[1]) { RecentReactions = reader.Read<TVector<MyTelegram.Schema.IMessagePeerReaction>>(); }
-        if (Flags[4]) { TopReactors = reader.Read<TVector<MyTelegram.Schema.IMessageReactor>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Min = true; }
+        if (Flags.IsBitSet(2)) { CanSeeList = true; }
+        if (Flags.IsBitSet(3)) { ReactionsAsTags = true; }
+        Results = buffer.Read<TVector<MyTelegram.Schema.IReactionCount>>();
+        if (Flags.IsBitSet(1)) { RecentReactions = buffer.Read<TVector<MyTelegram.Schema.IMessagePeerReaction>>(); }
+        if (Flags.IsBitSet(4)) { TopReactors = buffer.Read<TVector<MyTelegram.Schema.IMessageReactor>>(); }
     }
 }

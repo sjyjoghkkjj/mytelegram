@@ -21,7 +21,7 @@ public sealed class RequestGetAdminLog : IRequest<MyTelegram.Schema.Channels.IAd
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Channel
@@ -62,8 +62,8 @@ public sealed class RequestGetAdminLog : IRequest<MyTelegram.Schema.Channels.IAd
 
     public void ComputeFlag()
     {
-        if (EventsFilter != null) { Flags[0] = true; }
-        if (Admins?.Count > 0) { Flags[1] = true; }
+        if (EventsFilter != null) { Flags = Flags.SetBit(0); }
+        if (Admins?.Count > 0) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -74,22 +74,22 @@ public sealed class RequestGetAdminLog : IRequest<MyTelegram.Schema.Channels.IAd
         writer.Write(Flags);
         writer.Write(Channel);
         writer.Write(Q);
-        if (Flags[0]) { writer.Write(EventsFilter); }
-        if (Flags[1]) { writer.Write(Admins); }
+        if (Flags.IsBitSet(0)) { writer.Write(EventsFilter); }
+        if (Flags.IsBitSet(1)) { writer.Write(Admins); }
         writer.Write(MaxId);
         writer.Write(MinId);
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Q = reader.ReadString();
-        if (Flags[0]) { EventsFilter = reader.Read<MyTelegram.Schema.IChannelAdminLogEventsFilter>(); }
-        if (Flags[1]) { Admins = reader.Read<TVector<MyTelegram.Schema.IInputUser>>(); }
-        MaxId = reader.ReadInt64();
-        MinId = reader.ReadInt64();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Q = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { EventsFilter = buffer.Read<MyTelegram.Schema.IChannelAdminLogEventsFilter>(); }
+        if (Flags.IsBitSet(1)) { Admins = buffer.Read<TVector<MyTelegram.Schema.IInputUser>>(); }
+        MaxId = buffer.ReadInt64();
+        MinId = buffer.ReadInt64();
+        Limit = buffer.ReadInt32();
     }
 }

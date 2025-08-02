@@ -18,7 +18,7 @@ public sealed class RequestGetStarsTransactions : IRequest<MyTelegram.Schema.Pay
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, fetches only incoming transactions.
@@ -37,6 +37,7 @@ public sealed class RequestGetStarsTransactions : IRequest<MyTelegram.Schema.Pay
     /// See <a href="https://corefork.telegram.org/type/true" />
     ///</summary>
     public bool Ascending { get; set; }
+    public bool Ton { get; set; }
 
     ///<summary>
     /// If set, fetches only transactions for the specified <a href="https://corefork.telegram.org/api/stars#star-subscriptions">Telegram Star subscription »</a>.
@@ -61,10 +62,11 @@ public sealed class RequestGetStarsTransactions : IRequest<MyTelegram.Schema.Pay
 
     public void ComputeFlag()
     {
-        if (Inbound) { Flags[0] = true; }
-        if (Outbound) { Flags[1] = true; }
-        if (Ascending) { Flags[2] = true; }
-        if (SubscriptionId != null) { Flags[3] = true; }
+        if (Inbound) { Flags = Flags.SetBit(0); }
+        if (Outbound) { Flags = Flags.SetBit(1); }
+        if (Ascending) { Flags = Flags.SetBit(2); }
+        if (Ton) { Flags = Flags.SetBit(4); }
+        if (SubscriptionId != null) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -73,21 +75,22 @@ public sealed class RequestGetStarsTransactions : IRequest<MyTelegram.Schema.Pay
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[3]) { writer.Write(SubscriptionId); }
+        if (Flags.IsBitSet(3)) { writer.Write(SubscriptionId); }
         writer.Write(Peer);
         writer.Write(Offset);
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Inbound = true; }
-        if (Flags[1]) { Outbound = true; }
-        if (Flags[2]) { Ascending = true; }
-        if (Flags[3]) { SubscriptionId = reader.ReadString(); }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Inbound = true; }
+        if (Flags.IsBitSet(1)) { Outbound = true; }
+        if (Flags.IsBitSet(2)) { Ascending = true; }
+        if (Flags.IsBitSet(4)) { Ton = true; }
+        if (Flags.IsBitSet(3)) { SubscriptionId = buffer.ReadString(); }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

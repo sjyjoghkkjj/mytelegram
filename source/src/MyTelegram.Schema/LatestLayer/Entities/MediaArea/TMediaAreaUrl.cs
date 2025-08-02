@@ -35,9 +35,9 @@ public sealed class TMediaAreaUrl : IMediaArea
         writer.Write(Url);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Coordinates = reader.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
-        Url = reader.ReadString();
+        Coordinates = buffer.Read<MyTelegram.Schema.IMediaAreaCoordinates>();
+        Url = buffer.ReadString();
     }
 }

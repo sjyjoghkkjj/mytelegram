@@ -46,11 +46,11 @@ public sealed class TWebDocumentNoProxy : IWebDocument
         writer.Write(Attributes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        Size = reader.ReadInt32();
-        MimeType = reader.ReadString();
-        Attributes = reader.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
+        Url = buffer.ReadString();
+        Size = buffer.ReadInt32();
+        MimeType = buffer.ReadString();
+        Attributes = buffer.Read<TVector<MyTelegram.Schema.IDocumentAttribute>>();
     }
 }

@@ -23,6 +23,11 @@ public abstract class ReadModelWithCacheAppService<TReadModel>(IReadModelCacheHe
         return readModel ?? throw new ArgumentException($"ReadModel({typeof(TReadModel).Name}) with id {id} not exists");
     }
 
+    protected virtual bool IsValidReadModel(TReadModel readModel)
+    {
+        return true;
+    }
+
     public async Task<IReadOnlyCollection<TReadModel>> GetListAsync(IEnumerable<long> ids)
     {
         //var readModels = new List<TReadModel>();
@@ -34,7 +39,10 @@ public abstract class ReadModelWithCacheAppService<TReadModel>(IReadModelCacheHe
             {
                 if (readModel != null)
                 {
-                    readModels.TryAdd(id, readModel);
+                    if (IsValidReadModel(readModel))
+                    {
+                        readModels.TryAdd(id, readModel);
+                    }
                 }
                 else
                 {
@@ -54,6 +62,10 @@ public abstract class ReadModelWithCacheAppService<TReadModel>(IReadModelCacheHe
 
             foreach (var readModel in dbReadModels)
             {
+                if (!IsValidReadModel(readModel))
+                {
+                    continue;
+                }
                 readModels.TryAdd(GetReadModelInt64Id(readModel), readModel);
                 cacheHelper.Add(GetReadModelInt64Id(readModel), GetReadModelId(readModel), readModel);
                 idsNotExistInCache.Remove(GetReadModelInt64Id(readModel));
@@ -64,6 +76,11 @@ public abstract class ReadModelWithCacheAppService<TReadModel>(IReadModelCacheHe
                 var readModel = await CreateNonExistsReadModelAsync(id);
                 if (readModel != null)
                 {
+                    if (!IsValidReadModel(readModel))
+                    {
+                        continue;
+                    }
+
                     readModels.TryAdd(id, readModel);
                     cacheHelper.Add(id, GetReadModelId(readModel), readModel);
                 }

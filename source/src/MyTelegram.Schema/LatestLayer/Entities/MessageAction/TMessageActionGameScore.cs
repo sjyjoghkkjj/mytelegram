@@ -34,9 +34,9 @@ public sealed class TMessageActionGameScore : IMessageAction
         writer.Write(Score);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        GameId = reader.ReadInt64();
-        Score = reader.ReadInt32();
+        GameId = buffer.ReadInt64();
+        Score = buffer.ReadInt32();
     }
 }

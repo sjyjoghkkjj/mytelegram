@@ -28,10 +28,10 @@ public sealed class TSponsoredPeers : ISponsoredPeers
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peers = reader.Read<TVector<MyTelegram.Schema.ISponsoredPeer>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Peers = buffer.Read<TVector<MyTelegram.Schema.ISponsoredPeer>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

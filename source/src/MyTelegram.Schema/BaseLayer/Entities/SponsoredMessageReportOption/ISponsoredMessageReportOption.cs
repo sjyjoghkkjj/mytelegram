@@ -17,5 +17,5 @@ public interface ISponsoredMessageReportOption : IObject
     ///<summary>
     /// Option identifier to pass to <a href="https://corefork.telegram.org/method/channels.reportSponsoredMessage">channels.reportSponsoredMessage</a>.
     ///</summary>
-    byte[] Option { get; set; }
+    ReadOnlyMemory<byte> Option { get; set; }
 }

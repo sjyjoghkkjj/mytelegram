@@ -13,7 +13,7 @@ public record SessionRequestInput(
     long RequestSessionId,
     int SeqNumber,
     bool IsAuthKeyActive,
-    byte[] AuthKeyData,
+    ReadOnlyMemory<byte> AuthKeyData,
     long ServerSalt,
     int Layer,
     long Date,

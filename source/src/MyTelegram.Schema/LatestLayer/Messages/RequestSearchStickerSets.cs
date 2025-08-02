@@ -14,7 +14,7 @@ public sealed class RequestSearchStickerSets : IRequest<MyTelegram.Schema.Messag
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Exclude featured stickersets from results
@@ -34,7 +34,7 @@ public sealed class RequestSearchStickerSets : IRequest<MyTelegram.Schema.Messag
 
     public void ComputeFlag()
     {
-        if (ExcludeFeatured) { Flags[0] = true; }
+        if (ExcludeFeatured) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -47,11 +47,11 @@ public sealed class RequestSearchStickerSets : IRequest<MyTelegram.Schema.Messag
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ExcludeFeatured = true; }
-        Q = reader.ReadString();
-        Hash = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ExcludeFeatured = true; }
+        Q = buffer.ReadString();
+        Hash = buffer.ReadInt64();
     }
 }

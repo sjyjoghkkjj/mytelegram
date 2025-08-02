@@ -40,10 +40,10 @@ public sealed class TAffectedHistory : IAffectedHistory
         writer.Write(Offset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Pts = reader.ReadInt32();
-        PtsCount = reader.ReadInt32();
-        Offset = reader.ReadInt32();
+        Pts = buffer.ReadInt32();
+        PtsCount = buffer.ReadInt32();
+        Offset = buffer.ReadInt32();
     }
 }

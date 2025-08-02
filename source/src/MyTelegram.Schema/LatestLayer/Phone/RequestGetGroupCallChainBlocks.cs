@@ -30,11 +30,11 @@ public sealed class RequestGetGroupCallChainBlocks : IRequest<MyTelegram.Schema.
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        SubChainId = reader.ReadInt32();
-        Offset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        SubChainId = buffer.ReadInt32();
+        Offset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
     }
 }

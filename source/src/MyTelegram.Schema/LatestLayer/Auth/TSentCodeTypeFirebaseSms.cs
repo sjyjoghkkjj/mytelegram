@@ -14,12 +14,12 @@ public sealed class TSentCodeTypeFirebaseSms : ISentCodeType
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// On Android, the nonce to be used as described in the <a href="https://corefork.telegram.org/api/auth">auth documentation »</a>
     ///</summary>
-    public byte[]? Nonce { get; set; }
+    public ReadOnlyMemory<byte>? Nonce { get; set; }
 
     ///<summary>
     /// Google Play Integrity project ID
@@ -29,7 +29,7 @@ public sealed class TSentCodeTypeFirebaseSms : ISentCodeType
     ///<summary>
     /// Play Integrity API nonce
     ///</summary>
-    public byte[]? PlayIntegrityNonce { get; set; }
+    public ReadOnlyMemory<byte>? PlayIntegrityNonce { get; set; }
 
     ///<summary>
     /// On iOS, must be compared with the <code>receipt</code> extracted from the received push notification.
@@ -48,11 +48,11 @@ public sealed class TSentCodeTypeFirebaseSms : ISentCodeType
 
     public void ComputeFlag()
     {
-        if (Nonce != null) { Flags[0] = true; }
-        if (/*PlayIntegrityProjectId != 0 &&*/ PlayIntegrityProjectId.HasValue) { Flags[2] = true; }
-        if (PlayIntegrityNonce != null) { Flags[2] = true; }
-        if (Receipt != null) { Flags[1] = true; }
-        if (/*PushTimeout != 0 && */PushTimeout.HasValue) { Flags[1] = true; }
+        if (Nonce != null) { Flags = Flags.SetBit(0); }
+        if (/*PlayIntegrityProjectId != 0 &&*/ PlayIntegrityProjectId.HasValue) { Flags = Flags.SetBit(2); }
+        if (PlayIntegrityNonce != null) { Flags = Flags.SetBit(2); }
+        if (Receipt != null) { Flags = Flags.SetBit(1); }
+        if (/*PushTimeout != 0 && */PushTimeout.HasValue) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -61,22 +61,22 @@ public sealed class TSentCodeTypeFirebaseSms : ISentCodeType
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Nonce); }
-        if (Flags[2]) { writer.Write(PlayIntegrityProjectId.Value); }
-        if (Flags[2]) { writer.Write(PlayIntegrityNonce); }
-        if (Flags[1]) { writer.Write(Receipt); }
-        if (Flags[1]) { writer.Write(PushTimeout.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Nonce); }
+        if (Flags.IsBitSet(2)) { writer.Write(PlayIntegrityProjectId.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(PlayIntegrityNonce); }
+        if (Flags.IsBitSet(1)) { writer.Write(Receipt); }
+        if (Flags.IsBitSet(1)) { writer.Write(PushTimeout.Value); }
         writer.Write(Length);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Nonce = reader.ReadBytes(); }
-        if (Flags[2]) { PlayIntegrityProjectId = reader.ReadInt64(); }
-        if (Flags[2]) { PlayIntegrityNonce = reader.ReadBytes(); }
-        if (Flags[1]) { Receipt = reader.ReadString(); }
-        if (Flags[1]) { PushTimeout = reader.ReadInt32(); }
-        Length = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Nonce = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(2)) { PlayIntegrityProjectId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(2)) { PlayIntegrityNonce = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(1)) { Receipt = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { PushTimeout = buffer.ReadInt32(); }
+        Length = buffer.ReadInt32();
     }
 }

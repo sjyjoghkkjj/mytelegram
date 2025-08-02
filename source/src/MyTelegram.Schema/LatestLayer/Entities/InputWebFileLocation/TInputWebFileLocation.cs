@@ -34,9 +34,9 @@ public sealed class TInputWebFileLocation : IInputWebFileLocation
         writer.Write(AccessHash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Url = reader.ReadString();
-        AccessHash = reader.ReadInt64();
+        Url = buffer.ReadString();
+        AccessHash = buffer.ReadInt64();
     }
 }

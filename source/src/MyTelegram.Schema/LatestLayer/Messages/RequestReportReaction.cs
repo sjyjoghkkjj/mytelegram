@@ -47,10 +47,10 @@ public sealed class RequestReportReaction : IRequest<IBool>
         writer.Write(ReactionPeer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.ReadInt32();
-        ReactionPeer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.ReadInt32();
+        ReactionPeer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TSendMessageHistoryImportAction : ISendMessageAction
         writer.Write(Progress);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Progress = reader.ReadInt32();
+        Progress = buffer.ReadInt32();
     }
 }

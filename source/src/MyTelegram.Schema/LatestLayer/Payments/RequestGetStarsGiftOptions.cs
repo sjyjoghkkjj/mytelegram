@@ -14,7 +14,7 @@ public sealed class RequestGetStarsGiftOptions : IRequest<TVector<MyTelegram.Sch
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Receiver of the gift (optional).
@@ -24,7 +24,7 @@ public sealed class RequestGetStarsGiftOptions : IRequest<TVector<MyTelegram.Sch
 
     public void ComputeFlag()
     {
-        if (UserId != null) { Flags[0] = true; }
+        if (UserId != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -32,12 +32,12 @@ public sealed class RequestGetStarsGiftOptions : IRequest<TVector<MyTelegram.Sch
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(UserId); }
+        if (Flags.IsBitSet(0)) { writer.Write(UserId); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { UserId = reader.Read<MyTelegram.Schema.IInputUser>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { UserId = buffer.Read<MyTelegram.Schema.IInputUser>(); }
     }
 }

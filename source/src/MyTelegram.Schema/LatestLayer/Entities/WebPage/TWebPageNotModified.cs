@@ -14,7 +14,7 @@ public sealed class TWebPageNotModified : IWebPage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Page view count
@@ -23,7 +23,7 @@ public sealed class TWebPageNotModified : IWebPage
 
     public void ComputeFlag()
     {
-        if (/*CachedPageViews != 0 && */CachedPageViews.HasValue) { Flags[0] = true; }
+        if (/*CachedPageViews != 0 && */CachedPageViews.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -31,12 +31,12 @@ public sealed class TWebPageNotModified : IWebPage
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(CachedPageViews.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(CachedPageViews.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { CachedPageViews = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { CachedPageViews = buffer.ReadInt32(); }
     }
 }

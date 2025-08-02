@@ -2,11 +2,11 @@
 using Microsoft.Extensions.Hosting;
 using MyTelegram.Caching.Redis;
 using MyTelegram.Domain.Aggregates.Device;
+using MyTelegram.EventBus.RabbitMQ;
+using MyTelegram.EventBus.RabbitMQ.Extensions;
 using MyTelegram.Messenger;
 using MyTelegram.Messenger.CommandServer.BackgroundServices;
 using MyTelegram.Messenger.CommandServer.Extensions;
-using MyTelegram.Messenger.NativeAot;
-using MyTelegram.Services.NativeAot;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using MyTelegramConsts = MyTelegram.MyTelegramConsts;
@@ -74,22 +74,23 @@ builder.ConfigureServices((ctx,
     var eventBusOptions = ctx.Configuration.GetRequiredSection("RabbitMQ:EventBus").Get<EventBusRabbitMqOptions>();
     var rabbitMqOptions = ctx.Configuration.GetRequiredSection("RabbitMQ:Connections:Default").Get<RabbitMqOptions>();
 
-    services.AddRebusEventBus(options =>
-    {
-        options.Transport(t =>
-        {
-            t.UseRabbitMq(
-                    $"amqp://{rabbitMqOptions!.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
-                    eventBusOptions!.ClientName)
-                .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
-                ;
-        });
-        options.AddSystemTextJson(jsonOptions =>
-        {
-            jsonOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
-            jsonOptions.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
-        });
-    });
+    services.AddMyTelegramRabbitMqEventBus();
+    //services.AddRebusEventBus(options =>
+    //{
+    //    options.Transport(t =>
+    //    {
+    //        t.UseRabbitMq(
+    //                $"amqp://{rabbitMqOptions!.UserName}:{rabbitMqOptions.Password}@{rabbitMqOptions.HostName}:{rabbitMqOptions.Port}",
+    //                eventBusOptions!.ClientName)
+    //            .ExchangeNames(eventBusOptions.ExchangeName, eventBusOptions.TopicExchangeName ?? "RebusTopics")
+    //            ;
+    //    });
+    //    options.AddSystemTextJson(jsonOptions =>
+    //    {
+    //        jsonOptions.TypeInfoResolverChain.Add(MyJsonSerializeContext.Default);
+    //        jsonOptions.TypeInfoResolverChain.Add(MyMessengerJsonContext.Default);
+    //    });
+    //});
 
     services.AddMyTelegramMessengerCommandServer(options =>
     {
@@ -119,7 +120,5 @@ builder.ConfigureServices((ctx,
 
 
 var app = builder.Build();
-var eventBus = app.Services.GetRequiredService<IEventBus>();
-eventBus.ConfigureEventBus();
 
 await app.RunAsync();

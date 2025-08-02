@@ -28,8 +28,8 @@ public sealed class TUpdateDialogFilterOrder : IUpdate
         writer.Write(Order);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Order = reader.Read<TVector<int>>();
+        Order = buffer.Read<TVector<int>>();
     }
 }

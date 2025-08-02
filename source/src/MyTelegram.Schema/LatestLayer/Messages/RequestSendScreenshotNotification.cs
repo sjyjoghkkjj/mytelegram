@@ -49,10 +49,10 @@ public sealed class RequestSendScreenshotNotification : IRequest<MyTelegram.Sche
         writer.Write(RandomId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        ReplyTo = reader.Read<MyTelegram.Schema.IInputReplyTo>();
-        RandomId = reader.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        ReplyTo = buffer.Read<MyTelegram.Schema.IInputReplyTo>();
+        RandomId = buffer.ReadInt64();
     }
 }

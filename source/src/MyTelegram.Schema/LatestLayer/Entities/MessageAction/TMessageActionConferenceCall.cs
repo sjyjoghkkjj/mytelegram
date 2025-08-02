@@ -10,7 +10,7 @@ namespace MyTelegram.Schema;
 public sealed class TMessageActionConferenceCall : IMessageAction
 {
     public uint ConstructorId => 0x2ffe2f7a;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Missed { get; set; }
     public bool Active { get; set; }
     public bool Video { get; set; }
@@ -20,11 +20,11 @@ public sealed class TMessageActionConferenceCall : IMessageAction
 
     public void ComputeFlag()
     {
-        if (Missed) { Flags[0] = true; }
-        if (Active) { Flags[1] = true; }
-        if (Video) { Flags[4] = true; }
-        if (/*Duration != 0 && */Duration.HasValue) { Flags[2] = true; }
-        if (OtherParticipants?.Count > 0) { Flags[3] = true; }
+        if (Missed) { Flags = Flags.SetBit(0); }
+        if (Active) { Flags = Flags.SetBit(1); }
+        if (Video) { Flags = Flags.SetBit(4); }
+        if (/*Duration != 0 && */Duration.HasValue) { Flags = Flags.SetBit(2); }
+        if (OtherParticipants?.Count > 0) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -33,18 +33,18 @@ public sealed class TMessageActionConferenceCall : IMessageAction
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(CallId);
-        if (Flags[2]) { writer.Write(Duration.Value); }
-        if (Flags[3]) { writer.Write(OtherParticipants); }
+        if (Flags.IsBitSet(2)) { writer.Write(Duration.Value); }
+        if (Flags.IsBitSet(3)) { writer.Write(OtherParticipants); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Missed = true; }
-        if (Flags[1]) { Active = true; }
-        if (Flags[4]) { Video = true; }
-        CallId = reader.ReadInt64();
-        if (Flags[2]) { Duration = reader.ReadInt32(); }
-        if (Flags[3]) { OtherParticipants = reader.Read<TVector<MyTelegram.Schema.IPeer>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Missed = true; }
+        if (Flags.IsBitSet(1)) { Active = true; }
+        if (Flags.IsBitSet(4)) { Video = true; }
+        CallId = buffer.ReadInt64();
+        if (Flags.IsBitSet(2)) { Duration = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(3)) { OtherParticipants = buffer.Read<TVector<MyTelegram.Schema.IPeer>>(); }
     }
 }

@@ -56,10 +56,10 @@ public sealed class RequestEditBanned : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(BannedRights);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Participant = reader.Read<MyTelegram.Schema.IInputPeer>();
-        BannedRights = reader.Read<MyTelegram.Schema.IChatBannedRights>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Participant = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        BannedRights = buffer.Read<MyTelegram.Schema.IChatBannedRights>();
     }
 }

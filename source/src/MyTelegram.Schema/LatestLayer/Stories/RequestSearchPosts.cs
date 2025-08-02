@@ -17,7 +17,7 @@ public sealed class RequestSearchPosts : IRequest<MyTelegram.Schema.Stories.IFou
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Hashtag (without the <code>#</code>)
@@ -48,9 +48,9 @@ public sealed class RequestSearchPosts : IRequest<MyTelegram.Schema.Stories.IFou
 
     public void ComputeFlag()
     {
-        if (Hashtag != null) { Flags[0] = true; }
-        if (Area != null) { Flags[1] = true; }
-        if (Peer != null) { Flags[2] = true; }
+        if (Hashtag != null) { Flags = Flags.SetBit(0); }
+        if (Area != null) { Flags = Flags.SetBit(1); }
+        if (Peer != null) { Flags = Flags.SetBit(2); }
 
     }
 
@@ -59,20 +59,20 @@ public sealed class RequestSearchPosts : IRequest<MyTelegram.Schema.Stories.IFou
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Hashtag); }
-        if (Flags[1]) { writer.Write(Area); }
-        if (Flags[2]) { writer.Write(Peer); }
+        if (Flags.IsBitSet(0)) { writer.Write(Hashtag); }
+        if (Flags.IsBitSet(1)) { writer.Write(Area); }
+        if (Flags.IsBitSet(2)) { writer.Write(Peer); }
         writer.Write(Offset);
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Hashtag = reader.ReadString(); }
-        if (Flags[1]) { Area = reader.Read<MyTelegram.Schema.IMediaArea>(); }
-        if (Flags[2]) { Peer = reader.Read<MyTelegram.Schema.IInputPeer>(); }
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Hashtag = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { Area = buffer.Read<MyTelegram.Schema.IMediaArea>(); }
+        if (Flags.IsBitSet(2)) { Peer = buffer.Read<MyTelegram.Schema.IInputPeer>(); }
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

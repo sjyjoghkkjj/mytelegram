@@ -12,7 +12,7 @@ public interface ITermsOfService : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether a prompt must be showed to the user, in order to accept the new terms.

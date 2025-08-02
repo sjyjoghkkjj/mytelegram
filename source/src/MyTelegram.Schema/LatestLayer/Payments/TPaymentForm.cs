@@ -14,7 +14,7 @@ public sealed class TPaymentForm : IPaymentForm
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user can choose to save credentials.
@@ -104,14 +104,14 @@ public sealed class TPaymentForm : IPaymentForm
 
     public void ComputeFlag()
     {
-        if (CanSaveCredentials) { Flags[2] = true; }
-        if (PasswordMissing) { Flags[3] = true; }
-        if (Photo != null) { Flags[5] = true; }
-        if (NativeProvider != null) { Flags[4] = true; }
-        if (NativeParams != null) { Flags[4] = true; }
-        if (AdditionalMethods?.Count > 0) { Flags[6] = true; }
-        if (SavedInfo != null) { Flags[0] = true; }
-        if (SavedCredentials?.Count > 0) { Flags[1] = true; }
+        if (CanSaveCredentials) { Flags = Flags.SetBit(2); }
+        if (PasswordMissing) { Flags = Flags.SetBit(3); }
+        if (Photo != null) { Flags = Flags.SetBit(5); }
+        if (NativeProvider != null) { Flags = Flags.SetBit(4); }
+        if (NativeParams != null) { Flags = Flags.SetBit(4); }
+        if (AdditionalMethods?.Count > 0) { Flags = Flags.SetBit(6); }
+        if (SavedInfo != null) { Flags = Flags.SetBit(0); }
+        if (SavedCredentials?.Count > 0) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -124,36 +124,36 @@ public sealed class TPaymentForm : IPaymentForm
         writer.Write(BotId);
         writer.Write(Title);
         writer.Write(Description);
-        if (Flags[5]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(5)) { writer.Write(Photo); }
         writer.Write(Invoice);
         writer.Write(ProviderId);
         writer.Write(Url);
-        if (Flags[4]) { writer.Write(NativeProvider); }
-        if (Flags[4]) { writer.Write(NativeParams); }
-        if (Flags[6]) { writer.Write(AdditionalMethods); }
-        if (Flags[0]) { writer.Write(SavedInfo); }
-        if (Flags[1]) { writer.Write(SavedCredentials); }
+        if (Flags.IsBitSet(4)) { writer.Write(NativeProvider); }
+        if (Flags.IsBitSet(4)) { writer.Write(NativeParams); }
+        if (Flags.IsBitSet(6)) { writer.Write(AdditionalMethods); }
+        if (Flags.IsBitSet(0)) { writer.Write(SavedInfo); }
+        if (Flags.IsBitSet(1)) { writer.Write(SavedCredentials); }
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { CanSaveCredentials = true; }
-        if (Flags[3]) { PasswordMissing = true; }
-        FormId = reader.ReadInt64();
-        BotId = reader.ReadInt64();
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        if (Flags[5]) { Photo = reader.Read<MyTelegram.Schema.IWebDocument>(); }
-        Invoice = reader.Read<MyTelegram.Schema.IInvoice>();
-        ProviderId = reader.ReadInt64();
-        Url = reader.ReadString();
-        if (Flags[4]) { NativeProvider = reader.ReadString(); }
-        if (Flags[4]) { NativeParams = reader.Read<MyTelegram.Schema.IDataJSON>(); }
-        if (Flags[6]) { AdditionalMethods = reader.Read<TVector<MyTelegram.Schema.IPaymentFormMethod>>(); }
-        if (Flags[0]) { SavedInfo = reader.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
-        if (Flags[1]) { SavedCredentials = reader.Read<TVector<MyTelegram.Schema.IPaymentSavedCredentials>>(); }
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { CanSaveCredentials = true; }
+        if (Flags.IsBitSet(3)) { PasswordMissing = true; }
+        FormId = buffer.ReadInt64();
+        BotId = buffer.ReadInt64();
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        if (Flags.IsBitSet(5)) { Photo = buffer.Read<MyTelegram.Schema.IWebDocument>(); }
+        Invoice = buffer.Read<MyTelegram.Schema.IInvoice>();
+        ProviderId = buffer.ReadInt64();
+        Url = buffer.ReadString();
+        if (Flags.IsBitSet(4)) { NativeProvider = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { NativeParams = buffer.Read<MyTelegram.Schema.IDataJSON>(); }
+        if (Flags.IsBitSet(6)) { AdditionalMethods = buffer.Read<TVector<MyTelegram.Schema.IPaymentFormMethod>>(); }
+        if (Flags.IsBitSet(0)) { SavedInfo = buffer.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
+        if (Flags.IsBitSet(1)) { SavedCredentials = buffer.Read<TVector<MyTelegram.Schema.IPaymentSavedCredentials>>(); }
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

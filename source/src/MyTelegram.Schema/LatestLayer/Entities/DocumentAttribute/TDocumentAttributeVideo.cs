@@ -14,7 +14,7 @@ public sealed class TDocumentAttributeVideo : IDocumentAttribute
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a round video
@@ -66,12 +66,12 @@ public sealed class TDocumentAttributeVideo : IDocumentAttribute
 
     public void ComputeFlag()
     {
-        if (RoundMessage) { Flags[0] = true; }
-        if (SupportsStreaming) { Flags[1] = true; }
-        if (Nosound) { Flags[3] = true; }
-        if (/*PreloadPrefixSize != 0 && */PreloadPrefixSize.HasValue) { Flags[2] = true; }
-        if (VideoStartTs>0) { Flags[4] = true; }
-        if (VideoCodec != null) { Flags[5] = true; }
+        if (RoundMessage) { Flags = Flags.SetBit(0); }
+        if (SupportsStreaming) { Flags = Flags.SetBit(1); }
+        if (Nosound) { Flags = Flags.SetBit(3); }
+        if (/*PreloadPrefixSize != 0 && */PreloadPrefixSize.HasValue) { Flags = Flags.SetBit(2); }
+        if (VideoStartTs>0) { Flags = Flags.SetBit(4); }
+        if (VideoCodec != null) { Flags = Flags.SetBit(5); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -82,22 +82,22 @@ public sealed class TDocumentAttributeVideo : IDocumentAttribute
         writer.Write(Duration);
         writer.Write(W);
         writer.Write(H);
-        if (Flags[2]) { writer.Write(PreloadPrefixSize.Value); }
-        if (Flags[4]) { writer.Write(VideoStartTs.Value); }
-        if (Flags[5]) { writer.Write(VideoCodec); }
+        if (Flags.IsBitSet(2)) { writer.Write(PreloadPrefixSize.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(VideoStartTs.Value); }
+        if (Flags.IsBitSet(5)) { writer.Write(VideoCodec); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { RoundMessage = true; }
-        if (Flags[1]) { SupportsStreaming = true; }
-        if (Flags[3]) { Nosound = true; }
-        Duration = reader.ReadDouble();
-        W = reader.ReadInt32();
-        H = reader.ReadInt32();
-        if (Flags[2]) { PreloadPrefixSize = reader.ReadInt32(); }
-        if (Flags[4]) { VideoStartTs = reader.ReadDouble(); }
-        if (Flags[5]) { VideoCodec = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { RoundMessage = true; }
+        if (Flags.IsBitSet(1)) { SupportsStreaming = true; }
+        if (Flags.IsBitSet(3)) { Nosound = true; }
+        Duration = buffer.ReadDouble();
+        W = buffer.ReadInt32();
+        H = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { PreloadPrefixSize = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(4)) { VideoStartTs = buffer.ReadDouble(); }
+        if (Flags.IsBitSet(5)) { VideoCodec = buffer.ReadString(); }
     }
 }

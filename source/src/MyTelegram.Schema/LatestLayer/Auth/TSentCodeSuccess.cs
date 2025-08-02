@@ -29,8 +29,8 @@ public sealed class TSentCodeSuccess : ISentCode
         writer.Write(Authorization);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Authorization = reader.Read<MyTelegram.Schema.Auth.IAuthorization>();
+        Authorization = buffer.Read<MyTelegram.Schema.Auth.IAuthorization>();
     }
 }

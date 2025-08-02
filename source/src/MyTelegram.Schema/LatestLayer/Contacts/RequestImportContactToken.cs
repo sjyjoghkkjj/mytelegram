@@ -31,8 +31,8 @@ public sealed class RequestImportContactToken : IRequest<MyTelegram.Schema.IUser
         writer.Write(Token);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Token = reader.ReadString();
+        Token = buffer.ReadString();
     }
 }

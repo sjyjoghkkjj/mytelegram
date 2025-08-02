@@ -14,7 +14,7 @@ public sealed class TBoost : IBoost
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this boost was applied because the channel/supergroup <a href="https://corefork.telegram.org/api/giveaways">directly gifted a subscription to the user</a>.
@@ -76,14 +76,14 @@ public sealed class TBoost : IBoost
 
     public void ComputeFlag()
     {
-        if (Gift) { Flags[1] = true; }
-        if (Giveaway) { Flags[2] = true; }
-        if (Unclaimed) { Flags[3] = true; }
-        if (/*UserId != 0 &&*/ UserId.HasValue) { Flags[0] = true; }
-        if (/*GiveawayMsgId != 0 && */GiveawayMsgId.HasValue) { Flags[2] = true; }
-        if (UsedGiftSlug != null) { Flags[4] = true; }
-        if (/*Multiplier != 0 && */Multiplier.HasValue) { Flags[5] = true; }
-        if (/*Stars != 0 &&*/ Stars.HasValue) { Flags[6] = true; }
+        if (Gift) { Flags = Flags.SetBit(1); }
+        if (Giveaway) { Flags = Flags.SetBit(2); }
+        if (Unclaimed) { Flags = Flags.SetBit(3); }
+        if (/*UserId != 0 &&*/ UserId.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*GiveawayMsgId != 0 && */GiveawayMsgId.HasValue) { Flags = Flags.SetBit(2); }
+        if (UsedGiftSlug != null) { Flags = Flags.SetBit(4); }
+        if (/*Multiplier != 0 && */Multiplier.HasValue) { Flags = Flags.SetBit(5); }
+        if (/*Stars != 0 &&*/ Stars.HasValue) { Flags = Flags.SetBit(6); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -92,28 +92,28 @@ public sealed class TBoost : IBoost
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Id);
-        if (Flags[0]) { writer.Write(UserId.Value); }
-        if (Flags[2]) { writer.Write(GiveawayMsgId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(UserId.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(GiveawayMsgId.Value); }
         writer.Write(Date);
         writer.Write(Expires);
-        if (Flags[4]) { writer.Write(UsedGiftSlug); }
-        if (Flags[5]) { writer.Write(Multiplier.Value); }
-        if (Flags[6]) { writer.Write(Stars.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(UsedGiftSlug); }
+        if (Flags.IsBitSet(5)) { writer.Write(Multiplier.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(Stars.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Gift = true; }
-        if (Flags[2]) { Giveaway = true; }
-        if (Flags[3]) { Unclaimed = true; }
-        Id = reader.ReadString();
-        if (Flags[0]) { UserId = reader.ReadInt64(); }
-        if (Flags[2]) { GiveawayMsgId = reader.ReadInt32(); }
-        Date = reader.ReadInt32();
-        Expires = reader.ReadInt32();
-        if (Flags[4]) { UsedGiftSlug = reader.ReadString(); }
-        if (Flags[5]) { Multiplier = reader.ReadInt32(); }
-        if (Flags[6]) { Stars = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Gift = true; }
+        if (Flags.IsBitSet(2)) { Giveaway = true; }
+        if (Flags.IsBitSet(3)) { Unclaimed = true; }
+        Id = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { UserId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(2)) { GiveawayMsgId = buffer.ReadInt32(); }
+        Date = buffer.ReadInt32();
+        Expires = buffer.ReadInt32();
+        if (Flags.IsBitSet(4)) { UsedGiftSlug = buffer.ReadString(); }
+        if (Flags.IsBitSet(5)) { Multiplier = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(6)) { Stars = buffer.ReadInt64(); }
     }
 }

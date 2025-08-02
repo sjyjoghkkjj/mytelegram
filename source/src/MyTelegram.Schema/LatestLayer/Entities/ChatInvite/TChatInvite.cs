@@ -14,7 +14,7 @@ public sealed class TChatInvite : IChatInvite
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a <a href="https://corefork.telegram.org/api/channel">channel/supergroup</a> or a <a href="https://corefork.telegram.org/api/channel">normal group</a>
@@ -115,20 +115,20 @@ public sealed class TChatInvite : IChatInvite
 
     public void ComputeFlag()
     {
-        if (Channel) { Flags[0] = true; }
-        if (Broadcast) { Flags[1] = true; }
-        if (Public) { Flags[2] = true; }
-        if (Megagroup) { Flags[3] = true; }
-        if (RequestNeeded) { Flags[6] = true; }
-        if (Verified) { Flags[7] = true; }
-        if (Scam) { Flags[8] = true; }
-        if (Fake) { Flags[9] = true; }
-        if (CanRefulfillSubscription) { Flags[11] = true; }
-        if (About != null) { Flags[5] = true; }
-        if (Participants?.Count > 0) { Flags[4] = true; }
-        if (SubscriptionPricing != null) { Flags[10] = true; }
-        if (/*SubscriptionFormId != 0 &&*/ SubscriptionFormId.HasValue) { Flags[12] = true; }
-        if (BotVerification != null) { Flags[13] = true; }
+        if (Channel) { Flags = Flags.SetBit(0); }
+        if (Broadcast) { Flags = Flags.SetBit(1); }
+        if (Public) { Flags = Flags.SetBit(2); }
+        if (Megagroup) { Flags = Flags.SetBit(3); }
+        if (RequestNeeded) { Flags = Flags.SetBit(6); }
+        if (Verified) { Flags = Flags.SetBit(7); }
+        if (Scam) { Flags = Flags.SetBit(8); }
+        if (Fake) { Flags = Flags.SetBit(9); }
+        if (CanRefulfillSubscription) { Flags = Flags.SetBit(11); }
+        if (About != null) { Flags = Flags.SetBit(5); }
+        if (Participants?.Count > 0) { Flags = Flags.SetBit(4); }
+        if (SubscriptionPricing != null) { Flags = Flags.SetBit(10); }
+        if (/*SubscriptionFormId != 0 &&*/ SubscriptionFormId.HasValue) { Flags = Flags.SetBit(12); }
+        if (BotVerification != null) { Flags = Flags.SetBit(13); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -137,36 +137,36 @@ public sealed class TChatInvite : IChatInvite
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Title);
-        if (Flags[5]) { writer.Write(About); }
+        if (Flags.IsBitSet(5)) { writer.Write(About); }
         writer.Write(Photo);
         writer.Write(ParticipantsCount);
-        if (Flags[4]) { writer.Write(Participants); }
+        if (Flags.IsBitSet(4)) { writer.Write(Participants); }
         writer.Write(Color);
-        if (Flags[10]) { writer.Write(SubscriptionPricing); }
-        if (Flags[12]) { writer.Write(SubscriptionFormId.Value); }
-        if (Flags[13]) { writer.Write(BotVerification); }
+        if (Flags.IsBitSet(10)) { writer.Write(SubscriptionPricing); }
+        if (Flags.IsBitSet(12)) { writer.Write(SubscriptionFormId.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(BotVerification); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Channel = true; }
-        if (Flags[1]) { Broadcast = true; }
-        if (Flags[2]) { Public = true; }
-        if (Flags[3]) { Megagroup = true; }
-        if (Flags[6]) { RequestNeeded = true; }
-        if (Flags[7]) { Verified = true; }
-        if (Flags[8]) { Scam = true; }
-        if (Flags[9]) { Fake = true; }
-        if (Flags[11]) { CanRefulfillSubscription = true; }
-        Title = reader.ReadString();
-        if (Flags[5]) { About = reader.ReadString(); }
-        Photo = reader.Read<MyTelegram.Schema.IPhoto>();
-        ParticipantsCount = reader.ReadInt32();
-        if (Flags[4]) { Participants = reader.Read<TVector<MyTelegram.Schema.IUser>>(); }
-        Color = reader.ReadInt32();
-        if (Flags[10]) { SubscriptionPricing = reader.Read<MyTelegram.Schema.IStarsSubscriptionPricing>(); }
-        if (Flags[12]) { SubscriptionFormId = reader.ReadInt64(); }
-        if (Flags[13]) { BotVerification = reader.Read<MyTelegram.Schema.IBotVerification>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Channel = true; }
+        if (Flags.IsBitSet(1)) { Broadcast = true; }
+        if (Flags.IsBitSet(2)) { Public = true; }
+        if (Flags.IsBitSet(3)) { Megagroup = true; }
+        if (Flags.IsBitSet(6)) { RequestNeeded = true; }
+        if (Flags.IsBitSet(7)) { Verified = true; }
+        if (Flags.IsBitSet(8)) { Scam = true; }
+        if (Flags.IsBitSet(9)) { Fake = true; }
+        if (Flags.IsBitSet(11)) { CanRefulfillSubscription = true; }
+        Title = buffer.ReadString();
+        if (Flags.IsBitSet(5)) { About = buffer.ReadString(); }
+        Photo = buffer.Read<MyTelegram.Schema.IPhoto>();
+        ParticipantsCount = buffer.ReadInt32();
+        if (Flags.IsBitSet(4)) { Participants = buffer.Read<TVector<MyTelegram.Schema.IUser>>(); }
+        Color = buffer.ReadInt32();
+        if (Flags.IsBitSet(10)) { SubscriptionPricing = buffer.Read<MyTelegram.Schema.IStarsSubscriptionPricing>(); }
+        if (Flags.IsBitSet(12)) { SubscriptionFormId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(13)) { BotVerification = buffer.Read<MyTelegram.Schema.IBotVerification>(); }
     }
 }

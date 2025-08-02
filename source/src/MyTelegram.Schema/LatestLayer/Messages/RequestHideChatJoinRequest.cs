@@ -27,7 +27,7 @@ public sealed class RequestHideChatJoinRequest : IRequest<MyTelegram.Schema.IUpd
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to dismiss or approve the chat <a href="https://corefork.telegram.org/api/invites#join-requests">join request »</a>
@@ -49,7 +49,7 @@ public sealed class RequestHideChatJoinRequest : IRequest<MyTelegram.Schema.IUpd
 
     public void ComputeFlag()
     {
-        if (Approved) { Flags[0] = true; }
+        if (Approved) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -62,11 +62,11 @@ public sealed class RequestHideChatJoinRequest : IRequest<MyTelegram.Schema.IUpd
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Approved = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Approved = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

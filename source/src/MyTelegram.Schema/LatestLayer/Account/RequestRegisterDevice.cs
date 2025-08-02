@@ -22,7 +22,7 @@ public sealed class RequestRegisterDevice : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Avoid receiving (silent and invisible background) notifications. Useful to save battery.
@@ -58,7 +58,7 @@ public sealed class RequestRegisterDevice : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (NoMuted) { Flags[0] = true; }
+        if (NoMuted) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -74,14 +74,14 @@ public sealed class RequestRegisterDevice : IRequest<IBool>
         writer.Write(OtherUids);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { NoMuted = true; }
-        TokenType = reader.ReadInt32();
-        Token = reader.ReadString();
-        AppSandbox = reader.Read();
-        Secret = reader.ReadBytes();
-        OtherUids = reader.Read<TVector<long>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { NoMuted = true; }
+        TokenType = buffer.ReadInt32();
+        Token = buffer.ReadString();
+        AppSandbox = buffer.Read();
+        Secret = buffer.ReadBytes();
+        OtherUids = buffer.Read<TVector<long>>();
     }
 }

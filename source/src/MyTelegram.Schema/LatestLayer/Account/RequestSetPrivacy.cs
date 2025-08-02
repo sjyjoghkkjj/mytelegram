@@ -40,9 +40,9 @@ public sealed class RequestSetPrivacy : IRequest<MyTelegram.Schema.Account.IPriv
         writer.Write(Rules);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Key = reader.Read<MyTelegram.Schema.IInputPrivacyKey>();
-        Rules = reader.Read<TVector<MyTelegram.Schema.IInputPrivacyRule>>();
+        Key = buffer.Read<MyTelegram.Schema.IInputPrivacyKey>();
+        Rules = buffer.Read<TVector<MyTelegram.Schema.IInputPrivacyRule>>();
     }
 }

@@ -40,10 +40,10 @@ public sealed class TMessageEntityTextUrl : IMessageEntity
         writer.Write(Url);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Offset = reader.ReadInt32();
-        Length = reader.ReadInt32();
-        Url = reader.ReadString();
+        Offset = buffer.ReadInt32();
+        Length = buffer.ReadInt32();
+        Url = buffer.ReadString();
     }
 }

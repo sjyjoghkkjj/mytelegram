@@ -34,9 +34,9 @@ public sealed class TMessageActionChatCreate : IMessageAction
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
-        Users = reader.Read<TVector<long>>();
+        Title = buffer.ReadString();
+        Users = buffer.Read<TVector<long>>();
     }
 }

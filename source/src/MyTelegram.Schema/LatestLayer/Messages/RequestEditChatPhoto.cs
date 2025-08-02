@@ -44,9 +44,9 @@ public sealed class RequestEditChatPhoto : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Photo);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt64();
-        Photo = reader.Read<MyTelegram.Schema.IInputChatPhoto>();
+        ChatId = buffer.ReadInt64();
+        Photo = buffer.Read<MyTelegram.Schema.IInputChatPhoto>();
     }
 }

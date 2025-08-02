@@ -1,11 +1,10 @@
 ﻿namespace MyTelegram.Abstractions;
-
 public record UnencryptedMessage(
     long AuthKeyId,
     string ClientIp,
     string ConnectionId,
     ConnectionType ConnectionType,
-    byte[] MessageData,
+    ReadOnlyMemory<byte> MessageData,
     int MessageDataLength,
     long MessageId,
     uint ObjectId,
@@ -16,4 +15,5 @@ public record UnencryptedMessage(
     public string ConnectionId { get; set; } = ConnectionId;
     public ConnectionType ConnectionType { get; set; } = ConnectionType;
     public string ClientIp { get; set; } = ClientIp;
+    public IMemoryOwner<byte>? MemoryOwner { get; set; }
 }

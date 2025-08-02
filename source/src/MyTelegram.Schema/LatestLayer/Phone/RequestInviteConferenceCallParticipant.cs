@@ -10,14 +10,14 @@ namespace MyTelegram.Schema.Phone;
 public sealed class RequestInviteConferenceCallParticipant : IRequest<MyTelegram.Schema.IUpdates>
 {
     public uint ConstructorId => 0xbcf22685;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool Video { get; set; }
     public MyTelegram.Schema.IInputGroupCall Call { get; set; }
     public MyTelegram.Schema.IInputUser UserId { get; set; }
 
     public void ComputeFlag()
     {
-        if (Video) { Flags[0] = true; }
+        if (Video) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -30,11 +30,11 @@ public sealed class RequestInviteConferenceCallParticipant : IRequest<MyTelegram
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Video = true; }
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Video = true; }
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

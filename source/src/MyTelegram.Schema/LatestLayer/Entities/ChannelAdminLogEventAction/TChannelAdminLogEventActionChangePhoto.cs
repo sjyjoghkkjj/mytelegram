@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionChangePhoto : IChannelAdminLogEve
         writer.Write(NewPhoto);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevPhoto = reader.Read<MyTelegram.Schema.IPhoto>();
-        NewPhoto = reader.Read<MyTelegram.Schema.IPhoto>();
+        PrevPhoto = buffer.Read<MyTelegram.Schema.IPhoto>();
+        NewPhoto = buffer.Read<MyTelegram.Schema.IPhoto>();
     }
 }

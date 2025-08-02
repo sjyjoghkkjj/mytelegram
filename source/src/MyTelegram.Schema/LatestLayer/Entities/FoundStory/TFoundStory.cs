@@ -36,9 +36,9 @@ public sealed class TFoundStory : IFoundStory
         writer.Write(Story);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Story = reader.Read<MyTelegram.Schema.IStoryItem>();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Story = buffer.Read<MyTelegram.Schema.IStoryItem>();
     }
 }

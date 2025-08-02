@@ -46,11 +46,11 @@ public sealed class TQuickReplies : IQuickReplies
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        QuickReplies = reader.Read<TVector<MyTelegram.Schema.IQuickReply>>();
-        Messages = reader.Read<TVector<MyTelegram.Schema.IMessage>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        QuickReplies = buffer.Read<TVector<MyTelegram.Schema.IQuickReply>>();
+        Messages = buffer.Read<TVector<MyTelegram.Schema.IMessage>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

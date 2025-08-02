@@ -4,21 +4,10 @@ public class EncryptedMessageParser : IEncryptedMessageParser, ITransientDepende
 {
     public EncryptedMessage Parse(ReadOnlyMemory<byte> data)
     {
-        return Parse(data.Span);
-    }
-
-    public EncryptedMessage Parse(ReadOnlySpan<byte> data)
-    {
-        var authKeyId = BinaryPrimitives.ReadInt64LittleEndian(data);
+        var authKeyId = BinaryPrimitives.ReadInt64LittleEndian(data.Span);
         var msgKey = data.Slice(8, 16);
         var encryptedData = data[(8 + 16)..];
-
-        return new EncryptedMessage(authKeyId,
-            msgKey.ToArray(),
-            encryptedData.ToArray(),
-            string.Empty,
-            0,
-            string.Empty,
-            Guid.NewGuid(),DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        return new EncryptedMessage(authKeyId, msgKey, encryptedData, string.Empty, ConnectionType.UnKnown,
+            string.Empty, Guid.NewGuid(), DateTimeOffset.UtcNow.ToUnixTimeSeconds());
     }
 }

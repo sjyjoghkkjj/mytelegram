@@ -29,8 +29,8 @@ public sealed class TPageBlockCover : IPageBlock
         writer.Write(Cover);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Cover = reader.Read<MyTelegram.Schema.IPageBlock>();
+        Cover = buffer.Read<MyTelegram.Schema.IPageBlock>();
     }
 }

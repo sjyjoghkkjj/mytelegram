@@ -43,10 +43,10 @@ public sealed class RequestUnregisterDevice : IRequest<IBool>
         writer.Write(OtherUids);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        TokenType = reader.ReadInt32();
-        Token = reader.ReadString();
-        OtherUids = reader.Read<TVector<long>>();
+        TokenType = buffer.ReadInt32();
+        Token = buffer.ReadString();
+        OtherUids = buffer.Read<TVector<long>>();
     }
 }

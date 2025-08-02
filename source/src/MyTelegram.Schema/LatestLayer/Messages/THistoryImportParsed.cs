@@ -15,7 +15,7 @@ public sealed class THistoryImportParsed : IHistoryImportParsed
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// The chat export file was generated from a private chat.
@@ -36,9 +36,9 @@ public sealed class THistoryImportParsed : IHistoryImportParsed
 
     public void ComputeFlag()
     {
-        if (Pm) { Flags[0] = true; }
-        if (Group) { Flags[1] = true; }
-        if (Title != null) { Flags[2] = true; }
+        if (Pm) { Flags = Flags.SetBit(0); }
+        if (Group) { Flags = Flags.SetBit(1); }
+        if (Title != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -46,14 +46,14 @@ public sealed class THistoryImportParsed : IHistoryImportParsed
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[2]) { writer.Write(Title); }
+        if (Flags.IsBitSet(2)) { writer.Write(Title); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Pm = true; }
-        if (Flags[1]) { Group = true; }
-        if (Flags[2]) { Title = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Pm = true; }
+        if (Flags.IsBitSet(1)) { Group = true; }
+        if (Flags.IsBitSet(2)) { Title = buffer.ReadString(); }
     }
 }

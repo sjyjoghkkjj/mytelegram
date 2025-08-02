@@ -78,7 +78,7 @@ public class WebSocketMiddleware(
 
     private async Task ProcessResponseQueueAsync(ClientData clientData)
     {
-        var queue = clientData.ResponseQueue;
+        var queue = clientData.EncryptedMessageResponseQueue;
         while (await queue.Reader.WaitToReadAsync() && _isWebSocketConnected)
         {
             while (queue.Reader.TryRead(out var response))

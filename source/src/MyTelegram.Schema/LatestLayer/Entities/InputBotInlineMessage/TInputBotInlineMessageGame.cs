@@ -14,7 +14,7 @@ public sealed class TInputBotInlineMessageGame : IInputBotInlineMessage
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Inline keyboard
@@ -24,7 +24,7 @@ public sealed class TInputBotInlineMessageGame : IInputBotInlineMessage
 
     public void ComputeFlag()
     {
-        if (ReplyMarkup != null) { Flags[2] = true; }
+        if (ReplyMarkup != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -32,12 +32,12 @@ public sealed class TInputBotInlineMessageGame : IInputBotInlineMessage
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[2]) { writer.Write(ReplyMarkup); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReplyMarkup); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { ReplyMarkup = reader.Read<MyTelegram.Schema.IReplyMarkup>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { ReplyMarkup = buffer.Read<MyTelegram.Schema.IReplyMarkup>(); }
     }
 }

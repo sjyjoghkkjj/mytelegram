@@ -1,26 +1,11 @@
-﻿namespace MyTelegram.Schema.Serializer;
+﻿using System.Buffers.Binary;
 
-public class BooleanSerializer : ISerializer<bool>//, ISerializer2<bool>
+namespace MyTelegram.Schema.Serializer;
+
+public class BooleanSerializer : ISerializer<bool>
 {
     private const int True = -1720552011;
     private const int False = -1132882121;
-
-    //public void Serialize(bool value,
-    //    BinaryWriter writer)
-    //{
-    //    writer.Write(value ? True : False);
-    //}
-
-    //public bool Deserialize(BinaryReader reader)
-    //{
-    //    var number = reader.ReadInt32();
-    //    return number switch
-    //    {
-    //        True => true,
-    //        False => false,
-    //        _ => throw new ArgumentException($"Invalid bool value:{number}")
-    //    };
-    //}
 
     public void Serialize(bool value,
         IBufferWriter<byte> writer)
@@ -28,10 +13,11 @@ public class BooleanSerializer : ISerializer<bool>//, ISerializer2<bool>
         writer.Write(value ? True : False);
     }
 
-    public bool Deserialize(ref SequenceReader<byte> reader)
+    public bool Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        if (reader.TryReadLittleEndian(out int value))
+        if (BinaryPrimitives.TryReadInt32LittleEndian(buffer.Span, out var value))
         {
+            buffer = buffer[4..];
             return value switch
             {
                 True => true,
@@ -42,21 +28,4 @@ public class BooleanSerializer : ISerializer<bool>//, ISerializer2<bool>
 
         throw new InvalidOperationException("Read value from SequenceReader failed");
     }
-
-    //public bool Deserialize(ref ReadOnlySequence<byte> buffer)
-    //{
-    //    var reader = new SequenceReader<byte>(buffer);
-    //    if (reader.TryReadLittleEndian(out int value))
-    //    {
-    //        buffer = buffer.Slice(reader.UnreadSequence.Start);
-    //        return value switch
-    //        {
-    //            True => true,
-    //            False => false,
-    //            _ => throw new ArgumentException($"Invalid bool value:{value}")
-    //        };
-    //    }
-
-    //    throw new InvalidOperationException("Read value from SequenceReader failed");
-    //}
 }

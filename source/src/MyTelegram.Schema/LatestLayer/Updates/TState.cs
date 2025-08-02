@@ -52,12 +52,12 @@ public sealed class TState : IState
         writer.Write(UnreadCount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Pts = reader.ReadInt32();
-        Qts = reader.ReadInt32();
-        Date = reader.ReadInt32();
-        Seq = reader.ReadInt32();
-        UnreadCount = reader.ReadInt32();
+        Pts = buffer.ReadInt32();
+        Qts = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        Seq = buffer.ReadInt32();
+        UnreadCount = buffer.ReadInt32();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TChannelAdminLogEventActionPinTopic : IChannelAdminLogEventA
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Previous topic information
@@ -30,8 +30,8 @@ public sealed class TChannelAdminLogEventActionPinTopic : IChannelAdminLogEventA
 
     public void ComputeFlag()
     {
-        if (PrevTopic != null) { Flags[0] = true; }
-        if (NewTopic != null) { Flags[1] = true; }
+        if (PrevTopic != null) { Flags = Flags.SetBit(0); }
+        if (NewTopic != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -39,14 +39,14 @@ public sealed class TChannelAdminLogEventActionPinTopic : IChannelAdminLogEventA
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(PrevTopic); }
-        if (Flags[1]) { writer.Write(NewTopic); }
+        if (Flags.IsBitSet(0)) { writer.Write(PrevTopic); }
+        if (Flags.IsBitSet(1)) { writer.Write(NewTopic); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { PrevTopic = reader.Read<MyTelegram.Schema.IForumTopic>(); }
-        if (Flags[1]) { NewTopic = reader.Read<MyTelegram.Schema.IForumTopic>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { PrevTopic = buffer.Read<MyTelegram.Schema.IForumTopic>(); }
+        if (Flags.IsBitSet(1)) { NewTopic = buffer.Read<MyTelegram.Schema.IForumTopic>(); }
     }
 }

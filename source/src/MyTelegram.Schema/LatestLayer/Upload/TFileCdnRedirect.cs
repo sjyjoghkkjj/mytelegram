@@ -19,17 +19,17 @@ public sealed class TFileCdnRedirect : IFile
     ///<summary>
     /// File token (see <a href="https://corefork.telegram.org/cdn">CDN files</a>)
     ///</summary>
-    public byte[] FileToken { get; set; }
+    public ReadOnlyMemory<byte> FileToken { get; set; }
 
     ///<summary>
     /// Encryption key (see <a href="https://corefork.telegram.org/cdn">CDN files</a>)
     ///</summary>
-    public byte[] EncryptionKey { get; set; }
+    public ReadOnlyMemory<byte> EncryptionKey { get; set; }
 
     ///<summary>
     /// Encryption IV (see <a href="https://corefork.telegram.org/cdn">CDN files</a>)
     ///</summary>
-    public byte[] EncryptionIv { get; set; }
+    public ReadOnlyMemory<byte> EncryptionIv { get; set; }
 
     ///<summary>
     /// File hashes (see <a href="https://corefork.telegram.org/cdn">CDN files</a>)
@@ -52,12 +52,12 @@ public sealed class TFileCdnRedirect : IFile
         writer.Write(FileHashes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        DcId = reader.ReadInt32();
-        FileToken = reader.ReadBytes();
-        EncryptionKey = reader.ReadBytes();
-        EncryptionIv = reader.ReadBytes();
-        FileHashes = reader.Read<TVector<MyTelegram.Schema.IFileHash>>();
+        DcId = buffer.ReadInt32();
+        FileToken = buffer.ReadBytes();
+        EncryptionKey = buffer.ReadBytes();
+        EncryptionIv = buffer.ReadBytes();
+        FileHashes = buffer.Read<TVector<MyTelegram.Schema.IFileHash>>();
     }
 }

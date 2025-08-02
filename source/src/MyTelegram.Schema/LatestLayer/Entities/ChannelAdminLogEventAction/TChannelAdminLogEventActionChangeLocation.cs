@@ -36,9 +36,9 @@ public sealed class TChannelAdminLogEventActionChangeLocation : IChannelAdminLog
         writer.Write(NewValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevValue = reader.Read<MyTelegram.Schema.IChannelLocation>();
-        NewValue = reader.Read<MyTelegram.Schema.IChannelLocation>();
+        PrevValue = buffer.Read<MyTelegram.Schema.IChannelLocation>();
+        NewValue = buffer.Read<MyTelegram.Schema.IChannelLocation>();
     }
 }

@@ -28,8 +28,8 @@ public sealed class TInputMessageReplyTo : IInputMessage
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt32();
+        Id = buffer.ReadInt32();
     }
 }

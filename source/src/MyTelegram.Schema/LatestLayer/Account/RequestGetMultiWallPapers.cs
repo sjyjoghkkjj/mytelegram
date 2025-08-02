@@ -31,8 +31,8 @@ public sealed class RequestGetMultiWallPapers : IRequest<TVector<MyTelegram.Sche
         writer.Write(Wallpapers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Wallpapers = reader.Read<TVector<MyTelegram.Schema.IInputWallPaper>>();
+        Wallpapers = buffer.Read<TVector<MyTelegram.Schema.IInputWallPaper>>();
     }
 }

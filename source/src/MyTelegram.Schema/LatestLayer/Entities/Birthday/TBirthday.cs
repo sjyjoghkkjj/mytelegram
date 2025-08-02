@@ -14,7 +14,7 @@ public sealed class TBirthday : IBirthday
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Birth day
@@ -33,7 +33,7 @@ public sealed class TBirthday : IBirthday
 
     public void ComputeFlag()
     {
-        if (/*Year != 0 && */Year.HasValue) { Flags[0] = true; }
+        if (/*Year != 0 && */Year.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -43,14 +43,14 @@ public sealed class TBirthday : IBirthday
         writer.Write(Flags);
         writer.Write(Day);
         writer.Write(Month);
-        if (Flags[0]) { writer.Write(Year.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Year.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Day = reader.ReadInt32();
-        Month = reader.ReadInt32();
-        if (Flags[0]) { Year = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Day = buffer.ReadInt32();
+        Month = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Year = buffer.ReadInt32(); }
     }
 }

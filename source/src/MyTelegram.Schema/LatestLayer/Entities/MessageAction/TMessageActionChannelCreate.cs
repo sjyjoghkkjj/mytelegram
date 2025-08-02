@@ -28,8 +28,8 @@ public sealed class TMessageActionChannelCreate : IMessageAction
         writer.Write(Title);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
+        Title = buffer.ReadString();
     }
 }

@@ -39,9 +39,9 @@ public sealed class RequestToggleViewForumAsMessages : IRequest<MyTelegram.Schem
         writer.Write(Enabled);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Enabled = reader.Read();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Enabled = buffer.Read();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TPeerSettings : IPeerSettings
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether we can still report the user for spam
@@ -114,27 +114,27 @@ public sealed class TPeerSettings : IPeerSettings
 
     public void ComputeFlag()
     {
-        if (ReportSpam) { Flags[0] = true; }
-        if (AddContact) { Flags[1] = true; }
-        if (BlockContact) { Flags[2] = true; }
-        if (ShareContact) { Flags[3] = true; }
-        if (NeedContactsException) { Flags[4] = true; }
-        if (ReportGeo) { Flags[5] = true; }
-        if (Autoarchived) { Flags[7] = true; }
-        if (InviteMembers) { Flags[8] = true; }
-        if (RequestChatBroadcast) { Flags[10] = true; }
-        if (BusinessBotPaused) { Flags[11] = true; }
-        if (BusinessBotCanReply) { Flags[12] = true; }
-        if (/*GeoDistance != 0 && */GeoDistance.HasValue) { Flags[6] = true; }
-        if (RequestChatTitle != null) { Flags[9] = true; }
-        if (/*RequestChatDate != 0 && */RequestChatDate.HasValue) { Flags[9] = true; }
-        if (/*BusinessBotId != 0 &&*/ BusinessBotId.HasValue) { Flags[13] = true; }
-        if (BusinessBotManageUrl != null) { Flags[13] = true; }
-        if (/*ChargePaidMessageStars != 0 &&*/ ChargePaidMessageStars.HasValue) { Flags[14] = true; }
-        if (RegistrationMonth != null) { Flags[15] = true; }
-        if (PhoneCountry != null) { Flags[16] = true; }
-        if (/*NameChangeDate != 0 && */NameChangeDate.HasValue) { Flags[17] = true; }
-        if (/*PhotoChangeDate != 0 && */PhotoChangeDate.HasValue) { Flags[18] = true; }
+        if (ReportSpam) { Flags = Flags.SetBit(0); }
+        if (AddContact) { Flags = Flags.SetBit(1); }
+        if (BlockContact) { Flags = Flags.SetBit(2); }
+        if (ShareContact) { Flags = Flags.SetBit(3); }
+        if (NeedContactsException) { Flags = Flags.SetBit(4); }
+        if (ReportGeo) { Flags = Flags.SetBit(5); }
+        if (Autoarchived) { Flags = Flags.SetBit(7); }
+        if (InviteMembers) { Flags = Flags.SetBit(8); }
+        if (RequestChatBroadcast) { Flags = Flags.SetBit(10); }
+        if (BusinessBotPaused) { Flags = Flags.SetBit(11); }
+        if (BusinessBotCanReply) { Flags = Flags.SetBit(12); }
+        if (/*GeoDistance != 0 && */GeoDistance.HasValue) { Flags = Flags.SetBit(6); }
+        if (RequestChatTitle != null) { Flags = Flags.SetBit(9); }
+        if (/*RequestChatDate != 0 && */RequestChatDate.HasValue) { Flags = Flags.SetBit(9); }
+        if (/*BusinessBotId != 0 &&*/ BusinessBotId.HasValue) { Flags = Flags.SetBit(13); }
+        if (BusinessBotManageUrl != null) { Flags = Flags.SetBit(13); }
+        if (/*ChargePaidMessageStars != 0 &&*/ ChargePaidMessageStars.HasValue) { Flags = Flags.SetBit(14); }
+        if (RegistrationMonth != null) { Flags = Flags.SetBit(15); }
+        if (PhoneCountry != null) { Flags = Flags.SetBit(16); }
+        if (/*NameChangeDate != 0 && */NameChangeDate.HasValue) { Flags = Flags.SetBit(17); }
+        if (/*PhotoChangeDate != 0 && */PhotoChangeDate.HasValue) { Flags = Flags.SetBit(18); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -142,41 +142,41 @@ public sealed class TPeerSettings : IPeerSettings
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[6]) { writer.Write(GeoDistance.Value); }
-        if (Flags[9]) { writer.Write(RequestChatTitle); }
-        if (Flags[9]) { writer.Write(RequestChatDate.Value); }
-        if (Flags[13]) { writer.Write(BusinessBotId.Value); }
-        if (Flags[13]) { writer.Write(BusinessBotManageUrl); }
-        if (Flags[14]) { writer.Write(ChargePaidMessageStars.Value); }
-        if (Flags[15]) { writer.Write(RegistrationMonth); }
-        if (Flags[16]) { writer.Write(PhoneCountry); }
-        if (Flags[17]) { writer.Write(NameChangeDate.Value); }
-        if (Flags[18]) { writer.Write(PhotoChangeDate.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(GeoDistance.Value); }
+        if (Flags.IsBitSet(9)) { writer.Write(RequestChatTitle); }
+        if (Flags.IsBitSet(9)) { writer.Write(RequestChatDate.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(BusinessBotId.Value); }
+        if (Flags.IsBitSet(13)) { writer.Write(BusinessBotManageUrl); }
+        if (Flags.IsBitSet(14)) { writer.Write(ChargePaidMessageStars.Value); }
+        if (Flags.IsBitSet(15)) { writer.Write(RegistrationMonth); }
+        if (Flags.IsBitSet(16)) { writer.Write(PhoneCountry); }
+        if (Flags.IsBitSet(17)) { writer.Write(NameChangeDate.Value); }
+        if (Flags.IsBitSet(18)) { writer.Write(PhotoChangeDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ReportSpam = true; }
-        if (Flags[1]) { AddContact = true; }
-        if (Flags[2]) { BlockContact = true; }
-        if (Flags[3]) { ShareContact = true; }
-        if (Flags[4]) { NeedContactsException = true; }
-        if (Flags[5]) { ReportGeo = true; }
-        if (Flags[7]) { Autoarchived = true; }
-        if (Flags[8]) { InviteMembers = true; }
-        if (Flags[10]) { RequestChatBroadcast = true; }
-        if (Flags[11]) { BusinessBotPaused = true; }
-        if (Flags[12]) { BusinessBotCanReply = true; }
-        if (Flags[6]) { GeoDistance = reader.ReadInt32(); }
-        if (Flags[9]) { RequestChatTitle = reader.ReadString(); }
-        if (Flags[9]) { RequestChatDate = reader.ReadInt32(); }
-        if (Flags[13]) { BusinessBotId = reader.ReadInt64(); }
-        if (Flags[13]) { BusinessBotManageUrl = reader.ReadString(); }
-        if (Flags[14]) { ChargePaidMessageStars = reader.ReadInt64(); }
-        if (Flags[15]) { RegistrationMonth = reader.ReadString(); }
-        if (Flags[16]) { PhoneCountry = reader.ReadString(); }
-        if (Flags[17]) { NameChangeDate = reader.ReadInt32(); }
-        if (Flags[18]) { PhotoChangeDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ReportSpam = true; }
+        if (Flags.IsBitSet(1)) { AddContact = true; }
+        if (Flags.IsBitSet(2)) { BlockContact = true; }
+        if (Flags.IsBitSet(3)) { ShareContact = true; }
+        if (Flags.IsBitSet(4)) { NeedContactsException = true; }
+        if (Flags.IsBitSet(5)) { ReportGeo = true; }
+        if (Flags.IsBitSet(7)) { Autoarchived = true; }
+        if (Flags.IsBitSet(8)) { InviteMembers = true; }
+        if (Flags.IsBitSet(10)) { RequestChatBroadcast = true; }
+        if (Flags.IsBitSet(11)) { BusinessBotPaused = true; }
+        if (Flags.IsBitSet(12)) { BusinessBotCanReply = true; }
+        if (Flags.IsBitSet(6)) { GeoDistance = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(9)) { RequestChatTitle = buffer.ReadString(); }
+        if (Flags.IsBitSet(9)) { RequestChatDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(13)) { BusinessBotId = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(13)) { BusinessBotManageUrl = buffer.ReadString(); }
+        if (Flags.IsBitSet(14)) { ChargePaidMessageStars = buffer.ReadInt64(); }
+        if (Flags.IsBitSet(15)) { RegistrationMonth = buffer.ReadString(); }
+        if (Flags.IsBitSet(16)) { PhoneCountry = buffer.ReadString(); }
+        if (Flags.IsBitSet(17)) { NameChangeDate = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(18)) { PhotoChangeDate = buffer.ReadInt32(); }
     }
 }

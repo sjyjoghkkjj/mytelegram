@@ -28,7 +28,7 @@ public sealed class RequestReport : IRequest<MyTelegram.Schema.IReportResult>
     ///<summary>
     /// Menu option, intially empty
     ///</summary>
-    public byte[] Option { get; set; }
+    public ReadOnlyMemory<byte> Option { get; set; }
 
     ///<summary>
     /// Comment for report moderation
@@ -50,11 +50,11 @@ public sealed class RequestReport : IRequest<MyTelegram.Schema.IReportResult>
         writer.Write(Message);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.Read<TVector<int>>();
-        Option = reader.ReadBytes();
-        Message = reader.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.Read<TVector<int>>();
+        Option = buffer.ReadBytes();
+        Message = buffer.ReadString();
     }
 }

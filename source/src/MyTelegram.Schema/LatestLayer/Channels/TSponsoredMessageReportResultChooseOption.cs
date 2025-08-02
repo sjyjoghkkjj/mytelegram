@@ -34,9 +34,9 @@ public sealed class TSponsoredMessageReportResultChooseOption : ISponsoredMessag
         writer.Write(Options);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
-        Options = reader.Read<TVector<MyTelegram.Schema.ISponsoredMessageReportOption>>();
+        Title = buffer.ReadString();
+        Options = buffer.Read<TVector<MyTelegram.Schema.ISponsoredMessageReportOption>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TChannelMessagesFilter : IChannelMessagesFilter
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to exclude new messages from the search
@@ -29,7 +29,7 @@ public sealed class TChannelMessagesFilter : IChannelMessagesFilter
 
     public void ComputeFlag()
     {
-        if (ExcludeNewMessages) { Flags[1] = true; }
+        if (ExcludeNewMessages) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -41,10 +41,10 @@ public sealed class TChannelMessagesFilter : IChannelMessagesFilter
         writer.Write(Ranges);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { ExcludeNewMessages = true; }
-        Ranges = reader.Read<TVector<MyTelegram.Schema.IMessageRange>>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { ExcludeNewMessages = true; }
+        Ranges = buffer.Read<TVector<MyTelegram.Schema.IMessageRange>>();
     }
 }

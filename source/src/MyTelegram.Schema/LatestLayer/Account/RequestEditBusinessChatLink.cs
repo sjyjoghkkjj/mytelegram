@@ -39,9 +39,9 @@ public sealed class RequestEditBusinessChatLink : IRequest<MyTelegram.Schema.IBu
         writer.Write(Link);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Slug = reader.ReadString();
-        Link = reader.Read<MyTelegram.Schema.IInputBusinessChatLink>();
+        Slug = buffer.ReadString();
+        Link = buffer.Read<MyTelegram.Schema.IInputBusinessChatLink>();
     }
 }

@@ -34,7 +34,7 @@ public sealed class RequestBindTempAuthKey : IRequest<IBool>
     ///<summary>
     /// See <a href="https://corefork.telegram.org/htmls/method/auth.bindTempAuthKey.html#generating-encrypted-message">Generating encrypted_message</a>
     ///</summary>
-    public byte[] EncryptedMessage { get; set; }
+    public ReadOnlyMemory<byte> EncryptedMessage { get; set; }
 
     public void ComputeFlag()
     {
@@ -51,11 +51,11 @@ public sealed class RequestBindTempAuthKey : IRequest<IBool>
         writer.Write(EncryptedMessage);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PermAuthKeyId = reader.ReadInt64();
-        Nonce = reader.ReadInt64();
-        ExpiresAt = reader.ReadInt32();
-        EncryptedMessage = reader.ReadBytes();
+        PermAuthKeyId = buffer.ReadInt64();
+        Nonce = buffer.ReadInt64();
+        ExpiresAt = buffer.ReadInt32();
+        EncryptedMessage = buffer.ReadBytes();
     }
 }

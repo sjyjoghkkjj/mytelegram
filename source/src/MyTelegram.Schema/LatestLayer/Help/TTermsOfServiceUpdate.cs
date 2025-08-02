@@ -35,9 +35,9 @@ public sealed class TTermsOfServiceUpdate : ITermsOfServiceUpdate
         writer.Write(TermsOfService);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Expires = reader.ReadInt32();
-        TermsOfService = reader.Read<MyTelegram.Schema.Help.ITermsOfService>();
+        Expires = buffer.ReadInt32();
+        TermsOfService = buffer.Read<MyTelegram.Schema.Help.ITermsOfService>();
     }
 }

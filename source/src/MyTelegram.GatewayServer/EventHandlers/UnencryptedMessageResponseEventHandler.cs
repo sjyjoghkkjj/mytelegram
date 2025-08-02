@@ -5,7 +5,6 @@ public class UnencryptedMessageResponseEventHandler(IClientDataSender clientData
 {
     public Task HandleEventAsync(UnencryptedMessageResponse eventData)
     {
-        return clientDataSender.SendAsync(new UnencryptedMessageResponse(eventData.AuthKeyId, eventData.Data,
-            eventData.ConnectionId, eventData.ReqMsgId));
+        return clientDataSender.SendAsync(eventData);
     }
 }

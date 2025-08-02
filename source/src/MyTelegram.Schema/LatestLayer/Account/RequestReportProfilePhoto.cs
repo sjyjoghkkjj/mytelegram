@@ -52,11 +52,11 @@ public sealed class RequestReportProfilePhoto : IRequest<IBool>
         writer.Write(Message);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        PhotoId = reader.Read<MyTelegram.Schema.IInputPhoto>();
-        Reason = reader.Read<MyTelegram.Schema.IReportReason>();
-        Message = reader.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        PhotoId = buffer.Read<MyTelegram.Schema.IInputPhoto>();
+        Reason = buffer.Read<MyTelegram.Schema.IReportReason>();
+        Message = buffer.ReadString();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TStarsSubscription : IStarsSubscription
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this subscription was cancelled.
@@ -85,14 +85,14 @@ public sealed class TStarsSubscription : IStarsSubscription
 
     public void ComputeFlag()
     {
-        if (Canceled) { Flags[0] = true; }
-        if (CanRefulfill) { Flags[1] = true; }
-        if (MissingBalance) { Flags[2] = true; }
-        if (BotCanceled) { Flags[7] = true; }
-        if (ChatInviteHash != null) { Flags[3] = true; }
-        if (Title != null) { Flags[4] = true; }
-        if (Photo != null) { Flags[5] = true; }
-        if (InvoiceSlug != null) { Flags[6] = true; }
+        if (Canceled) { Flags = Flags.SetBit(0); }
+        if (CanRefulfill) { Flags = Flags.SetBit(1); }
+        if (MissingBalance) { Flags = Flags.SetBit(2); }
+        if (BotCanceled) { Flags = Flags.SetBit(7); }
+        if (ChatInviteHash != null) { Flags = Flags.SetBit(3); }
+        if (Title != null) { Flags = Flags.SetBit(4); }
+        if (Photo != null) { Flags = Flags.SetBit(5); }
+        if (InvoiceSlug != null) { Flags = Flags.SetBit(6); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -104,26 +104,26 @@ public sealed class TStarsSubscription : IStarsSubscription
         writer.Write(Peer);
         writer.Write(UntilDate);
         writer.Write(Pricing);
-        if (Flags[3]) { writer.Write(ChatInviteHash); }
-        if (Flags[4]) { writer.Write(Title); }
-        if (Flags[5]) { writer.Write(Photo); }
-        if (Flags[6]) { writer.Write(InvoiceSlug); }
+        if (Flags.IsBitSet(3)) { writer.Write(ChatInviteHash); }
+        if (Flags.IsBitSet(4)) { writer.Write(Title); }
+        if (Flags.IsBitSet(5)) { writer.Write(Photo); }
+        if (Flags.IsBitSet(6)) { writer.Write(InvoiceSlug); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Canceled = true; }
-        if (Flags[1]) { CanRefulfill = true; }
-        if (Flags[2]) { MissingBalance = true; }
-        if (Flags[7]) { BotCanceled = true; }
-        Id = reader.ReadString();
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        UntilDate = reader.ReadInt32();
-        Pricing = reader.Read<MyTelegram.Schema.IStarsSubscriptionPricing>();
-        if (Flags[3]) { ChatInviteHash = reader.ReadString(); }
-        if (Flags[4]) { Title = reader.ReadString(); }
-        if (Flags[5]) { Photo = reader.Read<MyTelegram.Schema.IWebDocument>(); }
-        if (Flags[6]) { InvoiceSlug = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Canceled = true; }
+        if (Flags.IsBitSet(1)) { CanRefulfill = true; }
+        if (Flags.IsBitSet(2)) { MissingBalance = true; }
+        if (Flags.IsBitSet(7)) { BotCanceled = true; }
+        Id = buffer.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        UntilDate = buffer.ReadInt32();
+        Pricing = buffer.Read<MyTelegram.Schema.IStarsSubscriptionPricing>();
+        if (Flags.IsBitSet(3)) { ChatInviteHash = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { Title = buffer.ReadString(); }
+        if (Flags.IsBitSet(5)) { Photo = buffer.Read<MyTelegram.Schema.IWebDocument>(); }
+        if (Flags.IsBitSet(6)) { InvoiceSlug = buffer.ReadString(); }
     }
 }

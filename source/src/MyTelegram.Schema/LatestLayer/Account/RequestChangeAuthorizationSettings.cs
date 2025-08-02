@@ -17,7 +17,7 @@ public sealed class RequestChangeAuthorizationSettings : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, <a href="https://corefork.telegram.org/api/auth#confirming-login">confirms a newly logged in session »</a>.
@@ -44,9 +44,9 @@ public sealed class RequestChangeAuthorizationSettings : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Confirmed) { Flags[3] = true; }
-        if (EncryptedRequestsDisabled !=null) { Flags[0] = true; }
-        if (CallRequestsDisabled !=null) { Flags[1] = true; }
+        if (Confirmed) { Flags = Flags.SetBit(3); }
+        if (EncryptedRequestsDisabled !=null) { Flags = Flags.SetBit(0); }
+        if (CallRequestsDisabled !=null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,16 +55,16 @@ public sealed class RequestChangeAuthorizationSettings : IRequest<IBool>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Hash);
-        if (Flags[0]) { writer.Write(EncryptedRequestsDisabled.Value); }
-        if (Flags[1]) { writer.Write(CallRequestsDisabled.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(EncryptedRequestsDisabled.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(CallRequestsDisabled.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[3]) { Confirmed = true; }
-        Hash = reader.ReadInt64();
-        if (Flags[0]) { EncryptedRequestsDisabled = reader.Read(); }
-        if (Flags[1]) { CallRequestsDisabled = reader.Read(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(3)) { Confirmed = true; }
+        Hash = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { EncryptedRequestsDisabled = buffer.Read(); }
+        if (Flags.IsBitSet(1)) { CallRequestsDisabled = buffer.Read(); }
     }
 }

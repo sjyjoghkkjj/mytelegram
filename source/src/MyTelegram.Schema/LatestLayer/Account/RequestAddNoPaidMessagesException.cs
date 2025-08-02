@@ -10,13 +10,13 @@ namespace MyTelegram.Schema.Account;
 public sealed class RequestAddNoPaidMessagesException : IRequest<IBool>
 {
     public uint ConstructorId => 0x6f688aa7;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool RefundCharged { get; set; }
     public MyTelegram.Schema.IInputUser UserId { get; set; }
 
     public void ComputeFlag()
     {
-        if (RefundCharged) { Flags[0] = true; }
+        if (RefundCharged) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -28,10 +28,10 @@ public sealed class RequestAddNoPaidMessagesException : IRequest<IBool>
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { RefundCharged = true; }
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { RefundCharged = true; }
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TUpdateInlineBotCallbackQuery : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Query ID
@@ -40,7 +40,7 @@ public sealed class TUpdateInlineBotCallbackQuery : IUpdate
     ///<summary>
     /// Data associated with the callback button. Be aware that a bad client can send arbitrary data in this field.
     ///</summary>
-    public byte[]? Data { get; set; }
+    public ReadOnlyMemory<byte>? Data { get; set; }
 
     ///<summary>
     /// Short name of a Game to be returned, serves as the unique identifier for the game
@@ -49,8 +49,8 @@ public sealed class TUpdateInlineBotCallbackQuery : IUpdate
 
     public void ComputeFlag()
     {
-        if (Data != null) { Flags[0] = true; }
-        if (GameShortName != null) { Flags[1] = true; }
+        if (Data != null) { Flags = Flags.SetBit(0); }
+        if (GameShortName != null) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -62,18 +62,18 @@ public sealed class TUpdateInlineBotCallbackQuery : IUpdate
         writer.Write(UserId);
         writer.Write(MsgId);
         writer.Write(ChatInstance);
-        if (Flags[0]) { writer.Write(Data); }
-        if (Flags[1]) { writer.Write(GameShortName); }
+        if (Flags.IsBitSet(0)) { writer.Write(Data); }
+        if (Flags.IsBitSet(1)) { writer.Write(GameShortName); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        QueryId = reader.ReadInt64();
-        UserId = reader.ReadInt64();
-        MsgId = reader.Read<MyTelegram.Schema.IInputBotInlineMessageID>();
-        ChatInstance = reader.ReadInt64();
-        if (Flags[0]) { Data = reader.ReadBytes(); }
-        if (Flags[1]) { GameShortName = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        QueryId = buffer.ReadInt64();
+        UserId = buffer.ReadInt64();
+        MsgId = buffer.Read<MyTelegram.Schema.IInputBotInlineMessageID>();
+        ChatInstance = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Data = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(1)) { GameShortName = buffer.ReadString(); }
     }
 }

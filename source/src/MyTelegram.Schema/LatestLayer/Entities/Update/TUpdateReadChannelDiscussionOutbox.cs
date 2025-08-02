@@ -40,10 +40,10 @@ public sealed class TUpdateReadChannelDiscussionOutbox : IUpdate
         writer.Write(ReadMaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChannelId = reader.ReadInt64();
-        TopMsgId = reader.ReadInt32();
-        ReadMaxId = reader.ReadInt32();
+        ChannelId = buffer.ReadInt64();
+        TopMsgId = buffer.ReadInt32();
+        ReadMaxId = buffer.ReadInt32();
     }
 }

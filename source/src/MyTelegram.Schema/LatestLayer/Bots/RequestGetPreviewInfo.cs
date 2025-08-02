@@ -38,9 +38,9 @@ public sealed class RequestGetPreviewInfo : IRequest<MyTelegram.Schema.Bots.IPre
         writer.Write(LangCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        LangCode = reader.ReadString();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        LangCode = buffer.ReadString();
     }
 }

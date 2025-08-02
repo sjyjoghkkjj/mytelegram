@@ -39,9 +39,9 @@ public sealed class RequestToggleConnectedBotPaused : IRequest<IBool>
         writer.Write(Paused);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Paused = reader.Read();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Paused = buffer.Read();
     }
 }

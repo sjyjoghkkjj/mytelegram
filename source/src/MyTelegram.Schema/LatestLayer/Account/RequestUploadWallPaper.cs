@@ -18,7 +18,7 @@ public sealed class RequestUploadWallPaper : IRequest<MyTelegram.Schema.IWallPap
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Set this flag when uploading wallpapers to be passed to <a href="https://corefork.telegram.org/method/messages.setChatWallPaper">messages.setChatWallPaper</a>.
@@ -45,7 +45,7 @@ public sealed class RequestUploadWallPaper : IRequest<MyTelegram.Schema.IWallPap
 
     public void ComputeFlag()
     {
-        if (ForChat) { Flags[0] = true; }
+        if (ForChat) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -59,12 +59,12 @@ public sealed class RequestUploadWallPaper : IRequest<MyTelegram.Schema.IWallPap
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ForChat = true; }
-        File = reader.Read<MyTelegram.Schema.IInputFile>();
-        MimeType = reader.ReadString();
-        Settings = reader.Read<MyTelegram.Schema.IWallPaperSettings>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ForChat = true; }
+        File = buffer.Read<MyTelegram.Schema.IInputFile>();
+        MimeType = buffer.ReadString();
+        Settings = buffer.Read<MyTelegram.Schema.IWallPaperSettings>();
     }
 }

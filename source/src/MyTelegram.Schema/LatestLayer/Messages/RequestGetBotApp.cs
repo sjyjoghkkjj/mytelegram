@@ -40,9 +40,9 @@ public sealed class RequestGetBotApp : IRequest<MyTelegram.Schema.Messages.IBotA
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        App = reader.Read<MyTelegram.Schema.IInputBotApp>();
-        Hash = reader.ReadInt64();
+        App = buffer.Read<MyTelegram.Schema.IInputBotApp>();
+        Hash = buffer.ReadInt64();
     }
 }

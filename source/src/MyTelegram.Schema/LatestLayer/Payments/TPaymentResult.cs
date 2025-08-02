@@ -29,8 +29,8 @@ public sealed class TPaymentResult : IPaymentResult
         writer.Write(Updates);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Updates = reader.Read<MyTelegram.Schema.IUpdates>();
+        Updates = buffer.Read<MyTelegram.Schema.IUpdates>();
     }
 }

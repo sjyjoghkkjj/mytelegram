@@ -56,12 +56,12 @@ public sealed class RequestGetGroupParticipants : IRequest<MyTelegram.Schema.Pho
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Ids = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
-        Sources = reader.Read<TVector<int>>();
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Ids = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Sources = buffer.Read<TVector<int>>();
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

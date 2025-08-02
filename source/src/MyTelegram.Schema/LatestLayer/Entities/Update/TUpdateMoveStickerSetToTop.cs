@@ -14,7 +14,7 @@ public sealed class TUpdateMoveStickerSetToTop : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// This update is referring to a <a href="https://corefork.telegram.org/api/stickers#mask-stickers">mask stickerset</a>
@@ -35,8 +35,8 @@ public sealed class TUpdateMoveStickerSetToTop : IUpdate
 
     public void ComputeFlag()
     {
-        if (Masks) { Flags[0] = true; }
-        if (Emojis) { Flags[1] = true; }
+        if (Masks) { Flags = Flags.SetBit(0); }
+        if (Emojis) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class TUpdateMoveStickerSetToTop : IUpdate
         writer.Write(Stickerset);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Masks = true; }
-        if (Flags[1]) { Emojis = true; }
-        Stickerset = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Masks = true; }
+        if (Flags.IsBitSet(1)) { Emojis = true; }
+        Stickerset = buffer.ReadInt64();
     }
 }

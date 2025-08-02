@@ -40,10 +40,10 @@ public sealed class TChannelParticipants : IObject
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        Participants = reader.Read<TVector<MyTelegram.Schema.IChannelParticipant>>();
-        Users = reader.Read<TVector<IUser>>();
+        Count = buffer.ReadInt32();
+        Participants = buffer.Read<TVector<MyTelegram.Schema.IChannelParticipant>>();
+        Users = buffer.Read<TVector<IUser>>();
     }
 }

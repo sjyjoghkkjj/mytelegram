@@ -34,9 +34,9 @@ public sealed class TLangPackString : ILangPackString
         writer.Write(Value);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Key = reader.ReadString();
-        Value = reader.ReadString();
+        Key = buffer.ReadString();
+        Value = buffer.ReadString();
     }
 }

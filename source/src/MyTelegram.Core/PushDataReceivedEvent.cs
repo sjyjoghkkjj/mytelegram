@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Core;
+﻿using System.Buffers;
+
+namespace MyTelegram.Core;
 
 public record PushDataReceivedEvent(
     uint ObjectId,
@@ -7,5 +9,8 @@ public record PushDataReceivedEvent(
     int SeqNumber,
     long AuthKeyId,
     long PermAuthKeyId,
-    byte[] Data,
-    int Layer);
+    ReadOnlyMemory<byte> Data,
+    int Layer) : IMayHaveMemoryOwner
+{
+    public IMemoryOwner<byte>? MemoryOwner { get; set; }
+}

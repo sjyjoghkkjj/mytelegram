@@ -10,14 +10,14 @@ namespace MyTelegram.Schema.Channels;
 public sealed class RequestUpdatePaidMessagesPrice : IRequest<MyTelegram.Schema.IUpdates>
 {
     public uint ConstructorId => 0x4b12327b;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool BroadcastMessagesAllowed { get; set; }
     public MyTelegram.Schema.IInputChannel Channel { get; set; }
     public long SendPaidMessagesStars { get; set; }
 
     public void ComputeFlag()
     {
-        if (BroadcastMessagesAllowed) { Flags[0] = true; }
+        if (BroadcastMessagesAllowed) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -30,11 +30,11 @@ public sealed class RequestUpdatePaidMessagesPrice : IRequest<MyTelegram.Schema.
         writer.Write(SendPaidMessagesStars);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { BroadcastMessagesAllowed = true; }
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        SendPaidMessagesStars = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { BroadcastMessagesAllowed = true; }
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        SendPaidMessagesStars = buffer.ReadInt64();
     }
 }

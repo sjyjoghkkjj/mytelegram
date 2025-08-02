@@ -52,11 +52,11 @@ public sealed class RequestGetUserPhotos : IRequest<MyTelegram.Schema.Photos.IPh
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        Offset = reader.ReadInt32();
-        MaxId = reader.ReadInt64();
-        Limit = reader.ReadInt32();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Offset = buffer.ReadInt32();
+        MaxId = buffer.ReadInt64();
+        Limit = buffer.ReadInt32();
     }
 }

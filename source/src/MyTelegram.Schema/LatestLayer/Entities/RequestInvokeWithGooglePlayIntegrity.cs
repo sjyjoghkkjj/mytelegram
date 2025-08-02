@@ -39,10 +39,10 @@ public sealed class RequestInvokeWithGooglePlayIntegrity : IRequest<IObject>, IH
         writer.Write(Query);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Nonce = reader.ReadString();
-        Token = reader.ReadString();
-        Query = reader.Read<IObject>();
+        Nonce = buffer.ReadString();
+        Token = buffer.ReadString();
+        Query = buffer.Read<IObject>();
     }
 }

@@ -52,11 +52,11 @@ public sealed class RequestImportBotAuthorization : IRequest<MyTelegram.Schema.A
         writer.Write(BotAuthToken);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadInt32();
-        ApiId = reader.ReadInt32();
-        ApiHash = reader.ReadString();
-        BotAuthToken = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        ApiId = buffer.ReadInt32();
+        ApiHash = buffer.ReadString();
+        BotAuthToken = buffer.ReadString();
     }
 }

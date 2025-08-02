@@ -34,9 +34,9 @@ public sealed class TChannelAdminLogEventActionChangeLinkedChat : IChannelAdminL
         writer.Write(NewValue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PrevValue = reader.ReadInt64();
-        NewValue = reader.ReadInt64();
+        PrevValue = buffer.ReadInt64();
+        NewValue = buffer.ReadInt64();
     }
 }

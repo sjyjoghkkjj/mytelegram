@@ -14,7 +14,7 @@ public sealed class TPremiumGiftCodeOption : IPremiumGiftCodeOption
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Number of users which will be able to activate the gift codes.
@@ -48,8 +48,8 @@ public sealed class TPremiumGiftCodeOption : IPremiumGiftCodeOption
 
     public void ComputeFlag()
     {
-        if (StoreProduct != null) { Flags[0] = true; }
-        if (/*StoreQuantity != 0 && */StoreQuantity.HasValue) { Flags[1] = true; }
+        if (StoreProduct != null) { Flags = Flags.SetBit(0); }
+        if (/*StoreQuantity != 0 && */StoreQuantity.HasValue) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -60,20 +60,20 @@ public sealed class TPremiumGiftCodeOption : IPremiumGiftCodeOption
         writer.Write(Flags);
         writer.Write(Users);
         writer.Write(Months);
-        if (Flags[0]) { writer.Write(StoreProduct); }
-        if (Flags[1]) { writer.Write(StoreQuantity.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(StoreProduct); }
+        if (Flags.IsBitSet(1)) { writer.Write(StoreQuantity.Value); }
         writer.Write(Currency);
         writer.Write(Amount);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Users = reader.ReadInt32();
-        Months = reader.ReadInt32();
-        if (Flags[0]) { StoreProduct = reader.ReadString(); }
-        if (Flags[1]) { StoreQuantity = reader.ReadInt32(); }
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        Users = buffer.ReadInt32();
+        Months = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { StoreProduct = buffer.ReadString(); }
+        if (Flags.IsBitSet(1)) { StoreQuantity = buffer.ReadInt32(); }
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
     }
 }

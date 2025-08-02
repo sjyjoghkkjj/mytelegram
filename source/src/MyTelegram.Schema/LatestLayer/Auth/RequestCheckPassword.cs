@@ -34,8 +34,8 @@ public sealed class RequestCheckPassword : IRequest<MyTelegram.Schema.Auth.IAuth
         writer.Write(Password);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Password = reader.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
+        Password = buffer.Read<MyTelegram.Schema.IInputCheckPasswordSRP>();
     }
 }

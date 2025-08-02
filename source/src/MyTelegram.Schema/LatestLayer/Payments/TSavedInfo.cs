@@ -14,7 +14,7 @@ public sealed class TSavedInfo : ISavedInfo
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the user has some saved payment credentials
@@ -30,8 +30,8 @@ public sealed class TSavedInfo : ISavedInfo
 
     public void ComputeFlag()
     {
-        if (HasSavedCredentials) { Flags[1] = true; }
-        if (SavedInfo != null) { Flags[0] = true; }
+        if (HasSavedCredentials) { Flags = Flags.SetBit(1); }
+        if (SavedInfo != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -39,13 +39,13 @@ public sealed class TSavedInfo : ISavedInfo
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(SavedInfo); }
+        if (Flags.IsBitSet(0)) { writer.Write(SavedInfo); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { HasSavedCredentials = true; }
-        if (Flags[0]) { SavedInfo = reader.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { HasSavedCredentials = true; }
+        if (Flags.IsBitSet(0)) { SavedInfo = buffer.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
     }
 }

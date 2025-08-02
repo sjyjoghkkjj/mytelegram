@@ -24,8 +24,8 @@ public sealed class TInputReplyToMonoForum : IInputReplyTo
         writer.Write(MonoforumPeerId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MonoforumPeerId = reader.Read<MyTelegram.Schema.IInputPeer>();
+        MonoforumPeerId = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

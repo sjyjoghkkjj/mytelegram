@@ -14,7 +14,7 @@ public sealed class TPremiumGiftOption : IPremiumGiftOption
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Duration of gifted Telegram Premium subscription
@@ -43,7 +43,7 @@ public sealed class TPremiumGiftOption : IPremiumGiftOption
 
     public void ComputeFlag()
     {
-        if (StoreProduct != null) { Flags[0] = true; }
+        if (StoreProduct != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -55,16 +55,16 @@ public sealed class TPremiumGiftOption : IPremiumGiftOption
         writer.Write(Currency);
         writer.Write(Amount);
         writer.Write(BotUrl);
-        if (Flags[0]) { writer.Write(StoreProduct); }
+        if (Flags.IsBitSet(0)) { writer.Write(StoreProduct); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Months = reader.ReadInt32();
-        Currency = reader.ReadString();
-        Amount = reader.ReadInt64();
-        BotUrl = reader.ReadString();
-        if (Flags[0]) { StoreProduct = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Months = buffer.ReadInt32();
+        Currency = buffer.ReadString();
+        Amount = buffer.ReadInt64();
+        BotUrl = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { StoreProduct = buffer.ReadString(); }
     }
 }

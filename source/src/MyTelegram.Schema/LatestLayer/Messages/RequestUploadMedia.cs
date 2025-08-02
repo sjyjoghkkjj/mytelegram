@@ -34,7 +34,7 @@ public sealed class RequestUploadMedia : IRequest<MyTelegram.Schema.IMessageMedi
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the media will be used only in the specified <a href="https://corefork.telegram.org/api/business#connected-bots">business connection »</a>, and not directly by the bot.
@@ -55,7 +55,7 @@ public sealed class RequestUploadMedia : IRequest<MyTelegram.Schema.IMessageMedi
 
     public void ComputeFlag()
     {
-        if (BusinessConnectionId != null) { Flags[0] = true; }
+        if (BusinessConnectionId != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -64,16 +64,16 @@ public sealed class RequestUploadMedia : IRequest<MyTelegram.Schema.IMessageMedi
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(BusinessConnectionId); }
+        if (Flags.IsBitSet(0)) { writer.Write(BusinessConnectionId); }
         writer.Write(Peer);
         writer.Write(Media);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { BusinessConnectionId = reader.ReadString(); }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Media = reader.Read<MyTelegram.Schema.IInputMedia>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { BusinessConnectionId = buffer.ReadString(); }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Media = buffer.Read<MyTelegram.Schema.IInputMedia>();
     }
 }

@@ -25,7 +25,7 @@ public sealed class TUpdateContactsReset : IUpdate
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
 
     }

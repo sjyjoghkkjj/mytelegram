@@ -48,10 +48,10 @@ public sealed class RequestEditChatAdmin : IRequest<IBool>
         writer.Write(IsAdmin);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt64();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        IsAdmin = reader.Read();
+        ChatId = buffer.ReadInt64();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        IsAdmin = buffer.Read();
     }
 }

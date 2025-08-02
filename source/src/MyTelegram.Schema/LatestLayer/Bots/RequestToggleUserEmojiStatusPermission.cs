@@ -35,9 +35,9 @@ public sealed class RequestToggleUserEmojiStatusPermission : IRequest<IBool>
         writer.Write(Enabled);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        Enabled = reader.Read();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Enabled = buffer.Read();
     }
 }

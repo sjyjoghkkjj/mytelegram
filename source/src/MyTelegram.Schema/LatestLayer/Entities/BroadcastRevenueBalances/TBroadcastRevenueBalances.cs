@@ -14,7 +14,7 @@ public sealed class TBroadcastRevenueBalances : IBroadcastRevenueBalances
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the available balance can be <a href="https://corefork.telegram.org/api/revenue#withdrawing-revenue">withdrawn »</a>.
@@ -39,7 +39,7 @@ public sealed class TBroadcastRevenueBalances : IBroadcastRevenueBalances
 
     public void ComputeFlag()
     {
-        if (WithdrawalEnabled) { Flags[0] = true; }
+        if (WithdrawalEnabled) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -53,12 +53,12 @@ public sealed class TBroadcastRevenueBalances : IBroadcastRevenueBalances
         writer.Write(OverallRevenue);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { WithdrawalEnabled = true; }
-        CurrentBalance = reader.ReadInt64();
-        AvailableBalance = reader.ReadInt64();
-        OverallRevenue = reader.ReadInt64();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { WithdrawalEnabled = true; }
+        CurrentBalance = buffer.ReadInt64();
+        AvailableBalance = buffer.ReadInt64();
+        OverallRevenue = buffer.ReadInt64();
     }
 }

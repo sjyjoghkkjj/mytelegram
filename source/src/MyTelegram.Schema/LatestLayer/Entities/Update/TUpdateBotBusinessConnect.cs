@@ -35,9 +35,9 @@ public sealed class TUpdateBotBusinessConnect : IUpdate
         writer.Write(Qts);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Connection = reader.Read<MyTelegram.Schema.IBotBusinessConnection>();
-        Qts = reader.ReadInt32();
+        Connection = buffer.Read<MyTelegram.Schema.IBotBusinessConnection>();
+        Qts = buffer.ReadInt32();
     }
 }

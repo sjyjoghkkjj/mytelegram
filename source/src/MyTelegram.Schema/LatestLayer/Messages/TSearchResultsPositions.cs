@@ -34,9 +34,9 @@ public sealed class TSearchResultsPositions : ISearchResultsPositions
         writer.Write(Positions);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        Positions = reader.Read<TVector<MyTelegram.Schema.ISearchResultsPosition>>();
+        Count = buffer.ReadInt32();
+        Positions = buffer.Read<TVector<MyTelegram.Schema.ISearchResultsPosition>>();
     }
 }

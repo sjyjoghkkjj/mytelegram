@@ -34,9 +34,9 @@ public sealed class TPaymentSavedCredentialsCard : IPaymentSavedCredentials
         writer.Write(Title);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadString();
-        Title = reader.ReadString();
+        Id = buffer.ReadString();
+        Title = buffer.ReadString();
     }
 }

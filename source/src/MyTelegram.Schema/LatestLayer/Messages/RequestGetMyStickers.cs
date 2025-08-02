@@ -34,9 +34,9 @@ public sealed class RequestGetMyStickers : IRequest<MyTelegram.Schema.Messages.I
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        OffsetId = reader.ReadInt64();
-        Limit = reader.ReadInt32();
+        OffsetId = buffer.ReadInt64();
+        Limit = buffer.ReadInt32();
     }
 }

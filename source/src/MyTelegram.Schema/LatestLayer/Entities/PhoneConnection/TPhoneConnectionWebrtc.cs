@@ -14,7 +14,7 @@ public sealed class TPhoneConnectionWebrtc : IPhoneConnection
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is a TURN endpoint
@@ -60,8 +60,8 @@ public sealed class TPhoneConnectionWebrtc : IPhoneConnection
 
     public void ComputeFlag()
     {
-        if (Turn) { Flags[0] = true; }
-        if (Stun) { Flags[1] = true; }
+        if (Turn) { Flags = Flags.SetBit(0); }
+        if (Stun) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -78,16 +78,16 @@ public sealed class TPhoneConnectionWebrtc : IPhoneConnection
         writer.Write(Password);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Turn = true; }
-        if (Flags[1]) { Stun = true; }
-        Id = reader.ReadInt64();
-        Ip = reader.ReadString();
-        Ipv6 = reader.ReadString();
-        Port = reader.ReadInt32();
-        Username = reader.ReadString();
-        Password = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Turn = true; }
+        if (Flags.IsBitSet(1)) { Stun = true; }
+        Id = buffer.ReadInt64();
+        Ip = buffer.ReadString();
+        Ipv6 = buffer.ReadString();
+        Port = buffer.ReadInt32();
+        Username = buffer.ReadString();
+        Password = buffer.ReadString();
     }
 }

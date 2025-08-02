@@ -47,11 +47,11 @@ public sealed class TKeyboardButtonRequestPeer : IKeyboardButton
         writer.Write(MaxQuantity);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Text = reader.ReadString();
-        ButtonId = reader.ReadInt32();
-        PeerType = reader.Read<MyTelegram.Schema.IRequestPeerType>();
-        MaxQuantity = reader.ReadInt32();
+        Text = buffer.ReadString();
+        ButtonId = buffer.ReadInt32();
+        PeerType = buffer.Read<MyTelegram.Schema.IRequestPeerType>();
+        MaxQuantity = buffer.ReadInt32();
     }
 }

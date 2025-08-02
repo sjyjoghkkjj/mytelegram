@@ -6,6 +6,6 @@ namespace MyTelegram.Schema.E2e;
 [JsonDerivedType(typeof(TPersonalData), nameof(TPersonalData))]
 public interface IPersonalData : IObject
 {
-    byte[] PublicKey { get; set; }
+    ReadOnlyMemory<byte> PublicKey { get; set; }
     TVector<MyTelegram.Schema.E2e.IPersonalOnServer> Data { get; set; }
 }

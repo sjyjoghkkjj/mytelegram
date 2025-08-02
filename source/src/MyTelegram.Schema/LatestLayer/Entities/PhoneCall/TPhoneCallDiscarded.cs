@@ -14,7 +14,7 @@ public sealed class TPhoneCallDiscarded : IPhoneCall
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the server required the user to <a href="https://corefork.telegram.org/method/phone.setCallRating">rate</a> the call
@@ -52,11 +52,11 @@ public sealed class TPhoneCallDiscarded : IPhoneCall
 
     public void ComputeFlag()
     {
-        if (NeedRating) { Flags[2] = true; }
-        if (NeedDebug) { Flags[3] = true; }
-        if (Video) { Flags[6] = true; }
-        if (Reason != null) { Flags[0] = true; }
-        if (/*Duration != 0 && */Duration.HasValue) { Flags[1] = true; }
+        if (NeedRating) { Flags = Flags.SetBit(2); }
+        if (NeedDebug) { Flags = Flags.SetBit(3); }
+        if (Video) { Flags = Flags.SetBit(6); }
+        if (Reason != null) { Flags = Flags.SetBit(0); }
+        if (/*Duration != 0 && */Duration.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -65,18 +65,18 @@ public sealed class TPhoneCallDiscarded : IPhoneCall
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Id);
-        if (Flags[0]) { writer.Write(Reason); }
-        if (Flags[1]) { writer.Write(Duration.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Reason); }
+        if (Flags.IsBitSet(1)) { writer.Write(Duration.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { NeedRating = true; }
-        if (Flags[3]) { NeedDebug = true; }
-        if (Flags[6]) { Video = true; }
-        Id = reader.ReadInt64();
-        if (Flags[0]) { Reason = reader.Read<MyTelegram.Schema.IPhoneCallDiscardReason>(); }
-        if (Flags[1]) { Duration = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { NeedRating = true; }
+        if (Flags.IsBitSet(3)) { NeedDebug = true; }
+        if (Flags.IsBitSet(6)) { Video = true; }
+        Id = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Reason = buffer.Read<MyTelegram.Schema.IPhoneCallDiscardReason>(); }
+        if (Flags.IsBitSet(1)) { Duration = buffer.ReadInt32(); }
     }
 }

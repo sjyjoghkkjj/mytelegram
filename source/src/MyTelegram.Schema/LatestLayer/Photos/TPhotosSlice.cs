@@ -40,10 +40,10 @@ public sealed class TPhotosSlice : IPhotos
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        Photos = reader.Read<TVector<MyTelegram.Schema.IPhoto>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Count = buffer.ReadInt32();
+        Photos = buffer.Read<TVector<MyTelegram.Schema.IPhoto>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

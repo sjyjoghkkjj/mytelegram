@@ -46,11 +46,11 @@ public sealed class TSearchResultsCalendarPeriod : ISearchResultsCalendarPeriod
         writer.Write(Count);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Date = reader.ReadInt32();
-        MinMsgId = reader.ReadInt32();
-        MaxMsgId = reader.ReadInt32();
-        Count = reader.ReadInt32();
+        Date = buffer.ReadInt32();
+        MinMsgId = buffer.ReadInt32();
+        MaxMsgId = buffer.ReadInt32();
+        Count = buffer.ReadInt32();
     }
 }

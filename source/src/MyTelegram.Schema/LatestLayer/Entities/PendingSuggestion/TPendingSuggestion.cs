@@ -30,11 +30,11 @@ public sealed class TPendingSuggestion : IPendingSuggestion
         writer.Write(Url);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Suggestion = reader.ReadString();
-        Title = reader.Read<MyTelegram.Schema.ITextWithEntities>();
-        Description = reader.Read<MyTelegram.Schema.ITextWithEntities>();
-        Url = reader.ReadString();
+        Suggestion = buffer.ReadString();
+        Title = buffer.Read<MyTelegram.Schema.ITextWithEntities>();
+        Description = buffer.Read<MyTelegram.Schema.ITextWithEntities>();
+        Url = buffer.ReadString();
     }
 }

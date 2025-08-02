@@ -8,12 +8,12 @@ namespace MyTelegram.Schema.E2e;
 public sealed class THandshakePrivateFinish : IHandshakePrivate
 {
     public uint ConstructorId => 0x15161335;
-    public byte[] AlicePK { get; set; }
-    public byte[] BobPK { get; set; }
+    public ReadOnlyMemory<byte> AlicePK { get; set; }
+    public ReadOnlyMemory<byte> BobPK { get; set; }
     public long AliceUserId { get; set; }
     public long BobUserId { get; set; }
-    public byte[] AliceNonce { get; set; }
-    public byte[] BobNonce { get; set; }
+    public ReadOnlyMemory<byte> AliceNonce { get; set; }
+    public ReadOnlyMemory<byte> BobNonce { get; set; }
 
     public void ComputeFlag()
     {
@@ -32,13 +32,13 @@ public sealed class THandshakePrivateFinish : IHandshakePrivate
         writer.WriteRawBytes(BobNonce);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        AlicePK = reader.ReadInt256();
-        BobPK = reader.ReadInt256();
-        AliceUserId = reader.ReadInt64();
-        BobUserId = reader.ReadInt64();
-        AliceNonce = reader.ReadInt256();
-        BobNonce = reader.ReadInt256();
+        AlicePK = buffer.ReadInt256();
+        BobPK = buffer.ReadInt256();
+        AliceUserId = buffer.ReadInt64();
+        BobUserId = buffer.ReadInt64();
+        AliceNonce = buffer.ReadInt256();
+        BobNonce = buffer.ReadInt256();
     }
 }

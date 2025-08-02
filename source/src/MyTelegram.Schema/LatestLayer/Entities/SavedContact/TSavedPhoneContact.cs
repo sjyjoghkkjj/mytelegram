@@ -46,11 +46,11 @@ public sealed class TSavedPhoneContact : ISavedContact
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Phone = reader.ReadString();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
-        Date = reader.ReadInt32();
+        Phone = buffer.ReadString();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
+        Date = buffer.ReadInt32();
     }
 }

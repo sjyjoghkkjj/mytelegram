@@ -42,9 +42,9 @@ public sealed class RequestToggleSlowMode : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Seconds);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Seconds = reader.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Seconds = buffer.ReadInt32();
     }
 }

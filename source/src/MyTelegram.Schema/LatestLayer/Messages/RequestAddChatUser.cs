@@ -57,10 +57,10 @@ public sealed class RequestAddChatUser : IRequest<MyTelegram.Schema.Messages.IIn
         writer.Write(FwdLimit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        ChatId = reader.ReadInt64();
-        UserId = reader.Read<MyTelegram.Schema.IInputUser>();
-        FwdLimit = reader.ReadInt32();
+        ChatId = buffer.ReadInt64();
+        UserId = buffer.Read<MyTelegram.Schema.IInputUser>();
+        FwdLimit = buffer.ReadInt32();
     }
 }

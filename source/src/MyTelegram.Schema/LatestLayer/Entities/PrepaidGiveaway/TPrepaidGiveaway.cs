@@ -46,11 +46,11 @@ public sealed class TPrepaidGiveaway : IPrepaidGiveaway
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Months = reader.ReadInt32();
-        Quantity = reader.ReadInt32();
-        Date = reader.ReadInt32();
+        Id = buffer.ReadInt64();
+        Months = buffer.ReadInt32();
+        Quantity = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
     }
 }

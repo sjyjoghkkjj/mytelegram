@@ -29,8 +29,8 @@ public sealed class TChannelAdminLogEventActionParticipantMute : IChannelAdminLo
         writer.Write(Participant);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Participant = reader.Read<MyTelegram.Schema.IGroupCallParticipant>();
+        Participant = buffer.Read<MyTelegram.Schema.IGroupCallParticipant>();
     }
 }

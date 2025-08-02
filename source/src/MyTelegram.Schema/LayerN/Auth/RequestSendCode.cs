@@ -17,13 +17,14 @@ namespace MyTelegram.Schema.Auth.LayerN;
 /// 406 PHONE_PASSWORD_FLOOD You have tried logging in too many times.
 /// 400 PHONE_PASSWORD_PROTECTED This phone is password protected.
 /// 400 SMS_CODE_CREATE_FAILED An error occurred while creating the SMS code.
+/// 406 UPDATE_APP_TO_LOGIN Please update your client to login.
 /// See <a href="https://corefork.telegram.org/method/auth.sendCode" />
 ///</summary>
 [TlObject(0x86aef0ec)]
 public sealed class RequestSendCode : IRequest<MyTelegram.Schema.Auth.ISentCode>
 {
     public uint ConstructorId => 0x86aef0ec;
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
     public bool AllowFlashcall { get; set; }
 
     ///<summary>
@@ -44,8 +45,8 @@ public sealed class RequestSendCode : IRequest<MyTelegram.Schema.Auth.ISentCode>
 
     public void ComputeFlag()
     {
-        if (AllowFlashcall) { Flags[0] = true; }
-        if (CurrentNumber !=null) { Flags[0] = true; }
+        if (AllowFlashcall) { Flags = Flags.SetBit(0); }
+        if (CurrentNumber !=null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -55,18 +56,18 @@ public sealed class RequestSendCode : IRequest<MyTelegram.Schema.Auth.ISentCode>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(PhoneNumber);
-        if (Flags[0]) { writer.Write(CurrentNumber.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(CurrentNumber.Value); }
         writer.Write(ApiId);
         writer.Write(ApiHash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AllowFlashcall = true; }
-        PhoneNumber = reader.ReadString();
-        if (Flags[0]) { CurrentNumber = reader.Read(); }
-        ApiId = reader.ReadInt32();
-        ApiHash = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AllowFlashcall = true; }
+        PhoneNumber = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { CurrentNumber = buffer.Read(); }
+        ApiId = buffer.ReadInt32();
+        ApiHash = buffer.ReadString();
     }
 }

@@ -44,9 +44,9 @@ public sealed class RequestDeleteParticipantHistory : IRequest<MyTelegram.Schema
         writer.Write(Participant);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Participant = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Participant = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

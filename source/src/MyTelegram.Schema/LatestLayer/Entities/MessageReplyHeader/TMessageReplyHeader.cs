@@ -14,7 +14,7 @@ public sealed class TMessageReplyHeader : IMessageReplyHeader
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// This is a reply to a scheduled message.
@@ -79,17 +79,17 @@ public sealed class TMessageReplyHeader : IMessageReplyHeader
 
     public void ComputeFlag()
     {
-        if (ReplyToScheduled) { Flags[2] = true; }
-        if (ForumTopic) { Flags[3] = true; }
-        if (Quote) { Flags[9] = true; }
-        if (/*ReplyToMsgId != 0 && */ReplyToMsgId.HasValue) { Flags[4] = true; }
-        if (ReplyToPeerId != null) { Flags[0] = true; }
-        if (ReplyFrom != null) { Flags[5] = true; }
-        if (ReplyMedia != null) { Flags[8] = true; }
-        if (/*ReplyToTopId != 0 && */ReplyToTopId.HasValue) { Flags[1] = true; }
-        if (QuoteText != null) { Flags[6] = true; }
-        if (QuoteEntities?.Count > 0) { Flags[7] = true; }
-        if (/*QuoteOffset != 0 && */QuoteOffset.HasValue) { Flags[10] = true; }
+        if (ReplyToScheduled) { Flags = Flags.SetBit(2); }
+        if (ForumTopic) { Flags = Flags.SetBit(3); }
+        if (Quote) { Flags = Flags.SetBit(9); }
+        if (/*ReplyToMsgId != 0 && */ReplyToMsgId.HasValue) { Flags = Flags.SetBit(4); }
+        if (ReplyToPeerId != null) { Flags = Flags.SetBit(0); }
+        if (ReplyFrom != null) { Flags = Flags.SetBit(5); }
+        if (ReplyMedia != null) { Flags = Flags.SetBit(8); }
+        if (/*ReplyToTopId != 0 && */ReplyToTopId.HasValue) { Flags = Flags.SetBit(1); }
+        if (QuoteText != null) { Flags = Flags.SetBit(6); }
+        if (QuoteEntities?.Count > 0) { Flags = Flags.SetBit(7); }
+        if (/*QuoteOffset != 0 && */QuoteOffset.HasValue) { Flags = Flags.SetBit(10); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -97,29 +97,29 @@ public sealed class TMessageReplyHeader : IMessageReplyHeader
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[4]) { writer.Write(ReplyToMsgId.Value); }
-        if (Flags[0]) { writer.Write(ReplyToPeerId); }
-        if (Flags[5]) { writer.Write(ReplyFrom); }
-        if (Flags[8]) { writer.Write(ReplyMedia); }
-        if (Flags[1]) { writer.Write(ReplyToTopId.Value); }
-        if (Flags[6]) { writer.Write(QuoteText); }
-        if (Flags[7]) { writer.Write(QuoteEntities); }
-        if (Flags[10]) { writer.Write(QuoteOffset.Value); }
+        if (Flags.IsBitSet(4)) { writer.Write(ReplyToMsgId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(ReplyToPeerId); }
+        if (Flags.IsBitSet(5)) { writer.Write(ReplyFrom); }
+        if (Flags.IsBitSet(8)) { writer.Write(ReplyMedia); }
+        if (Flags.IsBitSet(1)) { writer.Write(ReplyToTopId.Value); }
+        if (Flags.IsBitSet(6)) { writer.Write(QuoteText); }
+        if (Flags.IsBitSet(7)) { writer.Write(QuoteEntities); }
+        if (Flags.IsBitSet(10)) { writer.Write(QuoteOffset.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { ReplyToScheduled = true; }
-        if (Flags[3]) { ForumTopic = true; }
-        if (Flags[9]) { Quote = true; }
-        if (Flags[4]) { ReplyToMsgId = reader.ReadInt32(); }
-        if (Flags[0]) { ReplyToPeerId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        if (Flags[5]) { ReplyFrom = reader.Read<MyTelegram.Schema.IMessageFwdHeader>(); }
-        if (Flags[8]) { ReplyMedia = reader.Read<MyTelegram.Schema.IMessageMedia>(); }
-        if (Flags[1]) { ReplyToTopId = reader.ReadInt32(); }
-        if (Flags[6]) { QuoteText = reader.ReadString(); }
-        if (Flags[7]) { QuoteEntities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
-        if (Flags[10]) { QuoteOffset = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { ReplyToScheduled = true; }
+        if (Flags.IsBitSet(3)) { ForumTopic = true; }
+        if (Flags.IsBitSet(9)) { Quote = true; }
+        if (Flags.IsBitSet(4)) { ReplyToMsgId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { ReplyToPeerId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        if (Flags.IsBitSet(5)) { ReplyFrom = buffer.Read<MyTelegram.Schema.IMessageFwdHeader>(); }
+        if (Flags.IsBitSet(8)) { ReplyMedia = buffer.Read<MyTelegram.Schema.IMessageMedia>(); }
+        if (Flags.IsBitSet(1)) { ReplyToTopId = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(6)) { QuoteText = buffer.ReadString(); }
+        if (Flags.IsBitSet(7)) { QuoteEntities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>(); }
+        if (Flags.IsBitSet(10)) { QuoteOffset = buffer.ReadInt32(); }
     }
 }

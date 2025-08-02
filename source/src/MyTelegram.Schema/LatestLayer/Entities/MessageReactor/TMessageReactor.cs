@@ -14,7 +14,7 @@ public sealed class TMessageReactor : IMessageReactor
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the reactor is one of the most active reactors; may be unset if the reactor is the current user.
@@ -47,10 +47,10 @@ public sealed class TMessageReactor : IMessageReactor
 
     public void ComputeFlag()
     {
-        if (Top) { Flags[0] = true; }
-        if (My) { Flags[1] = true; }
-        if (Anonymous) { Flags[2] = true; }
-        if (PeerId != null) { Flags[3] = true; }
+        if (Top) { Flags = Flags.SetBit(0); }
+        if (My) { Flags = Flags.SetBit(1); }
+        if (Anonymous) { Flags = Flags.SetBit(2); }
+        if (PeerId != null) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -59,17 +59,17 @@ public sealed class TMessageReactor : IMessageReactor
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[3]) { writer.Write(PeerId); }
+        if (Flags.IsBitSet(3)) { writer.Write(PeerId); }
         writer.Write(Count);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Top = true; }
-        if (Flags[1]) { My = true; }
-        if (Flags[2]) { Anonymous = true; }
-        if (Flags[3]) { PeerId = reader.Read<MyTelegram.Schema.IPeer>(); }
-        Count = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Top = true; }
+        if (Flags.IsBitSet(1)) { My = true; }
+        if (Flags.IsBitSet(2)) { Anonymous = true; }
+        if (Flags.IsBitSet(3)) { PeerId = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        Count = buffer.ReadInt32();
     }
 }

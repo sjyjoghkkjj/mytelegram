@@ -40,9 +40,9 @@ public sealed class RequestJoinGroupCallPresentation : IRequest<MyTelegram.Schem
         writer.Write(Params);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Params = reader.Read<MyTelegram.Schema.IDataJSON>();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Params = buffer.Read<MyTelegram.Schema.IDataJSON>();
     }
 }

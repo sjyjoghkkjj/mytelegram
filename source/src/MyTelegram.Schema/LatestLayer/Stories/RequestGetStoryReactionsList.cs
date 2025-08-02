@@ -17,7 +17,7 @@ public sealed class RequestGetStoryReactionsList : IRequest<MyTelegram.Schema.St
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, returns forwards and reposts first, then reactions, then other views; otherwise returns interactions sorted just by interaction date.
@@ -54,9 +54,9 @@ public sealed class RequestGetStoryReactionsList : IRequest<MyTelegram.Schema.St
 
     public void ComputeFlag()
     {
-        if (ForwardsFirst) { Flags[2] = true; }
-        if (Reaction != null) { Flags[0] = true; }
-        if (Offset != null) { Flags[1] = true; }
+        if (ForwardsFirst) { Flags = Flags.SetBit(2); }
+        if (Reaction != null) { Flags = Flags.SetBit(0); }
+        if (Offset != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -67,19 +67,19 @@ public sealed class RequestGetStoryReactionsList : IRequest<MyTelegram.Schema.St
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Id);
-        if (Flags[0]) { writer.Write(Reaction); }
-        if (Flags[1]) { writer.Write(Offset); }
+        if (Flags.IsBitSet(0)) { writer.Write(Reaction); }
+        if (Flags.IsBitSet(1)) { writer.Write(Offset); }
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { ForwardsFirst = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.ReadInt32();
-        if (Flags[0]) { Reaction = reader.Read<MyTelegram.Schema.IReaction>(); }
-        if (Flags[1]) { Offset = reader.ReadString(); }
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { ForwardsFirst = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Reaction = buffer.Read<MyTelegram.Schema.IReaction>(); }
+        if (Flags.IsBitSet(1)) { Offset = buffer.ReadString(); }
+        Limit = buffer.ReadInt32();
     }
 }

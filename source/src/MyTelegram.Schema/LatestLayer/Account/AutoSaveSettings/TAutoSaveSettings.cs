@@ -61,13 +61,13 @@ public sealed class TAutoSaveSettings : IAutoSaveSettings
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UsersSettings = reader.Read<MyTelegram.Schema.IAutoSaveSettings>();
-        ChatsSettings = reader.Read<MyTelegram.Schema.IAutoSaveSettings>();
-        BroadcastsSettings = reader.Read<MyTelegram.Schema.IAutoSaveSettings>();
-        Exceptions = reader.Read<TVector<MyTelegram.Schema.IAutoSaveException>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        UsersSettings = buffer.Read<MyTelegram.Schema.IAutoSaveSettings>();
+        ChatsSettings = buffer.Read<MyTelegram.Schema.IAutoSaveSettings>();
+        BroadcastsSettings = buffer.Read<MyTelegram.Schema.IAutoSaveSettings>();
+        Exceptions = buffer.Read<TVector<MyTelegram.Schema.IAutoSaveException>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

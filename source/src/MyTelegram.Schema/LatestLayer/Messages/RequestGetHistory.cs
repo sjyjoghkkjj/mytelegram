@@ -79,15 +79,15 @@ public sealed class RequestGetHistory : IRequest<MyTelegram.Schema.Messages.IMes
         writer.Write(Hash);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        OffsetId = reader.ReadInt32();
-        OffsetDate = reader.ReadInt32();
-        AddOffset = reader.ReadInt32();
-        Limit = reader.ReadInt32();
-        MaxId = reader.ReadInt32();
-        MinId = reader.ReadInt32();
-        Hash = reader.ReadInt64();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        OffsetId = buffer.ReadInt32();
+        OffsetDate = buffer.ReadInt32();
+        AddOffset = buffer.ReadInt32();
+        Limit = buffer.ReadInt32();
+        MaxId = buffer.ReadInt32();
+        MinId = buffer.ReadInt32();
+        Hash = buffer.ReadInt64();
     }
 }

@@ -17,7 +17,7 @@ public sealed class RequestTogglePeerTranslations : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to disable or enable the real-time chat translation popup
@@ -33,7 +33,7 @@ public sealed class RequestTogglePeerTranslations : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Disabled) { Flags[0] = true; }
+        if (Disabled) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -45,10 +45,10 @@ public sealed class RequestTogglePeerTranslations : IRequest<IBool>
         writer.Write(Peer);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Disabled = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Disabled = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

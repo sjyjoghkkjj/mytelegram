@@ -14,7 +14,7 @@ public sealed class TReplyKeyboardHide : IReplyMarkup
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Use this flag if you want to remove the keyboard for specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.<br><br>Example: A user votes in a poll, bot returns confirmation message in reply to the vote and removes the keyboard for that user, while still showing the keyboard with poll options to users who haven't voted yet
@@ -24,7 +24,7 @@ public sealed class TReplyKeyboardHide : IReplyMarkup
 
     public void ComputeFlag()
     {
-        if (Selective) { Flags[2] = true; }
+        if (Selective) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -35,9 +35,9 @@ public sealed class TReplyKeyboardHide : IReplyMarkup
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { Selective = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { Selective = true; }
     }
 }

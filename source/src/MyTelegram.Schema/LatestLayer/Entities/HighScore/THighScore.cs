@@ -40,10 +40,10 @@ public sealed class THighScore : IHighScore
         writer.Write(Score);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Pos = reader.ReadInt32();
-        UserId = reader.ReadInt64();
-        Score = reader.ReadInt32();
+        Pos = buffer.ReadInt32();
+        UserId = buffer.ReadInt64();
+        Score = buffer.ReadInt32();
     }
 }

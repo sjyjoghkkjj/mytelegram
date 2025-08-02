@@ -12,7 +12,7 @@ public interface IPassword : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether the user has a recovery method configured
@@ -38,7 +38,7 @@ public interface IPassword : IObject
     ///<summary>
     /// Srp B param for <a href="https://corefork.telegram.org/api/srp">SRP authorization</a>
     ///</summary>
-    byte[]? SrpB { get; set; }
+    ReadOnlyMemory<byte>? SrpB { get; set; }
 
     ///<summary>
     /// Srp ID param for <a href="https://corefork.telegram.org/api/srp">SRP authorization</a>
@@ -70,7 +70,7 @@ public interface IPassword : IObject
     ///<summary>
     /// Secure random string
     ///</summary>
-    byte[] SecureRandom { get; set; }
+    ReadOnlyMemory<byte> SecureRandom { get; set; }
 
     ///<summary>
     /// The 2FA password will be automatically removed at this date, unless the user cancels the operation

@@ -39,9 +39,9 @@ public sealed class RequestSaveTheme : IRequest<IBool>
         writer.Write(Unsave);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Theme = reader.Read<MyTelegram.Schema.IInputTheme>();
-        Unsave = reader.Read();
+        Theme = buffer.Read<MyTelegram.Schema.IInputTheme>();
+        Unsave = buffer.Read();
     }
 }

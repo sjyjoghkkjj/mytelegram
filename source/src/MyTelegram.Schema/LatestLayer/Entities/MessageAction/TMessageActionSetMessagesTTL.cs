@@ -14,7 +14,7 @@ public sealed class TMessageActionSetMessagesTTL : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// New Time-To-Live of all messages sent in this chat; if 0, autodeletion was disabled.
@@ -28,7 +28,7 @@ public sealed class TMessageActionSetMessagesTTL : IMessageAction
 
     public void ComputeFlag()
     {
-        if (/*AutoSettingFrom != 0 &&*/ AutoSettingFrom.HasValue) { Flags[0] = true; }
+        if (/*AutoSettingFrom != 0 &&*/ AutoSettingFrom.HasValue) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -37,13 +37,13 @@ public sealed class TMessageActionSetMessagesTTL : IMessageAction
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Period);
-        if (Flags[0]) { writer.Write(AutoSettingFrom.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(AutoSettingFrom.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Period = reader.ReadInt32();
-        if (Flags[0]) { AutoSettingFrom = reader.ReadInt64(); }
+        Flags = buffer.ReadInt32();
+        Period = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AutoSettingFrom = buffer.ReadInt64(); }
     }
 }

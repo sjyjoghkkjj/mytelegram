@@ -34,9 +34,9 @@ public sealed class RequestGetPreparedInlineMessage : IRequest<MyTelegram.Schema
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Bot = reader.Read<MyTelegram.Schema.IInputUser>();
-        Id = reader.ReadString();
+        Bot = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Id = buffer.ReadString();
     }
 }

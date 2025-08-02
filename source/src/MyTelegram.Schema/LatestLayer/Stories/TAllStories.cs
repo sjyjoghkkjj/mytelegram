@@ -14,7 +14,7 @@ public sealed class TAllStories : IAllStories
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether more results can be fetched as <a href="https://corefork.telegram.org/api/stories#watching-stories">described here »</a>.
@@ -55,7 +55,7 @@ public sealed class TAllStories : IAllStories
 
     public void ComputeFlag()
     {
-        if (HasMore) { Flags[0] = true; }
+        if (HasMore) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -72,15 +72,15 @@ public sealed class TAllStories : IAllStories
         writer.Write(StealthMode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { HasMore = true; }
-        Count = reader.ReadInt32();
-        State = reader.ReadString();
-        PeerStories = reader.Read<TVector<MyTelegram.Schema.IPeerStories>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
-        StealthMode = reader.Read<MyTelegram.Schema.IStoriesStealthMode>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { HasMore = true; }
+        Count = buffer.ReadInt32();
+        State = buffer.ReadString();
+        PeerStories = buffer.Read<TVector<MyTelegram.Schema.IPeerStories>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
+        StealthMode = buffer.Read<MyTelegram.Schema.IStoriesStealthMode>();
     }
 }

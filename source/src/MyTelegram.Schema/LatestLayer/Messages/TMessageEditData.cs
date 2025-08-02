@@ -14,7 +14,7 @@ public sealed class TMessageEditData : IMessageEditData
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Media caption, if the specified media's caption can be edited
@@ -24,7 +24,7 @@ public sealed class TMessageEditData : IMessageEditData
 
     public void ComputeFlag()
     {
-        if (Caption) { Flags[0] = true; }
+        if (Caption) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -35,9 +35,9 @@ public sealed class TMessageEditData : IMessageEditData
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Caption = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Caption = true; }
     }
 }

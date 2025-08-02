@@ -17,7 +17,7 @@ public sealed class RequestActivateStealthMode : IRequest<MyTelegram.Schema.IUpd
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to erase views from any stories opened in the past <a href="https://corefork.telegram.org/api/config#stories-stealth-past-period"><code>stories_stealth_past_period</code> seconds »</a>, as specified by the <a href="https://corefork.telegram.org/api/config#client-configuration">client configuration</a>.
@@ -33,8 +33,8 @@ public sealed class RequestActivateStealthMode : IRequest<MyTelegram.Schema.IUpd
 
     public void ComputeFlag()
     {
-        if (Past) { Flags[0] = true; }
-        if (Future) { Flags[1] = true; }
+        if (Past) { Flags = Flags.SetBit(0); }
+        if (Future) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -45,10 +45,10 @@ public sealed class RequestActivateStealthMode : IRequest<MyTelegram.Schema.IUpd
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Past = true; }
-        if (Flags[1]) { Future = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Past = true; }
+        if (Flags.IsBitSet(1)) { Future = true; }
     }
 }

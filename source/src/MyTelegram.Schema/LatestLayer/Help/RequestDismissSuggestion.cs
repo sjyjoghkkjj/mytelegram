@@ -35,9 +35,9 @@ public sealed class RequestDismissSuggestion : IRequest<IBool>
         writer.Write(Suggestion);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Suggestion = reader.ReadString();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Suggestion = buffer.ReadString();
     }
 }

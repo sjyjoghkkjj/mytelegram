@@ -14,7 +14,7 @@ public sealed class TSearchCounter : ISearchCounter
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// If set, the results may be inexact
@@ -35,7 +35,7 @@ public sealed class TSearchCounter : ISearchCounter
 
     public void ComputeFlag()
     {
-        if (Inexact) { Flags[1] = true; }
+        if (Inexact) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -48,11 +48,11 @@ public sealed class TSearchCounter : ISearchCounter
         writer.Write(Count);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { Inexact = true; }
-        Filter = reader.Read<MyTelegram.Schema.IMessagesFilter>();
-        Count = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { Inexact = true; }
+        Filter = buffer.Read<MyTelegram.Schema.IMessagesFilter>();
+        Count = buffer.ReadInt32();
     }
 }

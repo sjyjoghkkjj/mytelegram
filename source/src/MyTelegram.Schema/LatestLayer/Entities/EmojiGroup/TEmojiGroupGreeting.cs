@@ -40,10 +40,10 @@ public sealed class TEmojiGroupGreeting : IEmojiGroup
         writer.Write(Emoticons);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Title = reader.ReadString();
-        IconEmojiId = reader.ReadInt64();
-        Emoticons = reader.Read<TVector<string>>();
+        Title = buffer.ReadString();
+        IconEmojiId = buffer.ReadInt64();
+        Emoticons = buffer.Read<TVector<string>>();
     }
 }

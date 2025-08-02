@@ -46,10 +46,10 @@ public sealed class RequestSaveWallPaper : IRequest<IBool>
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Wallpaper = reader.Read<MyTelegram.Schema.IInputWallPaper>();
-        Unsave = reader.Read();
-        Settings = reader.Read<MyTelegram.Schema.IWallPaperSettings>();
+        Wallpaper = buffer.Read<MyTelegram.Schema.IInputWallPaper>();
+        Unsave = buffer.Read();
+        Settings = buffer.Read<MyTelegram.Schema.IWallPaperSettings>();
     }
 }

@@ -20,7 +20,7 @@ public sealed class RequestSendReaction : IRequest<MyTelegram.Schema.IUpdates>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to add this reaction to the <a href="https://corefork.telegram.org/api/reactions#recent-reactions">recent reactions list »</a>.
@@ -47,7 +47,7 @@ public sealed class RequestSendReaction : IRequest<MyTelegram.Schema.IUpdates>
 
     public void ComputeFlag()
     {
-        if (AddToRecent) { Flags[0] = true; }
+        if (AddToRecent) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -61,12 +61,12 @@ public sealed class RequestSendReaction : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Reaction);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AddToRecent = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        StoryId = reader.ReadInt32();
-        Reaction = reader.Read<MyTelegram.Schema.IReaction>();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AddToRecent = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        StoryId = buffer.ReadInt32();
+        Reaction = buffer.Read<MyTelegram.Schema.IReaction>();
     }
 }

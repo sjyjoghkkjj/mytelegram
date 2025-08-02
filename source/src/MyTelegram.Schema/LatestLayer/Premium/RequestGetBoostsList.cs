@@ -18,7 +18,7 @@ public sealed class RequestGetBoostsList : IRequest<MyTelegram.Schema.Premium.IB
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether to return only info about boosts received from <a href="https://corefork.telegram.org/api/giveaways">gift codes and giveaways created by the channel/supergroup »</a>
@@ -44,7 +44,7 @@ public sealed class RequestGetBoostsList : IRequest<MyTelegram.Schema.Premium.IB
 
     public void ComputeFlag()
     {
-        if (Gifts) { Flags[0] = true; }
+        if (Gifts) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -58,12 +58,12 @@ public sealed class RequestGetBoostsList : IRequest<MyTelegram.Schema.Premium.IB
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Gifts = true; }
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Offset = reader.ReadString();
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Gifts = true; }
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Offset = buffer.ReadString();
+        Limit = buffer.ReadInt32();
     }
 }

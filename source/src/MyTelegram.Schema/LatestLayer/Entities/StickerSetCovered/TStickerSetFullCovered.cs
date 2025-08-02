@@ -48,11 +48,11 @@ public sealed class TStickerSetFullCovered : IStickerSetCovered
         writer.Write(Documents);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Set = reader.Read<MyTelegram.Schema.IStickerSet>();
-        Packs = reader.Read<TVector<MyTelegram.Schema.IStickerPack>>();
-        Keywords = reader.Read<TVector<MyTelegram.Schema.IStickerKeyword>>();
-        Documents = reader.Read<TVector<MyTelegram.Schema.IDocument>>();
+        Set = buffer.Read<MyTelegram.Schema.IStickerSet>();
+        Packs = buffer.Read<TVector<MyTelegram.Schema.IStickerPack>>();
+        Keywords = buffer.Read<TVector<MyTelegram.Schema.IStickerKeyword>>();
+        Documents = buffer.Read<TVector<MyTelegram.Schema.IDocument>>();
     }
 }

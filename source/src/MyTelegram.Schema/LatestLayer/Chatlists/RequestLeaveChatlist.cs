@@ -38,9 +38,9 @@ public sealed class RequestLeaveChatlist : IRequest<MyTelegram.Schema.IUpdates>
         writer.Write(Peers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Chatlist = reader.Read<MyTelegram.Schema.IInputChatlist>();
-        Peers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Chatlist = buffer.Read<MyTelegram.Schema.IInputChatlist>();
+        Peers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
     }
 }

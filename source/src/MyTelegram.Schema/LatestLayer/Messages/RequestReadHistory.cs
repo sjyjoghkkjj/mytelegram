@@ -41,9 +41,9 @@ public sealed class RequestReadHistory : IRequest<MyTelegram.Schema.Messages.IAf
         writer.Write(MaxId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MaxId = reader.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MaxId = buffer.ReadInt32();
     }
 }

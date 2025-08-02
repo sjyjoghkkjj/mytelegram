@@ -58,13 +58,13 @@ public sealed class TUpdatesCombined : IUpdates
         writer.Write(Seq);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Updates = reader.Read<TVector<MyTelegram.Schema.IUpdate>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
-        Chats = reader.Read<TVector<MyTelegram.Schema.IChat>>();
-        Date = reader.ReadInt32();
-        SeqStart = reader.ReadInt32();
-        Seq = reader.ReadInt32();
+        Updates = buffer.Read<TVector<MyTelegram.Schema.IUpdate>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
+        Chats = buffer.Read<TVector<MyTelegram.Schema.IChat>>();
+        Date = buffer.ReadInt32();
+        SeqStart = buffer.ReadInt32();
+        Seq = buffer.ReadInt32();
     }
 }

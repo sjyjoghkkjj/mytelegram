@@ -14,7 +14,7 @@ namespace MyTelegram.Schema.Channels.LayerN;
 /// See <a href="https://corefork.telegram.org/method/channels.exportMessageLink" />
 ///</summary>
 [TlObject(0xc846d22d)]
-public sealed class RequestExportMessageLink : IRequest<IExportedMessageLink>
+public sealed class RequestExportMessageLink : IRequest<MyTelegram.Schema.IExportedMessageLink>
 {
     public uint ConstructorId => 0xc846d22d;
     ///<summary>
@@ -41,9 +41,9 @@ public sealed class RequestExportMessageLink : IRequest<IExportedMessageLink>
         writer.Write(Id);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Channel = reader.Read<MyTelegram.Schema.IInputChannel>();
-        Id = reader.ReadInt32();
+        Channel = buffer.Read<MyTelegram.Schema.IInputChannel>();
+        Id = buffer.ReadInt32();
     }
 }

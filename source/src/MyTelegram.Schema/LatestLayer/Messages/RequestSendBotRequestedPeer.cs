@@ -50,11 +50,11 @@ public sealed class RequestSendBotRequestedPeer : IRequest<MyTelegram.Schema.IUp
         writer.Write(RequestedPeers);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.ReadInt32();
-        ButtonId = reader.ReadInt32();
-        RequestedPeers = reader.Read<TVector<MyTelegram.Schema.IInputPeer>>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.ReadInt32();
+        ButtonId = buffer.ReadInt32();
+        RequestedPeers = buffer.Read<TVector<MyTelegram.Schema.IInputPeer>>();
     }
 }

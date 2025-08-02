@@ -28,8 +28,8 @@ public sealed class TUserStatusOffline : IUserStatus
         writer.Write(WasOnline);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        WasOnline = reader.ReadInt32();
+        WasOnline = buffer.ReadInt32();
     }
 }

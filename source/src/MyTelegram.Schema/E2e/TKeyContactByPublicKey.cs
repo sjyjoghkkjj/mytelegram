@@ -8,7 +8,7 @@ namespace MyTelegram.Schema.E2e;
 public sealed class TKeyContactByPublicKey : IKey
 {
     public uint ConstructorId => 0x6C4F8C98;
-    public byte[] PublicKey { get; set; }
+    public ReadOnlyMemory<byte> PublicKey { get; set; }
 
     public void ComputeFlag()
     {
@@ -22,8 +22,8 @@ public sealed class TKeyContactByPublicKey : IKey
         writer.WriteRawBytes(PublicKey);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PublicKey = reader.ReadInt256();
+        PublicKey = buffer.ReadInt256();
     }
 }

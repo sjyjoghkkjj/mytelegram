@@ -12,7 +12,7 @@ public interface IDiscussionMessage : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// The messages from which the thread starts. The messages are returned in reverse chronological order (i.e., in order of decreasing message ID).

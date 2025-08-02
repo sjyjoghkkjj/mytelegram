@@ -40,9 +40,9 @@ public sealed class RequestSaveDefaultGroupCallJoinAs : IRequest<IBool>
         writer.Write(JoinAs);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        JoinAs = reader.Read<MyTelegram.Schema.IInputPeer>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        JoinAs = buffer.Read<MyTelegram.Schema.IInputPeer>();
     }
 }

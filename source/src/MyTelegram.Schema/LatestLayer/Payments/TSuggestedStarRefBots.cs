@@ -13,7 +13,7 @@ public sealed class TSuggestedStarRefBots : ISuggestedStarRefBots
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// &nbsp;
@@ -37,7 +37,7 @@ public sealed class TSuggestedStarRefBots : ISuggestedStarRefBots
 
     public void ComputeFlag()
     {
-        if (NextOffset != null) { Flags[0] = true; }
+        if (NextOffset != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -48,15 +48,15 @@ public sealed class TSuggestedStarRefBots : ISuggestedStarRefBots
         writer.Write(Count);
         writer.Write(SuggestedBots);
         writer.Write(Users);
-        if (Flags[0]) { writer.Write(NextOffset); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextOffset); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Count = reader.ReadInt32();
-        SuggestedBots = reader.Read<TVector<MyTelegram.Schema.IStarRefProgram>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
-        if (Flags[0]) { NextOffset = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Count = buffer.ReadInt32();
+        SuggestedBots = buffer.Read<TVector<MyTelegram.Schema.IStarRefProgram>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
+        if (Flags.IsBitSet(0)) { NextOffset = buffer.ReadString(); }
     }
 }

@@ -20,7 +20,7 @@ public sealed class TSecureSecretSettings : ISecureSecretSettings
     ///<summary>
     /// Secure secret
     ///</summary>
-    public byte[] SecureSecret { get; set; }
+    public ReadOnlyMemory<byte> SecureSecret { get; set; }
 
     ///<summary>
     /// Secret ID
@@ -41,10 +41,10 @@ public sealed class TSecureSecretSettings : ISecureSecretSettings
         writer.Write(SecureSecretId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        SecureAlgo = reader.Read<MyTelegram.Schema.ISecurePasswordKdfAlgo>();
-        SecureSecret = reader.ReadBytes();
-        SecureSecretId = reader.ReadInt64();
+        SecureAlgo = buffer.Read<MyTelegram.Schema.ISecurePasswordKdfAlgo>();
+        SecureSecret = buffer.ReadBytes();
+        SecureSecretId = buffer.ReadInt64();
     }
 }

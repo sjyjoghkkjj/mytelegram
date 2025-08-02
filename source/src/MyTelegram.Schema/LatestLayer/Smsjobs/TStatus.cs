@@ -14,7 +14,7 @@ public sealed class TStatus : IStatus
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Allow international numbers
@@ -59,8 +59,8 @@ public sealed class TStatus : IStatus
 
     public void ComputeFlag()
     {
-        if (AllowInternational) { Flags[0] = true; }
-        if (LastGiftSlug != null) { Flags[1] = true; }
+        if (AllowInternational) { Flags = Flags.SetBit(0); }
+        if (LastGiftSlug != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -74,20 +74,20 @@ public sealed class TStatus : IStatus
         writer.Write(RecentRemains);
         writer.Write(TotalSent);
         writer.Write(TotalSince);
-        if (Flags[1]) { writer.Write(LastGiftSlug); }
+        if (Flags.IsBitSet(1)) { writer.Write(LastGiftSlug); }
         writer.Write(TermsUrl);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { AllowInternational = true; }
-        RecentSent = reader.ReadInt32();
-        RecentSince = reader.ReadInt32();
-        RecentRemains = reader.ReadInt32();
-        TotalSent = reader.ReadInt32();
-        TotalSince = reader.ReadInt32();
-        if (Flags[1]) { LastGiftSlug = reader.ReadString(); }
-        TermsUrl = reader.ReadString();
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { AllowInternational = true; }
+        RecentSent = buffer.ReadInt32();
+        RecentSince = buffer.ReadInt32();
+        RecentRemains = buffer.ReadInt32();
+        TotalSent = buffer.ReadInt32();
+        TotalSince = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { LastGiftSlug = buffer.ReadString(); }
+        TermsUrl = buffer.ReadString();
     }
 }

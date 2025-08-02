@@ -21,30 +21,15 @@ public class SerializerFactory
         return Int128Serializer;
     }
 
-    //public static ISerializer2<byte[]> CreateInt128Serializer2()
-    //{
-    //    return Int128Serializer;
-    //}
-
     public static ISerializer<byte[]> CreateInt256Serializer()
     {
         return Int256Serializer;
     }
 
-    //public static ISerializer2<byte[]> CreateInt256Serializer2()
-    //{
-    //    return Int256Serializer;
-    //}
-
     public static ISerializer<T> CreateObjectSerializer<T>() where T : IObject
     {
         return new ObjectSerializer<T>();
     }
-
-    //public static ISerializer2<T> CreateObjectSerializer2<T>() where T : IObject
-    //{
-    //    return new ObjectSerializer<T>();
-    //}
 
     public static ISerializer<TVector<T>> CreateVectorSerializer<T>()
     {

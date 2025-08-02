@@ -19,7 +19,7 @@ public sealed class TExportedAuthorization : IExportedAuthorization
     ///<summary>
     /// authorizes key
     ///</summary>
-    public byte[] Bytes { get; set; }
+    public ReadOnlyMemory<byte> Bytes { get; set; }
 
     public void ComputeFlag()
     {
@@ -34,9 +34,9 @@ public sealed class TExportedAuthorization : IExportedAuthorization
         writer.Write(Bytes);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt64();
-        Bytes = reader.ReadBytes();
+        Id = buffer.ReadInt64();
+        Bytes = buffer.ReadBytes();
     }
 }

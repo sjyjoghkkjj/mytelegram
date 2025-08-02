@@ -28,8 +28,8 @@ public sealed class RequestGetEmojiURL : IRequest<MyTelegram.Schema.IEmojiURL>
         writer.Write(LangCode);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangCode = reader.ReadString();
+        LangCode = buffer.ReadString();
     }
 }

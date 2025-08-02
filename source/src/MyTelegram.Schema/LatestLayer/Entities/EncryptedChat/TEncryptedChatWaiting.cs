@@ -52,12 +52,12 @@ public sealed class TEncryptedChatWaiting : IEncryptedChat
         writer.Write(ParticipantId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.ReadInt32();
-        AccessHash = reader.ReadInt64();
-        Date = reader.ReadInt32();
-        AdminId = reader.ReadInt64();
-        ParticipantId = reader.ReadInt64();
+        Id = buffer.ReadInt32();
+        AccessHash = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
+        AdminId = buffer.ReadInt64();
+        ParticipantId = buffer.ReadInt64();
     }
 }

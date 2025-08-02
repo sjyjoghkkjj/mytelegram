@@ -40,9 +40,9 @@ public sealed class RequestSetSecureValueErrors : IRequest<IBool>
         writer.Write(Errors);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Id = reader.Read<MyTelegram.Schema.IInputUser>();
-        Errors = reader.Read<TVector<MyTelegram.Schema.ISecureValueError>>();
+        Id = buffer.Read<MyTelegram.Schema.IInputUser>();
+        Errors = buffer.Read<TVector<MyTelegram.Schema.ISecureValueError>>();
     }
 }

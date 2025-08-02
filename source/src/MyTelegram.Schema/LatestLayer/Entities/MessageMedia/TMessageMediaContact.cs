@@ -52,12 +52,12 @@ public sealed class TMessageMediaContact : IMessageMedia
         writer.Write(UserId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
-        FirstName = reader.ReadString();
-        LastName = reader.ReadString();
-        Vcard = reader.ReadString();
-        UserId = reader.ReadInt64();
+        PhoneNumber = buffer.ReadString();
+        FirstName = buffer.ReadString();
+        LastName = buffer.ReadString();
+        Vcard = buffer.ReadString();
+        UserId = buffer.ReadInt64();
     }
 }

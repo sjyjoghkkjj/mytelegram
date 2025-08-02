@@ -14,7 +14,7 @@ public sealed class TUpdateMessagePoll : IUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Poll ID
@@ -35,7 +35,7 @@ public sealed class TUpdateMessagePoll : IUpdate
 
     public void ComputeFlag()
     {
-        if (Poll != null) { Flags[0] = true; }
+        if (Poll != null) { Flags = Flags.SetBit(0); }
 
     }
 
@@ -45,15 +45,15 @@ public sealed class TUpdateMessagePoll : IUpdate
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(PollId);
-        if (Flags[0]) { writer.Write(Poll); }
+        if (Flags.IsBitSet(0)) { writer.Write(Poll); }
         writer.Write(Results);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        PollId = reader.ReadInt64();
-        if (Flags[0]) { Poll = reader.Read<MyTelegram.Schema.IPoll>(); }
-        Results = reader.Read<MyTelegram.Schema.IPollResults>();
+        Flags = buffer.ReadInt32();
+        PollId = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { Poll = buffer.Read<MyTelegram.Schema.IPoll>(); }
+        Results = buffer.Read<MyTelegram.Schema.IPollResults>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TMessageViews : IMessageViews
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// View count of message
@@ -34,9 +34,9 @@ public sealed class TMessageViews : IMessageViews
 
     public void ComputeFlag()
     {
-        if (/*Views != 0 && */Views.HasValue) { Flags[0] = true; }
-        if (/*Forwards != 0 && */Forwards.HasValue) { Flags[1] = true; }
-        if (Replies != null) { Flags[2] = true; }
+        if (/*Views != 0 && */Views.HasValue) { Flags = Flags.SetBit(0); }
+        if (/*Forwards != 0 && */Forwards.HasValue) { Flags = Flags.SetBit(1); }
+        if (Replies != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -44,16 +44,16 @@ public sealed class TMessageViews : IMessageViews
         ComputeFlag();
         writer.Write(ConstructorId);
         writer.Write(Flags);
-        if (Flags[0]) { writer.Write(Views.Value); }
-        if (Flags[1]) { writer.Write(Forwards.Value); }
-        if (Flags[2]) { writer.Write(Replies); }
+        if (Flags.IsBitSet(0)) { writer.Write(Views.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(Forwards.Value); }
+        if (Flags.IsBitSet(2)) { writer.Write(Replies); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { Views = reader.ReadInt32(); }
-        if (Flags[1]) { Forwards = reader.ReadInt32(); }
-        if (Flags[2]) { Replies = reader.Read<MyTelegram.Schema.IMessageReplies>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Views = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { Forwards = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(2)) { Replies = buffer.Read<MyTelegram.Schema.IMessageReplies>(); }
     }
 }

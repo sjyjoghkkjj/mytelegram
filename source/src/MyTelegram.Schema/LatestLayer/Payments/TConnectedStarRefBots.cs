@@ -39,10 +39,10 @@ public sealed class TConnectedStarRefBots : IConnectedStarRefBots
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Count = reader.ReadInt32();
-        ConnectedBots = reader.Read<TVector<MyTelegram.Schema.IConnectedBotStarRef>>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Count = buffer.ReadInt32();
+        ConnectedBots = buffer.Read<TVector<MyTelegram.Schema.IConnectedBotStarRef>>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

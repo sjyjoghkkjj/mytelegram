@@ -14,7 +14,7 @@ public sealed class TMessageActionPaymentSent : IMessageAction
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether this is the first payment of a recurring payment we just subscribed to
@@ -50,10 +50,10 @@ public sealed class TMessageActionPaymentSent : IMessageAction
 
     public void ComputeFlag()
     {
-        if (RecurringInit) { Flags[2] = true; }
-        if (RecurringUsed) { Flags[3] = true; }
-        if (InvoiceSlug != null) { Flags[0] = true; }
-        if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags[4] = true; }
+        if (RecurringInit) { Flags = Flags.SetBit(2); }
+        if (RecurringUsed) { Flags = Flags.SetBit(3); }
+        if (InvoiceSlug != null) { Flags = Flags.SetBit(0); }
+        if (/*SubscriptionUntilDate != 0 && */SubscriptionUntilDate.HasValue) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -63,18 +63,18 @@ public sealed class TMessageActionPaymentSent : IMessageAction
         writer.Write(Flags);
         writer.Write(Currency);
         writer.Write(TotalAmount);
-        if (Flags[0]) { writer.Write(InvoiceSlug); }
-        if (Flags[4]) { writer.Write(SubscriptionUntilDate.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(InvoiceSlug); }
+        if (Flags.IsBitSet(4)) { writer.Write(SubscriptionUntilDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { RecurringInit = true; }
-        if (Flags[3]) { RecurringUsed = true; }
-        Currency = reader.ReadString();
-        TotalAmount = reader.ReadInt64();
-        if (Flags[0]) { InvoiceSlug = reader.ReadString(); }
-        if (Flags[4]) { SubscriptionUntilDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { RecurringInit = true; }
+        if (Flags.IsBitSet(3)) { RecurringUsed = true; }
+        Currency = buffer.ReadString();
+        TotalAmount = buffer.ReadInt64();
+        if (Flags.IsBitSet(0)) { InvoiceSlug = buffer.ReadString(); }
+        if (Flags.IsBitSet(4)) { SubscriptionUntilDate = buffer.ReadInt32(); }
     }
 }

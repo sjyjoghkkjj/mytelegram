@@ -14,7 +14,7 @@ public sealed class TMessageMediaInvoice : IMessageMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether the shipping address was requested
@@ -72,11 +72,11 @@ public sealed class TMessageMediaInvoice : IMessageMedia
 
     public void ComputeFlag()
     {
-        if (ShippingAddressRequested) { Flags[1] = true; }
-        if (Test) { Flags[3] = true; }
-        if (Photo != null) { Flags[0] = true; }
-        if (/*ReceiptMsgId != 0 && */ReceiptMsgId.HasValue) { Flags[2] = true; }
-        if (ExtendedMedia != null) { Flags[4] = true; }
+        if (ShippingAddressRequested) { Flags = Flags.SetBit(1); }
+        if (Test) { Flags = Flags.SetBit(3); }
+        if (Photo != null) { Flags = Flags.SetBit(0); }
+        if (/*ReceiptMsgId != 0 && */ReceiptMsgId.HasValue) { Flags = Flags.SetBit(2); }
+        if (ExtendedMedia != null) { Flags = Flags.SetBit(4); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -86,26 +86,26 @@ public sealed class TMessageMediaInvoice : IMessageMedia
         writer.Write(Flags);
         writer.Write(Title);
         writer.Write(Description);
-        if (Flags[0]) { writer.Write(Photo); }
-        if (Flags[2]) { writer.Write(ReceiptMsgId.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Photo); }
+        if (Flags.IsBitSet(2)) { writer.Write(ReceiptMsgId.Value); }
         writer.Write(Currency);
         writer.Write(TotalAmount);
         writer.Write(StartParam);
-        if (Flags[4]) { writer.Write(ExtendedMedia); }
+        if (Flags.IsBitSet(4)) { writer.Write(ExtendedMedia); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[1]) { ShippingAddressRequested = true; }
-        if (Flags[3]) { Test = true; }
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        if (Flags[0]) { Photo = reader.Read<MyTelegram.Schema.IWebDocument>(); }
-        if (Flags[2]) { ReceiptMsgId = reader.ReadInt32(); }
-        Currency = reader.ReadString();
-        TotalAmount = reader.ReadInt64();
-        StartParam = reader.ReadString();
-        if (Flags[4]) { ExtendedMedia = reader.Read<MyTelegram.Schema.IMessageExtendedMedia>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { ShippingAddressRequested = true; }
+        if (Flags.IsBitSet(3)) { Test = true; }
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Photo = buffer.Read<MyTelegram.Schema.IWebDocument>(); }
+        if (Flags.IsBitSet(2)) { ReceiptMsgId = buffer.ReadInt32(); }
+        Currency = buffer.ReadString();
+        TotalAmount = buffer.ReadInt64();
+        StartParam = buffer.ReadString();
+        if (Flags.IsBitSet(4)) { ExtendedMedia = buffer.Read<MyTelegram.Schema.IMessageExtendedMedia>(); }
     }
 }

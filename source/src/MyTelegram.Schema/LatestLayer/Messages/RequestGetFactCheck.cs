@@ -38,9 +38,9 @@ public sealed class RequestGetFactCheck : IRequest<TVector<MyTelegram.Schema.IFa
         writer.Write(MsgId);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        MsgId = reader.Read<TVector<int>>();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        MsgId = buffer.Read<TVector<int>>();
     }
 }

@@ -14,7 +14,7 @@ public sealed class TAppUpdate : IAppUpdate
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Unskippable, the new info must be shown to the user (with a popup or something else)
@@ -61,10 +61,10 @@ public sealed class TAppUpdate : IAppUpdate
 
     public void ComputeFlag()
     {
-        if (CanNotSkip) { Flags[0] = true; }
-        if (Document != null) { Flags[1] = true; }
-        if (Url != null) { Flags[2] = true; }
-        if (Sticker != null) { Flags[3] = true; }
+        if (CanNotSkip) { Flags = Flags.SetBit(0); }
+        if (Document != null) { Flags = Flags.SetBit(1); }
+        if (Url != null) { Flags = Flags.SetBit(2); }
+        if (Sticker != null) { Flags = Flags.SetBit(3); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -76,21 +76,21 @@ public sealed class TAppUpdate : IAppUpdate
         writer.Write(Version);
         writer.Write(Text);
         writer.Write(Entities);
-        if (Flags[1]) { writer.Write(Document); }
-        if (Flags[2]) { writer.Write(Url); }
-        if (Flags[3]) { writer.Write(Sticker); }
+        if (Flags.IsBitSet(1)) { writer.Write(Document); }
+        if (Flags.IsBitSet(2)) { writer.Write(Url); }
+        if (Flags.IsBitSet(3)) { writer.Write(Sticker); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { CanNotSkip = true; }
-        Id = reader.ReadInt32();
-        Version = reader.ReadString();
-        Text = reader.ReadString();
-        Entities = reader.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
-        if (Flags[1]) { Document = reader.Read<MyTelegram.Schema.IDocument>(); }
-        if (Flags[2]) { Url = reader.ReadString(); }
-        if (Flags[3]) { Sticker = reader.Read<MyTelegram.Schema.IDocument>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { CanNotSkip = true; }
+        Id = buffer.ReadInt32();
+        Version = buffer.ReadString();
+        Text = buffer.ReadString();
+        Entities = buffer.Read<TVector<MyTelegram.Schema.IMessageEntity>>();
+        if (Flags.IsBitSet(1)) { Document = buffer.Read<MyTelegram.Schema.IDocument>(); }
+        if (Flags.IsBitSet(2)) { Url = buffer.ReadString(); }
+        if (Flags.IsBitSet(3)) { Sticker = buffer.Read<MyTelegram.Schema.IDocument>(); }
     }
 }

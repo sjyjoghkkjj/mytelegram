@@ -14,7 +14,7 @@ public sealed class TInputMediaInvoice : IInputMedia
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Product name, 1-32 characters
@@ -41,7 +41,7 @@ public sealed class TInputMediaInvoice : IInputMedia
     ///<summary>
     /// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
     ///</summary>
-    public byte[] Payload { get; set; }
+    public ReadOnlyMemory<byte> Payload { get; set; }
 
     ///<summary>
     /// Payments provider token, obtained via <a href="https://t.me/botfather">Botfather</a>
@@ -67,10 +67,10 @@ public sealed class TInputMediaInvoice : IInputMedia
 
     public void ComputeFlag()
     {
-        if (Photo != null) { Flags[0] = true; }
-        if (Provider != null) { Flags[3] = true; }
-        if (StartParam != null) { Flags[1] = true; }
-        if (ExtendedMedia != null) { Flags[2] = true; }
+        if (Photo != null) { Flags = Flags.SetBit(0); }
+        if (Provider != null) { Flags = Flags.SetBit(3); }
+        if (StartParam != null) { Flags = Flags.SetBit(1); }
+        if (ExtendedMedia != null) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -80,26 +80,26 @@ public sealed class TInputMediaInvoice : IInputMedia
         writer.Write(Flags);
         writer.Write(Title);
         writer.Write(Description);
-        if (Flags[0]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(0)) { writer.Write(Photo); }
         writer.Write(Invoice);
         writer.Write(Payload);
-        if (Flags[3]) { writer.Write(Provider); }
+        if (Flags.IsBitSet(3)) { writer.Write(Provider); }
         writer.Write(ProviderData);
-        if (Flags[1]) { writer.Write(StartParam); }
-        if (Flags[2]) { writer.Write(ExtendedMedia); }
+        if (Flags.IsBitSet(1)) { writer.Write(StartParam); }
+        if (Flags.IsBitSet(2)) { writer.Write(ExtendedMedia); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        if (Flags[0]) { Photo = reader.Read<MyTelegram.Schema.IInputWebDocument>(); }
-        Invoice = reader.Read<MyTelegram.Schema.IInvoice>();
-        Payload = reader.ReadBytes();
-        if (Flags[3]) { Provider = reader.ReadString(); }
-        ProviderData = reader.Read<MyTelegram.Schema.IDataJSON>();
-        if (Flags[1]) { StartParam = reader.ReadString(); }
-        if (Flags[2]) { ExtendedMedia = reader.Read<MyTelegram.Schema.IInputMedia>(); }
+        Flags = buffer.ReadInt32();
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        if (Flags.IsBitSet(0)) { Photo = buffer.Read<MyTelegram.Schema.IInputWebDocument>(); }
+        Invoice = buffer.Read<MyTelegram.Schema.IInvoice>();
+        Payload = buffer.ReadBytes();
+        if (Flags.IsBitSet(3)) { Provider = buffer.ReadString(); }
+        ProviderData = buffer.Read<MyTelegram.Schema.IDataJSON>();
+        if (Flags.IsBitSet(1)) { StartParam = buffer.ReadString(); }
+        if (Flags.IsBitSet(2)) { ExtendedMedia = buffer.Read<MyTelegram.Schema.IInputMedia>(); }
     }
 }

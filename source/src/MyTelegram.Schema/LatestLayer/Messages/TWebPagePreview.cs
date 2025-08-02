@@ -26,9 +26,9 @@ public sealed class TWebPagePreview : IWebPagePreview
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Media = reader.Read<MyTelegram.Schema.IMessageMedia>();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Media = buffer.Read<MyTelegram.Schema.IMessageMedia>();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

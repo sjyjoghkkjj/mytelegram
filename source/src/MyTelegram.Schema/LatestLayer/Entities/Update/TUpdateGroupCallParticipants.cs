@@ -41,10 +41,10 @@ public sealed class TUpdateGroupCallParticipants : IUpdate
         writer.Write(Version);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Call = reader.Read<MyTelegram.Schema.IInputGroupCall>();
-        Participants = reader.Read<TVector<MyTelegram.Schema.IGroupCallParticipant>>();
-        Version = reader.ReadInt32();
+        Call = buffer.Read<MyTelegram.Schema.IInputGroupCall>();
+        Participants = buffer.Read<TVector<MyTelegram.Schema.IGroupCallParticipant>>();
+        Version = buffer.ReadInt32();
     }
 }

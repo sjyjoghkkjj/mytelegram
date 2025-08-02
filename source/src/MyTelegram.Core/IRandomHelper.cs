@@ -4,6 +4,7 @@ public interface IRandomHelper
 {
     string GenerateRandomString(int length);
     string GenerateRandomNumber(int length);
+
     void NextBytes(byte[] buffer);
 
     byte[] NextBytes(int length);

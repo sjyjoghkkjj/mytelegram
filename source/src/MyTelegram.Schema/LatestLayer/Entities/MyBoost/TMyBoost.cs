@@ -14,7 +14,7 @@ public sealed class TMyBoost : IMyBoost
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/boost">Boost slot ID »</a>
@@ -44,8 +44,8 @@ public sealed class TMyBoost : IMyBoost
 
     public void ComputeFlag()
     {
-        if (Peer != null) { Flags[0] = true; }
-        if (/*CooldownUntilDate != 0 && */CooldownUntilDate.HasValue) { Flags[1] = true; }
+        if (Peer != null) { Flags = Flags.SetBit(0); }
+        if (/*CooldownUntilDate != 0 && */CooldownUntilDate.HasValue) { Flags = Flags.SetBit(1); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -54,19 +54,19 @@ public sealed class TMyBoost : IMyBoost
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Slot);
-        if (Flags[0]) { writer.Write(Peer); }
+        if (Flags.IsBitSet(0)) { writer.Write(Peer); }
         writer.Write(Date);
         writer.Write(Expires);
-        if (Flags[1]) { writer.Write(CooldownUntilDate.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(CooldownUntilDate.Value); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Slot = reader.ReadInt32();
-        if (Flags[0]) { Peer = reader.Read<MyTelegram.Schema.IPeer>(); }
-        Date = reader.ReadInt32();
-        Expires = reader.ReadInt32();
-        if (Flags[1]) { CooldownUntilDate = reader.ReadInt32(); }
+        Flags = buffer.ReadInt32();
+        Slot = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Peer = buffer.Read<MyTelegram.Schema.IPeer>(); }
+        Date = buffer.ReadInt32();
+        Expires = buffer.ReadInt32();
+        if (Flags.IsBitSet(1)) { CooldownUntilDate = buffer.ReadInt32(); }
     }
 }

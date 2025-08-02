@@ -14,7 +14,7 @@ public sealed class TBoostsStatus : IBoostsStatus
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Whether we're currently boosting this channel/supergroup, <code>my_boost_slots</code> will also be set.
@@ -70,12 +70,12 @@ public sealed class TBoostsStatus : IBoostsStatus
 
     public void ComputeFlag()
     {
-        if (MyBoost) { Flags[2] = true; }
-        if (/*GiftBoosts != 0 && */GiftBoosts.HasValue) { Flags[4] = true; }
-        if (/*NextLevelBoosts != 0 && */NextLevelBoosts.HasValue) { Flags[0] = true; }
-        if (PremiumAudience != null) { Flags[1] = true; }
-        if (PrepaidGiveaways?.Count > 0) { Flags[3] = true; }
-        if (MyBoostSlots?.Count > 0) { Flags[2] = true; }
+        if (MyBoost) { Flags = Flags.SetBit(2); }
+        if (/*GiftBoosts != 0 && */GiftBoosts.HasValue) { Flags = Flags.SetBit(4); }
+        if (/*NextLevelBoosts != 0 && */NextLevelBoosts.HasValue) { Flags = Flags.SetBit(0); }
+        if (PremiumAudience != null) { Flags = Flags.SetBit(1); }
+        if (PrepaidGiveaways?.Count > 0) { Flags = Flags.SetBit(3); }
+        if (MyBoostSlots?.Count > 0) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -86,26 +86,26 @@ public sealed class TBoostsStatus : IBoostsStatus
         writer.Write(Level);
         writer.Write(CurrentLevelBoosts);
         writer.Write(Boosts);
-        if (Flags[4]) { writer.Write(GiftBoosts.Value); }
-        if (Flags[0]) { writer.Write(NextLevelBoosts.Value); }
-        if (Flags[1]) { writer.Write(PremiumAudience); }
+        if (Flags.IsBitSet(4)) { writer.Write(GiftBoosts.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(NextLevelBoosts.Value); }
+        if (Flags.IsBitSet(1)) { writer.Write(PremiumAudience); }
         writer.Write(BoostUrl);
-        if (Flags[3]) { writer.Write(PrepaidGiveaways); }
-        if (Flags[2]) { writer.Write(MyBoostSlots); }
+        if (Flags.IsBitSet(3)) { writer.Write(PrepaidGiveaways); }
+        if (Flags.IsBitSet(2)) { writer.Write(MyBoostSlots); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[2]) { MyBoost = true; }
-        Level = reader.ReadInt32();
-        CurrentLevelBoosts = reader.ReadInt32();
-        Boosts = reader.ReadInt32();
-        if (Flags[4]) { GiftBoosts = reader.ReadInt32(); }
-        if (Flags[0]) { NextLevelBoosts = reader.ReadInt32(); }
-        if (Flags[1]) { PremiumAudience = reader.Read<MyTelegram.Schema.IStatsPercentValue>(); }
-        BoostUrl = reader.ReadString();
-        if (Flags[3]) { PrepaidGiveaways = reader.Read<TVector<MyTelegram.Schema.IPrepaidGiveaway>>(); }
-        if (Flags[2]) { MyBoostSlots = reader.Read<TVector<int>>(); }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(2)) { MyBoost = true; }
+        Level = buffer.ReadInt32();
+        CurrentLevelBoosts = buffer.ReadInt32();
+        Boosts = buffer.ReadInt32();
+        if (Flags.IsBitSet(4)) { GiftBoosts = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(0)) { NextLevelBoosts = buffer.ReadInt32(); }
+        if (Flags.IsBitSet(1)) { PremiumAudience = buffer.Read<MyTelegram.Schema.IStatsPercentValue>(); }
+        BoostUrl = buffer.ReadString();
+        if (Flags.IsBitSet(3)) { PrepaidGiveaways = buffer.Read<TVector<MyTelegram.Schema.IPrepaidGiveaway>>(); }
+        if (Flags.IsBitSet(2)) { MyBoostSlots = buffer.Read<TVector<int>>(); }
     }
 }

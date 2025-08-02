@@ -34,9 +34,9 @@ public sealed class TReadParticipantDate : IReadParticipantDate
         writer.Write(Date);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        UserId = reader.ReadInt64();
-        Date = reader.ReadInt32();
+        UserId = buffer.ReadInt64();
+        Date = buffer.ReadInt32();
     }
 }

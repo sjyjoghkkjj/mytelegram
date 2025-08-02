@@ -38,9 +38,9 @@ public sealed class RequestChangeStickerPosition : IRequest<MyTelegram.Schema.Me
         writer.Write(Position);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Sticker = reader.Read<MyTelegram.Schema.IInputDocument>();
-        Position = reader.ReadInt32();
+        Sticker = buffer.Read<MyTelegram.Schema.IInputDocument>();
+        Position = buffer.ReadInt32();
     }
 }

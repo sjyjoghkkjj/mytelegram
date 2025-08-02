@@ -14,7 +14,7 @@ public sealed class TPaymentReceipt : IPaymentReceipt
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Date of generation
@@ -92,10 +92,10 @@ public sealed class TPaymentReceipt : IPaymentReceipt
 
     public void ComputeFlag()
     {
-        if (Photo != null) { Flags[2] = true; }
-        if (Info != null) { Flags[0] = true; }
-        if (Shipping != null) { Flags[1] = true; }
-        if (/*TipAmount != 0 &&*/ TipAmount.HasValue) { Flags[3] = true; }
+        if (Photo != null) { Flags = Flags.SetBit(2); }
+        if (Info != null) { Flags = Flags.SetBit(0); }
+        if (Shipping != null) { Flags = Flags.SetBit(1); }
+        if (/*TipAmount != 0 &&*/ TipAmount.HasValue) { Flags = Flags.SetBit(3); }
 
     }
 
@@ -109,33 +109,33 @@ public sealed class TPaymentReceipt : IPaymentReceipt
         writer.Write(ProviderId);
         writer.Write(Title);
         writer.Write(Description);
-        if (Flags[2]) { writer.Write(Photo); }
+        if (Flags.IsBitSet(2)) { writer.Write(Photo); }
         writer.Write(Invoice);
-        if (Flags[0]) { writer.Write(Info); }
-        if (Flags[1]) { writer.Write(Shipping); }
-        if (Flags[3]) { writer.Write(TipAmount.Value); }
+        if (Flags.IsBitSet(0)) { writer.Write(Info); }
+        if (Flags.IsBitSet(1)) { writer.Write(Shipping); }
+        if (Flags.IsBitSet(3)) { writer.Write(TipAmount.Value); }
         writer.Write(Currency);
         writer.Write(TotalAmount);
         writer.Write(CredentialsTitle);
         writer.Write(Users);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Date = reader.ReadInt32();
-        BotId = reader.ReadInt64();
-        ProviderId = reader.ReadInt64();
-        Title = reader.ReadString();
-        Description = reader.ReadString();
-        if (Flags[2]) { Photo = reader.Read<MyTelegram.Schema.IWebDocument>(); }
-        Invoice = reader.Read<MyTelegram.Schema.IInvoice>();
-        if (Flags[0]) { Info = reader.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
-        if (Flags[1]) { Shipping = reader.Read<MyTelegram.Schema.IShippingOption>(); }
-        if (Flags[3]) { TipAmount = reader.ReadInt64(); }
-        Currency = reader.ReadString();
-        TotalAmount = reader.ReadInt64();
-        CredentialsTitle = reader.ReadString();
-        Users = reader.Read<TVector<MyTelegram.Schema.IUser>>();
+        Flags = buffer.ReadInt32();
+        Date = buffer.ReadInt32();
+        BotId = buffer.ReadInt64();
+        ProviderId = buffer.ReadInt64();
+        Title = buffer.ReadString();
+        Description = buffer.ReadString();
+        if (Flags.IsBitSet(2)) { Photo = buffer.Read<MyTelegram.Schema.IWebDocument>(); }
+        Invoice = buffer.Read<MyTelegram.Schema.IInvoice>();
+        if (Flags.IsBitSet(0)) { Info = buffer.Read<MyTelegram.Schema.IPaymentRequestedInfo>(); }
+        if (Flags.IsBitSet(1)) { Shipping = buffer.Read<MyTelegram.Schema.IShippingOption>(); }
+        if (Flags.IsBitSet(3)) { TipAmount = buffer.ReadInt64(); }
+        Currency = buffer.ReadString();
+        TotalAmount = buffer.ReadInt64();
+        CredentialsTitle = buffer.ReadString();
+        Users = buffer.Read<TVector<MyTelegram.Schema.IUser>>();
     }
 }

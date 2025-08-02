@@ -60,11 +60,11 @@ public sealed class RequestSendCode : IRequest<MyTelegram.Schema.Auth.ISentCode>
         writer.Write(Settings);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PhoneNumber = reader.ReadString();
-        ApiId = reader.ReadInt32();
-        ApiHash = reader.ReadString();
-        Settings = reader.Read<MyTelegram.Schema.ICodeSettings>();
+        PhoneNumber = buffer.ReadString();
+        ApiId = buffer.ReadInt32();
+        ApiHash = buffer.ReadString();
+        Settings = buffer.Read<MyTelegram.Schema.ICodeSettings>();
     }
 }

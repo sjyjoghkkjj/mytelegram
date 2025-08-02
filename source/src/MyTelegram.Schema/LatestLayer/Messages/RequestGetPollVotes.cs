@@ -19,7 +19,7 @@ public sealed class RequestGetPollVotes : IRequest<MyTelegram.Schema.Messages.IV
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Chat where the poll was sent
@@ -35,7 +35,7 @@ public sealed class RequestGetPollVotes : IRequest<MyTelegram.Schema.Messages.IV
     ///<summary>
     /// Get only results for the specified poll <code>option</code>
     ///</summary>
-    public byte[]? Option { get; set; }
+    public ReadOnlyMemory<byte>? Option { get; set; }
 
     ///<summary>
     /// Offset for results, taken from the <code>next_offset</code> field of <a href="https://corefork.telegram.org/constructor/messages.votesList">messages.votesList</a>, initially an empty string. <br>Note: if no more results are available, the method call will return an empty <code>next_offset</code>; thus, avoid providing the <code>next_offset</code> returned in <a href="https://corefork.telegram.org/constructor/messages.votesList">messages.votesList</a> if it is empty, to avoid an infinite loop.
@@ -49,8 +49,8 @@ public sealed class RequestGetPollVotes : IRequest<MyTelegram.Schema.Messages.IV
 
     public void ComputeFlag()
     {
-        if (Option != null) { Flags[0] = true; }
-        if (Offset != null) { Flags[1] = true; }
+        if (Option != null) { Flags = Flags.SetBit(0); }
+        if (Offset != null) { Flags = Flags.SetBit(1); }
 
     }
 
@@ -61,18 +61,18 @@ public sealed class RequestGetPollVotes : IRequest<MyTelegram.Schema.Messages.IV
         writer.Write(Flags);
         writer.Write(Peer);
         writer.Write(Id);
-        if (Flags[0]) { writer.Write(Option); }
-        if (Flags[1]) { writer.Write(Offset); }
+        if (Flags.IsBitSet(0)) { writer.Write(Option); }
+        if (Flags.IsBitSet(1)) { writer.Write(Offset); }
         writer.Write(Limit);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Peer = reader.Read<MyTelegram.Schema.IInputPeer>();
-        Id = reader.ReadInt32();
-        if (Flags[0]) { Option = reader.ReadBytes(); }
-        if (Flags[1]) { Offset = reader.ReadString(); }
-        Limit = reader.ReadInt32();
+        Flags = buffer.ReadInt32();
+        Peer = buffer.Read<MyTelegram.Schema.IInputPeer>();
+        Id = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { Option = buffer.ReadBytes(); }
+        if (Flags.IsBitSet(1)) { Offset = buffer.ReadString(); }
+        Limit = buffer.ReadInt32();
     }
 }

@@ -40,10 +40,10 @@ public sealed class TNearestDc : INearestDc
         writer.Write(NearestDc);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Country = reader.ReadString();
-        ThisDc = reader.ReadInt32();
-        NearestDc = reader.ReadInt32();
+        Country = buffer.ReadString();
+        ThisDc = buffer.ReadInt32();
+        NearestDc = buffer.ReadInt32();
     }
 }

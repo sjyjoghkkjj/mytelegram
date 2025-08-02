@@ -34,9 +34,9 @@ public sealed class RequestGetEmojiKeywordsDifference : IRequest<MyTelegram.Sche
         writer.Write(FromVersion);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        LangCode = reader.ReadString();
-        FromVersion = reader.ReadInt32();
+        LangCode = buffer.ReadString();
+        FromVersion = buffer.ReadInt32();
     }
 }

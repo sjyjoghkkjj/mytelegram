@@ -15,36 +15,12 @@ public class TGzipPacked : IRequest<IObject>
         writer.Write(PackedData);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        PackedData = reader.ReadBytes();
+        PackedData = buffer.ReadBytes();
     }
 
-    //public void Serialize(BinaryWriter bw)
-    //{
-    //    ComputeFlag();
-    //    bw.Write(ConstructorId);
-    //    bw.Serialize(PackedData);
-    //}
-
-    //public void Deserialize(BinaryReader br)
-    //{
-    //    PackedData = br.Deserialize<byte[]>();
-    //}
-
-    //public void Serialize(IBufferWriter<byte> writer)
-    //{
-    //    ComputeFlag();
-    //    writer.Write(ConstructorId);
-    //    writer.Serialize(PackedData);
-    //}
-
-    //public void Deserialize(ref ReadOnlySequence<byte> buffer)
-    //{
-    //    PackedData = buffer.Deserialize<byte[]>();
-    //}
-
-    public byte[] PackedData { get; set; }
+    public ReadOnlyMemory<byte> PackedData { get; set; } = ReadOnlyMemory<byte>.Empty;
 
     public void ComputeFlag()
     {
@@ -56,12 +32,12 @@ public sealed class TContainerMessage : IObject
 {
     public uint ConstructorId => 0x73f1f8dc;
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        MsgId = reader.ReadInt64();
-        SeqNo = reader.ReadInt32();
-        Bytes = reader.ReadInt32();
-        Body = reader.Read<IObject>();
+        MsgId = buffer.ReadInt64();
+        SeqNo = buffer.ReadInt32();
+        Bytes = buffer.ReadInt32();
+        Body = buffer.Read<IObject>();
     }
 
 

@@ -178,6 +178,8 @@ public class ChannelDomainEventHandler(
         };
 
         await SendRpcMessageToClientAsync(domainEvent.AggregateEvent.RequestInfo, updates);
+
+        await PushMessageToPeerAsync(domainEvent.AggregateEvent.RequestInfo.UserId.ToUserPeer(), updates);
     }
 
     public async Task HandleAsync(IDomainEvent<ChannelAggregate, ChannelId, ChannelTitleEditedEvent> domainEvent,

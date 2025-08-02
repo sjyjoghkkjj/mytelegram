@@ -12,7 +12,7 @@ public interface IForumTopics : IObject
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    BitArray Flags { get; set; }
+    int Flags { get; set; }
 
     ///<summary>
     /// Whether the returned topics are ordered by creation date; if set, pagination by <code>offset_date</code> should use <a href="https://corefork.telegram.org/constructor/forumTopic">forumTopic</a>.<code>date</code>; otherwise topics are ordered by the last message date, so paginate by the <code>date</code> of the <a href="https://corefork.telegram.org/type/Message">message</a> referenced by <a href="https://corefork.telegram.org/constructor/forumTopic">forumTopic</a>.<code>top_message</code>.

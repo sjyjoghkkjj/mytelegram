@@ -18,7 +18,7 @@ public sealed class RequestGetAdminedPublicChannels : IRequest<MyTelegram.Schema
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// Get geogroups
@@ -40,9 +40,9 @@ public sealed class RequestGetAdminedPublicChannels : IRequest<MyTelegram.Schema
 
     public void ComputeFlag()
     {
-        if (ByLocation) { Flags[0] = true; }
-        if (CheckLimit) { Flags[1] = true; }
-        if (ForPersonal) { Flags[2] = true; }
+        if (ByLocation) { Flags = Flags.SetBit(0); }
+        if (CheckLimit) { Flags = Flags.SetBit(1); }
+        if (ForPersonal) { Flags = Flags.SetBit(2); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -53,11 +53,11 @@ public sealed class RequestGetAdminedPublicChannels : IRequest<MyTelegram.Schema
 
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        if (Flags[0]) { ByLocation = true; }
-        if (Flags[1]) { CheckLimit = true; }
-        if (Flags[2]) { ForPersonal = true; }
+        Flags = buffer.ReadInt32();
+        if (Flags.IsBitSet(0)) { ByLocation = true; }
+        if (Flags.IsBitSet(1)) { CheckLimit = true; }
+        if (Flags.IsBitSet(2)) { ForPersonal = true; }
     }
 }

@@ -32,8 +32,8 @@ public sealed class RequestSetAccountTTL : IRequest<IBool>
         writer.Write(Ttl);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Ttl = reader.Read<MyTelegram.Schema.IAccountDaysTTL>();
+        Ttl = buffer.Read<MyTelegram.Schema.IAccountDaysTTL>();
     }
 }

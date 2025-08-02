@@ -5,16 +5,19 @@ namespace MyTelegram.Services.Tests.TLObjectConverters;
 
 public class LayeredServiceTests : TestsFor<LayeredService<ILayeredConverter>>
 {
-    private List<ILayeredConverter> _converters;
+    private List<ILayeredConverter> _converters = [];
 
     private void SetupConverters(List<int> layers)
     {
-        _converters = layers.Select(layer =>
-        {
-            var mockConverter = new Mock<ILayeredConverter>();
-            mockConverter.SetupGet(c => c.Layer).Returns(layer);
-            return mockConverter.Object;
-        }).ToList();
+        _converters =
+        [
+            .. layers.Select(layer =>
+            {
+                var mockConverter = new Mock<ILayeredConverter>();
+                mockConverter.SetupGet(c => c.Layer).Returns(layer);
+                return mockConverter.Object;
+            })
+        ];
     }
 
     protected override LayeredService<ILayeredConverter> CreateSut()
@@ -33,7 +36,7 @@ public class LayeredServiceTests : TestsFor<LayeredService<ILayeredConverter>>
 
     public void GetConverter_ShouldReturnExpectedLayer(int[] layers, int requestLayer, int expectedLayer)
     {
-        SetupConverters(layers.ToList());
+        SetupConverters([.. layers]);
         var sut = CreateSut();
 
         var result = sut.GetConverter(requestLayer);

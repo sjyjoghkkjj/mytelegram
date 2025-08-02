@@ -36,9 +36,9 @@ public sealed class TUpdateBroadcastRevenueTransactions : IUpdate
         writer.Write(Balances);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Peer = reader.Read<MyTelegram.Schema.IPeer>();
-        Balances = reader.Read<MyTelegram.Schema.IBroadcastRevenueBalances>();
+        Peer = buffer.Read<MyTelegram.Schema.IPeer>();
+        Balances = buffer.Read<MyTelegram.Schema.IBroadcastRevenueBalances>();
     }
 }

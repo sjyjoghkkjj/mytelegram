@@ -28,8 +28,8 @@ public sealed class RequestDeleteByPhones : IRequest<IBool>
         writer.Write(Phones);
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Phones = reader.Read<TVector<string>>();
+        Phones = buffer.Read<TVector<string>>();
     }
 }

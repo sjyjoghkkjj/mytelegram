@@ -18,7 +18,7 @@ public sealed class RequestUpdateSavedReactionTag : IRequest<IBool>
     ///<summary>
     /// Flags, see <a href="https://corefork.telegram.org/mtproto/TL-combinators#conditional-fields">TL conditional fields</a>
     ///</summary>
-    public BitArray Flags { get; set; } = new BitArray(32);
+    public int Flags { get; set; }
 
     ///<summary>
     /// <a href="https://corefork.telegram.org/api/reactions">Reaction</a> associated to the tag
@@ -33,7 +33,7 @@ public sealed class RequestUpdateSavedReactionTag : IRequest<IBool>
 
     public void ComputeFlag()
     {
-        if (Title != null) { Flags[0] = true; }
+        if (Title != null) { Flags = Flags.SetBit(0); }
     }
 
     public void Serialize(IBufferWriter<byte> writer)
@@ -42,13 +42,13 @@ public sealed class RequestUpdateSavedReactionTag : IRequest<IBool>
         writer.Write(ConstructorId);
         writer.Write(Flags);
         writer.Write(Reaction);
-        if (Flags[0]) { writer.Write(Title); }
+        if (Flags.IsBitSet(0)) { writer.Write(Title); }
     }
 
-    public void Deserialize(ref SequenceReader<byte> reader)
+    public void Deserialize(ref ReadOnlyMemory<byte> buffer)
     {
-        Flags = reader.ReadBitArray();
-        Reaction = reader.Read<MyTelegram.Schema.IReaction>();
-        if (Flags[0]) { Title = reader.ReadString(); }
+        Flags = buffer.ReadInt32();
+        Reaction = buffer.Read<MyTelegram.Schema.IReaction>();
+        if (Flags.IsBitSet(0)) { Title = buffer.ReadString(); }
     }
 }
