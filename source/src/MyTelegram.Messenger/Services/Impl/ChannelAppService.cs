@@ -49,7 +49,8 @@ public class ChannelAppService(IQueryProcessor queryProcessor,
 
     public async Task<bool> SendRpcErrorIfNotChannelMemberAsync(IRequestInput input, IChannelReadModel channelReadModel)
     {
-        if (string.IsNullOrEmpty(channelReadModel.UserName))
+        if (string.IsNullOrEmpty(channelReadModel.UserName) &&
+            channelReadModel is { Broadcast: false, LinkedChatId: null })
         {
             if (!await IsChannelMemberAsync(input.UserId, channelReadModel.ChannelId))
             {
