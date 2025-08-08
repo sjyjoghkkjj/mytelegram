@@ -1,10 +1,12 @@
 ﻿using MyTelegram.EventBus.Extensions;
+using MyTelegram.Services.Extensions;
 
 namespace MyTelegram.SmsSender.Extensions;
 public static class Extensions
 {
     public static IServiceCollection AddMyTelegramSmsSender(this IServiceCollection services)
     {
+        services.AddMyTelegramHandlerServices();
         services.RegisterServices();
         services.AddEventHandlers();
 
