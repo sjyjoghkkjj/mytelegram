@@ -37,7 +37,7 @@ MyTelegram is telegram server side api implementation written in c#, support pri
 3. Run the following command in the directory where the docker-compose.yml file is located
    ```
       mkdir -p ./data/mytelegram
-      chmod -R 777 ./data/mytelegram
+      chown -R 1654:1654 ./data/mytelegram
       docker compose up
    ```
 4. Default verification code is `22222`
@@ -78,3 +78,4 @@ Contact author: [https://t.me/mytelegram666](https://t.me/mytelegram666)
 MyTelegram channel: [https://t.me/+9wMJrMqLTIoyYzM8](https://t.me/+9wMJrMqLTIoyYzM8)
 
 Mytelegram discussion group: [https://t.me/+S-aNBoRvCRpPyXrR](https://t.me/+S-aNBoRvCRpPyXrR)
+
