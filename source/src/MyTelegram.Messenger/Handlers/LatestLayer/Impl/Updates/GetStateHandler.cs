@@ -16,8 +16,8 @@ internal sealed class GetStateHandler(
     {
         if (input.UserId == 0)
         {
-            //RpcErrors.RpcErrors403.UserInvalid.ThrowRpcError();
-            RpcErrors.RpcErrors401.AuthKeyInvalid.ThrowRpcError();
+            RpcErrors.RpcErrors403.UserInvalid.ThrowRpcError();
+            //RpcErrors.RpcErrors401.AuthKeyInvalid.ThrowRpcError();
         }
 
         var cacheItem = await ptsHelper.GetPtsForUserAsync(input.UserId);
