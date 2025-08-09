@@ -5,10 +5,11 @@ public class WebSocketMiddleware(
     IMtpMessageDispatcher messageDispatcher,
     IClientManager clientManager,
     IClientDataSender clientDataSender,
+    ILogger<WebSocketMiddleware> logger,
     IMessageQueueProcessor<ClientDisconnectedEvent> messageQueueProcessor)
     : IMiddleware, ITransientDependency
 {
-    private readonly string[] _allowedWsPaths = ["/apiws", "/apiws_premium", "/apiws_test"];
+    private readonly string[] _allowedWsPaths = ["/apiws", "/apiw1", "/apiws_premium", "/apiws_test"];
     private readonly string _subProtocol = "binary";
     private bool _isWebSocketConnected;
 
@@ -43,10 +44,52 @@ public class WebSocketMiddleware(
 
                 await ProcessWebSocketAsync(webSocket, clientData);
             }
+            else
+            {
+                Console.WriteLine($"Not allowed path:{context.Request.Path}");
+            }
         }
         else
         {
             await next(context);
+        }
+    }
+
+    private async Task ProcessSendUnencryptedDataAsync(ClientData clientData)
+    {
+        var queue = clientData.UnencryptedMessageResponseQueue;
+        while (await queue.Reader.WaitToReadAsync() && _isWebSocketConnected)
+        {
+            while (queue.Reader.TryRead(out var response))
+            {
+                try
+                {
+                    if (!clientManager.TryGetClientData(clientData.ConnectionId, out var d))
+                    {
+                        logger.LogWarning(
+                            "[0] Cannot find cached client info, skip sending message, connectionId: {ConnectionId}",
+                            clientData.ConnectionId);
+                        continue;
+                    }
+
+                    var encodedBytes = ArrayPool<byte>.Shared.Rent(clientDataSender.GetEncodedDataMaxLength(response.Data.Length));
+                    try
+                    {
+                        var totalCount = clientDataSender.EncodeData(response, d, encodedBytes);
+                        //await SendAsync(encodedBytes.AsMemory()[..totalCount], connectionContext);
+                        await clientData.WebSocket!.SendAsync(encodedBytes.AsMemory()[..totalCount],
+                            WebSocketMessageType.Binary, true, default);
+                    }
+                    finally
+                    {
+                        ArrayPool<byte>.Shared.Return(encodedBytes);
+                    }
+                }
+                finally
+                {
+                    response.MemoryOwner?.Dispose();
+                }
+            }
         }
     }
 
@@ -70,7 +113,9 @@ public class WebSocketMiddleware(
         var writeTask = WritePipeAsync(webSocket, pipe.Writer);
         var readTask = ReadPipeAsync(pipe.Reader, clientData);
         var processResponseQueueTask = ProcessResponseQueueAsync(clientData);
-        await Task.WhenAll(writeTask, readTask, processResponseQueueTask);
+        var processSendUnencryptedDataTask = ProcessSendUnencryptedDataAsync(clientData);
+
+        await Task.WhenAll(processSendUnencryptedDataTask, writeTask, readTask, processResponseQueueTask);
         clientManager.RemoveClient(clientData.ConnectionId);
         messageQueueProcessor.Enqueue(new ClientDisconnectedEvent(clientData.ConnectionId, clientData.AuthKeyId, 0),
             clientData.AuthKeyId);
