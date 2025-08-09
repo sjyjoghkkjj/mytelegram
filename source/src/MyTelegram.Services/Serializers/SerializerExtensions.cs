@@ -111,13 +111,16 @@ public static class SerializerExtensions
         }
     }
 
-    public static void Write(this IBufferWriter<byte> writer, IReadOnlyDictionary<string, string> value)
+    public static void Write(this IBufferWriter<byte> writer, IReadOnlyDictionary<string, string>? value)
     {
-        writer.Write(value.Count);
-        foreach (var kv in value)
+        writer.Write(value?.Count ?? 0);
+        if (value != null)
         {
-            writer.Write(kv.Key);
-            writer.Write(kv.Value);
+            foreach (var kv in value)
+            {
+                writer.Write(kv.Key);
+                writer.Write(kv.Value);
+            }
         }
     }
 
