@@ -49,7 +49,9 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             domainEvent.AggregateEvent.Post,
             domainEvent.AggregateEvent.TtlPeriod,
             domainEvent.AggregateEvent.FromNames,
-            domainEvent.AggregateEvent.SendAs
+            domainEvent.AggregateEvent.SendAs,
+            domainEvent.AggregateEvent.DropAuthor,
+            domainEvent.AggregateEvent.DropMediaCaptions
         ));
         ForwardMessage(domainEvent.AggregateEvent);
         return Task.CompletedTask;
@@ -198,6 +200,11 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             ? _state.ToPeer
             : senderPeer;
         var toPeer = _state.ToPeer;
+        string message = item.Message;
+        if (_state.DropMediaCaptions)
+        {
+            message = string.Empty;
+        }
 
         var messageItem = new MessageItem(
             ownerPeer,
@@ -205,7 +212,7 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             senderPeer,
             aggregateEvent.OriginalMessageItem.SenderUserId,
             outMessageId,
-            item.Message,
+            message,
             DateTime.UtcNow.ToTimestamp(),
             aggregateEvent.RandomId,
             isOut,
