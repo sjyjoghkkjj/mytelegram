@@ -201,6 +201,12 @@ public class ForwardMessageSaga : MyInMemoryAggregateSaga<ForwardMessageSaga, Fo
             : senderPeer;
         var toPeer = _state.ToPeer;
         string message = item.Message;
+
+        if (_state.DropAuthor)
+        {
+            fwd = null;
+        }
+
         if (_state.DropMediaCaptions)
         {
             message = string.Empty;
