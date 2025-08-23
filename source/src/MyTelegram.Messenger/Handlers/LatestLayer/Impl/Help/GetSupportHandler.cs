@@ -33,7 +33,7 @@ internal sealed class GetSupportHandler(
 
         return new TSupport
         {
-            PhoneNumber = user.Phone,
+            PhoneNumber = user.Phone ?? string.Empty,
             User = user
         };
     }
