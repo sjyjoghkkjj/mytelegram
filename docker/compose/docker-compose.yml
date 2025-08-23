@@ -115,7 +115,8 @@ services:
     volumes:
       - ./data/mytelegram/data-seeder/logs:/app/Logs
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
 
   ### 1.Gateway server
   gateway-server:
@@ -203,9 +204,12 @@ services:
       RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
       RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
     depends_on:
-      - rabbitmq
-      - mongodb
-      - redis
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   # ### 2.Seq server
   # seq-server:
@@ -242,9 +246,12 @@ services:
     volumes:
       - ./data/mytelegram/auth/logs:/app/Logs
     depends_on:
-      - mongodb
-      - rabbitmq
-      - redis
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   ### 3.Session server
   session-server:
@@ -275,9 +282,12 @@ services:
     volumes:
       - ./data/mytelegram/session/logs:/app/Logs
     depends_on:
-      - mongodb
-      - rabbitmq
-      - redis
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   # ### 5.Messenger grpc server
   # messenger-grpc-server:
@@ -326,8 +336,10 @@ services:
       RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
       Redis__Configuration: ${Redis__Configuration}
     depends_on:
-      - mongodb
-      - rabbitmq
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   ### 5.Messenger command server
   messenger-command-server:
@@ -416,9 +428,12 @@ services:
     volumes:
       - ./data/mytelegram/command-server/logs:/app/Logs
     depends_on:
-      - mongodb
-      - rabbitmq
-      - redis
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   ### 6.Messenger query server
   messenger-query-server:
@@ -506,9 +521,12 @@ services:
     volumes:
       - ./data/mytelegram/query-server/logs:/app/Logs
     depends_on:
-      - mongodb
-      - rabbitmq
-      - redis
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   ### 7.Sms sender
   sms-sender:
@@ -536,4 +554,5 @@ services:
     volumes:
       - ./data/mytelegram/sms-sender/logs:/app/Logs
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
