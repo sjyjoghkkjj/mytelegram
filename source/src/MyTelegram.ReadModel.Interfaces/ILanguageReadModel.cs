@@ -3,6 +3,7 @@
 public interface ILanguageReadModel : IReadModel
 {
     DeviceType Platform { get; }
+    bool Rtl { get; }
     string Name { get; }
     string NativeName { get; }
     string LanguageCode { get; }
