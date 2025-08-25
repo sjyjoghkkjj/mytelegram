@@ -29,6 +29,7 @@ internal sealed class GetLanguagesHandler(ILanguageCacheService languageCacheSer
         {
             var langPackLanguage = new TLangPackLanguage
             {
+                Rtl = languageReadModel.Rtl,
                 Name = languageReadModel.Name,
                 NativeName = languageReadModel.NativeName,
                 LangCode = languageReadModel.LanguageCode,

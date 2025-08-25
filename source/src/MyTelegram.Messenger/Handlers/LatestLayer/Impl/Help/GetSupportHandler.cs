@@ -21,19 +21,18 @@ internal sealed class GetSupportHandler(
                 supportUserId = MyTelegramConsts.DefaultSupportUserId;
             }
         }
-        var userReadModel = await userAppService.GetAsync(supportUserId);
+        var userReadModel = await userAppService.GetAsync((long?)supportUserId);
 
         if (userReadModel == null)
         {
             supportUserId = MyTelegramConsts.DefaultSupportUserId;
-            userReadModel = await userAppService.GetAsync(supportUserId);
         }
 
         var user = await userConverterService.GetUserAsync(input, supportUserId, layer: input.Layer);
 
         return new TSupport
         {
-            PhoneNumber = user.Phone,
+            PhoneNumber = user.Phone ?? string.Empty,
             User = user
         };
     }

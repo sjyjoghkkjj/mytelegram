@@ -6,6 +6,7 @@ public class LanguageReadModel : ILanguageReadModel,
     IAmReadModelFor<LanguageAggregate, LanguageId, LanguageCreatedEvent>
 {
     public DeviceType Platform { get; private set; }
+    public bool Rtl { get; private set; }
     public string Name { get; private set; } = null!;
     public string NativeName { get; private set; } = null!;
     public string LanguageCode { get; private set; } = null!;

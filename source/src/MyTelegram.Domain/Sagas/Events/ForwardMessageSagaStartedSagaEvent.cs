@@ -10,10 +10,13 @@ public class ForwardMessageSagaStartedSagaEvent(
     bool post,
     int? ttlPeriod,
     Dictionary<long, string>? fromNames,
-    Peer? sendAs
+    Peer? sendAs,
+    bool dropAuthor,
+    bool dropMediaCaptions
     )
     : RequestAggregateEvent2<ForwardMessageSaga, ForwardMessageSagaId>(requestInfo)
 {
+    public RequestInfo RequestInfo { get; } = requestInfo;
     public Peer FromPeer { get; } = fromPeer;
     public IReadOnlyList<int> IdList { get; } = idList;
     public IReadOnlyList<long> RandomIdList { get; } = randomIdList;
@@ -23,4 +26,6 @@ public class ForwardMessageSagaStartedSagaEvent(
     public Dictionary<long, string>? FromNames { get; } = fromNames;
     public Peer ToPeer { get; } = toPeer;
     public Peer? SendAs { get; } = sendAs;
+    public bool DropAuthor { get; } = dropAuthor;
+    public bool DropMediaCaptions { get; } = dropMediaCaptions;
 }
