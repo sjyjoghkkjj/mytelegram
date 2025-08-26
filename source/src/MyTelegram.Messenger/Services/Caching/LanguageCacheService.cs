@@ -57,7 +57,11 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         _languageTexts = languageTexts.GroupBy(p => new { p.LanguageCode, p.Platform },
                 v => new LanguageTextItem(v.Key, v.LanguageVersion) {
                     Value = v.Value,
+                    ZeroValue = v.ZeroValue,
                     OneValue = v.OneValue,
+                    TwoValue = v.TwoValue,
+                    FewValue = v.FewValue,
+                    ManyValue = v.ManyValue,
                     OtherValue = v.OtherValue
                 })
             .ToFrozenDictionary(k => GetLanguageTextKey(k.Key.LanguageCode, k.Key.Platform, false),
@@ -250,3 +254,4 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         return langCode;
     }
 }
+
