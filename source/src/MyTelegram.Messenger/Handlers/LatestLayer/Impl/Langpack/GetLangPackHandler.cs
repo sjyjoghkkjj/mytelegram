@@ -29,11 +29,7 @@ internal sealed class GetLangPackHandler(ILanguageCacheService languageCacheServ
             FromVersion = 0,
             LangCode = obj.LangCode,
             Version = languageReadModel!.LanguageVersion,
-            Strings = [.. texts.Select(p => new TLangPackString
-            {
-                Key = p.Key,
-                Value = p.Value
-            })]
+            Strings = languageCacheService.ConvertToILangPackString(texts)
         };
 
         return langPackDifference;

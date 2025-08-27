@@ -21,11 +21,7 @@ internal sealed class GetDifferenceHandler(ILanguageCacheService languageCacheSe
         {
             FromVersion = obj.FromVersion,
             LangCode = obj.LangCode,
-            Strings = [.. texts.Select(p => new TLangPackString
-            {
-                Key = p.Key,
-                Value = p.Value
-            })],
+            Strings = languageCacheService.ConvertToILangPackString(texts),
             Version = version
         };
 

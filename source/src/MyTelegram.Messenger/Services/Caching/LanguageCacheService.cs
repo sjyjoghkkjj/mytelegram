@@ -2,10 +2,16 @@
 
 namespace MyTelegram.Messenger.Services.Caching;
 
-public class LanguageTextItem(string key, string value, int languageVersion)
+public class LanguageTextItem(string key, int languageVersion)
 {
     public string Key { get; init; } = key;
-    public string Value { get; set; } = value;
+    public string? Value { get; set; } = null;
+    public string? ZeroValue { get; set; } = null;
+    public string? OneValue { get; set; } = null;
+    public string? TwoValue { get; set; } = null;
+    public string? FewValue { get; set; } = null;
+    public string? ManyValue { get; set; } = null;
+    public string? OtherValue { get; set; } = null;
     public int LanguageVersion { get; } = languageVersion;
 }
 
@@ -26,6 +32,7 @@ public interface ILanguageCacheService
     Task<ILanguageReadModel?> GetLanguageAsync(string languageCode, string languagePack);
 
     Task<List<LanguageTextItem>> GetLanguageDifferenceAsync(string languageCode, string languagePack, int fromVersion);
+    TVector<ILangPackString> ConvertToILangPackString(IReadOnlyCollection<LanguageTextItem> languageTexts);
 }
 
 public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<LanguageCacheService> logger) : ILanguageCacheService, ISingletonDependency
@@ -48,7 +55,15 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         var sw = Stopwatch.StartNew();
         var languageTexts = await queryProcessor.ProcessAsync(new GetAllLanguageTextsQuery());
         _languageTexts = languageTexts.GroupBy(p => new { p.LanguageCode, p.Platform },
-                v => new LanguageTextItem(v.Key, v.Value, v.LanguageVersion))
+                v => new LanguageTextItem(v.Key, v.LanguageVersion) {
+                    Value = v.Value,
+                    ZeroValue = v.ZeroValue,
+                    OneValue = v.OneValue,
+                    TwoValue = v.TwoValue,
+                    FewValue = v.FewValue,
+                    ManyValue = v.ManyValue,
+                    OtherValue = v.OtherValue
+                })
             .ToFrozenDictionary(k => GetLanguageTextKey(k.Key.LanguageCode, k.Key.Platform, false),
                 v => v.ToDictionary(k1 => k1.Key, v1 => v1));
         sw.Stop();
@@ -188,6 +203,46 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         return Task.FromResult<List<LanguageTextItem>>([]);
     }
 
+    public TVector<ILangPackString> ConvertToILangPackString(IReadOnlyCollection<LanguageTextItem> languageTexts)
+    {
+        var vector = new TVector<ILangPackString>();
+
+        foreach (var item in languageTexts)
+        {
+            if (item.Value != null)
+            {
+                // Single value -> TLangPackString
+                vector.Add(new TLangPackString
+                {
+                    Key = item.Key,
+                    Value = item.Value
+                });
+            }
+            else if (item.ZeroValue != null ||
+                     item.OneValue != null ||
+                     item.TwoValue != null ||
+                     item.FewValue != null ||
+                     item.ManyValue != null ||
+                     item.OtherValue != null)
+            {
+                // Pluralized values -> TLangPackStringPluralized
+                vector.Add(new TLangPackStringPluralized
+                {
+                    Key = item.Key,
+                    ZeroValue = item.ZeroValue,
+                    OneValue = item.OneValue,
+                    TwoValue = item.TwoValue,
+                    FewValue = item.FewValue,
+                    ManyValue = item.ManyValue,
+                    OtherValue = item.OtherValue
+                });
+            }
+            // else -> skip (nothing to map)
+        }
+
+        return vector;
+    }
+
     private string GetLanguageCode(string langCode)
     {
         // The WebA client uses language codes with the `-raw` suffix
@@ -199,3 +254,4 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         return langCode;
     }
 }
+
