@@ -14,25 +14,25 @@ internal sealed class GetStringsHandler(ILanguageCacheService languageCacheServi
     protected override async Task<TVector<ILangPackString>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Langpack.RequestGetStrings obj)
     {
-        var texts = (await languageCacheService.GetLanguageTextsAsync(obj.LangCode, obj.LangPack, obj.Keys)).ToDictionary(k => k.Key, v => v);
-        var langPackStrings = new TVector<ILangPackString>();
+        var foundLanguageItems = await languageCacheService.GetLanguageTextsAsync(obj.LangCode, obj.LangPack, obj.Keys);
+        var langPackStrings = languageCacheService.ConvertToILangPackString(foundLanguageItems);
 
-        foreach (var key in obj.Keys)
+        // 3. Identify which keys were NOT found and add them as "Deleted".
+        if (foundLanguageItems.Count != obj.Keys.Count)
         {
-            if (texts.TryGetValue(key, out var item))
+            // Create a HashSet of found keys for efficient lookups (O(1) complexity).
+            var foundKeys = foundLanguageItems.Select(item => item.Key).ToHashSet();
+
+            foreach (var requestedKey in obj.Keys)
             {
-                langPackStrings.Add(new TLangPackString
+                // If the requested key is not in our set of found keys, it's missing.
+                if (!foundKeys.Contains(requestedKey))
                 {
-                    Key = item.Key,
-                    Value = item.Value
-                });
-            }
-            else
-            {
-                langPackStrings.Add(new TLangPackStringDeleted
-                {
-                    Key = key
-                });
+                    langPackStrings.Add(new TLangPackStringDeleted
+                    {
+                        Key = requestedKey
+                    });
+                }
             }
         }
 
