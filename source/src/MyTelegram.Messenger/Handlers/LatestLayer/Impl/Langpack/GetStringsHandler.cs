@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
+﻿using MyTelegram.Messenger.Converters.ConverterServices;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
 
 ///<summary>
 /// Get strings from a language pack
@@ -8,14 +10,14 @@
 /// 400 LANG_PACK_INVALID The provided language pack is invalid.
 /// See <a href="https://corefork.telegram.org/method/langpack.getStrings" />
 ///</summary>
-internal sealed class GetStringsHandler(ILanguageCacheService languageCacheService) : RpcResultObjectHandler<MyTelegram.Schema.Langpack.RequestGetStrings, TVector<MyTelegram.Schema.ILangPackString>>,
+internal sealed class GetStringsHandler(ILanguageCacheService languageCacheService, ILangPackStringConverterService langPackStringConverterService) : RpcResultObjectHandler<MyTelegram.Schema.Langpack.RequestGetStrings, TVector<MyTelegram.Schema.ILangPackString>>,
     Langpack.IGetStringsHandler
 {
     protected override async Task<TVector<ILangPackString>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Langpack.RequestGetStrings obj)
     {
         var foundLanguageItems = await languageCacheService.GetLanguageTextsAsync(obj.LangCode, obj.LangPack, obj.Keys);
-        var langPackStrings = languageCacheService.ConvertToILangPackString(foundLanguageItems);
+        var langPackStrings = langPackStringConverterService.ToLangPackStrings(foundLanguageItems, input.Layer);
 
         // 3. Identify which keys were NOT found and add them as "Deleted".
         if (foundLanguageItems.Count != obj.Keys.Count)

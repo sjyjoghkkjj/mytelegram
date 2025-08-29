@@ -32,7 +32,6 @@ public interface ILanguageCacheService
     Task<ILanguageReadModel?> GetLanguageAsync(string languageCode, string languagePack);
 
     Task<List<LanguageTextItem>> GetLanguageDifferenceAsync(string languageCode, string languagePack, int fromVersion);
-    TVector<ILangPackString> ConvertToILangPackString(IReadOnlyCollection<LanguageTextItem> languageTexts);
 }
 
 public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<LanguageCacheService> logger) : ILanguageCacheService, ISingletonDependency
@@ -201,45 +200,6 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         }
 
         return Task.FromResult<List<LanguageTextItem>>([]);
-    }
-
-    public TVector<ILangPackString> ConvertToILangPackString(IReadOnlyCollection<LanguageTextItem> languageTexts)
-    {
-        var vector = new TVector<ILangPackString>();
-
-        foreach (var item in languageTexts)
-        {
-            if (!string.IsNullOrEmpty(item.Value))
-            {
-                // Single value -> TLangPackString
-                vector.Add(new TLangPackString
-                {
-                    Key = item.Key,
-                    Value = item.Value
-                });
-            }
-            else if (!string.IsNullOrEmpty(item.OtherValue))
-            {
-                // Pluralized values -> TLangPackStringPluralized
-                vector.Add(new TLangPackStringPluralized
-                {
-                    Key = item.Key,
-                    ZeroValue = item.ZeroValue,
-                    OneValue = item.OneValue,
-                    TwoValue = item.TwoValue,
-                    FewValue = item.FewValue,
-                    ManyValue = item.ManyValue,
-                    OtherValue = item.OtherValue
-                });
-            } else {
-                vector.Add(new TLangPackStringDeleted
-                {
-                    Key = item.Key
-                });
-            }
-        }
-
-        return vector;
     }
 
     private string GetLanguageCode(string langCode)

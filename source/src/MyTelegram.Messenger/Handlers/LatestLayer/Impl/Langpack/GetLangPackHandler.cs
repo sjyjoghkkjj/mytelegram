@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
+﻿using MyTelegram.Messenger.Converters.ConverterServices;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Impl.Langpack;
 
 ///<summary>
 /// Get localization pack strings
@@ -9,7 +11,7 @@
 /// 400 LANG_PACK_INVALID The provided language pack is invalid.
 /// See <a href="https://corefork.telegram.org/method/langpack.getLangPack" />
 ///</summary>
-internal sealed class GetLangPackHandler(ILanguageCacheService languageCacheService) : RpcResultObjectHandler<MyTelegram.Schema.Langpack.RequestGetLangPack, MyTelegram.Schema.ILangPackDifference>,
+internal sealed class GetLangPackHandler(ILanguageCacheService languageCacheService, ILangPackStringConverterService langPackStringConverterService) : RpcResultObjectHandler<MyTelegram.Schema.Langpack.RequestGetLangPack, MyTelegram.Schema.ILangPackDifference>,
     Langpack.IGetLangPackHandler
 {
     protected override async Task<ILangPackDifference> HandleCoreAsync(IRequestInput input,
@@ -29,7 +31,7 @@ internal sealed class GetLangPackHandler(ILanguageCacheService languageCacheServ
             FromVersion = 0,
             LangCode = obj.LangCode,
             Version = languageReadModel!.LanguageVersion,
-            Strings = languageCacheService.ConvertToILangPackString(texts)
+            Strings = langPackStringConverterService.ToLangPackStrings(texts, input.Layer)
         };
 
         return langPackDifference;
