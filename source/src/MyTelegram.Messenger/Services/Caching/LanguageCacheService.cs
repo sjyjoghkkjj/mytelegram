@@ -209,7 +209,7 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
 
         foreach (var item in languageTexts)
         {
-            if (item.Value != null)
+            if (!string.IsNullOrEmpty(item.Value))
             {
                 // Single value -> TLangPackString
                 vector.Add(new TLangPackString
@@ -218,12 +218,7 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
                     Value = item.Value
                 });
             }
-            else if (item.ZeroValue != null ||
-                     item.OneValue != null ||
-                     item.TwoValue != null ||
-                     item.FewValue != null ||
-                     item.ManyValue != null ||
-                     item.OtherValue != null)
+            else if (!string.IsNullOrEmpty(item.OtherValue))
             {
                 // Pluralized values -> TLangPackStringPluralized
                 vector.Add(new TLangPackStringPluralized
@@ -254,4 +249,3 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         return langCode;
     }
 }
-
