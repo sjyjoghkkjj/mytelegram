@@ -231,8 +231,12 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
                     ManyValue = item.ManyValue,
                     OtherValue = item.OtherValue
                 });
+            } else {
+                vector.Add(new TLangPackStringDeleted
+                {
+                    Key = item.Key
+                });
             }
-            // else -> skip (nothing to map)
         }
 
         return vector;
