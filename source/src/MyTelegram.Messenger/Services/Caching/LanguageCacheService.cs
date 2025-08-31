@@ -32,7 +32,6 @@ public interface ILanguageCacheService
     Task<ILanguageReadModel?> GetLanguageAsync(string languageCode, string languagePack);
 
     Task<List<LanguageTextItem>> GetLanguageDifferenceAsync(string languageCode, string languagePack, int fromVersion);
-    TVector<ILangPackString> ConvertToILangPackString(IReadOnlyCollection<LanguageTextItem> languageTexts);
 }
 
 public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<LanguageCacheService> logger) : ILanguageCacheService, ISingletonDependency
@@ -203,46 +202,6 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         return Task.FromResult<List<LanguageTextItem>>([]);
     }
 
-    public TVector<ILangPackString> ConvertToILangPackString(IReadOnlyCollection<LanguageTextItem> languageTexts)
-    {
-        var vector = new TVector<ILangPackString>();
-
-        foreach (var item in languageTexts)
-        {
-            if (item.Value != null)
-            {
-                // Single value -> TLangPackString
-                vector.Add(new TLangPackString
-                {
-                    Key = item.Key,
-                    Value = item.Value
-                });
-            }
-            else if (item.ZeroValue != null ||
-                     item.OneValue != null ||
-                     item.TwoValue != null ||
-                     item.FewValue != null ||
-                     item.ManyValue != null ||
-                     item.OtherValue != null)
-            {
-                // Pluralized values -> TLangPackStringPluralized
-                vector.Add(new TLangPackStringPluralized
-                {
-                    Key = item.Key,
-                    ZeroValue = item.ZeroValue,
-                    OneValue = item.OneValue,
-                    TwoValue = item.TwoValue,
-                    FewValue = item.FewValue,
-                    ManyValue = item.ManyValue,
-                    OtherValue = item.OtherValue
-                });
-            }
-            // else -> skip (nothing to map)
-        }
-
-        return vector;
-    }
-
     private string GetLanguageCode(string langCode)
     {
         // The WebA client uses language codes with the `-raw` suffix
@@ -254,4 +213,3 @@ public class LanguageCacheService(IQueryProcessor queryProcessor, ILogger<Langua
         return langCode;
     }
 }
-
