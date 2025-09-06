@@ -7,7 +7,7 @@ networks:
 services:
   ### Redis
   redis:
-    image: redis:alpine
+    image: redis:8-alpine
     restart: always
     networks:
       - tg-net
@@ -15,6 +15,16 @@ services:
     #- "6379:6379"
     volumes:
       - ./data/redis:/data
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1000"]
+    # Optional auth:
+    # command: ["redis-server", "--appendonly", "yes", "--save", "60", "1000", "--requirepass", "${REDIS_PASSWORD}"]
+    # environment:
+    #   REDIS_PASSWORD: ${Redis__Password:-changeme}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   ### RabbitMq
   rabbitmq:
@@ -28,26 +38,34 @@ services:
     volumes:
       - ./data/rabbitmq:/var/lib/rabbitmq
     environment:
-      # RABBITMQ_DEFAULT_USER: ${RabbitMQ__Connections__Default__UserName}
-      # RABBITMQ_DEFAULT_PASS: ${RabbitMQ__Connections__Default__Password}
-      RABBITMQ_DEFAULT_USER: test
-      RABBITMQ_DEFAULT_PASS: test
+      RABBITMQ_DEFAULT_USER: ${RabbitMQ__Connections__Default__UserName:-test}
+      RABBITMQ_DEFAULT_PASS: ${RabbitMQ__Connections__Default__Password:-test}
+      RABBITMQ_ERLANG_COOKIE: ${RabbitMQ__ErlangCookie:-changeme-cookie}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ### MongoDb
   mongodb:
-    image: mongo:latest
+    image: mongo:8
     restart: always
     networks:
       - tg-net
     #ports:
     #  - "27017:27017"
     volumes:
-      - ./data/mongo/:/data
-      #- ./data/mongo/db:/data/db
-      #- ./data/mongo/configdb:/data/configdb
-    #environment:
-    #  MONGO_INITDB_ROOT_USERNAME: admin
-    #  MONGO_INITDB_ROOT_PASSWORD: admin
+      - ./data/mongo/db:/data/db
+      - ./data/mongo/configdb:/data/configdb
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: ${Mongo__User:-root}
+    #   MONGO_INITDB_ROOT_PASSWORD: ${Mongo__Password:-rootpass}
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ### Minio
   minio:
@@ -55,9 +73,7 @@ services:
     restart: always
     networks:
       - tg-net
-    #expose:
-    #  - "9000"
-    #  - "9001"
+
     #ports:
     #  - 9000:9000
     #  - 9001:9001
@@ -67,8 +83,13 @@ services:
     volumes:
       - ./data/minio:/data
       #- /docker/minio/config:/root/./minio/
-    command: server /data  --console-address ":9001"
-    #privileged: true
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
 
   ################### MyTelegram server
 
@@ -85,16 +106,17 @@ services:
       App__ReadModelDatabaseName: ${App__ReadModelDatabaseName}
       App__CreateTestUsers: ${App__CreateTestUsers}
       # App__LoadAllStickersIntoMemory: ${App__LoadAllStickersIntoMemory}
-      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
-      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
-      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
-      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
-      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
-      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName:-rabbitmq}
+      RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port:-5672}
+      RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName:-test}
+      RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password:-test}
+      RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
     volumes:
       - ./data/mytelegram/data-seeder/logs:/app/Logs
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
 
   ### 1.Gateway server
   gateway-server:
@@ -175,16 +197,19 @@ services:
       # App__Servers__5__KeyPemFilePath: ${App__Servers__5__KeyPemFilePath}
       # App__Servers__5__EnableProxyProtocolV2: ${App__Servers__5__EnableProxyProtocolV2}
       # App__Servers__5__MediaOnly: ${App__Servers__5__MediaOnly}
-      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
-      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
-      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
-      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
-      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
-      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName:-rabbitmq}
+      RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port:-5672}
+      RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName:-test}
+      RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password:-test}
+      RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
     depends_on:
-      - rabbitmq
-      - mongodb
-      - redis
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   # ### 2.Seq server
   # seq-server:
@@ -211,19 +236,22 @@ services:
     environment:
       Serilog__MinimumLevel__Default: ${Serilog__MinimumLevel__Default}
       #App__PrivateKeyFilePath: ${App__PrivateKeyFilePath}
-      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
-      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
-      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
-      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
-      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
-      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName:-rabbitmq}
+      RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port:-5672}
+      RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName:-test}
+      RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password:-test}
+      RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
       Redis__Configuration: ${Redis__Configuration}
     volumes:
       - ./data/mytelegram/auth/logs:/app/Logs
     depends_on:
-      - mongodb
-      - rabbitmq
-      - redis
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   ### 3.Session server
   session-server:
@@ -244,19 +272,22 @@ services:
       # App__DispatchUnknownObjectToMessengerServer: ${App__DispatchUnknownObjectToMessengerServer}
       # App__TempAuthKeyExpirationMinutes: ${App__TempAuthKeyExpirationMinutes}
       # App__CommandServerObjectIds: ${App__CommandServerObjectIds}
-      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
-      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
-      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
-      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
-      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
-      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName:-rabbitmq}
+      RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port:-5672}
+      RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName:-test}
+      RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password:-test}
+      RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
       Redis__Configuration: ${Redis__Configuration}
     volumes:
       - ./data/mytelegram/session/logs:/app/Logs
     depends_on:
-      - mongodb
-      - rabbitmq
-      - redis
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   # ### 5.Messenger grpc server
   # messenger-grpc-server:
@@ -297,16 +328,18 @@ services:
       Minio__SecretKey: ${Minio__SecretKey}
       # Minio__BucketName: ${Minio__BucketName}
       # Minio__CreateBucketIfNotExists: ${Minio__CreateBucketIfNotExists}
-      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
-      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
-      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
-      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
-      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
-      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName:-rabbitmq}
+      RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port:-5672}
+      RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName:-test}
+      RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password:-test}
+      RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
       Redis__Configuration: ${Redis__Configuration}
     depends_on:
-      - mongodb
-      - rabbitmq
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   ### 5.Messenger command server
   messenger-command-server:
@@ -385,19 +418,22 @@ services:
       # App__DcOptions__3__Cdn: ${App__DcOptions__3__Cdn}
       # App__DcOptions__3__MediaOnly: ${App__DcOptions__3__MediaOnly}
       # App__DcOptions__3__Static: ${App__DcOptions__3__Static}
-      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
-      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
-      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
-      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
-      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
-      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName:-rabbitmq}
+      RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port:-5672}
+      RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName:-test}
+      RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password:-test}
+      RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
       Redis__Configuration: ${Redis__Configuration}
     volumes:
       - ./data/mytelegram/command-server/logs:/app/Logs
     depends_on:
-      - mongodb
-      - rabbitmq
-      - redis
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   ### 6.Messenger query server
   messenger-query-server:
@@ -475,19 +511,22 @@ services:
       # App__DcOptions__3__Cdn: ${App__DcOptions__3__Cdn}
       # App__DcOptions__3__MediaOnly: ${App__DcOptions__3__MediaOnly}
       # App__DcOptions__3__Static: ${App__DcOptions__3__Static}
-      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
-      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
-      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
-      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
-      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
-      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName:-rabbitmq}
+      RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port:-5672}
+      RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName:-test}
+      RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password:-test}
+      RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
       Redis__Configuration: ${Redis__Configuration}
     volumes:
       - ./data/mytelegram/query-server/logs:/app/Logs
     depends_on:
-      - mongodb
-      - rabbitmq
-      - redis
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   ### 7.Sms sender
   sms-sender:
@@ -506,13 +545,14 @@ services:
       # VonageSms__BrandName: ${VonageSms__BrandName}
       # VonageSms__ApiKey: ${VonageSms__ApiKey}
       # VonageSms__ApiSecret: ${VonageSms__ApiSecret}
-      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName}
-      # RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port}
-      # RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName}
-      # RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password}
-      # RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
-      # RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
+      RabbitMQ__Connections__Default__HostName: ${RabbitMQ__Connections__Default__HostName:-rabbitmq}
+      RabbitMQ__Connections__Default__Port: ${RabbitMQ__Connections__Default__Port:-5672}
+      RabbitMQ__Connections__Default__UserName: ${RabbitMQ__Connections__Default__UserName:-test}
+      RabbitMQ__Connections__Default__Password: ${RabbitMQ__Connections__Default__Password:-test}
+      RabbitMQ__EventBus__ClientName: ${RabbitMQ__EventBus__ClientName}
+      RabbitMQ__EventBus__ExchangeName: ${RabbitMQ__EventBus__ExchangeName}
     volumes:
       - ./data/mytelegram/sms-sender/logs:/app/Logs
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
