@@ -1,4 +1,6 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+﻿using TStickerSet = MyTelegram.Schema.Messages.TStickerSet;
+
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// Get info about a stickerset
@@ -10,9 +12,19 @@
 ///</summary>
 internal sealed class GetStickerSetHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestGetStickerSet, MyTelegram.Schema.Messages.IStickerSet>
 {
-    protected override Task<MyTelegram.Schema.Messages.IStickerSet> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.Messages.IStickerSet> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestGetStickerSet obj)
     {
-        return Task.FromResult<MyTelegram.Schema.Messages.IStickerSet>(new TStickerSetNotModified());
+        return new TStickerSet
+        {
+            Packs = [],
+            Documents = [],
+            Keywords = [],
+            Set=new Schema.TStickerSet
+            {
+                Title = string.Empty,
+                ShortName = string.Empty
+            }
+        };
     }
 }
