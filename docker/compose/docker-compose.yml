@@ -53,6 +53,7 @@ services:
       - tg-net
     #ports:
     #  - "27017:27017"
+    command: ["mongod", "--quiet", "--logpath", "/dev/null", "--logappend"]
     volumes:
       - ./data/mongo/db:/data/db
       - ./data/mongo/configdb:/data/configdb
