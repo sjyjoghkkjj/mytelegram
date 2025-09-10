@@ -13,7 +13,9 @@ internal sealed class GetStarGiftsHandler : RpcResultObjectHandler<MyTelegram.Sc
     {
         return Task.FromResult<MyTelegram.Schema.Payments.IStarGifts>(new TStarGifts
         {
-            Gifts = []
+            Gifts = [],
+            Chats = [],
+            Users = []
         });
     }
 }
