@@ -11,6 +11,6 @@ internal sealed class GetResaleStarGiftsHandler(IResaleMarketService market) : R
     protected override Task<MyTelegram.Schema.Payments.IResaleStarGifts> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Payments.RequestGetResaleStarGifts obj)
     {
-        return market.GetAsync(obj.MinPrice, obj.MaxPrice, obj.Attributes);
+        return market.GetAsync(obj.GiftId, obj.SortByPrice, obj.SortByNum, obj.Offset, obj.Limit, obj.Attributes, obj.AttributesHash);
     }
 }
