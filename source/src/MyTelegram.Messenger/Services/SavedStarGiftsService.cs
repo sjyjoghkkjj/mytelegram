@@ -17,6 +17,9 @@ public interface ISavedStarGiftsService : ITransientDependency
         CancellationToken cancellationToken = default);
 
     Task<bool> TogglePinnedAsync(long userId, TVector<IInputSavedStarGift> gifts);
+
+    Task<ISavedStarGifts> GetSavedByKeysAsync(long userId, TVector<IInputSavedStarGift> gifts);
+    Task<IStarGiftWithdrawalUrl> GetWithdrawalUrlAsync(long userId, IInputSavedStarGift gift);
 }
 
 public class SavedStarGiftsService : ISavedStarGiftsService
@@ -114,6 +117,33 @@ public class SavedStarGiftsService : ISavedStarGiftsService
             kv.Value.PinnedTop = isPinned;
         }
         return Task.FromResult(true);
+    }
+
+    public Task<ISavedStarGifts> GetSavedByKeysAsync(long userId, TVector<IInputSavedStarGift> gifts)
+    {
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        var keys = gifts.Select(GiftKey).ToHashSet();
+        var list = state.Gifts.Where(kv => keys.Contains(kv.Key)).Select(kv => (ISavedStarGift)kv.Value).ToList();
+        return Task.FromResult<ISavedStarGifts>(new TSavedStarGifts
+        {
+            Users = new TVector<IUser>(),
+            Chats = new TVector<IChat>(),
+            Gifts = new TVector<ISavedStarGift>(list)
+        });
+    }
+
+    public Task<IStarGiftWithdrawalUrl> GetWithdrawalUrlAsync(long userId, IInputSavedStarGift gift)
+    {
+        var key = GiftKey(gift);
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        if (!state.Gifts.ContainsKey(key))
+        {
+            RpcErrors.RpcErrors400.BadRequest("STARGIFT_NOT_FOUND").ThrowRpcError();
+        }
+
+        // Реалистичный URL (в реальном мире был бы подписанный токен). Здесь — детерминированная ссылка.
+        var url = $"https://mytelegram.local/withdraw/stargift/{userId}/{key}";
+        return Task.FromResult<IStarGiftWithdrawalUrl>(new TStarGiftWithdrawalUrl { Url = url });
     }
 
     private static long GiftKey(IInputSavedStarGift g) => g switch
