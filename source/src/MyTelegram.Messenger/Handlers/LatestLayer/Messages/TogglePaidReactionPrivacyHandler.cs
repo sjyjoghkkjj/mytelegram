@@ -1,14 +1,24 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+using MyTelegram.Messenger.Services;
 
-///<summary>
-/// Changes the privacy of already sent <a href="https://corefork.telegram.org/api/reactions#paid-reactions">paid reactions</a> on a specific message.
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+
+/// <summary>
+/// Changes paid reaction privacy for a specific message
 /// See <a href="https://corefork.telegram.org/method/messages.togglePaidReactionPrivacy" />
-///</summary>
+/// </summary>
 internal sealed class TogglePaidReactionPrivacyHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestTogglePaidReactionPrivacy, IBool>
 {
-    protected override Task<IBool> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Messages.RequestTogglePaidReactionPrivacy obj)
-    {
-        return Task.FromResult<IBool>(new TBoolTrue());
-    }
+	private readonly IPaidReactionsService _paid;
+
+	public TogglePaidReactionPrivacyHandler(IPaidReactionsService paid)
+	{
+		_paid = paid;
+	}
+
+	protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
+		MyTelegram.Schema.Messages.RequestTogglePaidReactionPrivacy obj)
+	{
+		await _paid.SetPrivacyAsync(input.UserId, obj.Peer, obj.MsgId, obj.Private);
+		return new TBoolTrue();
+	}
 }
