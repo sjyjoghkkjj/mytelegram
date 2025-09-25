@@ -1,20 +1,32 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
+using MyTelegram.Messenger.Services;
 
-///<summary>
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
+
+/// <summary>
 /// Send an email verification code.
-/// <para>Possible errors</para>
-/// Code Type Description
-/// 400 EMAIL_INVALID The specified email is invalid.
-/// 400 EMAIL_NOT_SETUP In order to change the login email with emailVerifyPurposeLoginChange, an existing login email must already be set using emailVerifyPurposeLoginSetup.
-/// 400 PHONE_HASH_EXPIRED An invalid or expired <code>phone_code_hash</code> was provided.
-/// 400 PHONE_NUMBER_INVALID The phone number is invalid.
 /// See <a href="https://corefork.telegram.org/method/account.sendVerifyEmailCode" />
-///</summary>
+/// </summary>
 internal sealed class SendVerifyEmailCodeHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestSendVerifyEmailCode, MyTelegram.Schema.Account.ISentEmailCode>
 {
-    protected override Task<MyTelegram.Schema.Account.ISentEmailCode> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Account.RequestSendVerifyEmailCode obj)
-    {
-        throw new NotImplementedException();
-    }
+	private readonly IEmailCodeService _emailCodes;
+	private readonly IOptionsMonitor<MyTelegramMessengerServerOptions> _options;
+
+	public SendVerifyEmailCodeHandler(IEmailCodeService emailCodes, IOptionsMonitor<MyTelegramMessengerServerOptions> options)
+	{
+		_emailCodes = emailCodes;
+		_options = options;
+	}
+
+	protected override async Task<MyTelegram.Schema.Account.ISentEmailCode> HandleCoreAsync(IRequestInput input,
+		MyTelegram.Schema.Account.RequestSendVerifyEmailCode obj)
+	{
+		var ttl = TimeSpan.FromSeconds(_options.CurrentValue.VerificationCodeExpirationSeconds);
+		var (_, expire) = await _emailCodes.CreateAsync(input.UserId, obj.Email, ttl);
+		return new MyTelegram.Schema.Account.TSentEmailCode
+		{
+			Email = obj.Email,
+			Length = _options.CurrentValue.VerificationCodeLength,
+			Expire = expire
+		};
+	}
 }

@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Auth;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Auth;
 
 ///<summary>
 /// Signs in a user with a validated phone number.
@@ -37,13 +37,30 @@ internal sealed class SignInHandler(
             userId = userReadModel.UserId;
         }
 
-        var command = new CheckSignInCodeCommand(AppCodeId.Create(obj.PhoneNumber.ToPhoneNumber(), obj.PhoneCodeHash),
-            input.ToRequestInfo() with { UserId = userId },
-            obj.PhoneCode ?? string.Empty,
-            userId
-        );
-
-        await commandBus.PublishAsync(command);
+        if (obj.EmailVerification != null)
+        {
+            // Email-based sign in: используем существующий pipeline — создаём EmailAppCodeId и проверяем код как app code
+            var emailCode = obj.EmailVerification switch
+            {
+                MyTelegram.Schema.TEmailVerificationCode c => c.Code,
+                _ => string.Empty
+            };
+            var emailAppCodeId = AppCodeId.CreateEmailAppCodeId(userId, input.AuthKeyId);
+            var emailSignInCommand = new CheckSignInCodeCommand(emailAppCodeId,
+                input.ToRequestInfo() with { UserId = userId },
+                emailCode,
+                userId);
+            await commandBus.PublishAsync(emailSignInCommand);
+        }
+        else
+        {
+            var command = new CheckSignInCodeCommand(AppCodeId.Create(obj.PhoneNumber.ToPhoneNumber(), obj.PhoneCodeHash),
+                input.ToRequestInfo() with { UserId = userId },
+                obj.PhoneCode ?? string.Empty,
+                userId
+            );
+            await commandBus.PublishAsync(command);
+        }
 
         return null!;
     }
