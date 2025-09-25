@@ -26,6 +26,7 @@ public interface ISavedStarGiftsService : ITransientDependency
 
     Task<IStarGiftCollection> CreateCollectionAsync(long userId, string title, TVector<IInputSavedStarGift> gifts);
     Task<bool> DeleteCollectionAsync(long userId, string slug);
+    Task<bool> ReorderCollectionsAsync(long userId, TVector<string> order);
 }
 
 public class SavedStarGiftsService : ISavedStarGiftsService
@@ -138,6 +139,34 @@ public class SavedStarGiftsService : ISavedStarGiftsService
     {
         var state = _storage.GetOrAdd(userId, _ => new UserSaved());
         return Task.FromResult(state.Collections.TryRemove(slug, out _));
+    }
+
+    public Task<bool> ReorderCollectionsAsync(long userId, TVector<string> order)
+    {
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        var existing = state.Collections.ToArray();
+        var ordered = new List<KeyValuePair<string, TStarGiftCollection>>();
+        foreach (var slug in order)
+        {
+            if (state.Collections.TryGetValue(slug, out var coll))
+            {
+                ordered.Add(new KeyValuePair<string, TStarGiftCollection>(slug, coll));
+            }
+        }
+        // add leftovers
+        foreach (var kv in existing)
+        {
+            if (!ordered.Any(x => x.Key == kv.Key))
+            {
+                ordered.Add(kv);
+            }
+        }
+        state.Collections.Clear();
+        foreach (var kv in ordered)
+        {
+            state.Collections[kv.Key] = kv.Value;
+        }
+        return Task.FromResult(true);
     }
 
     public Task<bool> TogglePinnedAsync(long userId, TVector<IInputSavedStarGift> gifts)
