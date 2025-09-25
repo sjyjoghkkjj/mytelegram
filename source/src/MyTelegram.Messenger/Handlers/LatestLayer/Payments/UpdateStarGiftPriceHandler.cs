@@ -22,7 +22,14 @@ internal sealed class UpdateStarGiftPriceHandler : RpcResultObjectHandler<MyTele
 
 	private async Task<MyTelegram.Schema.IUpdates> HandleAsync(IRequestInput input, MyTelegram.Schema.Payments.RequestUpdateStarGiftPrice obj)
 	{
-		await _market.UpsertListingAsync(input.UserId, obj.Stargift, obj.Price);
+		if (obj.Price <= 0)
+		{
+			await _market.RemoveListingAsync(input.UserId, obj.Stargift);
+		}
+		else
+		{
+			await _market.UpsertListingAsync(input.UserId, obj.Stargift, obj.Price);
+		}
 		return new TUpdates
 		{
 			Chats = [],
