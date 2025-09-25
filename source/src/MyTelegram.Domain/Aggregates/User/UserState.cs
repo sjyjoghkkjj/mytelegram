@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS8618
+#pragma warning disable CS8618
 
 namespace MyTelegram.Domain.Aggregates.User;
 
@@ -17,7 +17,8 @@ public class UserState : AggregateState<UserAggregate, UserId, UserState>,
     IApply<PersonalChannelUpdatedEvent>,
     IApply<BirthdayUpdatedEvent>,
     IApply<UserAboutUpdatedEvent>,
-    IApply<UserFirstNameUpdatedEvent>
+    IApply<UserFirstNameUpdatedEvent>,
+    IApply<UserEmailUpdatedEvent>
 {
     public long AccessHash { get; private set; }
     public string FirstName { get; private set; } = null!;
@@ -30,6 +31,8 @@ public class UserState : AggregateState<UserAggregate, UserId, UserState>,
     public bool Support { get; private set; }
     public long UserId { get; private set; }
     public string? UserName { get; private set; }
+    public string? Email { get; private set; }
+    public bool EnableEmailLogin { get; private set; }
     public bool Verified { get; private set; }
     public bool IsBot { get; private set; }
     public bool IsDeleted { get; private set; }
@@ -182,5 +185,11 @@ public class UserState : AggregateState<UserAggregate, UserId, UserState>,
     public void Apply(UserFirstNameUpdatedEvent aggregateEvent)
     {
         FirstName= aggregateEvent.FirstName;
+    }
+
+    public void Apply(UserEmailUpdatedEvent aggregateEvent)
+    {
+        Email = aggregateEvent.Email;
+        EnableEmailLogin = aggregateEvent.EnableEmailLogin;
     }
 }

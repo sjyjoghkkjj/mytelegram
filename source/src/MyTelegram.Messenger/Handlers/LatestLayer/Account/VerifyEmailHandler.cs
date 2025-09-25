@@ -9,10 +9,12 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
 internal sealed class VerifyEmailHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestVerifyEmail, MyTelegram.Schema.Account.IEmailVerified>
 {
 	private readonly IEmailCodeService _emailCodes;
+	private readonly ICommandBus _commandBus;
 
-	public VerifyEmailHandler(IEmailCodeService emailCodes)
+	public VerifyEmailHandler(IEmailCodeService emailCodes, ICommandBus commandBus)
 	{
 		_emailCodes = emailCodes;
+		_commandBus = commandBus;
 	}
 
 	protected override async Task<MyTelegram.Schema.Account.IEmailVerified> HandleCoreAsync(IRequestInput input,
@@ -25,6 +27,7 @@ internal sealed class VerifyEmailHandler : RpcResultObjectHandler<MyTelegram.Sch
 		}
 		await _emailCodes.SetVerifiedEmailAsync(input.UserId, obj.Email);
 		await _emailCodes.SetEmailLoginEnabledAsync(input.UserId, true);
+		await _commandBus.PublishAsync(new UpdateEmailCommand(UserId.Create(input.UserId), obj.Email, true));
 		return new MyTelegram.Schema.Account.TEmailVerifiedLogin { Email = obj.Email };
 	}
 }
