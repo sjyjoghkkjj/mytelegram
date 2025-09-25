@@ -18,11 +18,14 @@ public interface IEmailCodeService : ITransientDependency
 {
     Task<(string code, int expire)> CreateAsync(long userId, string email, TimeSpan ttl, CancellationToken ct = default);
     Task<bool> VerifyAsync(long userId, string email, string code, CancellationToken ct = default);
+    Task SetVerifiedEmailAsync(long userId, string email, CancellationToken ct = default);
+    Task<string?> GetVerifiedEmailAsync(long userId, CancellationToken ct = default);
 }
 
 public class EmailCodeService(IRandomHelper randomHelper, IEmailSender emailSender, ILogger<EmailCodeService> logger) : IEmailCodeService
 {
     private readonly ConcurrentDictionary<long, Entry> _codes = new();
+    private readonly ConcurrentDictionary<long, string> _verifiedEmails = new();
 
     public async Task<(string code, int expire)> CreateAsync(long userId, string email, TimeSpan ttl, CancellationToken ct = default)
     {
@@ -46,6 +49,18 @@ public class EmailCodeService(IRandomHelper randomHelper, IEmailSender emailSend
             }
         }
         return Task.FromResult(false);
+    }
+
+    public Task SetVerifiedEmailAsync(long userId, string email, CancellationToken ct = default)
+    {
+        _verifiedEmails[userId] = email;
+        return Task.CompletedTask;
+    }
+
+    public Task<string?> GetVerifiedEmailAsync(long userId, CancellationToken ct = default)
+    {
+        _verifiedEmails.TryGetValue(userId, out var email);
+        return Task.FromResult<string?>(email);
     }
 
     private sealed record Entry(string Email, string Code, int Expire);
