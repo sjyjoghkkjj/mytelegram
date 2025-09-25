@@ -15,6 +15,8 @@ public interface ISavedStarGiftsService : ITransientDependency
         TVector<IInputSavedStarGift>? add,
         TVector<IInputSavedStarGift>? order,
         CancellationToken cancellationToken = default);
+
+    Task<bool> TogglePinnedAsync(long userId, TVector<IInputSavedStarGift> gifts);
 }
 
 public class SavedStarGiftsService : ISavedStarGiftsService
@@ -100,6 +102,18 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         }
 
         return Task.FromResult<IStarGiftCollection>(collection);
+    }
+
+    public Task<bool> TogglePinnedAsync(long userId, TVector<IInputSavedStarGift> gifts)
+    {
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        var set = gifts.Select(GiftKey).ToHashSet();
+        foreach (var kv in state.Gifts)
+        {
+            var isPinned = set.Contains(kv.Key);
+            kv.Value.PinnedTop = isPinned;
+        }
+        return Task.FromResult(true);
     }
 
     private static long GiftKey(IInputSavedStarGift g) => g switch
