@@ -20,6 +20,9 @@ public interface ISavedStarGiftsService : ITransientDependency
 
     Task<ISavedStarGifts> GetSavedByKeysAsync(long userId, TVector<IInputSavedStarGift> gifts);
     Task<IStarGiftWithdrawalUrl> GetWithdrawalUrlAsync(long userId, IInputSavedStarGift gift);
+
+    Task<bool> ConvertAsync(long userId, IInputSavedStarGift gift);
+    Task<long> GetStarsBalanceAsync(long userId);
 }
 
 public class SavedStarGiftsService : ISavedStarGiftsService
@@ -146,6 +149,36 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         return Task.FromResult<IStarGiftWithdrawalUrl>(new TStarGiftWithdrawalUrl { Url = url });
     }
 
+    public Task<bool> ConvertAsync(long userId, IInputSavedStarGift gift)
+    {
+        var key = GiftKey(gift);
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        if (!state.Gifts.TryGetValue(key, out var saved))
+        {
+            RpcErrors.RpcErrors400.BadRequest("STARGIFT_NOT_FOUND").ThrowRpcError();
+        }
+
+        // Считаем конверсию
+        var convert = (saved.Gift as TStarGift)?.ConvertStars ?? 0;
+        if (convert <= 0)
+        {
+            RpcErrors.RpcErrors400.BadRequest("STARGIFT_CONVERT_FORBIDDEN").ThrowRpcError();
+        }
+
+        // Удаляем подарок у пользователя (уничтожаем)
+        state.Gifts.TryRemove(key, out _);
+        // Зачисляем звёзды
+        state.StarsBalance += convert;
+
+        return Task.FromResult(true);
+    }
+
+    public Task<long> GetStarsBalanceAsync(long userId)
+    {
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        return Task.FromResult(state.StarsBalance);
+    }
+
     private static long GiftKey(IInputSavedStarGift g) => g switch
     {
         TInputSavedStarGiftById x => x.GiftId,
@@ -159,6 +192,7 @@ public class SavedStarGiftsService : ISavedStarGiftsService
     {
         public ConcurrentDictionary<long, TSavedStarGift> Gifts { get; } = new();
         public ConcurrentDictionary<string, TStarGiftCollection> Collections { get; } = new();
+        public long StarsBalance { get; set; }
     }
 }
 
