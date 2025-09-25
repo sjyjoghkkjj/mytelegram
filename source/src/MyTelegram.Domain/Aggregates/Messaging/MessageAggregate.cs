@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Domain.Aggregates.Messaging;
+namespace MyTelegram.Domain.Aggregates.Messaging;
 
 public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageId, MessageSnapshot>
 {
@@ -368,6 +368,18 @@ public class MessageAggregate : SnapshotAggregateRoot<MessageAggregate, MessageI
             _state.Pts,
             _state.IsDeleted
         ));
+    }
+
+    public void SendReaction(RequestInfo requestInfo, long userId, MyTelegram.Schema.IReaction reaction, bool addToRecent = false)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        Emit(new MessageReactionAddedEvent(requestInfo, userId, reaction, addToRecent));
+    }
+
+    public void RemoveReaction(RequestInfo requestInfo, long userId, MyTelegram.Schema.IReaction reaction)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        Emit(new MessageReactionRemovedEvent(requestInfo, userId, reaction));
     }
 
     protected override Task LoadSnapshotAsync(MessageSnapshot snapshot,
