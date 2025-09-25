@@ -179,6 +179,23 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         return Task.FromResult(state.StarsBalance);
     }
 
+    public bool TryGetSaved(long userId, IInputSavedStarGift gift, out TSavedStarGift saved)
+    {
+        var key = GiftKey(gift);
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        return state.Gifts.TryGetValue(key, out saved!);
+    }
+
+    public void DeductStars(long userId, long amount)
+    {
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        if (state.StarsBalance < amount)
+        {
+            RpcErrors.RpcErrors400.BalanceTooLow.ThrowRpcError();
+        }
+        state.StarsBalance -= amount;
+    }
+
     private static long GiftKey(IInputSavedStarGift g) => g switch
     {
         TInputSavedStarGiftById x => x.GiftId,
