@@ -29,7 +29,12 @@ public class ResaleMarketService : IResaleMarketService
                 AvailabilityResale = 1,
                 Sticker = new TDocument { Id = 20010, AccessHash = 0, FileReference = ReadOnlyMemory<byte>.Empty, Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(), MimeType = "application/x-tgsticker", Size = 0, DcId = 1, Attributes = new TVector<IDocumentAttribute>(Array.Empty<IDocumentAttribute>()) }
             },
-            new List<IStarGiftAttribute>{ new TStarGiftAttributeModel{ Model = "heart" } }),
+            new List<IStarGiftAttribute>{
+                new TStarGiftAttributeModel{ Model = "heart" },
+                new TStarGiftAttributePattern{ Pattern = "crystal" },
+                new TStarGiftAttributeBackdrop{ Backdrop = "pink" },
+                new TStarGiftAttributeOriginalDetails{ Url = "https://example.com/item/2001" }
+            }),
             (43,
             new TStarGift
             {
@@ -40,7 +45,12 @@ public class ResaleMarketService : IResaleMarketService
                 AvailabilityResale = 1,
                 Sticker = new TDocument { Id = 20020, AccessHash = 0, FileReference = ReadOnlyMemory<byte>.Empty, Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(), MimeType = "application/x-tgsticker", Size = 0, DcId = 1, Attributes = new TVector<IDocumentAttribute>(Array.Empty<IDocumentAttribute>()) }
             },
-            new List<IStarGiftAttribute>{ new TStarGiftAttributeModel{ Model = "balloon" } })
+            new List<IStarGiftAttribute>{
+                new TStarGiftAttributeModel{ Model = "balloon" },
+                new TStarGiftAttributePattern{ Pattern = "gold" },
+                new TStarGiftAttributeBackdrop{ Backdrop = "blue" },
+                new TStarGiftAttributeOriginalDetails{ Url = "https://example.com/item/2002" }
+            })
         };
     }
 
@@ -49,12 +59,19 @@ public class ResaleMarketService : IResaleMarketService
         IEnumerable<(long Owner, IStarGift Gift, List<IStarGiftAttribute> Attrs)> query = _listings;
         if (giftId != 0)
             query = query.Where(x => (x.Gift as TStarGift)?.Id == giftId);
-        // фильтр по атрибутам (по id-модели, паттерну, бэкдропу и т.п.) — здесь упростим до модели
+        // фильтры по атрибутам (model/pattern/backdrop)
         if (attributes != null && attributes.Count > 0)
         {
             var models = attributes.OfType<TStarGiftAttributeIdModel>().Select(a => a.Model).ToHashSet();
+            var patterns = attributes.OfType<TStarGiftAttributeIdPattern>().Select(a => a.Pattern).ToHashSet();
+            var backdrops = attributes.OfType<TStarGiftAttributeIdBackdrop>().Select(a => a.Backdrop).ToHashSet();
+
             if (models.Count > 0)
                 query = query.Where(x => x.Attrs.OfType<TStarGiftAttributeModel>().Any(a => models.Contains(a.Model)));
+            if (patterns.Count > 0)
+                query = query.Where(x => x.Attrs.OfType<TStarGiftAttributePattern>().Any(a => patterns.Contains(a.Pattern)));
+            if (backdrops.Count > 0)
+                query = query.Where(x => x.Attrs.OfType<TStarGiftAttributeBackdrop>().Any(a => backdrops.Contains(a.Backdrop)));
         }
 
         if (sortByPrice)
@@ -68,16 +85,32 @@ public class ResaleMarketService : IResaleMarketService
         var page = query.Take(Math.Max(1, Math.Min(100, limit))).ToList();
         var lastId = page.LastOrDefault().Gift is TStarGift lg ? lg.Id : 0;
 
-        // counters по атрибутам
-        var counters = page
-            .SelectMany(x => x.Attrs.OfType<TStarGiftAttributeModel>().Select(m => m.Model))
-            .GroupBy(m => m)
+        // counters по атрибутам (model/pattern/backdrop)
+        var counters = new List<IStarGiftAttributeCounter>();
+        var modelCounters = page.SelectMany(x => x.Attrs.OfType<TStarGiftAttributeModel>().Select(m => m.Model))
+            .GroupBy(v => v)
             .Select(g => (IStarGiftAttributeCounter)new TStarGiftAttributeCounter
             {
                 Attribute = new TStarGiftAttributeIdModel { Model = g.Key },
                 Count = g.Count()
-            })
-            .ToList();
+            });
+        var patternCounters = page.SelectMany(x => x.Attrs.OfType<TStarGiftAttributePattern>().Select(m => m.Pattern))
+            .GroupBy(v => v)
+            .Select(g => (IStarGiftAttributeCounter)new TStarGiftAttributeCounter
+            {
+                Attribute = new TStarGiftAttributeIdPattern { Pattern = g.Key },
+                Count = g.Count()
+            });
+        var backdropCounters = page.SelectMany(x => x.Attrs.OfType<TStarGiftAttributeBackdrop>().Select(m => m.Backdrop))
+            .GroupBy(v => v)
+            .Select(g => (IStarGiftAttributeCounter)new TStarGiftAttributeCounter
+            {
+                Attribute = new TStarGiftAttributeIdBackdrop { Backdrop = g.Key },
+                Count = g.Count()
+            });
+        counters.AddRange(modelCounters);
+        counters.AddRange(patternCounters);
+        counters.AddRange(backdropCounters);
 
         var result = new TResaleStarGifts
         {
