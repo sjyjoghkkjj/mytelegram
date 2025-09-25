@@ -186,6 +186,24 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         _ => 0
     };
 
+    public bool TransferTo(long fromUserId, long toUserId, IInputSavedStarGift gift, out TSavedStarGift transferred)
+    {
+        transferred = null!;
+        var key = GiftKey(gift);
+        var from = _storage.GetOrAdd(fromUserId, _ => new UserSaved());
+        if (!from.Gifts.TryRemove(key, out var saved))
+        {
+            RpcErrors.RpcErrors400.BadRequest("STARGIFT_NOT_FOUND").ThrowRpcError();
+        }
+        var to = _storage.GetOrAdd(toUserId, _ => new UserSaved());
+        // Сбросим пин у получателя; дата обновится
+        saved.PinnedTop = false;
+        saved.Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        to.Gifts[key] = saved;
+        transferred = saved;
+        return true;
+    }
+
     private static long GiftKeyFromSaved(ISavedStarGift g) => g.Gift.Id;
 
     private class UserSaved
