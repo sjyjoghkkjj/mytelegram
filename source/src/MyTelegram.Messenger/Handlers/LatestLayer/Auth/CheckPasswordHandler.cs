@@ -1,19 +1,28 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Auth;
+using MyTelegram.Messenger.Services;
 
-///<summary>
-/// Try logging to an account protected by a <a href="https://corefork.telegram.org/api/srp">2FA password</a>.
-/// <para>Possible errors</para>
-/// Code Type Description
-/// 400 PASSWORD_HASH_INVALID The provided password hash is invalid.
-/// 400 SRP_ID_INVALID Invalid SRP ID provided.
-/// 400 SRP_PASSWORD_CHANGED Password has changed.
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Auth;
+
+/// <summary>
+/// Try logging to an account protected by a 2FA password (SRP)
 /// See <a href="https://corefork.telegram.org/method/auth.checkPassword" />
-///</summary>
+/// </summary>
 internal sealed class CheckPasswordHandler : RpcResultObjectHandler<MyTelegram.Schema.Auth.RequestCheckPassword, MyTelegram.Schema.Auth.IAuthorization>
 {
-    protected override Task<MyTelegram.Schema.Auth.IAuthorization> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Auth.RequestCheckPassword obj)
-    {
-        throw new NotImplementedException();
-    }
+	private readonly IPasswordService _passwords;
+
+	public CheckPasswordHandler(IPasswordService passwords)
+	{
+		_passwords = passwords;
+	}
+
+	protected override async Task<MyTelegram.Schema.Auth.IAuthorization> HandleCoreAsync(IRequestInput input,
+		MyTelegram.Schema.Auth.RequestCheckPassword obj)
+	{
+		var ok = await _passwords.CheckPasswordAsync(input.UserId, obj.Password);
+		if (!ok)
+		{
+			RpcErrors.RpcErrors400.PasswordHashInvalid.ThrowRpcError();
+		}
+		return new MyTelegram.Schema.Auth.TAuthorization { User = new MyTelegram.Schema.TUser { Id = input.UserId, Self = true } };
+	}
 }
