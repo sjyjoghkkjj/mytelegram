@@ -66,6 +66,7 @@ public class ResaleMarketService : IResaleMarketService
         if (long.TryParse(offset, out var off) && off > 0)
             query = query.Where(x => (x.Gift as TStarGift)!.Id > off);
         var page = query.Take(Math.Max(1, Math.Min(100, limit))).ToList();
+        var lastId = page.LastOrDefault().Gift is TStarGift lg ? lg.Id : 0;
 
         // counters по атрибутам
         var counters = page
@@ -84,7 +85,8 @@ public class ResaleMarketService : IResaleMarketService
             Attributes = new TVector<IStarGiftAttribute>(page.SelectMany(x => x.Attrs).ToList()),
             Counters = new TVector<IStarGiftAttributeCounter>(counters),
             Users = new TVector<IUser>(),
-            Chats = new TVector<IChat>()
+            Chats = new TVector<IChat>(),
+            NextOffset = lastId > 0 ? lastId.ToString() : null
         };
         return Task.FromResult<IResaleStarGifts>(result);
     }
