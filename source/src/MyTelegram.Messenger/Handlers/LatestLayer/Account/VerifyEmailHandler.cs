@@ -24,6 +24,7 @@ internal sealed class VerifyEmailHandler : RpcResultObjectHandler<MyTelegram.Sch
 			RpcErrors.RpcErrors400.EmailVerifyExpired.ThrowRpcError();
 		}
 		await _emailCodes.SetVerifiedEmailAsync(input.UserId, obj.Email);
-		return new MyTelegram.Schema.Account.TEmailVerified { Email = obj.Email };
+		await _emailCodes.SetEmailLoginEnabledAsync(input.UserId, true);
+		return new MyTelegram.Schema.Account.TEmailVerifiedLogin { Email = obj.Email };
 	}
 }

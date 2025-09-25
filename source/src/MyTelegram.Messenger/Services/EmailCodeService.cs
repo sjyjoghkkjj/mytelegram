@@ -20,12 +20,15 @@ public interface IEmailCodeService : ITransientDependency
     Task<bool> VerifyAsync(long userId, string email, string code, CancellationToken ct = default);
     Task SetVerifiedEmailAsync(long userId, string email, CancellationToken ct = default);
     Task<string?> GetVerifiedEmailAsync(long userId, CancellationToken ct = default);
+    Task SetEmailLoginEnabledAsync(long userId, bool enabled, CancellationToken ct = default);
+    Task<bool> IsEmailLoginEnabledAsync(long userId, CancellationToken ct = default);
 }
 
 public class EmailCodeService(IRandomHelper randomHelper, IEmailSender emailSender, ILogger<EmailCodeService> logger) : IEmailCodeService
 {
     private readonly ConcurrentDictionary<long, Entry> _codes = new();
     private readonly ConcurrentDictionary<long, string> _verifiedEmails = new();
+    private readonly ConcurrentDictionary<long, bool> _emailLoginEnabled = new();
 
     public async Task<(string code, int expire)> CreateAsync(long userId, string email, TimeSpan ttl, CancellationToken ct = default)
     {
@@ -61,6 +64,17 @@ public class EmailCodeService(IRandomHelper randomHelper, IEmailSender emailSend
     {
         _verifiedEmails.TryGetValue(userId, out var email);
         return Task.FromResult<string?>(email);
+    }
+
+    public Task SetEmailLoginEnabledAsync(long userId, bool enabled, CancellationToken ct = default)
+    {
+        _emailLoginEnabled[userId] = enabled;
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> IsEmailLoginEnabledAsync(long userId, CancellationToken ct = default)
+    {
+        return Task.FromResult(_emailLoginEnabled.TryGetValue(userId, out var enabled) && enabled);
     }
 
     private sealed record Entry(string Email, string Code, int Expire);
