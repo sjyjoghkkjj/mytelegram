@@ -32,7 +32,10 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     IApply<OutboxMessageEditedEventV2>,
     IApply<InboxMessageEditedEventV2>,
     IApply<MessageReactionAddedEvent>,
-    IApply<MessageReactionRemovedEvent>
+    IApply<MessageReactionRemovedEvent>,
+    IApply<ScheduledMessageCreatedEvent>,
+    IApply<ScheduledMessageSentEvent>,
+    IApply<ScheduledMessageCancelledEvent>
 {
     public int EditDate { get; private set; }
     //public bool EditHide { get; private set; }
@@ -50,6 +53,8 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     public ConcurrentDictionary<long, List<Reaction>> UserReactions { get; } = new();
 
     public bool IsDeleted { get; private set; }
+    public bool IsScheduled { get; private set; }
+    public int? ScheduledDate { get; private set; }
     public void Apply(ChannelMessageDeletedEvent aggregateEvent)
     {
     }
@@ -264,5 +269,26 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
                 ReactionCounts.TryRemove(reactionId, out _);
             }
         }
+    }
+
+    public void Apply(ScheduledMessageCreatedEvent aggregateEvent)
+    {
+        IsScheduled = true;
+        ScheduledDate = aggregateEvent.ScheduleDate;
+        MessageItem = aggregateEvent.MessageItem;
+    }
+
+    public void Apply(ScheduledMessageSentEvent aggregateEvent)
+    {
+        IsScheduled = false;
+        ScheduledDate = null;
+        // Message is now sent, so it becomes a regular message
+    }
+
+    public void Apply(ScheduledMessageCancelledEvent aggregateEvent)
+    {
+        IsScheduled = false;
+        ScheduledDate = null;
+        IsDeleted = true;
     }
 }
