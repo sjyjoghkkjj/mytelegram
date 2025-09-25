@@ -27,6 +27,7 @@ public interface ISavedStarGiftsService : ITransientDependency
     Task<IStarGiftCollection> CreateCollectionAsync(long userId, string title, TVector<IInputSavedStarGift> gifts);
     Task<bool> DeleteCollectionAsync(long userId, string slug);
     Task<bool> ReorderCollectionsAsync(long userId, TVector<string> order);
+    Task<bool> ToggleChatNotificationsAsync(long userId, long chatId, bool enabled);
 }
 
 public class SavedStarGiftsService : ISavedStarGiftsService
@@ -166,6 +167,13 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         {
             state.Collections[kv.Key] = kv.Value;
         }
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> ToggleChatNotificationsAsync(long userId, long chatId, bool enabled)
+    {
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        state.ChatStarGiftNotifications[chatId] = enabled;
         return Task.FromResult(true);
     }
 
@@ -316,6 +324,7 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         public ConcurrentDictionary<long, TSavedStarGift> Gifts { get; } = new();
         public ConcurrentDictionary<string, TStarGiftCollection> Collections { get; } = new();
         public long StarsBalance { get; set; }
+        public ConcurrentDictionary<long, bool> ChatStarGiftNotifications { get; } = new();
     }
 }
 
