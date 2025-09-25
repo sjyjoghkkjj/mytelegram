@@ -75,14 +75,15 @@ public class ResaleMarketService : IResaleMarketService
         }
 
         if (sortByPrice)
-            query = query.OrderBy(x => (x.Gift as TStarGift)!.Stars);
+            query = query.OrderBy(x => (x.Gift as TStarGift)!.Stars).ThenBy(x => (x.Gift as TStarGift)!.Id);
         else if (sortByNum)
-            query = query.OrderBy(x => (x.Gift as TStarGift)!.AvailabilityResale ?? 0);
+            query = query.OrderBy(x => (x.Gift as TStarGift)!.AvailabilityResale ?? 0).ThenBy(x => (x.Gift as TStarGift)!.Id);
 
         // пагинация через offset как numeric id
         if (long.TryParse(offset, out var off) && off > 0)
             query = query.Where(x => (x.Gift as TStarGift)!.Id > off);
-        var page = query.Take(Math.Max(1, Math.Min(100, limit))).ToList();
+        var take = Math.Max(1, Math.Min(100, limit));
+        var page = query.Take(take).ToList();
         var lastId = page.LastOrDefault().Gift is TStarGift lg ? lg.Id : 0;
 
         // counters по атрибутам (model/pattern/backdrop)
@@ -112,16 +113,76 @@ public class ResaleMarketService : IResaleMarketService
         counters.AddRange(patternCounters);
         counters.AddRange(backdropCounters);
 
+        // вычислим hash атрибутов+счётчиков для кэш-валидации
+        var allAttrs = page.SelectMany(x => x.Attrs).ToList();
+        var hash = ComputeAttributesHash(allAttrs, counters);
+        var attrsOut = (attributesHash.HasValue && attributesHash.Value == hash)
+            ? new TVector<IStarGiftAttribute>()
+            : new TVector<IStarGiftAttribute>(allAttrs);
+        var countersOut = (attributesHash.HasValue && attributesHash.Value == hash)
+            ? new TVector<IStarGiftAttributeCounter>()
+            : new TVector<IStarGiftAttributeCounter>(counters);
+
         var result = new TResaleStarGifts
         {
             Gifts = new TVector<IStarGift>(page.Select(x => x.Gift).ToList()),
-            Attributes = new TVector<IStarGiftAttribute>(page.SelectMany(x => x.Attrs).ToList()),
-            Counters = new TVector<IStarGiftAttributeCounter>(counters),
+            Attributes = attrsOut,
+            Counters = countersOut,
             Users = new TVector<IUser>(),
             Chats = new TVector<IChat>(),
-            NextOffset = lastId > 0 ? lastId.ToString() : null
+            NextOffset = page.Count == take && lastId > 0 ? lastId.ToString() : null
         };
         return Task.FromResult<IResaleStarGifts>(result);
+    }
+
+    private static long ComputeAttributesHash(IEnumerable<IStarGiftAttribute> attrs, IEnumerable<IStarGiftAttributeCounter> counters)
+    {
+        using var sha = System.Security.Cryptography.SHA256.Create();
+        void AddString(string s)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(s);
+            sha.TransformBlock(bytes, 0, bytes.Length, null, 0);
+        }
+
+        foreach (var a in attrs)
+        {
+            switch (a)
+            {
+                case TStarGiftAttributeModel m:
+                    AddString($"m:{m.Model}");
+                    break;
+                case TStarGiftAttributePattern p:
+                    AddString($"p:{p.Pattern}");
+                    break;
+                case TStarGiftAttributeBackdrop b:
+                    AddString($"b:{b.Backdrop}");
+                    break;
+                case TStarGiftAttributeOriginalDetails od:
+                    AddString($"o:{od.Url}");
+                    break;
+            }
+        }
+
+        foreach (var c in counters)
+        {
+            switch (c.Attribute)
+            {
+                case TStarGiftAttributeIdModel m:
+                    AddString($"cm:{m.Model}:{c.Count}");
+                    break;
+                case TStarGiftAttributeIdPattern p:
+                    AddString($"cp:{p.Pattern}:{c.Count}");
+                    break;
+                case TStarGiftAttributeIdBackdrop b:
+                    AddString($"cb:{b.Backdrop}:{c.Count}");
+                    break;
+            }
+        }
+
+        sha.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+        var hashBytes = sha.Hash!;
+        // первые 8 байт в Int64 (little-endian)
+        return System.BitConverter.ToInt64(hashBytes, 0);
     }
 
     public Task<bool> UpsertListingAsync(long userId, IInputSavedStarGift gift, long priceStars)
