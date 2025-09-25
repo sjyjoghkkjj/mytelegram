@@ -208,6 +208,26 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         return Task.FromResult<IStarGiftWithdrawalUrl>(new TStarGiftWithdrawalUrl { Url = url });
     }
 
+    public TStarGiftUpgradePreview BuildUpgradePreview(long userId, long giftId)
+    {
+        // Находим подарок среди сохранённых
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        var match = state.Gifts.Values.FirstOrDefault(x => x.Gift.Id == giftId);
+        if (match == null)
+        {
+            RpcErrors.RpcErrors400.BadRequest("STARGIFT_NOT_FOUND").ThrowRpcError();
+        }
+
+        // Для примера вернём модельный набор атрибутов как превью
+        var attrs = new TVector<IStarGiftAttribute>(new IStarGiftAttribute[]
+        {
+            new TStarGiftAttributeModel{ Model = "upgraded" },
+            new TStarGiftAttributePattern{ Pattern = "deluxe" },
+            new TStarGiftAttributeBackdrop{ Backdrop = "neon" }
+        });
+        return new TStarGiftUpgradePreview { SampleAttributes = attrs };
+    }
+
     public Task<bool> ConvertAsync(long userId, IInputSavedStarGift gift)
     {
         var key = GiftKey(gift);
