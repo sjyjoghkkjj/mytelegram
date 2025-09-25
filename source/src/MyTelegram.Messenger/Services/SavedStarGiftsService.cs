@@ -23,6 +23,9 @@ public interface ISavedStarGiftsService : ITransientDependency
 
     Task<bool> ConvertAsync(long userId, IInputSavedStarGift gift);
     Task<long> GetStarsBalanceAsync(long userId);
+
+    Task<IStarGiftCollection> CreateCollectionAsync(long userId, string title, TVector<IInputSavedStarGift> gifts);
+    Task<bool> DeleteCollectionAsync(long userId, string slug);
 }
 
 public class SavedStarGiftsService : ISavedStarGiftsService
@@ -108,6 +111,33 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         }
 
         return Task.FromResult<IStarGiftCollection>(collection);
+    }
+
+    public Task<IStarGiftCollection> CreateCollectionAsync(long userId, string title, TVector<IInputSavedStarGift> gifts)
+    {
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        var slug = Slugify(title);
+        if (state.Collections.ContainsKey(slug))
+        {
+            RpcErrors.RpcErrors400.BadRequest("COLLECTION_EXISTS").ThrowRpcError();
+        }
+        var coll = new TStarGiftCollection { Slug = slug, Title = title, Gifts = new TVector<ISavedStarGift>() };
+        foreach (var g in gifts)
+        {
+            var key = GiftKey(g);
+            if (state.Gifts.TryGetValue(key, out var saved))
+            {
+                coll.Gifts.Add(saved);
+            }
+        }
+        state.Collections[slug] = coll;
+        return Task.FromResult<IStarGiftCollection>(coll);
+    }
+
+    public Task<bool> DeleteCollectionAsync(long userId, string slug)
+    {
+        var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+        return Task.FromResult(state.Collections.TryRemove(slug, out _));
     }
 
     public Task<bool> TogglePinnedAsync(long userId, TVector<IInputSavedStarGift> gifts)
@@ -222,6 +252,15 @@ public class SavedStarGiftsService : ISavedStarGiftsService
     }
 
     private static long GiftKeyFromSaved(ISavedStarGift g) => g.Gift.Id;
+
+    private static string Slugify(string title)
+    {
+        var s = (title ?? string.Empty).Trim().ToLowerInvariant();
+        foreach (var c in System.IO.Path.GetInvalidFileNameChars()) s = s.Replace(c, '-');
+        s = string.Join('-', s.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        if (string.IsNullOrWhiteSpace(s)) s = $"collection-{Guid.NewGuid():N}";
+        return s;
+    }
 
     private class UserSaved
     {
