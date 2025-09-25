@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Auth;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Auth;
 
 ///<summary>
 /// Signs in a user with a validated phone number.
@@ -16,7 +16,9 @@
 internal sealed class SignInHandler(
     ICommandBus commandBus,
     ILogger<SignInHandler> logger,
-    IQueryProcessor queryProcessor)
+    IQueryProcessor queryProcessor,
+    IOptionsMonitor<MyTelegramMessengerServerOptions> options,
+    MyTelegram.Messenger.Services.IEmailCodeService emailCodes)
     : RpcResultObjectHandler<MyTelegram.Schema.Auth.RequestSignIn, MyTelegram.Schema.Auth.IAuthorization>
 {
     protected override async Task<MyTelegram.Schema.Auth.IAuthorization> HandleCoreAsync(IRequestInput input,
@@ -37,13 +39,39 @@ internal sealed class SignInHandler(
             userId = userReadModel.UserId;
         }
 
-        var command = new CheckSignInCodeCommand(AppCodeId.Create(obj.PhoneNumber.ToPhoneNumber(), obj.PhoneCodeHash),
-            input.ToRequestInfo() with { UserId = userId },
-            obj.PhoneCode ?? string.Empty,
-            userId
-        );
-
-        await commandBus.PublishAsync(command);
+        if (obj.EmailVerification != null)
+        {
+            // Email-based sign in: используем существующий pipeline — создаём EmailAppCodeId и проверяем код как app code
+            var emailCode = obj.EmailVerification switch
+            {
+                MyTelegram.Schema.TEmailVerificationCode c => c.Code,
+                _ => string.Empty
+            };
+            if (!options.CurrentValue.EnableEmailLogin)
+            {
+                RpcErrors.RpcErrors400.BadRequest("EMAIL_LOGIN_DISABLED").ThrowRpcError();
+            }
+            var verifiedEmail = await emailCodes.GetVerifiedEmailAsync(userId);
+            if (string.IsNullOrEmpty(verifiedEmail))
+            {
+                RpcErrors.RpcErrors400.BadRequest("EMAIL_NOT_VERIFIED").ThrowRpcError();
+            }
+            var emailAppCodeId = AppCodeId.CreateEmailAppCodeId(userId, input.AuthKeyId);
+            var emailSignInCommand = new CheckSignInCodeCommand(emailAppCodeId,
+                input.ToRequestInfo() with { UserId = userId },
+                emailCode,
+                userId);
+            await commandBus.PublishAsync(emailSignInCommand);
+        }
+        else
+        {
+            var command = new CheckSignInCodeCommand(AppCodeId.Create(obj.PhoneNumber.ToPhoneNumber(), obj.PhoneCodeHash),
+                input.ToRequestInfo() with { UserId = userId },
+                obj.PhoneCode ?? string.Empty,
+                userId
+            );
+            await commandBus.PublishAsync(command);
+        }
 
         return null!;
     }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using ReplyChannelMessageCompletedEvent = MyTelegram.Domain.Events.Messaging.ReplyChannelMessageCompletedEvent;
 
 namespace MyTelegram.Domain.Aggregates.Messaging;
@@ -30,7 +30,12 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     IApply<MessageUnpinnedEvent>,
     IApply<MessagePinnedUpdatedEvent>,
     IApply<OutboxMessageEditedEventV2>,
-    IApply<InboxMessageEditedEventV2>
+    IApply<InboxMessageEditedEventV2>,
+    IApply<MessageReactionAddedEvent>,
+    IApply<MessageReactionRemovedEvent>,
+    IApply<ScheduledMessageCreatedEvent>,
+    IApply<ScheduledMessageSentEvent>,
+    IApply<ScheduledMessageCancelledEvent>
 {
     public int EditDate { get; private set; }
     //public bool EditHide { get; private set; }
@@ -48,6 +53,8 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
     public ConcurrentDictionary<long, List<Reaction>> UserReactions { get; } = new();
 
     public bool IsDeleted { get; private set; }
+    public bool IsScheduled { get; private set; }
+    public int? ScheduledDate { get; private set; }
     public void Apply(ChannelMessageDeletedEvent aggregateEvent)
     {
     }
@@ -207,5 +214,81 @@ public class MessageState : AggregateState<MessageAggregate, MessageId, MessageS
         Edited = true;
 
         MessageItem = aggregateEvent.NewMessageItem;
+    }
+
+    public void Apply(MessageReactionAddedEvent aggregateEvent)
+    {
+        var reaction = new Reaction(aggregateEvent.Reaction);
+        var reactionId = reaction.GetReactionId();
+        
+        // Add to user reactions
+        if (!UserReactions.ContainsKey(aggregateEvent.UserId))
+        {
+            UserReactions[aggregateEvent.UserId] = new List<Reaction>();
+        }
+        
+        // Remove existing reaction from this user if any
+        UserReactions[aggregateEvent.UserId].RemoveAll(r => r.GetReactionId() == reactionId);
+        UserReactions[aggregateEvent.UserId].Add(reaction);
+        
+        // Update reaction counts
+        if (ReactionCounts.ContainsKey(reactionId))
+        {
+            ReactionCounts[reactionId].Count++;
+        }
+        else
+        {
+            ReactionCounts[reactionId] = new ReactionCount(reaction, 1, false);
+        }
+        
+        // Add to recent reactions if requested
+        if (aggregateEvent.AddToRecent)
+        {
+            RecentReactions.RemoveAll(r => r.GetReactionId() == reactionId);
+            RecentReactions.Add(reaction);
+        }
+    }
+
+    public void Apply(MessageReactionRemovedEvent aggregateEvent)
+    {
+        var reaction = new Reaction(aggregateEvent.Reaction);
+        var reactionId = reaction.GetReactionId();
+        
+        // Remove from user reactions
+        if (UserReactions.ContainsKey(aggregateEvent.UserId))
+        {
+            UserReactions[aggregateEvent.UserId].RemoveAll(r => r.GetReactionId() == reactionId);
+        }
+        
+        // Update reaction counts
+        if (ReactionCounts.ContainsKey(reactionId))
+        {
+            ReactionCounts[reactionId].Count--;
+            if (ReactionCounts[reactionId].Count <= 0)
+            {
+                ReactionCounts.TryRemove(reactionId, out _);
+            }
+        }
+    }
+
+    public void Apply(ScheduledMessageCreatedEvent aggregateEvent)
+    {
+        IsScheduled = true;
+        ScheduledDate = aggregateEvent.ScheduleDate;
+        MessageItem = aggregateEvent.MessageItem;
+    }
+
+    public void Apply(ScheduledMessageSentEvent aggregateEvent)
+    {
+        IsScheduled = false;
+        ScheduledDate = null;
+        // Message is now sent, so it becomes a regular message
+    }
+
+    public void Apply(ScheduledMessageCancelledEvent aggregateEvent)
+    {
+        IsScheduled = false;
+        ScheduledDate = null;
+        IsDeleted = true;
     }
 }

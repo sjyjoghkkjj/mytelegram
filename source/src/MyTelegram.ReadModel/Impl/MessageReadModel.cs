@@ -1,4 +1,4 @@
-﻿using MyTelegram.Schema.Extensions;
+using MyTelegram.Schema.Extensions;
 
 namespace MyTelegram.ReadModel.Impl;
 
@@ -392,6 +392,22 @@ public class MessageReadModel : IMessageReadModel,
     {
         Pinned = domainEvent.AggregateEvent.Pinned;
 
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<MessageAggregate, MessageId, MessageReactionAddedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        // Update reactions in read model
+        // This would typically involve updating the Reactions list
+        // and RecentReactions list based on the aggregate state
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<MessageAggregate, MessageId, MessageReactionRemovedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        // Update reactions in read model
+        // This would typically involve updating the Reactions list
+        // and RecentReactions list based on the aggregate state
         return Task.CompletedTask;
     }
 }

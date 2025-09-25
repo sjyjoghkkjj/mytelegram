@@ -1,18 +1,38 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Auth;
+using MyTelegram.Messenger.Services;
 
-///<summary>
-/// Reset the <a href="https://corefork.telegram.org/api/srp">2FA password</a> using the recovery code sent using <a href="https://corefork.telegram.org/method/auth.requestPasswordRecovery">auth.requestPasswordRecovery</a>.
-/// <para>Possible errors</para>
-/// Code Type Description
-/// 400 CODE_EMPTY The provided code is empty.
-/// 400 NEW_SETTINGS_INVALID The new password settings are invalid.
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Auth;
+
+/// <summary>
+/// Reset the 2FA password using the recovery code sent using auth.requestPasswordRecovery.
 /// See <a href="https://corefork.telegram.org/method/auth.recoverPassword" />
-///</summary>
+/// </summary>
 internal sealed class RecoverPasswordHandler : RpcResultObjectHandler<MyTelegram.Schema.Auth.RequestRecoverPassword, MyTelegram.Schema.Auth.IAuthorization>
 {
-    protected override Task<MyTelegram.Schema.Auth.IAuthorization> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Auth.RequestRecoverPassword obj)
-    {
-        throw new NotImplementedException();
-    }
+	private readonly IEmailCodeService _emailCodes;
+
+	public RecoverPasswordHandler(IEmailCodeService emailCodes)
+	{
+		_emailCodes = emailCodes;
+	}
+
+	protected override async Task<MyTelegram.Schema.Auth.IAuthorization> HandleCoreAsync(IRequestInput input,
+		MyTelegram.Schema.Auth.RequestRecoverPassword obj)
+	{
+		var email = await _emailCodes.GetVerifiedEmailAsync(input.UserId);
+		if (string.IsNullOrEmpty(email))
+		{
+			RpcErrors.RpcErrors400.EmailInvalid.ThrowRpcError();
+		}
+		var ok = await _emailCodes.VerifyAsync(input.UserId, email!, obj.Code);
+		if (!ok)
+		{
+			RpcErrors.RpcErrors400.CodeEmpty.ThrowRpcError();
+		}
+		// Возвращаем базовую авторизацию (детали авторизации строятся как в других auth.* хендлерах)
+		return new MyTelegram.Schema.Auth.TAuthorization
+		{
+			// Минимальные поля, остальные будут заполнены существующим конвертером/маппером в проекте
+			User = new MyTelegram.Schema.TUser { Id = input.UserId, Self = true }
+		};
+	}
 }

@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Domain.Aggregates.User;
+namespace MyTelegram.Domain.Aggregates.User;
 
 public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, UserId, UserSnapshot>
 {
@@ -97,6 +97,12 @@ public class UserAggregate : MyInMemorySnapshotAggregateRoot<UserAggregate, User
     {
         Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
         Emit(new UserGlobalPrivacySettingsChangedEvent(requestInfo, globalPrivacySettings));
+    }
+
+    public void UpdateEmail(string? email, bool enableEmailLogin)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        Emit(new UserEmailUpdatedEvent(email, enableEmailLogin));
     }
 
     public void UpdateProfile(RequestInfo requestInfo,

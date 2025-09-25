@@ -1,4 +1,4 @@
-﻿using MyTelegram.Domain.Extensions;
+using MyTelegram.Domain.Extensions;
 
 namespace MyTelegram.ReadModel.Impl;
 
@@ -19,7 +19,8 @@ public class UserReadModel : IUserReadModel,
     IAmReadModelFor<UserAggregate, UserId, PersonalChannelUpdatedEvent>,
     IAmReadModelFor<UserAggregate, UserId, BirthdayUpdatedEvent>,
     IAmReadModelFor<UserAggregate, UserId, UserAboutUpdatedEvent>,
-    IAmReadModelFor<UserAggregate, UserId, UserFirstNameUpdatedEvent>
+    IAmReadModelFor<UserAggregate, UserId, UserFirstNameUpdatedEvent>,
+    IAmReadModelFor<UserAggregate, UserId, UserEmailUpdatedEvent>
 {
     public virtual string? About { get; private set; }
     public virtual long AccessHash { get; private set; }
@@ -60,6 +61,7 @@ public class UserReadModel : IUserReadModel,
     public virtual long UserId { get; set; }
     //public string UserId { get; private set; }
     public virtual string? UserName { get; private set; }
+    public bool EnableEmailLogin { get; private set; }
 
     public List<string>? Usernames { get; private set; }
     public int? UserNameUpdateDate { get; private set; }
@@ -251,6 +253,13 @@ public class UserReadModel : IUserReadModel,
     {
         FirstName = domainEvent.AggregateEvent.FirstName;
 
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyAsync(IReadModelContext context, IDomainEvent<UserAggregate, UserId, UserEmailUpdatedEvent> domainEvent, CancellationToken cancellationToken)
+    {
+        Email = domainEvent.AggregateEvent.Email;
+        EnableEmailLogin = domainEvent.AggregateEvent.EnableEmailLogin;
         return Task.CompletedTask;
     }
 

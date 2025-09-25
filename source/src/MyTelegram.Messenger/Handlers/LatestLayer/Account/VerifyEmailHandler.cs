@@ -1,18 +1,33 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
+using MyTelegram.Messenger.Services;
 
-///<summary>
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
+
+/// <summary>
 /// Verify an email address.
-/// <para>Possible errors</para>
-/// Code Type Description
-/// 400 EMAIL_INVALID The specified email is invalid.
-/// 400 EMAIL_VERIFY_EXPIRED The verification email has expired.
 /// See <a href="https://corefork.telegram.org/method/account.verifyEmail" />
-///</summary>
+/// </summary>
 internal sealed class VerifyEmailHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestVerifyEmail, MyTelegram.Schema.Account.IEmailVerified>
 {
-    protected override Task<MyTelegram.Schema.Account.IEmailVerified> HandleCoreAsync(IRequestInput input,
-        MyTelegram.Schema.Account.RequestVerifyEmail obj)
-    {
-        throw new NotImplementedException();
-    }
+	private readonly IEmailCodeService _emailCodes;
+	private readonly ICommandBus _commandBus;
+
+	public VerifyEmailHandler(IEmailCodeService emailCodes, ICommandBus commandBus)
+	{
+		_emailCodes = emailCodes;
+		_commandBus = commandBus;
+	}
+
+	protected override async Task<MyTelegram.Schema.Account.IEmailVerified> HandleCoreAsync(IRequestInput input,
+		MyTelegram.Schema.Account.RequestVerifyEmail obj)
+	{
+		var ok = await _emailCodes.VerifyAsync(input.UserId, obj.Email, obj.Code);
+		if (!ok)
+		{
+			RpcErrors.RpcErrors400.EmailVerifyExpired.ThrowRpcError();
+		}
+		await _emailCodes.SetVerifiedEmailAsync(input.UserId, obj.Email);
+		await _emailCodes.SetEmailLoginEnabledAsync(input.UserId, true);
+		await _commandBus.PublishAsync(new UpdateEmailCommand(UserId.Create(input.UserId), obj.Email, true));
+		return new MyTelegram.Schema.Account.TEmailVerifiedLogin { Email = obj.Email };
+	}
 }
