@@ -194,6 +194,10 @@ public class DocumentReadModel : Impl.DocumentReadModel, IMongoDbReadModel
 {
 }
 
+public class StoryReactionReadModel : Impl.StoryReactionReadModel, IMongoDbReadModel
+{
+}
+
 // public class ThemeReadModel : Impl.ThemeReadModel, IMongoDbReadModel
 // {
 //
