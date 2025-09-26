@@ -101,6 +101,19 @@ public partial class MessageDomainEventHandler(
 
         await PushUpdatesToPeerAsync(new Peer(message.ToPeerType, ownerPeerId), updates);
         await PushUpdatesToPeerAsync(toPeer, updates);
+
+        // Notify bots (basic): if message is in a channel and reactions are anonymous/public
+        if (message.ToPeerType == PeerType.Channel)
+        {
+            // Simplified bot update: send TUpdateBotMessageReactions (anonymous totals)
+            var botUpdate = new TUpdateBotMessageReactions
+            {
+                ChannelId = message.ToPeerId,
+                MsgId = msgId,
+                Reactions = msgReactions
+            };
+            await PushUpdatesToPeerAsync(toPeer, new TUpdates { Updates = new TVector<IUpdate>(botUpdate), Users = [], Chats = [], Date = DateTime.UtcNow.ToTimestamp() });
+        }
     }
 
     private static (long, int) ParseMessageId(string id)
