@@ -90,7 +90,7 @@ internal sealed class SendReactionHandler(
             return new TUpdates { Updates = [], Chats = [], Users = [], Date = CurrentDate };
         }
 
-        var userReactions = await queryProcessor.ProcessAsync(new GetMessageReactionsListQuery(input.UserId, toPeer, obj.MsgId, null, 0, 100));
+        var userReactions = await queryProcessor.ProcessAsync(new GetMessageReactionsListQuery(input.UserId, toPeer, obj.MsgId, null, 0, 1000));
         var counts = new Dictionary<long, (IReaction reaction, int count)>();
         foreach (var ur in userReactions)
         {

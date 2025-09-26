@@ -16,12 +16,12 @@ public class UserReactionReadModel : IUserReactionReadModel,
         CancellationToken cancellationToken)
     {
         var e = domainEvent.AggregateEvent;
-        // Compose deterministic id: ownerPeerId_messageId_userId_reactionId
-        var reaction = new Reaction(e.Reaction);
-        Id = $"{e.OwnerPeerId}_{e.MessageId}_{e.UserId}_{reaction.GetReactionId()}";
+        var (ownerPeerId, msgId) = ParseAggregateIdentity(domainEvent.AggregateIdentity.Value);
+        var reaction = ToDomainReaction(e.Reaction, e.UserId, DateTime.UtcNow.ToTimestamp());
+        Id = $"{ownerPeerId}_{msgId}_{e.UserId}_{reaction.GetReactionId()}";
         UserId = e.UserId;
-        PeerId = e.OwnerPeerId;
-        MessageId = e.MessageId;
+        PeerId = ownerPeerId;
+        MessageId = msgId;
         ReactionId = reaction.GetReactionId();
         Reaction = reaction;
         return Task.CompletedTask;
@@ -32,10 +32,38 @@ public class UserReactionReadModel : IUserReactionReadModel,
         CancellationToken cancellationToken)
     {
         var e = domainEvent.AggregateEvent;
-        var reaction = new Reaction(e.Reaction);
-        var id = $"{e.OwnerPeerId}_{e.MessageId}_{e.UserId}_{reaction.GetReactionId()}";
+        var (ownerPeerId, msgId) = ParseAggregateIdentity(domainEvent.AggregateIdentity.Value);
+        var reaction = ToDomainReaction(e.Reaction, e.UserId, DateTime.UtcNow.ToTimestamp());
+        var id = $"{ownerPeerId}_{msgId}_{e.UserId}_{reaction.GetReactionId()}";
         context.MarkForDeletion(id);
         return Task.CompletedTask;
+    }
+
+    private static (long ownerPeerId, int messageId) ParseAggregateIdentity(string aggregateId)
+    {
+        // message_{ownerPeerId}_{messageId} or quick_reply_message_{ownerPeerId}_{messageId}
+        var parts = aggregateId.Split('_');
+        if (parts.Length < 3) return (0, 0);
+        if (long.TryParse(parts[^2], out var owner) && int.TryParse(parts[^1], out var msg))
+        {
+            return (owner, msg);
+        }
+        return (0, 0);
+    }
+
+    private static Reaction ToDomainReaction(MyTelegram.Schema.IReaction reaction, long userId, int? date)
+    {
+        switch (reaction)
+        {
+            case MyTelegram.Schema.TReactionEmoji r:
+                return new Reaction(userId, r.Emoticon, null, date);
+            case MyTelegram.Schema.TReactionCustomEmoji r:
+                return new Reaction(userId, null, r.DocumentId, date);
+            case MyTelegram.Schema.TReactionPaid:
+                return new Reaction(userId, null, null, date);
+            default:
+                return new Reaction(userId, null, null, date);
+        }
     }
 }
 
