@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.ReadModel.MongoDB;
+namespace MyTelegram.ReadModel.MongoDB;
 
 public class AppCodeReadModel : Impl.AppCodeReadModel, IMongoDbReadModel
 {
@@ -146,9 +146,9 @@ public class PollAnswerVoterReadModel : Impl.PollAnswerVoterReadModel, IMongoDbR
 //{
 //}
 
-//public class UserReactionReadModel : Impl.UserReactionReadModel, IMongoDbReadModel
-//{
-//}
+public class UserReactionReadModel : Impl.UserReactionReadModel, IMongoDbReadModel
+{
+}
 
 //public class ForumTopicReadModel : Impl.ForumTopicReadModel, IMongoDbReadModel
 //{
@@ -191,6 +191,10 @@ public class UpdatesReadModel : Impl.UpdatesReadModel, IMongoDbReadModel
 //}
 
 public class DocumentReadModel : Impl.DocumentReadModel, IMongoDbReadModel
+{
+}
+
+public class StoryReactionReadModel : Impl.StoryReactionReadModel, IMongoDbReadModel
 {
 }
 

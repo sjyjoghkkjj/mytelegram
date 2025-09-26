@@ -397,17 +397,48 @@ public class MessageReadModel : IMessageReadModel,
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<MessageAggregate, MessageId, MessageReactionAddedEvent> domainEvent, CancellationToken cancellationToken)
     {
-        // Update reactions in read model
-        // This would typically involve updating the Reactions list
-        // and RecentReactions list based on the aggregate state
+        var reaction = new Reaction(domainEvent.AggregateEvent.Reaction);
+        var reactionId = reaction.GetReactionId();
+
+        Reactions ??= [];
+        var existing = Reactions.FirstOrDefault(r => r.GetReactionId() == reactionId);
+        if (existing != null)
+        {
+            existing.Count++;
+        }
+        else
+        {
+            Reactions.Add(new ReactionCount(reaction, 1, reaction.Emoticon, reaction.CustomEmojiDocumentId));
+        }
+
+        if (domainEvent.AggregateEvent.AddToRecent)
+        {
+            RecentReactions ??= [];
+            RecentReactions.RemoveAll(r => r.GetReactionId() == reactionId);
+            RecentReactions.Add(reaction);
+        }
+
         return Task.CompletedTask;
     }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<MessageAggregate, MessageId, MessageReactionRemovedEvent> domainEvent, CancellationToken cancellationToken)
     {
-        // Update reactions in read model
-        // This would typically involve updating the Reactions list
-        // and RecentReactions list based on the aggregate state
+        var reaction = new Reaction(domainEvent.AggregateEvent.Reaction);
+        var reactionId = reaction.GetReactionId();
+
+        if (Reactions != null)
+        {
+            var existing = Reactions.FirstOrDefault(r => r.GetReactionId() == reactionId);
+            if (existing != null)
+            {
+                existing.Count--;
+                if (existing.Count <= 0)
+                {
+                    Reactions.Remove(existing);
+                }
+            }
+        }
+
         return Task.CompletedTask;
     }
 }
