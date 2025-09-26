@@ -1,4 +1,4 @@
-﻿using MyTelegram.Schema.Stories;
+using MyTelegram.Schema.Stories;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Stories;
 
@@ -10,11 +10,6 @@ internal sealed class GetStoryReactionsListHandler : RpcResultObjectHandler<MyTe
     protected override Task<MyTelegram.Schema.Stories.IStoryReactionsList> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestGetStoryReactionsList obj)
     {
-        return Task.FromResult<IStoryReactionsList>(new TStoryReactionsList
-        {
-            Chats = [],
-            Users = [],
-            Reactions = []
-        });
+        return Task.FromResult<IStoryReactionsList>(new TStoryReactionsList { Chats = [], Users = [], Reactions = [] });
     }
 }

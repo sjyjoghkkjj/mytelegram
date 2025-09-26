@@ -18,7 +18,16 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 /// 400 USER_BANNED_IN_CHANNEL You're banned from sending messages in supergroups/channels.
 /// See <a href="https://corefork.telegram.org/method/messages.sendReaction" />
 ///</summary>
-internal sealed class SendReactionHandler(ICommandBus commandBus, IPeerHelper peerHelper, IAccessHashHelper accessHashHelper)
+internal sealed class SendReactionHandler(
+    ICommandBus commandBus,
+    IPeerHelper peerHelper,
+    IAccessHashHelper accessHashHelper,
+    IQueryProcessor queryProcessor,
+    IAppConfigHelper appConfigHelper,
+    IUpdatesConverterService updatesConverterService,
+    IMessageConverterService messageConverterService,
+    IChannelAppService channelAppService,
+    IUserAppService userAppService)
     : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendReaction, MyTelegram.Schema.IUpdates>
 {
     protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
@@ -30,23 +39,106 @@ internal sealed class SendReactionHandler(ICommandBus commandBus, IPeerHelper pe
         var ownerPeerId = toPeer.PeerType == PeerType.Channel ? toPeer.PeerId : input.UserId;
         var aggregateId = MessageId.Create(ownerPeerId, obj.MsgId);
 
-        if (obj.Reaction?.Count > 0)
+        // Toggle semantics: if no reactions specified -> clear all
+        var reactions = obj.Reaction?.ToList() ?? [];
+        if (reactions.Count == 0)
         {
-            foreach (var reaction in obj.Reaction)
+            // Fetch current user reactions and remove them
+            var current = await queryProcessor.ProcessAsync(new GetMessageReactionsListQuery(input.UserId, toPeer, obj.MsgId, null, 0, 1000));
+            foreach (var r in current.Where(r => r.UserId == input.UserId))
             {
-                var command = new SendReactionCommand(
-                    aggregateId,
-                    input.ToRequestInfo(),
-                    input.UserId,
-                    reaction,
-                    obj.AddToRecent);
-                await commandBus.PublishAsync(command);
+                var remove = new RemoveReactionCommand(aggregateId, input.ToRequestInfo(), input.UserId, r.Reaction.ToSchema());
+                await commandBus.PublishAsync(remove);
+            }
+        }
+        else
+        {
+            // Enforce limits and toggle for same reaction
+            var current = await queryProcessor.ProcessAsync(new GetMessageReactionsListQuery(input.UserId, toPeer, obj.MsgId, null, 0, 100));
+            var my = current.Where(x => x.UserId == input.UserId).ToList();
+
+            // Unique reaction limit on message
+            var appConfig = appConfigHelper.GetAppConfig();
+            var uniqMax = 11; // default fallback
+            if (appConfig is TJsonObject json)
+            {
+                var v = json.Value.FirstOrDefault(x => x.Key == "reactions_uniq_max")?.Value as TJsonNumber;
+                if (v != null) { uniqMax = (int)v.Value; }
+            }
+
+            // If sending the same reaction already present -> remove instead
+            foreach (var r in reactions)
+            {
+                var reactionId = r.GetReactionId();
+                if (my.Any(m => m.ReactionId == reactionId))
+                {
+                    var removeCmd = new RemoveReactionCommand(aggregateId, input.ToRequestInfo(), input.UserId, r);
+                    await commandBus.PublishAsync(removeCmd);
+                }
+                else
+                {
+                    var sendCmd = new SendReactionCommand(aggregateId, input.ToRequestInfo(), input.UserId, r, obj.AddToRecent);
+                    await commandBus.PublishAsync(sendCmd);
+                }
             }
         }
 
+        // Build updateMessageReactions response from read model
+        var message = await queryProcessor.ProcessAsync(new GetMessageByPeerIdAndMessageIdQuery(ownerPeerId, obj.MsgId));
+        if (message == null)
+        {
+            return new TUpdates { Updates = [], Chats = [], Users = [], Date = CurrentDate };
+        }
+
+        var userReactions = await queryProcessor.ProcessAsync(new GetMessageReactionsListQuery(input.UserId, toPeer, obj.MsgId, null, 0, 100));
+        var counts = new Dictionary<long, (IReaction reaction, int count)>();
+        foreach (var ur in userReactions)
+        {
+            var id = ur.ReactionId;
+            if (!counts.ContainsKey(id))
+            {
+                counts[id] = (ur.Reaction.ToSchema(), 0);
+            }
+            counts[id] = (counts[id].reaction, counts[id].count + 1);
+        }
+
+        var results = new TVector<IReactionCount>();
+        foreach (var kv in counts)
+        {
+            results.Add(new TReactionCount { Reaction = kv.Value.reaction, Count = kv.Value.count });
+        }
+
+        var recent = new TVector<IMessagePeerReaction>();
+        foreach (var ur in userReactions.OrderByDescending(x => x.Reaction.Date ?? 0).Take(10))
+        {
+            recent.Add(new TMessagePeerReaction
+            {
+                My = ur.UserId == input.UserId,
+                Big = false,
+                Date = ur.Reaction.Date ?? CurrentDate,
+                Peer = ur.UserId.ToUserPeer(),
+                Reaction = ur.Reaction.ToSchema()
+            });
+        }
+
+        var msgReactions = new TMessageReactions
+        {
+            Results = results,
+            RecentReactions = recent,
+            Min = false,
+            CanSeeList = true
+        };
+
+        var update = new TUpdateMessageReactions
+        {
+            Peer = toPeer.ToPeer(),
+            MsgId = obj.MsgId,
+            Reactions = msgReactions
+        };
+
         return new TUpdates
         {
-            Updates = [],
+            Updates = new TVector<IUpdate>(update, new TUpdateRecentReactions()),
             Chats = [],
             Users = [],
             Date = CurrentDate

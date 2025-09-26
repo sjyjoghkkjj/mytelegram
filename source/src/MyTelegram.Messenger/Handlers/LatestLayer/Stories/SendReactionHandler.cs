@@ -8,12 +8,12 @@ internal sealed class SendReactionHandler : RpcResultObjectHandler<MyTelegram.Sc
     protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestSendReaction obj)
     {
-        return Task.FromResult<IUpdates>(new TUpdates
+        var update = new TUpdateSentStoryReaction
         {
-            Updates = [],
-            Chats = [],
-            Users = [],
-            Date = CurrentDate
-        });
+            Peer = obj.Peer,
+            StoryId = obj.StoryId,
+            Reaction = obj.Reaction
+        };
+        return Task.FromResult<IUpdates>(new TUpdates { Updates = new TVector<IUpdate>(update), Chats = [], Users = [], Date = CurrentDate });
     }
 }
