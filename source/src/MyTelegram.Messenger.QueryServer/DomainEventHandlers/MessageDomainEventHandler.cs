@@ -1,4 +1,4 @@
-﻿using MyTelegram.Messenger.Services.Caching;
+using MyTelegram.Messenger.Services.Caching;
 using MyTelegram.Messenger.Services.Interfaces;
 
 namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
@@ -30,7 +30,9 @@ public partial class MessageDomainEventHandler(
         ISubscribeSynchronousTo<MessageAggregate, MessageId, ChannelMessagePinnedEvent>,
         ISubscribeSynchronousTo<MessageAggregate, MessageId, MessageReplyUpdatedEvent>,
         ISubscribeSynchronousTo<SendMessageSaga, SendMessageSagaId, SendOutboxMessageCompletedSagaEvent>,
-        ISubscribeSynchronousTo<SendMessageSaga, SendMessageSagaId, ReceiveInboxMessageCompletedSagaEvent>
+        ISubscribeSynchronousTo<SendMessageSaga, SendMessageSagaId, ReceiveInboxMessageCompletedSagaEvent>,
+        ISubscribeSynchronousTo<MessageAggregate, MessageId, MessageReactionAddedEvent>,
+        ISubscribeSynchronousTo<MessageAggregate, MessageId, MessageReactionRemovedEvent>
 {
     public Task HandleAsync(
         IDomainEvent<EditMessageSaga, EditMessageSagaId, InboxMessageEditCompletedSagaEvent> domainEvent,
@@ -43,6 +45,73 @@ public partial class MessageDomainEventHandler(
             pts: domainEvent.AggregateEvent.NewMessageItem.Pts,
             updatesType: UpdatesType.Updates
         );
+    }
+
+    public async Task HandleAsync(IDomainEvent<MessageAggregate, MessageId, MessageReactionAddedEvent> domainEvent,
+        CancellationToken cancellationToken)
+    {
+        await PushMessageReactionsUpdateAsync(domainEvent);
+    }
+
+    public async Task HandleAsync(IDomainEvent<MessageAggregate, MessageId, MessageReactionRemovedEvent> domainEvent,
+        CancellationToken cancellationToken)
+    {
+        await PushMessageReactionsUpdateAsync(domainEvent);
+    }
+
+    private async Task PushMessageReactionsUpdateAsync<TEvent>(IDomainEvent<MessageAggregate, MessageId, TEvent> domainEvent)
+        where TEvent : class, IAggregateEvent
+    {
+        var (ownerPeerId, msgId) = ParseMessageId(domainEvent.AggregateIdentity.Value);
+        if (ownerPeerId == 0 || msgId == 0) return;
+
+        var message = await queryProcessor.ProcessAsync(new GetMessageByPeerIdAndMessageIdQuery(ownerPeerId, msgId));
+        if (message == null) return;
+
+        var toPeer = new Peer(message.ToPeerType, message.ToPeerId);
+        var selfUserId = 0L;
+
+        var reactionsRead = await queryProcessor.ProcessAsync(new GetMessageReactionsListQuery(selfUserId, toPeer, msgId, null, 0, 1000));
+        var counts = reactionsRead.GroupBy(x => x.ReactionId)
+            .Select(g => (reaction: g.First().Reaction.ToSchema(), count: g.Count())).ToList();
+        var results = new TVector<IReactionCount>(counts.Select(c => (IReactionCount)new TReactionCount { Reaction = c.reaction, Count = c.count }));
+
+        var recent = new TVector<IMessagePeerReaction>(reactionsRead
+            .OrderByDescending(x => x.Reaction.Date ?? 0)
+            .Take(10)
+            .Select(ur => (IMessagePeerReaction)new TMessagePeerReaction
+            {
+                My = false,
+                Big = false,
+                Date = ur.Reaction.Date ?? DateTime.UtcNow.ToTimestamp(),
+                Peer = ur.UserId.ToUserPeer(),
+                Reaction = ur.Reaction.ToSchema()
+            }));
+
+        var msgReactions = new TMessageReactions
+        {
+            Results = results,
+            RecentReactions = recent,
+            CanSeeList = true,
+            Min = false
+        };
+
+        var update = new TUpdateMessageReactions { Peer = toPeer.ToPeer(), MsgId = msgId, Reactions = msgReactions };
+        var updates = new TUpdates { Updates = new TVector<IUpdate>(update), Users = [], Chats = [], Date = DateTime.UtcNow.ToTimestamp() };
+
+        await PushUpdatesToPeerAsync(new Peer(message.ToPeerType, ownerPeerId), updates);
+        await PushUpdatesToPeerAsync(toPeer, updates);
+    }
+
+    private static (long, int) ParseMessageId(string id)
+    {
+        var parts = id.Split('_');
+        if (parts.Length < 3) return (0, 0);
+        if (long.TryParse(parts[^2], out var owner) && int.TryParse(parts[^1], out var msg))
+        {
+            return (owner, msg);
+        }
+        return (0, 0);
     }
 
     public async Task HandleAsync(
