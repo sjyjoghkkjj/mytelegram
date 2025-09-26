@@ -3,13 +3,32 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Stories;
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/stories.sendReaction" />
 ///</summary>
-internal sealed class SendReactionHandler(IQueryProcessor queryProcessor, IAppConfigHelper appConfigHelper, IObjectMessageSender objectMessageSender) : RpcResultObjectHandler<MyTelegram.Schema.Stories.RequestSendReaction, MyTelegram.Schema.IUpdates>
+internal sealed class SendReactionHandler(
+    IQueryProcessor queryProcessor,
+    IAppConfigHelper appConfigHelper,
+    IObjectMessageSender objectMessageSender,
+    IMyMongoDbReadModelStore<StoryReactionReadModel> storyReactionStore
+) : RpcResultObjectHandler<MyTelegram.Schema.Stories.RequestSendReaction, MyTelegram.Schema.IUpdates>
 {
     protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestSendReaction obj)
     {
-        // Persist to StoryReactionReadModel via object message bus (simulate domain event)
-        // For now, directly emit update; storage handlers can be added similarly to messages
+        // Persist reaction (simple upsert semantics)
+        var ownerPeerId = input.UserId; // story owner resolution could vary; using current for demo
+        var userId = input.UserId;
+        var date = CurrentDate;
+        var id = $"{ownerPeerId}_{obj.StoryId}_{userId}";
+        await storyReactionStore.InsertAsync(new StoryReactionReadModel
+        {
+            Id = id,
+            OwnerPeerId = ownerPeerId,
+            StoryId = obj.StoryId,
+            UserId = userId,
+            Date = date,
+            Reaction = new Reaction(userId, (obj.Reaction as TReactionEmoji)?.Emoticon, (obj.Reaction as TReactionCustomEmoji)?.DocumentId, date)
+        }, default);
+
+        // Send updates
         var update = new TUpdateSentStoryReaction
         {
             Peer = obj.Peer,
