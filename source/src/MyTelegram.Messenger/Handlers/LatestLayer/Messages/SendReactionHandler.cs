@@ -39,6 +39,32 @@ internal sealed class SendReactionHandler(
         var ownerPeerId = toPeer.PeerType == PeerType.Channel ? toPeer.PeerId : input.UserId;
         var aggregateId = MessageId.Create(ownerPeerId, obj.MsgId);
 
+        // Rights & limits
+        if (toPeer.PeerType == PeerType.Channel)
+        {
+            var channel = await channelAppService.GetAsync(toPeer.PeerId);
+            var member = channel.AdminList.FirstOrDefault(a => a.UserId == input.UserId);
+            if (channel.DefaultBannedRights?.SendReactions ?? false)
+            {
+                RpcErrors.RpcErrors403.ChatWriteForbidden.ThrowRpcError();
+            }
+            if (member != null && member.AdminRights.Anonymous)
+            {
+                RpcErrors.RpcErrors403.AnonymousReactionsDisabled.ThrowRpcError();
+            }
+        }
+        var requester = await userAppService.GetAsync(input.UserId);
+        var isPremium = requester.Premium;
+        var reactionsUserMax = isPremium ? 3 : 1;
+        var appCfg = appConfigHelper.GetAppConfig();
+        if (appCfg is TJsonObject json2)
+        {
+            var prem = json2.Value.FirstOrDefault(x => x.Key == "reactions_user_max_premium")?.Value as TJsonNumber;
+            var def = json2.Value.FirstOrDefault(x => x.Key == "reactions_user_max_default")?.Value as TJsonNumber;
+            if (prem != null && isPremium) reactionsUserMax = (int)prem.Value;
+            if (def != null && !isPremium) reactionsUserMax = (int)def.Value;
+        }
+
         // Toggle semantics: if no reactions specified -> clear all
         var reactions = obj.Reaction?.ToList() ?? [];
         if (reactions.Count == 0)
@@ -77,6 +103,10 @@ internal sealed class SendReactionHandler(
                 }
                 else
                 {
+                    if (my.Count >= reactionsUserMax)
+                    {
+                        RpcErrors.RpcErrors400.ReactionsTooMany.ThrowRpcError();
+                    }
                     var sendCmd = new SendReactionCommand(aggregateId, input.ToRequestInfo(), input.UserId, r, obj.AddToRecent);
                     await commandBus.PublishAsync(sendCmd);
                 }
