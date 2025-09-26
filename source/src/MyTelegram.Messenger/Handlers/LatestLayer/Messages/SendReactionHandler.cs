@@ -91,6 +91,25 @@ internal sealed class SendReactionHandler(
                 var v = json.Value.FirstOrDefault(x => x.Key == "reactions_uniq_max")?.Value as TJsonNumber;
                 if (v != null) { uniqMax = (int)v.Value; }
             }
+            if (toPeer.PeerType == PeerType.Channel)
+            {
+                var channelFull = await queryProcessor.ProcessAsync(new GetChannelFullByIdQuery(toPeer.PeerId));
+                if (channelFull?.ReactionsLimit.HasValue ?? false)
+                {
+                    uniqMax = channelFull.ReactionsLimit.Value;
+                }
+                if (channelFull?.AvailableReactions != null && channelFull.AvailableReactions.Count > 0)
+                {
+                    // allow only configured reactions in this chat
+                    foreach (var r in reactions)
+                    {
+                        if (r is TReactionEmoji re && !channelFull.AvailableReactions.Contains(re.Emoticon))
+                        {
+                            RpcErrors.RpcErrors400.ReactionInvalid.ThrowRpcError();
+                        }
+                    }
+                }
+            }
 
             // If sending the same reaction already present -> remove instead
             foreach (var r in reactions)
@@ -104,6 +123,18 @@ internal sealed class SendReactionHandler(
                 else
                 {
                     if (my.Count >= reactionsUserMax)
+                    {
+                        RpcErrors.RpcErrors400.ReactionsTooMany.ThrowRpcError();
+                    }
+                    // check uniqMax: count unique reactions on message
+                    var all = await queryProcessor.ProcessAsync(new GetMessageReactionsListQuery(input.UserId, toPeer, obj.MsgId, null, 0, 1000));
+                    var currentUnique = all.Select(a => a.ReactionId).Distinct().Count();
+                    var newUnique = currentUnique;
+                    if (!all.Any(a => a.ReactionId == reactionId))
+                    {
+                        newUnique++;
+                    }
+                    if (newUnique > uniqMax)
                     {
                         RpcErrors.RpcErrors400.ReactionsTooMany.ThrowRpcError();
                     }
