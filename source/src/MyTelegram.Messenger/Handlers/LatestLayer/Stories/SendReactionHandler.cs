@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Stories;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Stories;
 
 ///<summary>
 /// See <a href="https://corefork.telegram.org/method/stories.sendReaction" />
@@ -8,6 +8,12 @@ internal sealed class SendReactionHandler : RpcResultObjectHandler<MyTelegram.Sc
     protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Stories.RequestSendReaction obj)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IUpdates>(new TUpdates
+        {
+            Updates = [],
+            Chats = [],
+            Users = [],
+            Date = CurrentDate
+        });
     }
 }

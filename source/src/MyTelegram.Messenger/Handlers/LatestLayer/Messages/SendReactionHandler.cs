@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// React to message.Starting from layer 159, the reaction will be sent from the peer specified using <a href="https://corefork.telegram.org/method/messages.saveDefaultSendAs">messages.saveDefaultSendAs</a>.
@@ -18,11 +18,38 @@
 /// 400 USER_BANNED_IN_CHANNEL You're banned from sending messages in supergroups/channels.
 /// See <a href="https://corefork.telegram.org/method/messages.sendReaction" />
 ///</summary>
-internal sealed class SendReactionHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendReaction, MyTelegram.Schema.IUpdates>
+internal sealed class SendReactionHandler(ICommandBus commandBus, IPeerHelper peerHelper, IAccessHashHelper accessHashHelper)
+    : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendReaction, MyTelegram.Schema.IUpdates>
 {
-    protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSendReaction obj)
     {
-        throw new NotImplementedException();
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+
+        var toPeer = peerHelper.GetPeer(obj.Peer, input.UserId);
+        var ownerPeerId = toPeer.PeerType == PeerType.Channel ? toPeer.PeerId : input.UserId;
+        var aggregateId = MessageId.Create(ownerPeerId, obj.MsgId);
+
+        if (obj.Reaction?.Count > 0)
+        {
+            foreach (var reaction in obj.Reaction)
+            {
+                var command = new SendReactionCommand(
+                    aggregateId,
+                    input.ToRequestInfo(),
+                    input.UserId,
+                    reaction,
+                    obj.AddToRecent);
+                await commandBus.PublishAsync(command);
+            }
+        }
+
+        return new TUpdates
+        {
+            Updates = [],
+            Chats = [],
+            Users = [],
+            Date = CurrentDate
+        };
     }
 }
