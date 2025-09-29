@@ -12,7 +12,8 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 internal sealed class SetChatAvailableReactionsHandler(
     IAccessHashHelper accessHashHelper,
     IPeerHelper peerHelper,
-    IChannelAdminRightsChecker channelAdminRightsChecker
+    IChannelAdminRightsChecker channelAdminRightsChecker,
+    ICommandBus commandBus
 ) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSetChatAvailableReactions, MyTelegram.Schema.IUpdates>
 {
     protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
@@ -32,14 +33,30 @@ internal sealed class SetChatAvailableReactionsHandler(
                 RpcErrors.RpcErrors400.ChatAdminRequired);
         }
 
-        // TODO: Persist available reactions in channel/chat settings and emit proper updates.
-        // For now, return empty updates to acknowledge the call.
-        return new TUpdates
+        var (reactionType, allowCustom, list) = Map(obj.AvailableReactions);
+
+        var cmd = new ChangeAvailableReactionsCommand(ChannelId.Create(peer.PeerId), input.ToRequestInfo(), reactionType, allowCustom, list);
+        await commandBus.PublishAsync(cmd);
+
+        return null!;
+    }
+
+    private static (ReactionType reactionType, bool allowCustom, List<string>? list) Map(IChatReactions chatReactions)
+    {
+        switch (chatReactions)
         {
-            Chats = [],
-            Users = [],
-            Updates = [],
-            Date = CurrentDate
-        };
+            case TChatReactionsNone:
+                return (ReactionType.ReactionNone, false, null);
+            case TChatReactionsAll tAll:
+                return (ReactionType.ReactionAll, tAll.AllowCustom, null);
+            case TChatReactionsSome tSome:
+                return (ReactionType.ReactionSome, false, tSome.Reactions.Select(r => r switch
+                {
+                    TReactionEmoji e => e.Emoticon,
+                    _ => string.Empty
+                }).Where(s => !string.IsNullOrEmpty(s)).ToList());
+            default:
+                return (ReactionType.ReactionAll, false, null);
+        }
     }
 }

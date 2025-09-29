@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Domain.Aggregates.Channel;
+namespace MyTelegram.Domain.Aggregates.Channel;
 
 public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelState>,
     IApply<ChannelCreatedEvent>,
@@ -28,7 +28,8 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     IApply<ChannelParticipantCountChangedEvent>,
     IApply<ChannelTopMessageIdUpdatedEvent>,
     IApply<ChannelParticipantsHiddenUpdatedEvent>,
-    IApply<ChannelJoinRequestUpdatedEvent>
+    IApply<ChannelJoinRequestUpdatedEvent>,
+    IApply<ChannelAvailableReactionsChangedEvent>
 {
     public Dictionary<long, ChatAdmin> ChatAdmins { get; private set; } = [];
     public static ChatBannedRights InitRights => ChatBannedRights.CreateDefaultBannedRights();
@@ -76,6 +77,9 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     public bool Verified { get; private set; }
     public bool ParticipantsHidden { get; private set; }
     public bool JoinRequest { get; private set; }
+    public ReactionType ReactionType { get; private set; }
+    public bool AllowCustomReaction { get; private set; }
+    public List<string>? AvailableReactions { get; private set; }
 
     public void Apply(ChannelAboutEditedEvent aggregateEvent)
     {
@@ -331,5 +335,12 @@ public class ChannelState : AggregateState<ChannelAggregate, ChannelId, ChannelS
     public void Apply(ChannelJoinRequestUpdatedEvent aggregateEvent)
     {
         JoinRequest = aggregateEvent.Enabled;
+    }
+
+    public void Apply(ChannelAvailableReactionsChangedEvent aggregateEvent)
+    {
+        ReactionType = aggregateEvent.ReactionType;
+        AllowCustomReaction = aggregateEvent.AllowCustom;
+        AvailableReactions = aggregateEvent.AvailableReactions;
     }
 }

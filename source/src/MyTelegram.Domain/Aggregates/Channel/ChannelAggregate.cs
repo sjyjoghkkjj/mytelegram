@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Domain.Aggregates.Channel;
+namespace MyTelegram.Domain.Aggregates.Channel;
 
 public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate, ChannelId, ChannelSnapshot>
 {
@@ -339,6 +339,17 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
             RpcErrors.RpcErrors400.ChatAdminRequired);
 
         Emit(new SlowModeChangedEvent(requestInfo, _state.ChannelId, seconds));
+    }
+
+    public void ChangeAvailableReactions(RequestInfo requestInfo,
+        ReactionType reactionType,
+        bool allowCustom,
+        List<string>? availableReactions)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        CheckAdminRights(requestInfo, rights => rights.ChangeInfo);
+
+        Emit(new ChannelAvailableReactionsChangedEvent(requestInfo, _state.ChannelId, reactionType, allowCustom, availableReactions));
     }
 
     public void UpdateColor(RequestInfo requestInfo, PeerColor color, long? backgroundEmojiId, bool forProfile)
