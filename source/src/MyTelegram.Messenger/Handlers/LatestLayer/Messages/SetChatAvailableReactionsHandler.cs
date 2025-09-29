@@ -11,7 +11,8 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 ///</summary>
 internal sealed class SetChatAvailableReactionsHandler(
     IAccessHashHelper accessHashHelper,
-    IPeerHelper peerHelper
+    IPeerHelper peerHelper,
+    IChannelAdminRightsChecker channelAdminRightsChecker
 ) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSetChatAvailableReactions, MyTelegram.Schema.IUpdates>
 {
     protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
@@ -24,7 +25,14 @@ internal sealed class SetChatAvailableReactionsHandler(
             RpcErrors.RpcErrors400.PeerIdInvalid.ThrowRpcError();
         }
 
-        // TODO: enforce admin rights and persist available reactions.
+        if (peer.PeerType == PeerType.Channel)
+        {
+            await channelAdminRightsChecker.CheckAdminRightAsync(peer.PeerId, input.UserId,
+                p => p.AdminRights.ChangeInfo,
+                RpcErrors.RpcErrors400.ChatAdminRequired);
+        }
+
+        // TODO: Persist available reactions in channel/chat settings and emit proper updates.
         // For now, return empty updates to acknowledge the call.
         return new TUpdates
         {
