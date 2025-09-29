@@ -1,6 +1,6 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
-///<summary>
+/// <summary>
 /// Change the set of <a href="https://corefork.telegram.org/api/reactions">message reactions »</a> that can be used in a certain group, supergroup or channel
 /// <para>Possible errors</para>
 /// Code Type Description
@@ -9,11 +9,29 @@
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.setChatAvailableReactions" />
 ///</summary>
-internal sealed class SetChatAvailableReactionsHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSetChatAvailableReactions, MyTelegram.Schema.IUpdates>
+internal sealed class SetChatAvailableReactionsHandler(
+    IAccessHashHelper accessHashHelper,
+    IPeerHelper peerHelper
+) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSetChatAvailableReactions, MyTelegram.Schema.IUpdates>
 {
-    protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSetChatAvailableReactions obj)
     {
-        throw new NotImplementedException();
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
+        if (peer.PeerType != PeerType.Channel && peer.PeerType != PeerType.Chat)
+        {
+            RpcErrors.RpcErrors400.PeerIdInvalid.ThrowRpcError();
+        }
+
+        // TODO: enforce admin rights and persist available reactions.
+        // For now, return empty updates to acknowledge the call.
+        return new TUpdates
+        {
+            Chats = [],
+            Users = [],
+            Updates = [],
+            Date = CurrentDate
+        };
     }
 }
