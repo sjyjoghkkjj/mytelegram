@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 
 ///<summary>
 /// Returns content of a whole file or its part.
@@ -17,11 +17,28 @@
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/upload.getFile" />
 ///</summary>
-internal sealed class GetFileHandler : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetFile, MyTelegram.Schema.Upload.IFile>
+internal sealed class GetFileHandler(IInMemoryFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetFile, MyTelegram.Schema.Upload.IFile>
 {
-    protected override Task<MyTelegram.Schema.Upload.IFile> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.Upload.IFile> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetFile obj)
     {
-        throw new NotImplementedException();
+        var limit = Math.Clamp(obj.Limit, 1, 1024 * 1024);
+        int offset;
+        switch (obj.Location)
+        {
+            case MyTelegram.Schema.TInputFileLocation loc:
+                offset = obj.Offset;
+                var (ok, slice) = await storage.GetSliceAsync(loc.VolumeId, offset, limit);
+                if (!ok)
+                {
+                    RpcErrors.RpcErrors400.LocationInvalid.ThrowRpcError();
+                }
+                return new MyTelegram.Schema.Upload.TFile { Type = new MyTelegram.Schema.TStorageFileJpeg(), Bytes = slice };
+            default:
+                RpcErrors.RpcErrors400.LocationInvalid.ThrowRpcError();
+                break;
+        }
+
+        throw new InvalidOperationException();
     }
 }
