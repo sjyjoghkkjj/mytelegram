@@ -29,7 +29,11 @@ internal sealed class SaveBigFilePartHandler(IFileStorage storage) : RpcResultOb
         // Attempt assembly when last part arrives
         if (obj.FilePart + 1 == obj.FileTotalParts)
         {
-            await storage.TryAssembleAsync(obj.FileId, obj.FileTotalParts, true);
+            var (assembled, _) = await storage.TryAssembleAsync(obj.FileId, obj.FileTotalParts, true);
+            if (assembled)
+            {
+                await storage.CleanupPartsAsync(obj.FileId);
+            }
         }
         return new TBoolTrue();
     }

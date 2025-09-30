@@ -5,6 +5,7 @@ public interface IFileStorage : ISingletonDependency
     Task<bool> SavePartAsync(long fileId, int filePart, int totalParts, ReadOnlyMemory<byte> bytes, bool isBig);
     Task<(bool ok, ReadOnlyMemory<byte> data)> TryAssembleAsync(long fileId, int expectedParts, bool isBig);
     Task<(bool ok, ReadOnlyMemory<byte> slice)> GetSliceAsync(long fileId, int offset, int limit);
+    Task CleanupPartsAsync(long fileId);
 }
 
 public class InMemoryFileStorage(IOptionsMonitor<MyTelegramMessengerServerOptions> options, ILogger<InMemoryFileStorage> logger) : IFileStorage
@@ -150,6 +151,36 @@ public class InMemoryFileStorage(IOptionsMonitor<MyTelegramMessengerServerOption
             var end = Math.Min(data.Length, offset + limit);
             var len = end - offset;
             return Task.FromResult<(bool, ReadOnlyMemory<byte>)>((true, new ReadOnlyMemory<byte>(data, offset, len)));
+        }
+    }
+
+    public Task CleanupPartsAsync(long fileId)
+    {
+        if (UseDisk)
+        {
+            try
+            {
+                var dir = Path.Combine(RootPath, fileId.ToString());
+                if (Directory.Exists(dir))
+                {
+                    foreach (var pf in Directory.GetFiles(dir, "*_*.part"))
+                    {
+                        File.Delete(pf);
+                    }
+                    var meta = Path.Combine(dir, "meta.txt");
+                    if (File.Exists(meta)) File.Delete(meta);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Cleanup parts failed for file {FileId}", fileId);
+            }
+            return Task.CompletedTask;
+        }
+        else
+        {
+            _parts.Keys.Where(k => k.FileId == fileId).ToList().ForEach(k => _parts.TryRemove(k, out _));
+            return Task.CompletedTask;
         }
     }
 }
