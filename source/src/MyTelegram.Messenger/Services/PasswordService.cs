@@ -34,7 +34,7 @@ public interface IPasswordService : ITransientDependency
     Task ResetFailedAttemptsAsync(long userId);
 }
 
-public class PasswordService(IRandomHelper randomHelper, ILogger<PasswordService> logger) : IPasswordService
+public class PasswordService(IRandomHelper randomHelper, ILogger<PasswordService> logger, ICacheManager<PasswordService.FailsCacheItem> cache) : IPasswordService
 {
     private sealed record State(
         byte[] Salt1,
@@ -48,7 +48,8 @@ public class PasswordService(IRandomHelper randomHelper, ILogger<PasswordService
     );
     private readonly ConcurrentDictionary<long, State> _store = new();
     private readonly ConcurrentDictionary<long, SrpState> _srp = new();
-    private readonly ConcurrentDictionary<long, (int Count, int? BlockUntil)> _fails = new();
+    private readonly ConcurrentDictionary<long, (int Count, int? BlockUntil, int BlockLevel)> _fails = new();
+    private readonly ICacheManager<FailsCacheItem> _cache = cache;
 
     private sealed record SrpState(long SrpId, BigInteger bSecret, byte[] BPublic);
 
@@ -322,36 +323,73 @@ partial class PasswordService
 // ------- Brute-force protection -------
 partial class PasswordService
 {
-    public Task<bool> IsLoginBlockedAsync(long userId)
+    public sealed record FailsCacheItem(int Count, int? BlockUntil, int BlockLevel);
+
+    private static string FailKey(long userId) => $"fails:{userId}";
+
+    public async Task<bool> IsLoginBlockedAsync(long userId)
     {
-        if (_fails.TryGetValue(userId, out var s) && s.BlockUntil.HasValue)
+        var s = await GetFailsAsync(userId);
+        if (s.BlockUntil.HasValue)
         {
             var now = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (now < s.BlockUntil.Value)
             {
-                return Task.FromResult(true);
+                return true;
             }
             // Unblock after time passes
-            _fails[userId] = (0, null);
+            await SaveFailsAsync(userId, (0, null, 0));
         }
-        return Task.FromResult(false);
+        return false;
     }
 
-    public Task RegisterFailedAttemptAsync(long userId, int maxAttempts, int blockSeconds)
+    public async Task RegisterFailedAttemptAsync(long userId, int maxAttempts, int blockSeconds)
     {
         var now = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var entry = _fails.AddOrUpdate(userId, _ => (1, (int?)null), (_, old) => (old.Count + 1, old.BlockUntil));
+        var entry = await GetFailsAsync(userId);
+        entry = (entry.Count + 1, entry.BlockUntil, entry.BlockLevel);
         if (entry.Count >= maxAttempts)
         {
-            _fails[userId] = (0, now + blockSeconds);
+            // exponential backoff: 1h, 24h, 7d (cap)
+            var nextLevel = Math.Clamp(entry.BlockLevel + 1, 1, 3);
+            var seconds = nextLevel switch
+            {
+                1 => blockSeconds,           // 1h
+                2 => 86400,                  // 24h
+                _ => 86400 * 7               // 7 days
+            };
+            await SaveFailsAsync(userId, (0, now + seconds, nextLevel));
+            return;
         }
-        return Task.CompletedTask;
+        await SaveFailsAsync(userId, entry);
     }
 
-    public Task ResetFailedAttemptsAsync(long userId)
+    public async Task ResetFailedAttemptsAsync(long userId)
     {
-        _fails[userId] = (0, null);
-        return Task.CompletedTask;
+        await SaveFailsAsync(userId, (0, null, 0));
+    }
+
+    private async Task<(int Count, int? BlockUntil, int BlockLevel)> GetFailsAsync(long userId)
+    {
+        if (_fails.TryGetValue(userId, out var inMem))
+        {
+            return inMem;
+        }
+        var cached = await _cache.GetAsync(FailKey(userId));
+        if (cached != null)
+        {
+            var r = (cached.Count, cached.BlockUntil, cached.BlockLevel);
+            _fails[userId] = r;
+            return r;
+        }
+        return (0, null, 0);
+    }
+
+    private async Task SaveFailsAsync(long userId, (int Count, int? BlockUntil, int BlockLevel) value)
+    {
+        _fails[userId] = value;
+        var ttl = value.BlockUntil.HasValue ? Math.Max(60, value.BlockUntil.Value - (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds()) : 3600;
+        await _cache.SetAsync(FailKey(userId), new FailsCacheItem(value.Count, value.BlockUntil, value.BlockLevel), ttlInSeconds: ttl);
     }
 }
 
