@@ -33,7 +33,31 @@ internal sealed class GetFileHandler(IFileStorage storage) : RpcResultObjectHand
                 {
                     RpcErrors.RpcErrors400.LocationInvalid.ThrowRpcError();
                 }
-                return new MyTelegram.Schema.Upload.TFile { Type = new MyTelegram.Schema.TStorageFileJpeg(), Bytes = slice };
+                return new MyTelegram.Schema.Upload.TFile { Type = new MyTelegram.Schema.TStorageFilePartial(), Bytes = slice };
+            case MyTelegram.Schema.TInputPhotoFileLocation p:
+                offset = obj.Offset;
+                var (okp, sliceP) = await storage.GetSliceAsync(p.Id, offset, limit);
+                if (!okp)
+                {
+                    RpcErrors.RpcErrors400.LocationInvalid.ThrowRpcError();
+                }
+                return new MyTelegram.Schema.Upload.TFile { Type = new MyTelegram.Schema.TStorageFileJpeg(), Bytes = sliceP };
+            case MyTelegram.Schema.TInputDocumentFileLocation d:
+                offset = obj.Offset;
+                var (okd, sliceD) = await storage.GetSliceAsync(d.Id, offset, limit);
+                if (!okd)
+                {
+                    RpcErrors.RpcErrors400.LocationInvalid.ThrowRpcError();
+                }
+                return new MyTelegram.Schema.Upload.TFile { Type = new MyTelegram.Schema.TStorageFilePartial(), Bytes = sliceD };
+            case MyTelegram.Schema.TInputEncryptedFileLocation e:
+                offset = obj.Offset;
+                var (oke, sliceE) = await storage.GetSliceAsync(e.Id, offset, limit);
+                if (!oke)
+                {
+                    RpcErrors.RpcErrors400.LocationInvalid.ThrowRpcError();
+                }
+                return new MyTelegram.Schema.Upload.TFile { Type = new MyTelegram.Schema.TStorageFileUnknown(), Bytes = sliceE };
             default:
                 RpcErrors.RpcErrors400.LocationInvalid.ThrowRpcError();
                 break;

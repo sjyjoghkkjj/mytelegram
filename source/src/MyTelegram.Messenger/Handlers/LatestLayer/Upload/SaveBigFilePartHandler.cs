@@ -26,6 +26,11 @@ internal sealed class SaveBigFilePartHandler(IFileStorage storage) : RpcResultOb
         {
             RpcErrors.RpcErrors400.FilePartInvalid.ThrowRpcError();
         }
+        // Attempt assembly when last part arrives
+        if (obj.FilePart + 1 == obj.FileTotalParts)
+        {
+            await storage.TryAssembleAsync(obj.FileId, obj.FileTotalParts, true);
+        }
         return new TBoolTrue();
     }
 }

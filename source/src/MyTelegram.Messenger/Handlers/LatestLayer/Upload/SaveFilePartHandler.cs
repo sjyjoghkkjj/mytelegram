@@ -23,6 +23,8 @@ internal sealed class SaveFilePartHandler(IFileStorage storage) : RpcResultObjec
         {
             RpcErrors.RpcErrors400.FilePartInvalid.ThrowRpcError();
         }
+        // Try assemble optimistically to persist on disk
+        await storage.TryAssembleAsync(obj.FileId, obj.FileTotalParts, false);
         return new TBoolTrue();
     }
 }
