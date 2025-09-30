@@ -1,4 +1,4 @@
-﻿using MyTelegram.Messenger.Services.Impl;
+using MyTelegram.Messenger.Services.Impl;
 using TPeerSettings = MyTelegram.Schema.TPeerSettings;
 
 namespace MyTelegram.Messenger.Converters.ConverterServices;
@@ -202,6 +202,23 @@ public class UserConverterService(
             groupedPrivacyReadModels.TryGetValue(userReadModel.UserId, out var currentUserPrivacyReadModels);
             var user = ToUserCore(request, userReadModel, photos, myContactReadModel,
                 targetUserContactReadModel, currentUserPrivacyReadModels, layer);
+
+            // Приватность last seen: если разрешено, показываем реальный статус; иначе — Recently
+            if (user is TUser tu)
+            {
+                var canSee = privacyHelper.CanSee(PrivacyType.StatusTimestamp, request.UserId, userReadModel.UserId, currentUserPrivacyReadModels);
+                if (canSee)
+                {
+                    tu.Status = userReadModel.IsOnline
+                        ? new TUserStatusOnline { Expires = userReadModel.StatusExpires }
+                        : new TUserStatusOffline { WasOnline = userReadModel.LastSeenDate };
+                }
+                else
+                {
+                    tu.Status = new TUserStatusRecently();
+                }
+            }
+
             users.Add(user);
         }
 
