@@ -372,6 +372,34 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         CheckAdminRights(requestInfo, r => r.ManageTopics);
         Emit(new ForumTopicCreatedEvent(requestInfo, _state.ChannelId, topicId, title, iconColor, iconEmojiId, date, topMessageId, sendAs));
     }
+
+    public void EditForumTopic(RequestInfo requestInfo,
+        int topicId,
+        string? title,
+        int? iconColor,
+        long? iconEmojiId)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        CheckAdminRights(requestInfo, r => r.ManageTopics);
+        Emit(new ForumTopicEditedEvent(requestInfo, _state.ChannelId, topicId, title, iconColor, iconEmojiId));
+    }
+
+    public void PinForumTopic(RequestInfo requestInfo,
+        int topicId,
+        bool pinned)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        CheckAdminRights(requestInfo, r => r.ManageTopics);
+        Emit(new ForumTopicPinnedEvent(requestInfo, _state.ChannelId, topicId, pinned));
+    }
+
+    public void ReorderPinnedForumTopics(RequestInfo requestInfo,
+        List<int> topicIds)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        CheckAdminRights(requestInfo, r => r.ManageTopics);
+        Emit(new ForumTopicPinnedOrderChangedEvent(requestInfo, _state.ChannelId, topicIds));
+    }
     public void UpdateUserName(RequestInfo requestInfo,
             string userName)
     {
