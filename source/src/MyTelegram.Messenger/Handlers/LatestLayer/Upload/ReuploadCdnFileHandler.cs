@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 
 ///<summary>
 /// Request a reupload of a certain file to a <a href="https://corefork.telegram.org/cdn">CDN DC</a>.
@@ -14,6 +14,7 @@ internal sealed class ReuploadCdnFileHandler : RpcResultObjectHandler<MyTelegram
     protected override Task<TVector<MyTelegram.Schema.IFileHash>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestReuploadCdnFile obj)
     {
-        throw new NotImplementedException();
+        // Minimal: acknowledge and return empty hashes (no-op CDN)
+        return Task.FromResult(new TVector<MyTelegram.Schema.IFileHash>());
     }
 }

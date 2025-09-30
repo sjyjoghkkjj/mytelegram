@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 
 ///<summary>
 /// Get SHA256 hashes for verifying downloaded <a href="https://corefork.telegram.org/cdn">CDN</a> files
@@ -13,6 +13,7 @@ internal sealed class GetCdnFileHashesHandler : RpcResultObjectHandler<MyTelegra
     protected override Task<TVector<MyTelegram.Schema.IFileHash>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetCdnFileHashes obj)
     {
-        throw new NotImplementedException();
+        // Minimal: return empty, client will fallback to reupload when needed
+        return Task.FromResult(new TVector<MyTelegram.Schema.IFileHash>());
     }
 }
