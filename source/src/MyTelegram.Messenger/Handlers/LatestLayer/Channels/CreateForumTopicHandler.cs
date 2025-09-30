@@ -28,8 +28,8 @@ internal sealed class CreateForumTopicHandler(
 
         var topicId = (int)(obj.RandomId % int.MaxValue);
         var sendAs = obj.SendAs != null ? peerHelper.GetPeer(obj.SendAs, input.UserId) : null;
-        var evt = new ForumTopicCreatedEvent(input.ToRequestInfo(), peer.PeerId, topicId, obj.Title, obj.IconColor, obj.IconEmojiId, (int)DateTime.UtcNow.ToTimestamp(), 0, sendAs);
-        await commandBus.PublishAsync(new RaiseEventCommand<ChannelAggregate, ChannelId>(ChannelId.Create(peer.PeerId), input.ToRequestInfo(), evt));
+        var cmd = new CreateForumTopicCommand(ChannelId.Create(peer.PeerId), input.ToRequestInfo(), topicId, obj.Title, obj.IconColor, obj.IconEmojiId, (int)DateTime.UtcNow.ToTimestamp(), 0, sendAs);
+        await commandBus.PublishAsync(cmd);
 
         return null!;
     }

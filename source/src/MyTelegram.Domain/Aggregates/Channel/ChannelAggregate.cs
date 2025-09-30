@@ -358,6 +358,20 @@ public class ChannelAggregate : MyInMemorySnapshotAggregateRoot<ChannelAggregate
         CheckAdminRights(requestInfo, rights => rights.ChangeInfo);
         Emit(new ChannelColorUpdatedEvent(requestInfo, _state.ChannelId, color, backgroundEmojiId, forProfile));
     }
+
+    public void CreateForumTopic(RequestInfo requestInfo,
+        int topicId,
+        string title,
+        int? iconColor,
+        long? iconEmojiId,
+        int date,
+        int topMessageId,
+        Peer? sendAs)
+    {
+        Specs.AggregateIsCreated.ThrowDomainErrorIfNotSatisfied(this);
+        CheckAdminRights(requestInfo, r => r.ManageTopics);
+        Emit(new ForumTopicCreatedEvent(requestInfo, _state.ChannelId, topicId, title, iconColor, iconEmojiId, date, topMessageId, sendAs));
+    }
     public void UpdateUserName(RequestInfo requestInfo,
             string userName)
     {
