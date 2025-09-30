@@ -51,6 +51,19 @@ internal sealed class SendReactionHandler(
             RpcErrors.RpcErrors400.MessageIdInvalid.ThrowRpcError();
         }
 
+        // validate unique reactions max
+        var maxUniq = 2; // default; could be taken from config
+        var rm = await queryProcessor.ProcessAsync(new GetMessageByPeerIdAndMessageIdQuery(ownerPeerId, obj.MsgId));
+        if (rm?.Reactions != null)
+        {
+            var uniq = rm.Reactions.Count;
+            var newId = first.GetReactionId();
+            if (first is not TReactionEmpty && rm.Reactions.All(r => r.GetReactionId() != newId) && uniq >= maxUniq)
+            {
+                RpcErrors.RpcErrors400.ReactionsTooMany.ThrowRpcError();
+            }
+        }
+
         if (first is TReactionEmpty)
         {
             var removeCmd = new RemoveReactionCommand(

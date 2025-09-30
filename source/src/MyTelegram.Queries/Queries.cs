@@ -1,4 +1,4 @@
-﻿using MyTelegram.Schema;
+using MyTelegram.Schema;
 
 namespace MyTelegram.Queries;
 
