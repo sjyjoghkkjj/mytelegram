@@ -60,4 +60,15 @@ public class PrivacyHelper : IPrivacyHelper, ITransientDependency
 
         return true;
     }
+
+    public bool CanSee(PrivacyType privacyType, long selfUserId, long targetUserId, IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels)
+    {
+        if (privacyReadModels == null)
+        {
+            return true;
+        }
+        var model = privacyReadModels.FirstOrDefault(p => p.PrivacyType == privacyType);
+        // TODO: вычисление ContactType по self/target; упрощённо считаем None
+        return IsAllowedByPrivacy(selfUserId, model, ContactType.None);
+    }
 }
