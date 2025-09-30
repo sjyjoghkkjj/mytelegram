@@ -162,6 +162,10 @@ public class PeerSettingsReadModel : Impl.PeerSettingsReadModel, IMongoDbReadMod
 {
 }
 
+public class PrivacyReadModel : Impl.PrivacyReadModel, IMongoDbReadModel
+{
+}
+
 public class PhotoReadModel : Impl.PhotoReadModel, IMongoDbReadModel
 {
 }
