@@ -18,11 +18,11 @@ internal sealed class CheckPasswordHandler : RpcResultObjectHandler<MyTelegram.S
 	protected override async Task<MyTelegram.Schema.Auth.IAuthorization> HandleCoreAsync(IRequestInput input,
 		MyTelegram.Schema.Auth.RequestCheckPassword obj)
 	{
-		var ok = await _passwords.CheckPasswordAsync(input.UserId, obj.Password);
+        var ok = await _passwords.CheckPasswordAsync(input.UserId, obj.Password);
 		if (!ok)
 		{
 			RpcErrors.RpcErrors400.PasswordHashInvalid.ThrowRpcError();
 		}
-		return new MyTelegram.Schema.Auth.TAuthorization { User = new MyTelegram.Schema.TUser { Id = input.UserId, Self = true } };
+        return new MyTelegram.Schema.Auth.TAuthorization { User = new MyTelegram.Schema.TUser { Id = input.UserId, Self = true } };
 	}
 }
