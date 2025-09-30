@@ -12,6 +12,13 @@ internal sealed class CheckRecoveryPasswordHandler(IEmailCodeService emailCodes)
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Auth.RequestCheckRecoveryPassword obj)
     {
+        const string scope = "recover";
+        if (await emailCodes.IsBlockedAsync(input.UserId, scope))
+        {
+            var left = await emailCodes.GetBlockSecondsAsync(input.UserId, scope);
+            RpcErrors.RpcErrors420.FloodWaitX.ThrowRpcError(left);
+        }
+
         var email = await emailCodes.GetVerifiedEmailAsync(input.UserId);
         if (string.IsNullOrEmpty(email))
         {
@@ -20,8 +27,10 @@ internal sealed class CheckRecoveryPasswordHandler(IEmailCodeService emailCodes)
         var ok = await emailCodes.VerifyAsync(input.UserId, email!, obj.Code);
         if (!ok)
         {
+            await emailCodes.RegisterFailedAttemptAsync(input.UserId, scope, 5, 3600);
             RpcErrors.RpcErrors400.PasswordRecoveryExpired.ThrowRpcError();
         }
+        await emailCodes.ResetFailedAttemptsAsync(input.UserId, scope);
         return new TBoolTrue();
     }
 }

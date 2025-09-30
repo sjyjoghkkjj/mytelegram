@@ -13,6 +13,13 @@ internal sealed class ConfirmPasswordEmailHandler(IEmailCodeService emailCodes, 
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestConfirmPasswordEmail obj)
     {
+        const string scope = "confirm";
+        if (await emailCodes.IsBlockedAsync(input.UserId, scope))
+        {
+            var left = await emailCodes.GetBlockSecondsAsync(input.UserId, scope);
+            RpcErrors.RpcErrors420.FloodWaitX.ThrowRpcError(left);
+        }
+
         var email = await passwords.GetUnconfirmedEmailAsync(input.UserId);
         if (string.IsNullOrEmpty(email))
         {
@@ -21,8 +28,10 @@ internal sealed class ConfirmPasswordEmailHandler(IEmailCodeService emailCodes, 
         var ok = await emailCodes.VerifyAsync(input.UserId, email!, obj.Code);
         if (!ok)
         {
+            await emailCodes.RegisterFailedAttemptAsync(input.UserId, scope, 5, 3600);
             RpcErrors.RpcErrors400.CodeInvalid.ThrowRpcError();
         }
+        await emailCodes.ResetFailedAttemptsAsync(input.UserId, scope);
         await passwords.SetVerifiedEmailAsync(input.UserId, email!);
         return new TBoolTrue();
     }
