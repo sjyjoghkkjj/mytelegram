@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyTelegram.Messenger;
 #nullable disable
@@ -30,6 +30,8 @@ public class MyTelegramMessengerServerOptions
     public bool SendWelcomeMessageAfterUserSignIn { get; set; }
     public bool SetupPasswordRequired { get; set; }
     public bool EnableEmailLogin { get; set; }
+
+    public string FileStoragePath { get; set; }
 
     [RegularExpression("^([\\d]{6})|(\\s*)$")]
     public string FixedEmailVerificationCode { get; set; }

@@ -9,7 +9,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// 400 MSG_ID_INVALID Invalid message ID provided.
 /// See <a href="https://corefork.telegram.org/method/upload.saveFilePart" />
 ///</summary>
-internal sealed class SaveFilePartHandler(IInMemoryFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestSaveFilePart, IBool>
+internal sealed class SaveFilePartHandler(IFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestSaveFilePart, IBool>
 {
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestSaveFilePart obj)

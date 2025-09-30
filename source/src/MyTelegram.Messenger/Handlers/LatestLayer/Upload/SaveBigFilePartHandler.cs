@@ -12,7 +12,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// 400 FILE_PART_TOO_BIG The uploaded file part is too big.
 /// See <a href="https://corefork.telegram.org/method/upload.saveBigFilePart" />
 ///</summary>
-internal sealed class SaveBigFilePartHandler(IInMemoryFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestSaveBigFilePart, IBool>
+internal sealed class SaveBigFilePartHandler(IFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestSaveBigFilePart, IBool>
 {
     protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestSaveBigFilePart obj)
