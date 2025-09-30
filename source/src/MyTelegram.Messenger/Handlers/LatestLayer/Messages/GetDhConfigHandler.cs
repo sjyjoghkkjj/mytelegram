@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// Returns configuration parameters for Diffie-Hellman key generation. Can also return a random sequence of bytes of required length.
@@ -12,6 +12,22 @@ internal sealed class GetDhConfigHandler : RpcResultObjectHandler<MyTelegram.Sch
     protected override Task<MyTelegram.Schema.Messages.IDhConfig> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestGetDhConfig obj)
     {
-        throw new NotImplementedException();
+        if (obj.RandomLength is < 0 or > 1024 * 1024)
+        {
+            RpcErrors.RpcErrors400.RandomLengthInvalid.ThrowRpcError();
+        }
+
+        // Layered DH params. Use core MTProto prime and g.
+        var prime = AuthConsts.Dh2048P;
+        var g = 3;
+        var random = obj.RandomLength > 0 ? RandomNumberGenerator.GetBytes(obj.RandomLength) : Array.Empty<byte>();
+
+        var r = new MyTelegram.Schema.Messages.TDhConfig
+        {
+            G = g,
+            P = prime,
+            Random = random
+        };
+        return Task.FromResult<MyTelegram.Schema.Messages.IDhConfig>(r);
     }
 }
