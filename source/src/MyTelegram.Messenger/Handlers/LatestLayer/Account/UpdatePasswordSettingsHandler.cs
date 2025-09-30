@@ -22,6 +22,16 @@ internal sealed class UpdatePasswordSettingsHandler : RpcResultObjectHandler<MyT
 		{
 			RpcErrors.RpcErrors400.NewSettingsInvalid.ThrowRpcError();
 		}
+        // if a password already exists, require the current password SRP verification
+        var current = await _passwords.GetPasswordAsync(input.UserId);
+        if (current.HasPassword)
+        {
+            var ok = await _passwords.CheckPasswordAsync(input.UserId, obj.Password);
+            if (!ok)
+            {
+                RpcErrors.RpcErrors400.PasswordHashInvalid.ThrowRpcError();
+            }
+        }
 		await _passwords.SetPasswordAsync(input.UserId, s);
 		return new TBoolTrue();
 	}
