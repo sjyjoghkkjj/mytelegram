@@ -27,6 +27,11 @@ public interface IPasswordService : ITransientDependency
     Task SetResetRetryDateAsync(long userId, int? retryDate);
     Task<int?> GetResetRetryDateAsync(long userId);
     Task ClearPasswordAsync(long userId);
+
+    // Brute-force protection
+    Task<bool> IsLoginBlockedAsync(long userId);
+    Task RegisterFailedAttemptAsync(long userId, int maxAttempts, int blockSeconds);
+    Task ResetFailedAttemptsAsync(long userId);
 }
 
 public class PasswordService(IRandomHelper randomHelper, ILogger<PasswordService> logger) : IPasswordService
@@ -43,6 +48,7 @@ public class PasswordService(IRandomHelper randomHelper, ILogger<PasswordService
     );
     private readonly ConcurrentDictionary<long, State> _store = new();
     private readonly ConcurrentDictionary<long, SrpState> _srp = new();
+    private readonly ConcurrentDictionary<long, (int Count, int? BlockUntil)> _fails = new();
 
     private sealed record SrpState(long SrpId, BigInteger bSecret, byte[] BPublic);
 
@@ -310,6 +316,42 @@ partial class PasswordService
         var K = H(ToBytes(S, size));
         var M1 = H(Pad(Abytes.Span, size), Pad(Bbytes.Span, size), K);
         return CryptographicOperations.FixedTimeEquals(M1, M1bytes.Span);
+    }
+}
+
+// ------- Brute-force protection -------
+partial class PasswordService
+{
+    public Task<bool> IsLoginBlockedAsync(long userId)
+    {
+        if (_fails.TryGetValue(userId, out var s) && s.BlockUntil.HasValue)
+        {
+            var now = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (now < s.BlockUntil.Value)
+            {
+                return Task.FromResult(true);
+            }
+            // Unblock after time passes
+            _fails[userId] = (0, null);
+        }
+        return Task.FromResult(false);
+    }
+
+    public Task RegisterFailedAttemptAsync(long userId, int maxAttempts, int blockSeconds)
+    {
+        var now = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var entry = _fails.AddOrUpdate(userId, _ => (1, (int?)null), (_, old) => (old.Count + 1, old.BlockUntil));
+        if (entry.Count >= maxAttempts)
+        {
+            _fails[userId] = (0, now + blockSeconds);
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task ResetFailedAttemptsAsync(long userId)
+    {
+        _fails[userId] = (0, null);
+        return Task.CompletedTask;
     }
 }
 
