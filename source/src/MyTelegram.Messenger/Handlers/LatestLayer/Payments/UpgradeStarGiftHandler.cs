@@ -35,10 +35,15 @@ internal sealed class UpgradeStarGiftHandler : RpcResultObjectHandler<MyTelegram
 			RpcErrors.RpcErrors400.BadRequest("STARGIFT_UPGRADE_NOT_AVAILABLE").ThrowRpcError();
 		}
 
-		_savedService.DeductStars(input.UserId, price);
-		// Применяем апгрейд: для демонстрации обновим дату и снимем пин
+        _savedService.DeductStars(input.UserId, price);
+        // Применяем апгрейд
 		saved.PinnedTop = false;
 		saved.Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        // Зарегистрируем апгрейд, чтобы задать КД на передачу/реселл при первом апгрейде
+        if (saved.Gift is MyTelegram.Schema.TStarGift g)
+        {
+            (_savedService as SavedStarGiftsService)?.RegisterUpgrade(input.UserId, g.Id);
+        }
 
 		var balance = await _savedService.GetStarsBalanceAsync(input.UserId);
 		var update = new TUpdateStarsBalance { Stars = balance };
