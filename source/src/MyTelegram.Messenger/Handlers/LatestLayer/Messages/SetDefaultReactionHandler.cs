@@ -13,7 +13,8 @@ internal sealed class SetDefaultReactionHandler(ICommandBus commandBus) : RpcRes
         MyTelegram.Schema.Messages.RequestSetDefaultReaction obj)
     {
         string value = obj.Emoji is TReactionEmoji e ? e.Emoticon : string.Empty;
-        var cmd = new UpdateUserConfigCommand(UserConfigId.Create(input.UserId, UserConfigType.ReactionsDefault), input.ToRequestInfo(), input.UserId, UserConfigType.ReactionsDefault, value);
+        var key = nameof(UserConfigType.ReactionsDefault);
+        var cmd = new UpdateUserConfigCommand(UserConfigId.Create(input.UserId, key), input.ToRequestInfo(), input.UserId, key, value);
         await commandBus.PublishAsync(cmd);
         return new TBoolTrue();
     }
