@@ -58,6 +58,25 @@ public class PrivacyHelper : IPrivacyHelper, ITransientDependency
             return false;
         }
 
+        // Allow/Disallow specific users
+        var allowUsers = privacyReadModel.PrivacyValueDataList
+            .Where(p => p.PrivacyValueType == PrivacyValueType.AllowUsers)
+            .SelectMany(p => DeserializeIds(p.JsonData))
+            .ToHashSet();
+        if (allowUsers.Contains(selfUserId))
+        {
+            return true;
+        }
+
+        var disallowUsers = privacyReadModel.PrivacyValueDataList
+            .Where(p => p.PrivacyValueType == PrivacyValueType.DisallowUsers)
+            .SelectMany(p => DeserializeIds(p.JsonData))
+            .ToHashSet();
+        if (disallowUsers.Contains(selfUserId))
+        {
+            return false;
+        }
+
         return true;
     }
 
@@ -70,5 +89,26 @@ public class PrivacyHelper : IPrivacyHelper, ITransientDependency
         var model = privacyReadModels.FirstOrDefault(p => p.PrivacyType == privacyType);
         // TODO: вычисление ContactType по self/target; упрощённо считаем None
         return IsAllowedByPrivacy(selfUserId, model, ContactType.None);
+    }
+}
+
+file scoped helper
+partial class PrivacyHelper
+{
+    private static IEnumerable<long> DeserializeIds(string? json)
+    {
+        if (string.IsNullOrEmpty(json))
+        {
+            return Array.Empty<long>();
+        }
+        try
+        {
+            var arr = System.Text.Json.JsonSerializer.Deserialize<List<long>>(json);
+            return arr ?? [];
+        }
+        catch
+        {
+            return Array.Empty<long>();
+        }
     }
 }

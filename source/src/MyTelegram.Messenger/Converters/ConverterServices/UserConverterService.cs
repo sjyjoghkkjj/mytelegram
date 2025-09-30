@@ -276,7 +276,7 @@ public class UserConverterService(
             {
                 case ContactType.None:
                 case ContactType.TargetUserIsMyContact:
-                    user.Phone = null;
+                    // phone controlled by privacy rules below
                     break;
                 case ContactType.ContactOfTargetUser:
                 case ContactType.Mutual:
@@ -380,6 +380,24 @@ public class UserConverterService(
                         break;
                     case PrivacyType.PhoneNumber:
                         privacyHelper.ApplyPrivacy(privacy, _ => user.Phone = null, selfUserId, contactType);
+                        break;
+                    case PrivacyType.Forwards:
+                        privacyHelper.ApplyPrivacy(privacy, _ => user.ForwardsUnavailable = true, selfUserId, contactType);
+                        break;
+                    case PrivacyType.PhoneCall:
+                        privacyHelper.ApplyPrivacy(privacy, _ => { /* call availability handled in userFull */ }, selfUserId, contactType);
+                        break;
+                    case PrivacyType.PhoneP2P:
+                        privacyHelper.ApplyPrivacy(privacy, _ => { /* p2p relay preference */ }, selfUserId, contactType);
+                        break;
+                    case PrivacyType.ChatInvite:
+                        privacyHelper.ApplyPrivacy(privacy, _ => { /* invites visibility */ }, selfUserId, contactType);
+                        break;
+                    case PrivacyType.About:
+                        privacyHelper.ApplyPrivacy(privacy, _ => user.About = null, selfUserId, contactType);
+                        break;
+                    case PrivacyType.Birthday:
+                        privacyHelper.ApplyPrivacy(privacy, _ => user.Birthday = null, selfUserId, contactType);
                         break;
                 }
             }
