@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Channels;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Channels;
 
 ///<summary>
 /// Get forum topics by their ID
@@ -9,7 +9,7 @@
 /// 400 TOPICS_EMPTY &nbsp;
 /// See <a href="https://corefork.telegram.org/method/channels.getForumTopicsByID" />
 ///</summary>
-internal sealed class GetForumTopicsByIDHandler(IAccessHashHelper accessHashHelper,IPeerHelper peerHelper, IPtsHelper ptsHelper) : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestGetForumTopicsByID, MyTelegram.Schema.Messages.IForumTopics>
+internal sealed class GetForumTopicsByIDHandler(IAccessHashHelper accessHashHelper,IPeerHelper peerHelper, IPtsHelper ptsHelper, IQueryProcessor queryProcessor) : RpcResultObjectHandler<MyTelegram.Schema.Channels.RequestGetForumTopicsByID, MyTelegram.Schema.Messages.IForumTopics>
 {
     protected override async Task<MyTelegram.Schema.Messages.IForumTopics> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Channels.RequestGetForumTopicsByID obj)
@@ -18,15 +18,25 @@ internal sealed class GetForumTopicsByIDHandler(IAccessHashHelper accessHashHelp
         var peer = peerHelper.GetChannel(obj.Channel);
         var pts = ptsHelper.GetCachedPts(peer.PeerId);
 
-        var forumTopics = new TForumTopics
+        var topics = await queryProcessor.ProcessAsync(new GetForumTopicsByIdsQuery(peer.PeerId, obj.Topics.ToList()));
+        var tlTopics = new TVector<IForumTopic>(topics.Select(t => new TForumTopic
+        {
+            Id = t.TopicId,
+            Title = t.Title,
+            Pinned = t.Pinned,
+            IconEmojiId = t.IconEmojiId,
+            IconColor = t.IconColor,
+            TopMessage = t.TopMessage,
+            Date = t.Date
+        }));
+
+        return new TForumTopics
         {
             Pts=pts,
             Chats = new(),
             Messages = new(),
-            Topics = new(),
+            Topics = tlTopics,
             Users = new(),
         };
-
-        return forumTopics;
     }
 }
