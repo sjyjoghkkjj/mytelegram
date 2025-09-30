@@ -1,4 +1,4 @@
-﻿using EventFlow.MongoDB.Extensions;
+using EventFlow.MongoDB.Extensions;
 using MyTelegram;
 using MyTelegram.MessengerServer.GrpcService;
 using MyTelegram.MessengerServer.GrpcService.Services;
@@ -36,9 +36,11 @@ builder.Services.UseMyTelegramMessengerGrpcServer(options =>
         builder.Configuration["App:DatabaseName"]);
 });
 builder.Services.AddGrpc();
+builder.Services.AddSingleton<IFileStorage, InMemoryFileStorage>();
 
 var app = builder.Build();
 app.MapGrpcService<ChatMemberLoaderGrpcService>();
+app.MapGrpcService<MediaServiceImpl>();
 app.MapGet("/",
     () =>
         "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
