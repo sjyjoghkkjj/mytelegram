@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// Send a media
@@ -100,7 +100,8 @@ internal sealed class SendMediaHandler(
     IRandomHelper randomHelper,
     ICommandBus commandBus,
     IAccessHashHelper accessHashHelper,
-    IPrivacyAppService privacyAppService
+    IPrivacyAppService privacyAppService,
+    IFileStorage fileStorage
 )
     : RpcResultObjectHandler<
         MyTelegram.Schema.Messages.RequestSendMedia,
@@ -156,6 +157,23 @@ internal sealed class SendMediaHandler(
         }
 
         var media = await mediaHelper.SaveMediaAsync(obj.Media);
+        // Validate MD5 when provided for uploaded files
+        if (obj.Media is TInputMediaUploadedDocument ud && ud.File is TInputFile f && !string.IsNullOrEmpty(f.Md5Checksum))
+        {
+            var md5Ok = await fileStorage.ValidateMd5Async(f.Id, f.Md5Checksum);
+            if (!md5Ok)
+            {
+                RpcErrors.RpcErrors400.Md5ChecksumInvalid.ThrowRpcError();
+            }
+        }
+        if (obj.Media is TInputMediaUploadedPhoto up && up.File is TInputFile pf && !string.IsNullOrEmpty(pf.Md5Checksum))
+        {
+            var md5Ok = await fileStorage.ValidateMd5Async(pf.Id, pf.Md5Checksum);
+            if (!md5Ok)
+            {
+                RpcErrors.RpcErrors400.Md5ChecksumInvalid.ThrowRpcError();
+            }
+        }
         int? replyToMsgId = null;
         int? topMsgId = null;
         if (obj.ReplyTo is TInputReplyToMessage replyToMessage)

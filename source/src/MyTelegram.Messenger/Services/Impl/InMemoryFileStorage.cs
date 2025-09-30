@@ -6,6 +6,7 @@ public interface IFileStorage : ISingletonDependency
     Task<(bool ok, ReadOnlyMemory<byte> data)> TryAssembleAsync(long fileId, int expectedParts, bool isBig);
     Task<(bool ok, ReadOnlyMemory<byte> slice)> GetSliceAsync(long fileId, int offset, int limit);
     Task CleanupPartsAsync(long fileId);
+    Task<bool> ValidateMd5Async(long fileId, string md5);
 }
 
 public class InMemoryFileStorage(IOptionsMonitor<MyTelegramMessengerServerOptions> options, ILogger<InMemoryFileStorage> logger) : IFileStorage
@@ -15,6 +16,7 @@ public class InMemoryFileStorage(IOptionsMonitor<MyTelegramMessengerServerOption
     private readonly ConcurrentDictionary<(long FileId, bool IsBig), List<Part>> _parts = new();
     private readonly ConcurrentDictionary<long, byte[]> _assembled = new();
     private readonly ConcurrentDictionary<long, object> _locks = new();
+    private readonly ConcurrentDictionary<long, string> _md5 = new();
 
     private string RootPath => string.IsNullOrWhiteSpace(options.CurrentValue.FileStoragePath)
         ? Path.Combine(AppContext.BaseDirectory, "files")
@@ -181,6 +183,38 @@ public class InMemoryFileStorage(IOptionsMonitor<MyTelegramMessengerServerOption
         {
             _parts.Keys.Where(k => k.FileId == fileId).ToList().ForEach(k => _parts.TryRemove(k, out _));
             return Task.CompletedTask;
+        }
+    }
+
+    public Task<bool> ValidateMd5Async(long fileId, string md5)
+    {
+        try
+        {
+            byte[] data;
+            if (UseDisk)
+            {
+                var path = Path.Combine(RootPath, fileId.ToString(), "data.bin");
+                if (!File.Exists(path)) return Task.FromResult(false as bool);
+                data = File.ReadAllBytes(path);
+            }
+            else if (_assembled.TryGetValue(fileId, out var bytes))
+            {
+                data = bytes;
+            }
+            else
+            {
+                return Task.FromResult(false as bool);
+            }
+            using var md5Algo = System.Security.Cryptography.MD5.Create();
+            var hash = md5Algo.ComputeHash(data);
+            var hex = BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+            var ok = string.Equals(hex, (md5 ?? string.Empty).ToLowerInvariant(), StringComparison.Ordinal);
+            if (ok) _md5[fileId] = hex;
+            return Task.FromResult(ok);
+        }
+        catch
+        {
+            return Task.FromResult(false as bool);
         }
     }
 }
