@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 
 ///<summary>
 /// Get SHA256 hashes for verifying downloaded <a href="https://corefork.telegram.org/cdn">CDN</a> files
@@ -8,11 +8,44 @@
 /// 400 RSA_DECRYPT_FAILED Internal RSA decryption failed.
 /// See <a href="https://corefork.telegram.org/method/upload.getCdnFileHashes" />
 ///</summary>
-internal sealed class GetCdnFileHashesHandler : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetCdnFileHashes, TVector<MyTelegram.Schema.IFileHash>>
+internal sealed class GetCdnFileHashesHandler(IFileStorage storage, IDataCenterHelper dcHelper, ICdnTokenService cdnTokens) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetCdnFileHashes, TVector<MyTelegram.Schema.IFileHash>>
 {
     protected override Task<TVector<MyTelegram.Schema.IFileHash>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetCdnFileHashes obj)
     {
-        throw new NotImplementedException();
+        if (!dcHelper.IsCdnDc(dcHelper.GetThisDcId()))
+        {
+            RpcErrors.RpcErrors400.CdnMethodInvalid.ThrowRpcError();
+        }
+        if (!cdnTokens.TryResolveFileId(obj.FileToken, out var fileId))
+        {
+            RpcErrors.RpcErrors400.FileTokenInvalid.ThrowRpcError();
+        }
+        var hashes = ComputeHashes(fileId, obj.Offset, 131072); // 128 KB chunk size like Telegram CDN
+        return Task.FromResult(new TVector<MyTelegram.Schema.IFileHash>(hashes));
+    }
+
+    private IEnumerable<MyTelegram.Schema.IFileHash> ComputeHashes(long fileId, long offset, int chunkSize)
+    {
+        // Read chunks starting at offset, return up to a reasonable number per call (e.g., 64 chunks)
+        const int maxChunks = 64;
+        var hashes = new List<MyTelegram.Schema.IFileHash>();
+        for (int i = 0; i < maxChunks; i++)
+        {
+            var off = checked((int)(offset + (long)i * chunkSize));
+            var (ok, slice) = storage.GetSliceAsync(fileId, off, chunkSize).GetAwaiter().GetResult();
+            if (!ok || slice.IsEmpty)
+            {
+                break;
+            }
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var hash = sha.ComputeHash(slice.Span.ToArray());
+            hashes.Add(new MyTelegram.Schema.TFileHash { Offset = off, Limit = slice.Length, Hash = hash });
+            if (slice.Length < chunkSize)
+            {
+                break; // EOF
+            }
+        }
+        return hashes;
     }
 }

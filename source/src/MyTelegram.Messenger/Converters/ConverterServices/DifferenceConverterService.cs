@@ -1,4 +1,4 @@
-﻿using MyTelegram.Schema.Updates;
+using MyTelegram.Schema.Updates;
 
 namespace MyTelegram.Messenger.Converters.ConverterServices;
 
@@ -55,7 +55,7 @@ public class DifferenceConverterService(
     public IDifference ToDifference(
         IRequestWithAccessHashKeyId request,
         GetMessageOutput output, IPtsReadModel? pts, int cachedPts, int limit, IList<IUpdate> updateList,
-        IList<IChat> chatListFromUpdates, IReadOnlyCollection<IEncryptedMessageReadModel>? encryptedMessageReadModels, int layer = 0)
+        IList<IChat> chatListFromUpdates, IReadOnlyCollection<IEncryptedPushUpdatesReadModel>? encryptedPushUpdates, int layer = 0)
     {
         var messageList = messageConverterService.ToMessageList(output.SelfUserId, output.MessageList, output.PollList,
             output.ChosenPollOptions, output.UserReactionList, layer);
@@ -97,7 +97,31 @@ public class DifferenceConverterService(
             return differenceSlice;
         }
 
-        var newEncryptedMessages = Array.Empty<IEncryptedMessage>();
+        var newEncryptedMessages = encryptedPushUpdates == null
+            ? Array.Empty<IEncryptedMessage>()
+            : encryptedPushUpdates.Select(u =>
+            {
+                try
+                {
+                    var mem = new ReadOnlyMemory<byte>(u.Data);
+                    var upd = mem.ToTObject<IUpdate>();
+                    if (upd is TUpdateNewEncryptedMessage e)
+                    {
+                        return (IEncryptedMessage)e.Message;
+                    }
+                }
+                catch
+                {
+                    // ignore and fallback
+                }
+                return (IEncryptedMessage)new TEncryptedMessage
+                {
+                    ChatId = 0,
+                    Date = 0,
+                    RandomId = 0,
+                    Bytes = u.Data
+                };
+            }).ToArray();
 
         var difference = new TDifference
         {

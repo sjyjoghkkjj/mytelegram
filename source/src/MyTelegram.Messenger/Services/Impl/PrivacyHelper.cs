@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Services.Impl;
+namespace MyTelegram.Messenger.Services.Impl;
 
 public class PrivacyHelper : IPrivacyHelper, ITransientDependency
 {
@@ -7,17 +7,108 @@ public class PrivacyHelper : IPrivacyHelper, ITransientDependency
         long selfUserId,
         bool isContact)
     {
-
+        ApplyPrivacy(privacyReadModel, _ => executeOnPrivacyNotMatch(), selfUserId, isContact ? ContactType.Mutual : ContactType.None);
     }
 
     public void ApplyPrivacy(IPrivacyReadModel? privacyReadModel, Action<PrivacyValueType> executeOnPrivacyNotMatch, long selfUserId,
         ContactType contactType)
     {
-        
+        if (privacyReadModel == null)
+        {
+            return;
+        }
+
+        var allowed = IsAllowedByPrivacy(selfUserId, privacyReadModel, contactType);
+        if (!allowed)
+        {
+            var rule = privacyReadModel.PrivacyValueDataList.FirstOrDefault();
+            executeOnPrivacyNotMatch(rule?.PrivacyValueType ?? PrivacyValueType.DisallowAll);
+        }
     }
 
     public bool IsAllowedByPrivacy(long selfUserId, IPrivacyReadModel? privacyReadModel, ContactType contactType)
     {
+        if (privacyReadModel == null)
+        {
+            return true;
+        }
+
+        // Простая модель: AllowAll > DisallowAll; Contacts учитывает ContactType
+        var hasAllowAll = privacyReadModel.PrivacyValueDataList.Any(p => p.PrivacyValueType == PrivacyValueType.AllowAll);
+        if (hasAllowAll)
+        {
+            return true;
+        }
+
+        var hasDisallowAll = privacyReadModel.PrivacyValueDataList.Any(p => p.PrivacyValueType == PrivacyValueType.DisallowAll);
+        if (hasDisallowAll)
+        {
+            return false;
+        }
+
+        var allowContacts = privacyReadModel.PrivacyValueDataList.Any(p => p.PrivacyValueType == PrivacyValueType.AllowContacts);
+        if (allowContacts && contactType is ContactType.Mutual or ContactType.ContactOfTargetUser or ContactType.TargetUserIsMyContact)
+        {
+            return true;
+        }
+
+        var disallowContacts = privacyReadModel.PrivacyValueDataList.Any(p => p.PrivacyValueType == PrivacyValueType.DisallowContacts);
+        if (disallowContacts && contactType is ContactType.Mutual or ContactType.ContactOfTargetUser or ContactType.TargetUserIsMyContact)
+        {
+            return false;
+        }
+
+        // Allow/Disallow specific users
+        var allowUsers = privacyReadModel.PrivacyValueDataList
+            .Where(p => p.PrivacyValueType == PrivacyValueType.AllowUsers)
+            .SelectMany(p => DeserializeIds(p.JsonData))
+            .ToHashSet();
+        if (allowUsers.Contains(selfUserId))
+        {
+            return true;
+        }
+
+        var disallowUsers = privacyReadModel.PrivacyValueDataList
+            .Where(p => p.PrivacyValueType == PrivacyValueType.DisallowUsers)
+            .SelectMany(p => DeserializeIds(p.JsonData))
+            .ToHashSet();
+        if (disallowUsers.Contains(selfUserId))
+        {
+            return false;
+        }
+
         return true;
+    }
+
+    public bool CanSee(PrivacyType privacyType, long selfUserId, long targetUserId, IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels)
+    {
+        if (privacyReadModels == null)
+        {
+            return true;
+        }
+        var model = privacyReadModels.FirstOrDefault(p => p.PrivacyType == privacyType);
+        // TODO: вычисление ContactType по self/target; упрощённо считаем None
+        return IsAllowedByPrivacy(selfUserId, model, ContactType.None);
+    }
+}
+
+file scoped helper
+partial class PrivacyHelper
+{
+    private static IEnumerable<long> DeserializeIds(string? json)
+    {
+        if (string.IsNullOrEmpty(json))
+        {
+            return Array.Empty<long>();
+        }
+        try
+        {
+            var arr = System.Text.Json.JsonSerializer.Deserialize<List<long>>(json);
+            return arr ?? [];
+        }
+        catch
+        {
+            return Array.Empty<long>();
+        }
     }
 }

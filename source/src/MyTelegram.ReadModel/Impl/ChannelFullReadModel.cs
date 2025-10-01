@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.ReadModel.Impl;
+namespace MyTelegram.ReadModel.Impl;
 
 public class ChannelFullReadModel : IChannelFullReadModel,
     IAmReadModelFor<ChannelAggregate, ChannelId, ChannelCreatedEvent>,
@@ -82,6 +82,16 @@ public class ChannelFullReadModel : IChannelFullReadModel,
         CancellationToken cancellationToken)
     {
         UserName = domainEvent.AggregateEvent.UserName;
+        return Task.CompletedTask;
+    }
+
+    public Task ApplyAsync(IReadModelContext context,
+        IDomainEvent<ChannelAggregate, ChannelId, ChannelAvailableReactionsChangedEvent> domainEvent,
+        CancellationToken cancellationToken)
+    {
+        ReactionType = domainEvent.AggregateEvent.ReactionType;
+        AllowCustomReaction = domainEvent.AggregateEvent.AllowCustom;
+        AvailableReactions = domainEvent.AggregateEvent.AvailableReactions;
         return Task.CompletedTask;
     }
 

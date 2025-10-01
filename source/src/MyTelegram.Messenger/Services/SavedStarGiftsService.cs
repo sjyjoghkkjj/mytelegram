@@ -33,6 +33,13 @@ public interface ISavedStarGiftsService : ITransientDependency
 public class SavedStarGiftsService : ISavedStarGiftsService
 {
     private readonly ConcurrentDictionary<long, UserSaved> _storage = new();
+    // Global per-gift policies (by gift id)
+    private readonly ConcurrentDictionary<long, int> _globalTransferCounts = new();
+    private readonly ConcurrentDictionary<long, int> _globalUpgradeCounts = new();
+    private readonly ConcurrentDictionary<long, int> _globalTransferCooldownUntil = new();
+
+    private const int FirstUpgradeTransferCooldownSeconds = 86400; // 24h
+    private const long PaidTransferCostStars = 25; // cost after 2 transfers for unique gifts
 
     public Task<ISavedStarGifts> GetSavedAsync(long userId, CancellationToken cancellationToken = default)
     {
@@ -299,13 +306,55 @@ public class SavedStarGiftsService : ISavedStarGiftsService
         {
             RpcErrors.RpcErrors400.BadRequest("STARGIFT_NOT_FOUND").ThrowRpcError();
         }
+
+        // Check transfer cooldown (set on first upgrade)
+        if (_globalTransferCooldownUntil.TryGetValue(key, out var until))
+        {
+            var now = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (now < until)
+            {
+                RpcErrors.RpcErrors420.FloodWaitX.ThrowRpcError(until - now);
+            }
+        }
+
+        // Determine if unique and require paid transfer after 2 transfers
+        var transferCount = _globalTransferCounts.GetValueOrDefault(key);
+        var isUnique = saved.Gift is TStarGiftUnique || saved.Gift is IUniqueStarGift;
+        if (isUnique && transferCount >= 2)
+        {
+            DeductStars(fromUserId, PaidTransferCostStars);
+        }
         var to = _storage.GetOrAdd(toUserId, _ => new UserSaved());
         // Сбросим пин у получателя; дата обновится
         saved.PinnedTop = false;
         saved.Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        // Next-transfer policy hints for client
+        _globalTransferCounts.AddOrUpdate(key, _ => 1, (_, c) => c + 1);
+        var newCount = _globalTransferCounts[key];
+        saved.TransferStars = (isUnique && newCount >= 2) ? PaidTransferCostStars : 0;
+        saved.CanTransferAt = null;
+        saved.CanResellAt = null;
         to.Gifts[key] = saved;
         transferred = saved;
         return true;
+    }
+
+    public void RegisterUpgrade(long userId, long giftId)
+    {
+        var count = _globalUpgradeCounts.AddOrUpdate(giftId, _ => 1, (_, c) => c + 1);
+        if (count == 1)
+        {
+            // First upgrade: set transfer cooldown
+            var until = (int)DateTimeOffset.UtcNow.AddSeconds(FirstUpgradeTransferCooldownSeconds).ToUnixTimeSeconds();
+            _globalTransferCooldownUntil[giftId] = until;
+            // update owner's saved entry
+            var state = _storage.GetOrAdd(userId, _ => new UserSaved());
+            if (state.Gifts.TryGetValue(giftId, out var saved))
+            {
+                saved.CanTransferAt = until;
+                saved.CanResellAt = until;
+            }
+        }
     }
 
     private static long GiftKeyFromSaved(ISavedStarGift g) => g.Gift.Id;

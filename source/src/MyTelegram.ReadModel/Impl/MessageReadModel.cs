@@ -397,17 +397,60 @@ public class MessageReadModel : IMessageReadModel,
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<MessageAggregate, MessageId, MessageReactionAddedEvent> domainEvent, CancellationToken cancellationToken)
     {
-        // Update reactions in read model
-        // This would typically involve updating the Reactions list
-        // and RecentReactions list based on the aggregate state
+        Reactions ??= new List<ReactionCount>();
+        RecentReactions2 ??= new List<MessagePeerReaction>();
+
+        var reactionId = domainEvent.AggregateEvent.Reaction.GetReactionId();
+        var existing = Reactions.FirstOrDefault(r => r.GetReactionId() == reactionId);
+        if (existing == null)
+        {
+            var rc = new ReactionCount(domainEvent.AggregateEvent.Reaction, 0, null, null);
+            rc.Count = 1;
+            Reactions.Add(rc);
+        }
+        else
+        {
+            existing.Count++;
+        }
+
+        if (domainEvent.AggregateEvent.AddToRecent)
+        {
+            RecentReactions2.RemoveAll(x => x.Reaction.GetReactionId() == reactionId && x.SenderUserId == domainEvent.AggregateEvent.UserId);
+            RecentReactions2.Add(new MessagePeerReaction
+            {
+                Big = false,
+                Date = DateTime.UtcNow.ToTimestamp(),
+                PeerId = new Peer(PeerType.User, domainEvent.AggregateEvent.UserId),
+                SenderUserId = domainEvent.AggregateEvent.UserId,
+                Reaction = domainEvent.AggregateEvent.Reaction
+            });
+        }
+
         return Task.CompletedTask;
     }
 
     public Task ApplyAsync(IReadModelContext context, IDomainEvent<MessageAggregate, MessageId, MessageReactionRemovedEvent> domainEvent, CancellationToken cancellationToken)
     {
-        // Update reactions in read model
-        // This would typically involve updating the Reactions list
-        // and RecentReactions list based on the aggregate state
+        if (Reactions != null)
+        {
+            var reactionId = domainEvent.AggregateEvent.Reaction.GetReactionId();
+            var existing = Reactions.FirstOrDefault(r => r.GetReactionId() == reactionId);
+            if (existing != null)
+            {
+                existing.Count--;
+                if (existing.Count <= 0)
+                {
+                    Reactions.Remove(existing);
+                }
+            }
+        }
+
+        if (RecentReactions2 != null)
+        {
+            var rid = domainEvent.AggregateEvent.Reaction.GetReactionId();
+            RecentReactions2.RemoveAll(x => x.Reaction.GetReactionId() == rid && x.SenderUserId == domainEvent.AggregateEvent.UserId);
+        }
+
         return Task.CompletedTask;
     }
 }

@@ -10,17 +10,20 @@ internal sealed class SendVerifyEmailCodeHandler : RpcResultObjectHandler<MyTele
 {
 	private readonly IEmailCodeService _emailCodes;
 	private readonly IOptionsMonitor<MyTelegramMessengerServerOptions> _options;
+    private readonly IPasswordService _passwords;
 
-	public SendVerifyEmailCodeHandler(IEmailCodeService emailCodes, IOptionsMonitor<MyTelegramMessengerServerOptions> options)
+    public SendVerifyEmailCodeHandler(IEmailCodeService emailCodes, IOptionsMonitor<MyTelegramMessengerServerOptions> options, IPasswordService passwords)
 	{
 		_emailCodes = emailCodes;
 		_options = options;
+        _passwords = passwords;
 	}
 
 	protected override async Task<MyTelegram.Schema.Account.ISentEmailCode> HandleCoreAsync(IRequestInput input,
 		MyTelegram.Schema.Account.RequestSendVerifyEmailCode obj)
 	{
 		var ttl = TimeSpan.FromSeconds(_options.CurrentValue.VerificationCodeExpirationSeconds);
+        await _passwords.SetUnconfirmedEmailAsync(input.UserId, obj.Email);
 		var (_, expire) = await _emailCodes.CreateAsync(input.UserId, obj.Email, ttl);
 		return new MyTelegram.Schema.Account.TSentEmailCode
 		{

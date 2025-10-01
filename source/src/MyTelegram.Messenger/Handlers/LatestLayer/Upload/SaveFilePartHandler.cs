@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 
 ///<summary>
 /// Saves a part of file for further sending to one of the methods.
@@ -9,11 +9,26 @@
 /// 400 MSG_ID_INVALID Invalid message ID provided.
 /// See <a href="https://corefork.telegram.org/method/upload.saveFilePart" />
 ///</summary>
-internal sealed class SaveFilePartHandler : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestSaveFilePart, IBool>
+internal sealed class SaveFilePartHandler(IFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestSaveFilePart, IBool>
 {
-    protected override Task<IBool> HandleCoreAsync(IRequestInput input,
+    protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestSaveFilePart obj)
     {
-        throw new NotImplementedException();
+        if (obj.FilePart < 0 || obj.FileTotalParts <= 0 || obj.Bytes.IsEmpty)
+        {
+            RpcErrors.RpcErrors400.FilePartInvalid.ThrowRpcError();
+        }
+        var ok = await storage.SavePartAsync(obj.FileId, obj.FilePart, obj.FileTotalParts, obj.Bytes, isBig: false);
+        if (!ok)
+        {
+            RpcErrors.RpcErrors400.FilePartInvalid.ThrowRpcError();
+        }
+        // Try assemble optimistically to persist on disk
+        var (assembled, _) = await storage.TryAssembleAsync(obj.FileId, obj.FileTotalParts, false);
+        if (assembled)
+        {
+            await storage.CleanupPartsAsync(obj.FileId);
+        }
+        return new TBoolTrue();
     }
 }

@@ -1,4 +1,4 @@
-﻿using MyTelegram.Messenger.Services.Caching;
+using MyTelegram.Messenger.Services.Caching;
 using MyTelegram.Messenger.Services.Interfaces;
 
 namespace MyTelegram.Messenger.QueryServer.DomainEventHandlers;
@@ -30,7 +30,9 @@ public partial class MessageDomainEventHandler(
         ISubscribeSynchronousTo<MessageAggregate, MessageId, ChannelMessagePinnedEvent>,
         ISubscribeSynchronousTo<MessageAggregate, MessageId, MessageReplyUpdatedEvent>,
         ISubscribeSynchronousTo<SendMessageSaga, SendMessageSagaId, SendOutboxMessageCompletedSagaEvent>,
-        ISubscribeSynchronousTo<SendMessageSaga, SendMessageSagaId, ReceiveInboxMessageCompletedSagaEvent>
+        ISubscribeSynchronousTo<SendMessageSaga, SendMessageSagaId, ReceiveInboxMessageCompletedSagaEvent>,
+        ISubscribeSynchronousTo<MessageAggregate, MessageId, MessageReactionAddedEvent>,
+        ISubscribeSynchronousTo<MessageAggregate, MessageId, MessageReactionRemovedEvent>
 {
     public Task HandleAsync(
         IDomainEvent<EditMessageSaga, EditMessageSagaId, InboxMessageEditCompletedSagaEvent> domainEvent,
@@ -43,6 +45,95 @@ public partial class MessageDomainEventHandler(
             pts: domainEvent.AggregateEvent.NewMessageItem.Pts,
             updatesType: UpdatesType.Updates
         );
+    }
+
+    public async Task HandleAsync(IDomainEvent<MessageAggregate, MessageId, MessageReactionAddedEvent> domainEvent,
+        CancellationToken cancellationToken)
+    {
+        await NotifyMessageReactionsAsync(domainEvent.AggregateEvent.RequestInfo,
+            domainEvent.AggregateEvent.UserId,
+            domainEvent.AggregateIdentity);
+    }
+
+    public async Task HandleAsync(IDomainEvent<MessageAggregate, MessageId, MessageReactionRemovedEvent> domainEvent,
+        CancellationToken cancellationToken)
+    {
+        await NotifyMessageReactionsAsync(domainEvent.AggregateEvent.RequestInfo,
+            domainEvent.AggregateEvent.UserId,
+            domainEvent.AggregateIdentity);
+    }
+
+    private async Task NotifyMessageReactionsAsync(RequestInfo requestInfo,
+        long actorUserId,
+        MessageId messageId)
+    {
+        var ids = messageId.Value.Split('_');
+        var ownerPeerId = long.Parse(ids[1]);
+        var msgId = int.Parse(ids[2]);
+
+        var message = await queryProcessor.ProcessAsync(new GetMessageByPeerIdAndMessageIdQuery(ownerPeerId, msgId));
+        if (message == null)
+        {
+            return;
+        }
+
+        var results = new TVector<IReactionCount>();
+        if (message.Reactions != null)
+        {
+            foreach (var r in message.Reactions)
+            {
+                results.Add(new TReactionCount
+                {
+                    Reaction = r.GetReaction(),
+                    Count = r.Count
+                });
+            }
+        }
+
+        var recent = new TVector<IMessagePeerReaction>();
+        if (message.RecentReactions2 != null)
+        {
+            foreach (var rr in message.RecentReactions2)
+            {
+                recent.Add(new TMessagePeerReaction
+                {
+                    Big = rr.Big,
+                    Date = rr.Date,
+                    PeerId = rr.PeerId.ToPeer(),
+                    Reaction = rr.Reaction
+                });
+            }
+        }
+
+        var msgReactions = new TMessageReactions
+        {
+            Results = results,
+            RecentReactions = recent.Count > 0 ? recent : null,
+            CanSeeList = true
+        };
+
+        var update = new TUpdateMessageReactions
+        {
+            Peer = new TPeerUser { UserId = message.ToPeerId },
+            MsgId = message.MessageId,
+            Reactions = msgReactions
+        };
+
+        await SendRpcMessageToClientAsync(requestInfo, new TUpdates
+        {
+            Updates = new TVector<IUpdate>(update),
+            Chats = [],
+            Users = [],
+            Date = DateTime.UtcNow.ToTimestamp()
+        });
+
+        await PushUpdatesToPeerAsync(new Peer(message.ToPeerType, message.ToPeerId), new TUpdates
+        {
+            Updates = new TVector<IUpdate>(update),
+            Chats = [],
+            Users = [],
+            Date = DateTime.UtcNow.ToTimestamp()
+        }, excludeUserId: requestInfo.UserId);
     }
 
     public async Task HandleAsync(

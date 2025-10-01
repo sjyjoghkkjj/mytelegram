@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Services.Interfaces;
+namespace MyTelegram.Messenger.Services.Interfaces;
 
 public interface IPrivacyHelper
 {
@@ -14,4 +14,6 @@ public interface IPrivacyHelper
     //    ContactType contactType);
     bool IsAllowedByPrivacy(long selfUserId, IPrivacyReadModel? privacyReadModel,
         ContactType contactType);
+
+    bool CanSee(PrivacyType privacyType, long selfUserId, long targetUserId, IReadOnlyCollection<IPrivacyReadModel>? privacyReadModels);
 }

@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 
 ///<summary>
 /// Saves a part of a large file (over 10 MB in size) to be later passed to one of the methods.
@@ -12,11 +12,29 @@
 /// 400 FILE_PART_TOO_BIG The uploaded file part is too big.
 /// See <a href="https://corefork.telegram.org/method/upload.saveBigFilePart" />
 ///</summary>
-internal sealed class SaveBigFilePartHandler : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestSaveBigFilePart, IBool>
+internal sealed class SaveBigFilePartHandler(IFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestSaveBigFilePart, IBool>
 {
-    protected override Task<IBool> HandleCoreAsync(IRequestInput input,
+    protected override async Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestSaveBigFilePart obj)
     {
-        throw new NotImplementedException();
+        if (obj.FilePart < 0 || obj.FileTotalParts <= 0 || obj.Bytes.IsEmpty)
+        {
+            RpcErrors.RpcErrors400.FilePartInvalid.ThrowRpcError();
+        }
+        var ok = await storage.SavePartAsync(obj.FileId, obj.FilePart, obj.FileTotalParts, obj.Bytes, isBig: true);
+        if (!ok)
+        {
+            RpcErrors.RpcErrors400.FilePartInvalid.ThrowRpcError();
+        }
+        // Attempt assembly when last part arrives
+        if (obj.FilePart + 1 == obj.FileTotalParts)
+        {
+            var (assembled, _) = await storage.TryAssembleAsync(obj.FileId, obj.FileTotalParts, true);
+            if (assembled)
+            {
+                await storage.CleanupPartsAsync(obj.FileId);
+            }
+        }
+        return new TBoolTrue();
     }
 }

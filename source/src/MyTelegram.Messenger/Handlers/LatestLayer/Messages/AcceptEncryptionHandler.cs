@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// Confirms creation of a secret chat
@@ -9,11 +9,39 @@
 /// 400 ENCRYPTION_ALREADY_DECLINED The secret chat was already declined.
 /// See <a href="https://corefork.telegram.org/method/messages.acceptEncryption" />
 ///</summary>
-internal sealed class AcceptEncryptionHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestAcceptEncryption, MyTelegram.Schema.IEncryptedChat>
+internal sealed class AcceptEncryptionHandler(ISecretChatService secretChats, IResponseCacheAppService responseCache) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestAcceptEncryption, MyTelegram.Schema.IEncryptedChat>
 {
     protected override Task<MyTelegram.Schema.IEncryptedChat> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestAcceptEncryption obj)
     {
-        throw new NotImplementedException();
+        var chatId = (obj.Peer as TInputEncryptedChat)!.ChatId;
+        var gB = obj.GB.ToArray();
+        var state = secretChats.Accept(chatId, input.UserId, gB, obj.KeyFingerprint);
+        // Push updateEncryption to both participants (simplified: just enqueue updates list)
+        var update = new TUpdateEncryption
+        {
+            Chat = new TEncryptedChat
+            {
+                Id = state.ChatId,
+                AccessHash = state.AccessHash,
+                Date = state.Date,
+                AdminId = state.AdminId,
+                ParticipantId = state.ParticipantId,
+                GAOrB = gB,
+                KeyFingerprint = state.KeyFingerprint ?? 0
+            },
+            Date = state.Date
+        };
+        responseCache.AddToCache(input.ReqMsgId, update);
+        return Task.FromResult<MyTelegram.Schema.IEncryptedChat>(new TEncryptedChat
+        {
+            Id = state.ChatId,
+            AccessHash = state.AccessHash,
+            Date = state.Date,
+            AdminId = state.AdminId,
+            ParticipantId = state.ParticipantId,
+            GAOrB = gB,
+            KeyFingerprint = state.KeyFingerprint ?? 0
+        });
     }
 }

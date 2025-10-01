@@ -1,4 +1,4 @@
-﻿using MyTelegram.Schema.Updates;
+using MyTelegram.Schema.Updates;
 
 namespace MyTelegram.Messenger.Handlers.LatestLayer.Updates;
 
@@ -113,8 +113,10 @@ internal sealed class GetDifferenceHandler(
         }
 
         dto.MessageList = dto.MessageList.OrderBy(p => p.MessageId).ToList();
+        IReadOnlyCollection<IEncryptedPushUpdatesReadModel> e2e = await queryProcessor.ProcessAsync(new GetEncryptedPushUpdatesByQtsQuery(input.UserId, input.PermAuthKeyId!.Value, ptsReadModel?.Qts ?? 0, limit));
+
         var r = differenceConverterService.ToDifference(input, dto, ptsReadModel, cachedPts, limit,
-            allUpdateList, [], [], layer: input.Layer);
+            allUpdateList, [], e2e, layer: input.Layer);
 
         //logger.LogInformation("{UserId},Layer={Layer},res:{@Res}", input.UserId, input.Layer, r);
 
