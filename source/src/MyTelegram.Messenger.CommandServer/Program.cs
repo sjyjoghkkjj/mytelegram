@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using MyTelegram.Caching.Redis;
 using MyTelegram.Domain.Aggregates.Device;
@@ -111,6 +111,7 @@ builder.ConfigureServices((ctx,
     services.AddHostedService<MessageQueueDataProcessorBackgroundService<IDomainEvent>>();
     services.AddHostedService<QueuedCommandExecutorBackgroundService<DeviceAggregate, DeviceId>>();
     services.AddHostedService<QueuedCommandExecutorBackgroundService<PtsAggregate, PtsId>>();
+    services.AddHostedService<AutoDeleteMessagesBackgroundService>();
 
     services.Configure<HostOptions>(options =>
     {
