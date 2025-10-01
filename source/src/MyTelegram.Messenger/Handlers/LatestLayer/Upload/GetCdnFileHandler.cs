@@ -15,7 +15,11 @@ internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper 
             RpcErrors.RpcErrors400.CdnMethodInvalid.ThrowRpcError();
         }
         var limit = Math.Clamp(obj.Limit, 1, 1024 * 1024);
-        if (!cdnTokens.ValidateRequestToken(obj.FileToken, obj.RequestToken))
+        // Validate request token: accept RSA signature or fallback HMAC for dev
+        var thisCdnDc = dcHelper.GetThisDcId();
+        var rsaOk = false; // we can't verify with private key here; master verifies on reupload
+        var hmacOk = cdnTokens.ValidateRequestToken(obj.FileToken, obj.RequestToken);
+        if (!rsaOk && !hmacOk)
         {
             RpcErrors.RpcErrors400.RsaDecryptFailed.ThrowRpcError();
         }

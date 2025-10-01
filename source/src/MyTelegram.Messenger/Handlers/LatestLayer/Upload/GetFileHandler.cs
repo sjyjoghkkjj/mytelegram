@@ -17,7 +17,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/upload.getFile" />
 ///</summary>
-internal sealed class GetFileHandler(IFileStorage storage, IDataCenterHelper dcHelper, ICdnTokenService cdnTokens) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetFile, MyTelegram.Schema.Upload.IFile>
+internal sealed class GetFileHandler(IFileStorage storage, IDataCenterHelper dcHelper, ICdnTokenService cdnTokens, ICdnRsaKeyService rsaKeys) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetFile, MyTelegram.Schema.Upload.IFile>
 {
     protected override async Task<MyTelegram.Schema.Upload.IFile> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetFile obj)

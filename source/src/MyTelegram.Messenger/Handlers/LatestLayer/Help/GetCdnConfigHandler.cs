@@ -4,7 +4,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Help;
 /// Get configuration for <a href="https://corefork.telegram.org/cdn">CDN</a> file downloads.
 /// See <a href="https://corefork.telegram.org/method/help.getCdnConfig" />
 ///</summary>
-internal sealed class GetCdnConfigHandler(IOptions<MyTelegramMessengerServerOptions> options) : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetCdnConfig, MyTelegram.Schema.ICdnConfig>
+internal sealed class GetCdnConfigHandler(IOptions<MyTelegramMessengerServerOptions> options, ICdnRsaKeyService rsaKeys) : RpcResultObjectHandler<MyTelegram.Schema.Help.RequestGetCdnConfig, MyTelegram.Schema.ICdnConfig>
 {
     protected override Task<MyTelegram.Schema.ICdnConfig> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Help.RequestGetCdnConfig obj)
@@ -15,8 +15,7 @@ internal sealed class GetCdnConfigHandler(IOptions<MyTelegramMessengerServerOpti
         {
             if (dc.Cdn)
             {
-                // For demo, reuse a static RSA public key placeholder; in prod, load from secure store
-                keys.Add(new TCdnPublicKey { DcId = dc.Id, PublicKey = "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAuXh...devkey...IDAQAB\n-----END RSA PUBLIC KEY-----" });
+                keys.Add(new TCdnPublicKey { DcId = dc.Id, PublicKey = rsaKeys.GetPublicKeyPem(dc.Id) });
             }
         }
         return Task.FromResult<MyTelegram.Schema.ICdnConfig>(new TCdnConfig
