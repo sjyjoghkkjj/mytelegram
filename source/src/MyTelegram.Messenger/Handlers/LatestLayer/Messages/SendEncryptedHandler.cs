@@ -12,7 +12,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 /// 403 USER_IS_BLOCKED You were blocked by this user.
 /// See <a href="https://corefork.telegram.org/method/messages.sendEncrypted" />
 ///</summary>
-internal sealed class SendEncryptedHandler(ISecretChatService secretChats) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendEncrypted, MyTelegram.Schema.Messages.ISentEncryptedMessage>
+internal sealed class SendEncryptedHandler(ISecretChatService secretChats, IResponseCacheAppService responseCache) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendEncrypted, MyTelegram.Schema.Messages.ISentEncryptedMessage>
 {
     protected override Task<MyTelegram.Schema.Messages.ISentEncryptedMessage> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSendEncrypted obj)
@@ -24,6 +24,11 @@ internal sealed class SendEncryptedHandler(ISecretChatService secretChats) : Rpc
             RpcErrors.RpcErrors400.ChatIdInvalid.ThrowRpcError();
         }
         var rid = secretChats.AddMessage(chatId, input.UserId, obj.Data, hasFile: false);
+        // enqueue update for peer
+        foreach (var u in secretChats.BuildPendingUpdates(state.AdminId == input.UserId ? state.ParticipantId : state.AdminId))
+        {
+            responseCache.AddToCache(input.ReqMsgId, u);
+        }
         return Task.FromResult<MyTelegram.Schema.Messages.ISentEncryptedMessage>(new MyTelegram.Schema.Messages.TSentEncryptedMessage
         {
             Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),

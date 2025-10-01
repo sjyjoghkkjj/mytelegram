@@ -10,6 +10,7 @@ public interface ISecretChatService : ISingletonDependency
     long AddMessage(int chatId, long fromUserId, ReadOnlyMemory<byte> encryptedBytes, bool hasFile);
     void MarkRead(int chatId, long userId);
     IReadOnlyList<EncryptedMessageItem> GetPendingFor(long userId);
+    IReadOnlyList<MyTelegram.Schema.IUpdate> BuildPendingUpdates(long userId);
 }
 
 public sealed class EncryptedChatState
@@ -107,6 +108,27 @@ public class SecretChatService(IRandomHelper randomHelper, ILogger<SecretChatSer
     public IReadOnlyList<EncryptedMessageItem> GetPendingFor(long userId)
     {
         return _inbox.TryGetValue(userId, out var list) ? list.ToList() : new List<EncryptedMessageItem>();
+    }
+
+    public IReadOnlyList<MyTelegram.Schema.IUpdate> BuildPendingUpdates(long userId)
+    {
+        var items = GetPendingFor(userId);
+        var updates = new List<MyTelegram.Schema.IUpdate>();
+        foreach (var item in items)
+        {
+            updates.Add(new MyTelegram.Schema.TUpdateNewEncryptedMessage
+            {
+                Message = new MyTelegram.Schema.TEncryptedMessage
+                {
+                    ChatId = item.ChatId,
+                    Date = item.Date,
+                    RandomId = item.RandomId,
+                    Bytes = item.Bytes
+                },
+                Qts = 0
+            });
+        }
+        return updates;
     }
 
     private static void ValidatePublic(byte[] gX)
