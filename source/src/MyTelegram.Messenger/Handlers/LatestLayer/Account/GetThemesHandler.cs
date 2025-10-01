@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
 
 ///<summary>
 /// Get installed themes
@@ -9,8 +9,41 @@ internal sealed class GetThemesHandler : RpcResultObjectHandler<MyTelegram.Schem
     protected override Task<MyTelegram.Schema.Account.IThemes> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetThemes obj)
     {
-        var r = new TThemes { Themes = new TVector<ITheme>(), Hash = obj.Hash };
+        var themes = new TVector<ITheme>
+        {
+            new TTheme
+            {
+                Id = 20001,
+                Slug = "mtg-day",
+                Title = "MyTelegram Day",
+                Creator = false,
+                Default = true,
+                Dark = false,
+                BaseTheme = new TBaseThemeDay(),
+                Settings = new TThemeSettings
+                {
+                    OutboxAccentColor = 0xFF2196F3,
+                    MessageColors = new TVector<int>(new[]{0xFFFFFFFF, 0xFFF5F5F5})
+                }
+            },
+            new TTheme
+            {
+                Id = 20002,
+                Slug = "mtg-night",
+                Title = "MyTelegram Night",
+                Creator = false,
+                Default = false,
+                Dark = true,
+                BaseTheme = new TBaseThemeNight(),
+                Settings = new TThemeSettings
+                {
+                    OutboxAccentColor = 0xFF90CAF9,
+                    MessageColors = new TVector<int>(new[]{0xFF1E1E1E, 0xFF121212})
+                }
+            }
+        };
 
+        var r = new TThemes { Themes = themes, Hash = obj.Hash };
         return Task.FromResult<IThemes>(r);
     }
 }
