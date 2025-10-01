@@ -77,6 +77,10 @@ public class ImportedContactReadModel : Impl.ImportedContactReadModel, IMongoDbR
 {
 }
 
+public class ScheduleMessageReadModel : Impl.ScheduleMessageReadModel, IMongoDbReadModel
+{
+}
+
 public class MessageReadModel : Impl.MessageReadModel, IMongoDbReadModel
 {
 }
