@@ -32,6 +32,7 @@ public class MyTelegramMessengerServerOptions
     public bool EnableEmailLogin { get; set; }
 
     public string FileStoragePath { get; set; }
+    public string CdnTokenSecret { get; set; }
 
     [RegularExpression("^([\\d]{6})|(\\s*)$")]
     public string FixedEmailVerificationCode { get; set; }

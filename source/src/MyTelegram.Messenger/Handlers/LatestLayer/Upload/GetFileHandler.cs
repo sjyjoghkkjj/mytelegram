@@ -17,7 +17,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/upload.getFile" />
 ///</summary>
-internal sealed class GetFileHandler(IFileStorage storage, IDataCenterHelper dcHelper) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetFile, MyTelegram.Schema.Upload.IFile>
+internal sealed class GetFileHandler(IFileStorage storage, IDataCenterHelper dcHelper, ICdnTokenService cdnTokens) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetFile, MyTelegram.Schema.Upload.IFile>
 {
     protected override async Task<MyTelegram.Schema.Upload.IFile> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetFile obj)
@@ -51,14 +51,13 @@ internal sealed class GetFileHandler(IFileStorage storage, IDataCenterHelper dcH
                     var cdnDc = dcHelper.GetFirstCdnDcId();
                     if (cdnDc.HasValue)
                     {
-                        // Generate a simple opaque token from id
-                        var token = BitConverter.GetBytes(d.Id);
+                        var (fileToken, encKey, encIv) = cdnTokens.GenerateRedirect(d.Id, cdnDc.Value);
                         return new MyTelegram.Schema.Upload.TFileCdnRedirect
                         {
                             DcId = cdnDc.Value,
-                            FileToken = token,
-                            EncryptionKey = ReadOnlyMemory<byte>.Empty,
-                            EncryptionIv = ReadOnlyMemory<byte>.Empty,
+                            FileToken = fileToken,
+                            EncryptionKey = encKey,
+                            EncryptionIv = encIv,
                             FileHashes = new TVector<MyTelegram.Schema.IFileHash>()
                         };
                     }

@@ -4,7 +4,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// Download a <a href="https://corefork.telegram.org/cdn">CDN</a> file.
 /// See <a href="https://corefork.telegram.org/method/upload.getCdnFile" />
 ///</summary>
-internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper dcHelper) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetCdnFile, MyTelegram.Schema.Upload.ICdnFile>
+internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper dcHelper, ICdnTokenService cdnTokens) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetCdnFile, MyTelegram.Schema.Upload.ICdnFile>
 {
     protected override async Task<MyTelegram.Schema.Upload.ICdnFile> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetCdnFile obj)
@@ -15,7 +15,15 @@ internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper 
             RpcErrors.RpcErrors400.CdnMethodInvalid.ThrowRpcError();
         }
         var limit = Math.Clamp(obj.Limit, 1, 1024 * 1024);
-        var (ok, slice) = await storage.GetSliceAsync(obj.FileToken.ReadInt64(), obj.Offset, limit);
+        if (!cdnTokens.ValidateRequestToken(obj.FileToken, obj.RequestToken))
+        {
+            RpcErrors.RpcErrors400.RsaDecryptFailed.ThrowRpcError();
+        }
+        if (!cdnTokens.TryResolveFileId(obj.FileToken, out var fileId))
+        {
+            RpcErrors.RpcErrors400.FileTokenInvalid.ThrowRpcError();
+        }
+        var (ok, slice) = await storage.GetSliceAsync(fileId, obj.Offset, limit);
         if (!ok)
         {
             return new MyTelegram.Schema.Upload.TCdnFileReuploadNeeded { RequestToken = obj.FileToken };
