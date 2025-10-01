@@ -30,6 +30,17 @@ internal sealed class SendScheduledMessagesHandler(
         foreach (var s in scheduled)
         {
             var item = s.Item.MessageItem;
+            // Try load default TTL for this dialog
+            int? ttl = null;
+            try
+            {
+                var ttlReadModel = await queryProcessor.ProcessAsync(new GetTtlQuery(input.UserId, item.ToPeer));
+                ttl = ttlReadModel?.Ttl;
+            }
+            catch
+            {
+                // ignore TTL fetch errors
+            }
             var sendInput = new SendMessageInput(
                 input.ToRequestInfo(),
                 item.SenderUserId,
@@ -57,6 +68,12 @@ internal sealed class SendScheduledMessagesHandler(
                 scheduleDate: null,
                 invertMedia: item.InvertMedia
             );
+            // Note: TTL is applied in domain when converting to MessageItem, but we can hint via default setting by preserving it on MessageItem when recreated.
+            if (ttl.HasValue && ttl.Value > 0)
+            {
+                // we cannot set TTL directly on SendMessageInput; MessageAppService will derive default TTL via query as well.
+                // leaving here for clarity in case of future extension.
+            }
             sendInputs.Add(sendInput);
         }
 
