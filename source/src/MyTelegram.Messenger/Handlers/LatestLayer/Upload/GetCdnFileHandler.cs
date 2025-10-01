@@ -15,14 +15,6 @@ internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper 
             RpcErrors.RpcErrors400.CdnMethodInvalid.ThrowRpcError();
         }
         var limit = Math.Clamp(obj.Limit, 1, 1024 * 1024);
-        // Validate request token: accept RSA signature or fallback HMAC for dev
-        var thisCdnDc = dcHelper.GetThisDcId();
-        var rsaOk = false; // we can't verify with private key here; master verifies on reupload
-        var hmacOk = cdnTokens.ValidateRequestToken(obj.FileToken, obj.RequestToken);
-        if (!rsaOk && !hmacOk)
-        {
-            RpcErrors.RpcErrors400.RsaDecryptFailed.ThrowRpcError();
-        }
         if (!cdnTokens.TryResolveFileId(obj.FileToken, out var fileId))
         {
             RpcErrors.RpcErrors400.FileTokenInvalid.ThrowRpcError();
@@ -30,7 +22,10 @@ internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper 
         var (ok, slice) = await storage.GetSliceAsync(fileId, obj.Offset, limit);
         if (!ok)
         {
-            return new MyTelegram.Schema.Upload.TCdnFileReuploadNeeded { RequestToken = obj.FileToken };
+            // Generate request_token signed by CDN DC to ask master DC to reupload
+            var thisCdnDc = dcHelper.GetThisDcId();
+            var requestToken = rsaKeys.Sign(thisCdnDc, obj.FileToken);
+            return new MyTelegram.Schema.Upload.TCdnFileReuploadNeeded { RequestToken = requestToken };
         }
         if (!cdnTokens.TryGetEncryption(obj.FileToken, out var key, out var iv))
         {
