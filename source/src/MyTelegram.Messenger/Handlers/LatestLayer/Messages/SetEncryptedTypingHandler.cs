@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// Send typing event by the current user to a secret chat.
@@ -12,6 +12,7 @@ internal sealed class SetEncryptedTypingHandler : RpcResultObjectHandler<MyTeleg
     protected override Task<IBool> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSetEncryptedTyping obj)
     {
-        throw new NotImplementedException();
+        // For now, accept and return true; push updateEncryptedChatTyping can be added later
+        return Task.FromResult<IBool>(new TBoolTrue());
     }
 }

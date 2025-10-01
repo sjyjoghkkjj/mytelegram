@@ -23,11 +23,11 @@ internal sealed class SendEncryptedHandler(ISecretChatService secretChats) : Rpc
         {
             RpcErrors.RpcErrors400.ChatIdInvalid.ThrowRpcError();
         }
-        // For now, just echo back random_id and mark as sent
+        var rid = secretChats.AddMessage(chatId, input.UserId, obj.Data, hasFile: false);
         return Task.FromResult<MyTelegram.Schema.Messages.ISentEncryptedMessage>(new MyTelegram.Schema.Messages.TSentEncryptedMessage
         {
             Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            RandomId = obj.RandomId
+            RandomId = rid
         });
     }
 }

@@ -7,6 +7,9 @@ public interface ISecretChatService : ISingletonDependency
     EncryptedChatState CreateRequest(long adminId, long participantId, byte[] gA);
     EncryptedChatState Accept(int chatId, long accepterUserId, byte[] gB, long keyFingerprint);
     EncryptedChatState? Get(int chatId);
+    long AddMessage(int chatId, long fromUserId, ReadOnlyMemory<byte> encryptedBytes, bool hasFile);
+    void MarkRead(int chatId, long userId);
+    IReadOnlyList<EncryptedMessageItem> GetPendingFor(long userId);
 }
 
 public sealed class EncryptedChatState
@@ -21,9 +24,20 @@ public sealed class EncryptedChatState
     public long? KeyFingerprint { get; set; }
 }
 
+public sealed class EncryptedMessageItem
+{
+    public int ChatId { get; init; }
+    public long FromUserId { get; init; }
+    public long RandomId { get; init; }
+    public int Date { get; init; }
+    public ReadOnlyMemory<byte> Bytes { get; init; }
+    public bool HasFile { get; init; }
+}
+
 public class SecretChatService(IRandomHelper randomHelper, ILogger<SecretChatService> logger) : ISecretChatService
 {
     private readonly ConcurrentDictionary<int, EncryptedChatState> _chats = new();
+    private readonly ConcurrentDictionary<long, List<EncryptedMessageItem>> _inbox = new();
 
     public EncryptedChatState CreateRequest(long adminId, long participantId, byte[] gA)
     {
@@ -62,6 +76,37 @@ public class SecretChatService(IRandomHelper randomHelper, ILogger<SecretChatSer
     {
         _chats.TryGetValue(chatId, out var s);
         return s;
+    }
+
+    public long AddMessage(int chatId, long fromUserId, ReadOnlyMemory<byte> encryptedBytes, bool hasFile)
+    {
+        if (!_chats.TryGetValue(chatId, out var state))
+        {
+            RpcErrors.RpcErrors400.ChatIdInvalid.ThrowRpcError();
+        }
+        var toUser = fromUserId == state.AdminId ? state.ParticipantId : state.AdminId;
+        var item = new EncryptedMessageItem
+        {
+            ChatId = chatId,
+            FromUserId = fromUserId,
+            RandomId = Random.Shared.NextInt64(),
+            Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            Bytes = encryptedBytes,
+            HasFile = hasFile
+        };
+        var list = _inbox.GetOrAdd(toUser, _ => new List<EncryptedMessageItem>());
+        list.Add(item);
+        return item.RandomId;
+    }
+
+    public void MarkRead(int chatId, long userId)
+    {
+        _inbox.TryRemove(userId, out _);
+    }
+
+    public IReadOnlyList<EncryptedMessageItem> GetPendingFor(long userId)
+    {
+        return _inbox.TryGetValue(userId, out var list) ? list.ToList() : new List<EncryptedMessageItem>();
     }
 
     private static void ValidatePublic(byte[] gX)

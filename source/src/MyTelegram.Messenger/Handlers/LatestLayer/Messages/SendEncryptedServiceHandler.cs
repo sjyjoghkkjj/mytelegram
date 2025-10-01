@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// Sends a service message to a secret chat.
@@ -12,11 +12,17 @@
 /// 403 USER_IS_BLOCKED You were blocked by this user.
 /// See <a href="https://corefork.telegram.org/method/messages.sendEncryptedService" />
 ///</summary>
-internal sealed class SendEncryptedServiceHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendEncryptedService, MyTelegram.Schema.Messages.ISentEncryptedMessage>
+internal sealed class SendEncryptedServiceHandler(ISecretChatService secretChats) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendEncryptedService, MyTelegram.Schema.Messages.ISentEncryptedMessage>
 {
     protected override Task<MyTelegram.Schema.Messages.ISentEncryptedMessage> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSendEncryptedService obj)
     {
-        throw new NotImplementedException();
+        var chatId = (obj.Peer as TInputEncryptedChat)!.ChatId;
+        var rid = secretChats.AddMessage(chatId, input.UserId, obj.Data, hasFile: false);
+        return Task.FromResult<MyTelegram.Schema.Messages.ISentEncryptedMessage>(new MyTelegram.Schema.Messages.TSentEncryptedMessage
+        {
+            Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            RandomId = rid
+        });
     }
 }
