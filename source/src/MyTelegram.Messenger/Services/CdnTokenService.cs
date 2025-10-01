@@ -8,11 +8,12 @@ public interface ICdnTokenService : ISingletonDependency
     bool TryResolveFileId(ReadOnlyMemory<byte> fileToken, out long fileId);
     ReadOnlyMemory<byte> CreateRequestToken(ReadOnlyMemory<byte> fileToken);
     bool ValidateRequestToken(ReadOnlyMemory<byte> fileToken, ReadOnlyMemory<byte> requestToken);
+    bool TryGetEncryption(ReadOnlyMemory<byte> fileToken, out byte[] encKey, out byte[] encIv);
 }
 
 public class CdnTokenService(IOptionsMonitor<MyTelegramMessengerServerOptions> options, ILogger<CdnTokenService> logger) : ICdnTokenService
 {
-    private readonly ConcurrentDictionary<string, (long FileId, int ExpireAt)> _map = new();
+    private readonly ConcurrentDictionary<string, (long FileId, int ExpireAt, byte[] EncKey, byte[] EncIv)> _map = new();
 
     public (ReadOnlyMemory<byte> fileToken, ReadOnlyMemory<byte> encKey, ReadOnlyMemory<byte> encIv) GenerateRedirect(long fileId, int cdnDcId, TimeSpan? ttl = null)
     {
@@ -20,9 +21,9 @@ public class CdnTokenService(IOptionsMonitor<MyTelegramMessengerServerOptions> o
         var key = Convert.ToBase64String(token);
         var now = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var expireAt = now + (int)(ttl?.TotalSeconds ?? 3600);
-        _map[key] = (fileId, expireAt);
-        var encKey = RandomNumberGenerator.GetBytes(32); // placeholder, not used in demo
-        var encIv = RandomNumberGenerator.GetBytes(16); // placeholder, not used in demo
+        var encKey = RandomNumberGenerator.GetBytes(32);
+        var encIv = RandomNumberGenerator.GetBytes(16);
+        _map[key] = (fileId, expireAt, encKey, encIv);
         return (token, encKey, encIv);
     }
 
@@ -55,6 +56,20 @@ public class CdnTokenService(IOptionsMonitor<MyTelegramMessengerServerOptions> o
     {
         var expected = CreateRequestToken(fileToken).ToArray();
         return CryptographicOperations.FixedTimeEquals(expected, requestToken.ToArray());
+    }
+
+    public bool TryGetEncryption(ReadOnlyMemory<byte> fileToken, out byte[] encKey, out byte[] encIv)
+    {
+        var key = Convert.ToBase64String(fileToken.ToArray());
+        if (_map.TryGetValue(key, out var entry))
+        {
+            encKey = entry.EncKey;
+            encIv = entry.EncIv;
+            return true;
+        }
+        encKey = Array.Empty<byte>();
+        encIv = Array.Empty<byte>();
+        return false;
     }
 
     private byte[] GetSecret()

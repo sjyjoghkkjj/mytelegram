@@ -4,7 +4,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// Download a <a href="https://corefork.telegram.org/cdn">CDN</a> file.
 /// See <a href="https://corefork.telegram.org/method/upload.getCdnFile" />
 ///</summary>
-internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper dcHelper, ICdnTokenService cdnTokens) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetCdnFile, MyTelegram.Schema.Upload.ICdnFile>
+internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper dcHelper, ICdnTokenService cdnTokens, IAesHelper aesHelper) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetCdnFile, MyTelegram.Schema.Upload.ICdnFile>
 {
     protected override async Task<MyTelegram.Schema.Upload.ICdnFile> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetCdnFile obj)
@@ -28,6 +28,14 @@ internal sealed class GetCdnFileHandler(IFileStorage storage, IDataCenterHelper 
         {
             return new MyTelegram.Schema.Upload.TCdnFileReuploadNeeded { RequestToken = obj.FileToken };
         }
-        return new MyTelegram.Schema.Upload.TCdnFile { Bytes = slice };
+        if (!cdnTokens.TryGetEncryption(obj.FileToken, out var key, out var iv))
+        {
+            RpcErrors.RpcErrors400.FileTokenInvalid.ThrowRpcError();
+        }
+        // Encrypt slice with AES-CTR using offset
+        var buff = slice.ToArray();
+        var mem = new Memory<byte>(buff);
+        aesHelper.Ctr256Encrypt(mem, key, iv, obj.Offset);
+        return new MyTelegram.Schema.Upload.TCdnFile { Bytes = buff };
     }
 }
