@@ -13,7 +13,8 @@ internal sealed class SendScheduledMessagesHandler(
     IAccessHashHelper accessHashHelper,
     IPeerHelper peerHelper,
     IQueryProcessor queryProcessor,
-    IMessageAppService messageAppService
+    IMessageAppService messageAppService,
+    IResponseCacheAppService responseCache
     ) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendScheduledMessages, MyTelegram.Schema.IUpdates>
 {
     protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
@@ -94,6 +95,12 @@ internal sealed class SendScheduledMessagesHandler(
         {
             await commandBus.PublishAsync(new CancelScheduledMessageCommand(MessageId.Create(peer.PeerId, id), input.ToRequestInfo(), 0));
         }
+        // Push updateDeleteScheduledMessages so client removes scheduled items instantly
+        responseCache.AddToCache(input.ReqMsgId, new TUpdateDeleteScheduledMessages
+        {
+            Peer = peer.ToPeer(),
+            Id = new TVector<int>(obj.Id)
+        });
         return new TUpdates
         {
             Updates = [],
