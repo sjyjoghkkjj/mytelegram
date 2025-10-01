@@ -1,4 +1,4 @@
-﻿using MyTelegram.Schema.Updates;
+using MyTelegram.Schema.Updates;
 
 namespace MyTelegram.Messenger.Converters.ConverterServices;
 
@@ -97,7 +97,15 @@ public class DifferenceConverterService(
             return differenceSlice;
         }
 
-        var newEncryptedMessages = Array.Empty<IEncryptedMessage>();
+        var newEncryptedMessages = encryptedMessageReadModels == null
+            ? Array.Empty<IEncryptedMessage>()
+            : encryptedMessageReadModels.Select(m => (IEncryptedMessage)new TEncryptedMessage
+            {
+                ChatId = (int)m.ChatId,
+                Date = m.Date,
+                RandomId = m.RandomId,
+                Bytes = m.Data
+            }).ToArray();
 
         var difference = new TDifference
         {
