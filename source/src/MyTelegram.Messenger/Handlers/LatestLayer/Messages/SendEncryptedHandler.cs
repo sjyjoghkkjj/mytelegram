@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// Sends a text message to a secret chat.
@@ -12,11 +12,22 @@
 /// 403 USER_IS_BLOCKED You were blocked by this user.
 /// See <a href="https://corefork.telegram.org/method/messages.sendEncrypted" />
 ///</summary>
-internal sealed class SendEncryptedHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendEncrypted, MyTelegram.Schema.Messages.ISentEncryptedMessage>
+internal sealed class SendEncryptedHandler(ISecretChatService secretChats) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendEncrypted, MyTelegram.Schema.Messages.ISentEncryptedMessage>
 {
     protected override Task<MyTelegram.Schema.Messages.ISentEncryptedMessage> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSendEncrypted obj)
     {
-        throw new NotImplementedException();
+        var chatId = (obj.Peer as TInputEncryptedChat)!.ChatId;
+        var state = secretChats.Get(chatId);
+        if (state == null)
+        {
+            RpcErrors.RpcErrors400.ChatIdInvalid.ThrowRpcError();
+        }
+        // For now, just echo back random_id and mark as sent
+        return Task.FromResult<MyTelegram.Schema.Messages.ISentEncryptedMessage>(new MyTelegram.Schema.Messages.TSentEncryptedMessage
+        {
+            Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            RandomId = obj.RandomId
+        });
     }
 }
