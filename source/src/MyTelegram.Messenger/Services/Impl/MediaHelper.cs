@@ -1,4 +1,4 @@
-﻿using Google.Protobuf;
+using Google.Protobuf;
 using MyTelegram.Domain.Aggregates.Photo;
 using MyTelegram.Domain.Commands.Photo;
 using TWebPage = MyTelegram.Schema.TWebPage;
@@ -307,7 +307,23 @@ public class MediaHelper(
 
     private Task<IMessageMedia> CreateMediaWebPageAsync(TInputMediaWebPage inputMediaWebPage)
     {
-        throw new NotImplementedException();
+        var url = inputMediaWebPage.Url;
+        // Minimal WebPage loader: echo back URL with default fields
+        var wp = new TWebPage
+        {
+            Id = Random.Shared.NextInt64(),
+            Url = url,
+            DisplayUrl = url,
+            Hash = 0,
+            Title = url,
+            Description = string.Empty
+        };
+        return Task.FromResult<IMessageMedia>(new TMessageMediaWebPage
+        {
+            Manual = true,
+            Safe = true,
+            Webpage = wp
+        });
     }
 
     private async Task<IMessageMedia?> SaveMediaCoreAsync(IInputMedia? media)
