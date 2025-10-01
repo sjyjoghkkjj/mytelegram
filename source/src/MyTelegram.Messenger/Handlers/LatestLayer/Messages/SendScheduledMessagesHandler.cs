@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
+namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 
 ///<summary>
 /// Send scheduled messages right away
@@ -8,17 +8,23 @@
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/messages.sendScheduledMessages" />
 ///</summary>
-internal sealed class SendScheduledMessagesHandler : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendScheduledMessages, MyTelegram.Schema.IUpdates>
+internal sealed class SendScheduledMessagesHandler(ICommandBus commandBus, IAccessHashHelper accessHashHelper, IPeerHelper peerHelper) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendScheduledMessages, MyTelegram.Schema.IUpdates>
 {
-    protected override Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.IUpdates> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSendScheduledMessages obj)
     {
-        return Task.FromResult<IUpdates>(new TUpdates
+        await accessHashHelper.CheckAccessHashAsync(input, obj.Peer);
+        var peer = peerHelper.GetPeer(obj.Peer, input.UserId);
+        foreach (var id in obj.Id)
+        {
+            await commandBus.PublishAsync(new CancelScheduledMessageCommand(MessageId.Create(peer.PeerId, id), input.ToRequestInfo(), 0));
+        }
+        return new TUpdates
         {
             Updates = [],
             Chats = [],
             Users = [],
             Date = CurrentDate
-        });
+        };
     }
 }
