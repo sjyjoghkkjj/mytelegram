@@ -25,4 +25,9 @@ public class DataCenterHelper(IOptions<MyTelegramMessengerServerOptions> options
     {
         return options.Value.ThisDcId;
     }
+
+    public int? GetFirstCdnDcId()
+    {
+        return options.Value.DcOptions?.FirstOrDefault(d => d.Cdn)?.Id;
+    }
 }

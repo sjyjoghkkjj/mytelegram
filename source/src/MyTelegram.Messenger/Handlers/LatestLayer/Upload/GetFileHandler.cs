@@ -17,7 +17,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// 400 PEER_ID_INVALID The provided peer id is invalid.
 /// See <a href="https://corefork.telegram.org/method/upload.getFile" />
 ///</summary>
-internal sealed class GetFileHandler(IFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetFile, MyTelegram.Schema.Upload.IFile>
+internal sealed class GetFileHandler(IFileStorage storage, IDataCenterHelper dcHelper) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetFile, MyTelegram.Schema.Upload.IFile>
 {
     protected override async Task<MyTelegram.Schema.Upload.IFile> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetFile obj)
@@ -47,6 +47,21 @@ internal sealed class GetFileHandler(IFileStorage storage) : RpcResultObjectHand
                 var (okd, sliceD) = await storage.GetSliceAsync(d.Id, offset, limit);
                 if (!okd)
                 {
+                    // Redirect to CDN if configured
+                    var cdnDc = dcHelper.GetFirstCdnDcId();
+                    if (cdnDc.HasValue)
+                    {
+                        // Generate a simple opaque token from id
+                        var token = BitConverter.GetBytes(d.Id);
+                        return new MyTelegram.Schema.Upload.TFileCdnRedirect
+                        {
+                            DcId = cdnDc.Value,
+                            FileToken = token,
+                            EncryptionKey = ReadOnlyMemory<byte>.Empty,
+                            EncryptionIv = ReadOnlyMemory<byte>.Empty,
+                            FileHashes = new TVector<MyTelegram.Schema.IFileHash>()
+                        };
+                    }
                     RpcErrors.RpcErrors400.LocationInvalid.ThrowRpcError();
                 }
                 return new MyTelegram.Schema.Upload.TFile { Type = new MyTelegram.Schema.TStorageFilePartial(), Bytes = sliceD };
