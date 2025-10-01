@@ -25,61 +25,68 @@ internal sealed class SendScheduledMessagesHandler(
         // Fetch scheduled messages from read model
         var scheduled = await queryProcessor.ProcessAsync(new GetScheduledMessagesQuery(input.UserId, peer.PeerId, obj.Id));
 
-        // Build SendMessageInput list to send immediately (scheduleDate cleared so it becomes a normal send)
-        var sendInputs = new List<SendMessageInput>();
-        foreach (var s in scheduled)
-        {
-            var item = s.Item.MessageItem;
-            // Try load default TTL for this dialog
-            int? ttl = null;
-            try
-            {
-                var ttlReadModel = await queryProcessor.ProcessAsync(new GetTtlQuery(input.UserId, item.ToPeer));
-                ttl = ttlReadModel?.Ttl;
-            }
-            catch
-            {
-                // ignore TTL fetch errors
-            }
-            var sendInput = new SendMessageInput(
-                input.ToRequestInfo(),
-                item.SenderUserId,
-                item.ToPeer,
-                item.Message,
-                item.RandomId,
-                entities: item.Entities,
-                inputReplyTo: item.InputReplyTo,
-                clearDraft: false,
-                media: item.Media,
-                sendMessageType: item.SendMessageType,
-                messageType: item.MessageType,
-                messageAction: item.MessageAction,
-                groupId: item.GroupId,
-                groupItemCount: 1,
-                pollId: item.PollId,
-                replyMarkup: item.ReplyMarkup,
-                topMsgId: item.TopMsgId,
-                sendAs: item.SendAs,
-                inputQuickReplyShortcut: null,
-                effect: item.Effect,
-                isSendGroupedMessage: false,
-                isSendQuickReplyMessage: false,
-                silent: item.Silent,
-                scheduleDate: null,
-                invertMedia: item.InvertMedia
-            );
-            // Note: TTL is applied in domain when converting to MessageItem, but we can hint via default setting by preserving it on MessageItem when recreated.
-            if (ttl.HasValue && ttl.Value > 0)
-            {
-                // we cannot set TTL directly on SendMessageInput; MessageAppService will derive default TTL via query as well.
-                // leaving here for clarity in case of future extension.
-            }
-            sendInputs.Add(sendInput);
-        }
+        // Group by GroupId when present to send albums correctly
+        var groups = scheduled
+            .OrderBy(s => s.MessageId)
+            .GroupBy(s => s.Item.MessageItem.GroupId ?? 0)
+            .ToList();
 
-        if (sendInputs.Count > 0)
+        foreach (var group in groups)
         {
-            await messageAppService.SendMessageAsync(sendInputs);
+            var groupId = group.Key == 0 ? (long?)null : group.Key;
+            var items = group.Select(s => s.Item.MessageItem).ToList();
+            var isGrouped = groupId.HasValue && items.Count > 1;
+            var groupItemCount = items.Count;
+
+            var sendInputs = new List<SendMessageInput>();
+            foreach (var item in items)
+            {
+                // Try load default TTL for this dialog
+                int? ttl = null;
+                try
+                {
+                    var ttlReadModel = await queryProcessor.ProcessAsync(new GetTtlQuery(input.UserId, item.ToPeer));
+                    ttl = ttlReadModel?.Ttl;
+                }
+                catch
+                {
+                }
+
+                var sendInput = new SendMessageInput(
+                    input.ToRequestInfo(),
+                    item.SenderUserId,
+                    item.ToPeer,
+                    item.Message,
+                    item.RandomId,
+                    entities: item.Entities,
+                    inputReplyTo: item.InputReplyTo,
+                    clearDraft: false,
+                    media: item.Media,
+                    sendMessageType: item.SendMessageType,
+                    messageType: item.MessageType,
+                    messageAction: item.MessageAction,
+                    groupId: groupId,
+                    groupItemCount: isGrouped ? groupItemCount : 1,
+                    pollId: item.PollId,
+                    replyMarkup: item.ReplyMarkup,
+                    topMsgId: item.TopMsgId,
+                    sendAs: item.SendAs,
+                    inputQuickReplyShortcut: null,
+                    effect: item.Effect,
+                    isSendGroupedMessage: isGrouped,
+                    isSendQuickReplyMessage: false,
+                    silent: item.Silent,
+                    scheduleDate: null,
+                    invertMedia: item.InvertMedia
+                );
+                // TTL applied at domain; ttl fetched above ensures default exists in read model.
+                sendInputs.Add(sendInput);
+            }
+
+            if (sendInputs.Count > 0)
+            {
+                await messageAppService.SendMessageAsync(sendInputs);
+            }
         }
 
         // Cancel scheduled entries so they disappear from schedule box
