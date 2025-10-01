@@ -1,4 +1,4 @@
-﻿using MyTelegram.Schema.Updates;
+using MyTelegram.Schema.Updates;
 
 namespace MyTelegram.Messenger.Converters.ConverterServices;
 
@@ -23,6 +23,6 @@ public interface IDifferenceConverterService
         int limit,
         IList<IUpdate> updateList,
         IList<IChat> chatListFromUpdates,
-        IReadOnlyCollection<IEncryptedMessageReadModel>? encryptedMessageReadModels,
+        IReadOnlyCollection<IEncryptedPushUpdatesReadModel>? encryptedPushUpdates,
         int layer = 0);
 }
