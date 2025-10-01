@@ -113,9 +113,7 @@ internal sealed class GetDifferenceHandler(
         }
 
         dto.MessageList = dto.MessageList.OrderBy(p => p.MessageId).ToList();
-        IReadOnlyCollection<IEncryptedPushUpdatesReadModel> e2e = [];
-        // In a full impl, query encrypted push updates by QTS window
-        // e2e = await queryProcessor.ProcessAsync(new GetEncryptedPushUpdatesByQtsQuery(input.UserId, input.PermAuthKeyId!.Value, ptsReadModel?.Qts ?? 0, limit));
+        IReadOnlyCollection<IEncryptedPushUpdatesReadModel> e2e = await queryProcessor.ProcessAsync(new GetEncryptedPushUpdatesByQtsQuery(input.UserId, input.PermAuthKeyId!.Value, ptsReadModel?.Qts ?? 0, limit));
 
         var r = differenceConverterService.ToDifference(input, dto, ptsReadModel, cachedPts, limit,
             allUpdateList, [], e2e, layer: input.Layer);

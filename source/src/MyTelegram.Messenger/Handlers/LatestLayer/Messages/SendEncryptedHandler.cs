@@ -38,6 +38,8 @@ internal sealed class SendEncryptedHandler(ISecretChatService secretChats, IResp
             Qts = 0
         }.ToBytes();
         commandBus.PublishAsync(new MyTelegram.Domain.Commands.PushUpdates.CreateEncryptedPushUpdatesCommand(new MyTelegram.Domain.Aggregates.PushUpdates.PushUpdatesId(toUserId), toUserId, updatesBytes, 0, input.PermAuthKeyId!.Value)).GetAwaiter().GetResult();
+        // Increment QTS for recipient
+        commandBus.PublishAsync(new MyTelegram.Domain.Commands.Pts.IncrementQtsCommand(new MyTelegram.Domain.Aggregates.Pts.PtsId(toUserId), input.ToRequestInfo(), rid.ToString())).GetAwaiter().GetResult();
         return Task.FromResult<MyTelegram.Schema.Messages.ISentEncryptedMessage>(new MyTelegram.Schema.Messages.TSentEncryptedMessage
         {
             Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
