@@ -12,7 +12,7 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Messages;
 /// 403 USER_IS_BLOCKED You were blocked by this user.
 /// See <a href="https://corefork.telegram.org/method/messages.sendEncrypted" />
 ///</summary>
-internal sealed class SendEncryptedHandler(ISecretChatService secretChats, IResponseCacheAppService responseCache) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendEncrypted, MyTelegram.Schema.Messages.ISentEncryptedMessage>
+internal sealed class SendEncryptedHandler(ISecretChatService secretChats, IResponseCacheAppService responseCache, ICommandBus commandBus) : RpcResultObjectHandler<MyTelegram.Schema.Messages.RequestSendEncrypted, MyTelegram.Schema.Messages.ISentEncryptedMessage>
 {
     protected override Task<MyTelegram.Schema.Messages.ISentEncryptedMessage> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Messages.RequestSendEncrypted obj)
@@ -24,11 +24,20 @@ internal sealed class SendEncryptedHandler(ISecretChatService secretChats, IResp
             RpcErrors.RpcErrors400.ChatIdInvalid.ThrowRpcError();
         }
         var rid = secretChats.AddMessage(chatId, input.UserId, obj.Data, hasFile: false);
-        // enqueue update for peer
-        foreach (var u in secretChats.BuildPendingUpdates(state.AdminId == input.UserId ? state.ParticipantId : state.AdminId))
+        // Persist encrypted push update with QTS increment (simplified: qts=0 placeholder)
+        var toUserId = state.AdminId == input.UserId ? state.ParticipantId : state.AdminId;
+        var updatesBytes = new MyTelegram.Schema.TUpdateNewEncryptedMessage
         {
-            responseCache.AddToCache(input.ReqMsgId, u);
-        }
+            Message = new MyTelegram.Schema.TEncryptedMessage
+            {
+                ChatId = chatId,
+                Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                RandomId = rid,
+                Bytes = obj.Data
+            },
+            Qts = 0
+        }.ToBytes();
+        commandBus.PublishAsync(new MyTelegram.Domain.Commands.PushUpdates.CreateEncryptedPushUpdatesCommand(new MyTelegram.Domain.Aggregates.PushUpdates.PushUpdatesId(toUserId), toUserId, updatesBytes, 0, input.PermAuthKeyId!.Value)).GetAwaiter().GetResult();
         return Task.FromResult<MyTelegram.Schema.Messages.ISentEncryptedMessage>(new MyTelegram.Schema.Messages.TSentEncryptedMessage
         {
             Date = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
