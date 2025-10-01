@@ -99,14 +99,28 @@ public class DifferenceConverterService(
 
         var newEncryptedMessages = encryptedPushUpdates == null
             ? Array.Empty<IEncryptedMessage>()
-            : encryptedPushUpdates.Select(u => (IEncryptedMessage)new TEncryptedMessage
+            : encryptedPushUpdates.Select(u =>
             {
-                // In a full impl, parse u.Data back to TUpdateNewEncryptedMessage and extract message
-                // For now, store raw message bytes
-                ChatId = 0,
-                Date = 0,
-                RandomId = 0,
-                Bytes = u.Data
+                try
+                {
+                    var mem = new ReadOnlyMemory<byte>(u.Data);
+                    var upd = mem.ToTObject<IUpdate>();
+                    if (upd is TUpdateNewEncryptedMessage e)
+                    {
+                        return (IEncryptedMessage)e.Message;
+                    }
+                }
+                catch
+                {
+                    // ignore and fallback
+                }
+                return (IEncryptedMessage)new TEncryptedMessage
+                {
+                    ChatId = 0,
+                    Date = 0,
+                    RandomId = 0,
+                    Bytes = u.Data
+                };
             }).ToArray();
 
         var difference = new TDifference
