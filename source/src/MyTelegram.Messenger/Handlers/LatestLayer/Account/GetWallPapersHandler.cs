@@ -4,13 +4,13 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
 /// Returns a list of available <a href="https://corefork.telegram.org/api/wallpapers">wallpapers</a>.
 /// See <a href="https://corefork.telegram.org/method/account.getWallPapers" />
 ///</summary>
-internal sealed class GetWallPapersHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestGetWallPapers, MyTelegram.Schema.Account.IWallPapers>
+internal sealed class GetWallPapersHandler(IQueryProcessor queryProcessor) : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestGetWallPapers, MyTelegram.Schema.Account.IWallPapers>
 {
-    protected override Task<MyTelegram.Schema.Account.IWallPapers> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.Account.IWallPapers> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetWallPapers obj)
     {
         // Minimal static catalog, file-less entries with slugs; client may request concrete by slug later
-        var wallpapers = new TVector<IWallPaper>
+        var wallpapers = new List<IWallPaper>
         {
             new TWallPaperNoFile
             {
@@ -40,9 +40,22 @@ internal sealed class GetWallPapersHandler : RpcResultObjectHandler<MyTelegram.S
             }
         };
 
-        return Task.FromResult<MyTelegram.Schema.Account.IWallPapers>(new TWallPapers
+        // Read installed wallpaper from user config
+        var cfg = await queryProcessor.ProcessAsync(new GetUserConfigByKeyQuery(input.UserId, ((int)UserConfigType.WallPaper).ToString()));
+        if (cfg != null && long.TryParse(cfg.Value, out var selectedId))
         {
-            Wallpapers = wallpapers
-        });
+            foreach (var w in wallpapers)
+            {
+                if (w is TWallPaperNoFile nf)
+                {
+                    nf.Default = nf.Id == selectedId;
+                }
+            }
+        }
+
+        return new TWallPapers
+        {
+            Wallpapers = new TVector<IWallPaper>(wallpapers)
+        };
     }
 }

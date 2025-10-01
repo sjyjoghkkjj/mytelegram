@@ -4,12 +4,12 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Account;
 /// Get installed themes
 /// See <a href="https://corefork.telegram.org/method/account.getThemes" />
 ///</summary>
-internal sealed class GetThemesHandler : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestGetThemes, MyTelegram.Schema.Account.IThemes>
+internal sealed class GetThemesHandler(IQueryProcessor queryProcessor) : RpcResultObjectHandler<MyTelegram.Schema.Account.RequestGetThemes, MyTelegram.Schema.Account.IThemes>
 {
-    protected override Task<MyTelegram.Schema.Account.IThemes> HandleCoreAsync(IRequestInput input,
+    protected override async Task<MyTelegram.Schema.Account.IThemes> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Account.RequestGetThemes obj)
     {
-        var themes = new TVector<ITheme>
+        var themes = new List<ITheme>
         {
             new TTheme
             {
@@ -43,7 +43,19 @@ internal sealed class GetThemesHandler : RpcResultObjectHandler<MyTelegram.Schem
             }
         };
 
-        var r = new TThemes { Themes = themes, Hash = obj.Hash };
-        return Task.FromResult<IThemes>(r);
+        var cfg = await queryProcessor.ProcessAsync(new GetUserConfigByKeyQuery(input.UserId, ((int)UserConfigType.Theme).ToString()));
+        if (cfg != null && long.TryParse(cfg.Value, out var selectedId))
+        {
+            foreach (var t in themes)
+            {
+                if (t is TTheme theme)
+                {
+                    theme.Default = theme.Id == selectedId;
+                }
+            }
+        }
+
+        var r = new TThemes { Themes = new TVector<ITheme>(themes), Hash = obj.Hash };
+        return r;
     }
 }
