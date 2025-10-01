@@ -8,11 +8,15 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// 400 RSA_DECRYPT_FAILED Internal RSA decryption failed.
 /// See <a href="https://corefork.telegram.org/method/upload.getCdnFileHashes" />
 ///</summary>
-internal sealed class GetCdnFileHashesHandler(IFileStorage storage) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetCdnFileHashes, TVector<MyTelegram.Schema.IFileHash>>
+internal sealed class GetCdnFileHashesHandler(IFileStorage storage, IDataCenterHelper dcHelper) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestGetCdnFileHashes, TVector<MyTelegram.Schema.IFileHash>>
 {
     protected override Task<TVector<MyTelegram.Schema.IFileHash>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestGetCdnFileHashes obj)
     {
+        if (!dcHelper.IsCdnDc(dcHelper.GetThisDcId()))
+        {
+            RpcErrors.RpcErrors400.CdnMethodInvalid.ThrowRpcError();
+        }
         var tokenId = obj.FileToken.ReadInt64();
         var hashes = ComputeHashes(tokenId, obj.Offset, 131072); // 128 KB chunk size like Telegram CDN
         return Task.FromResult(new TVector<MyTelegram.Schema.IFileHash>(hashes));

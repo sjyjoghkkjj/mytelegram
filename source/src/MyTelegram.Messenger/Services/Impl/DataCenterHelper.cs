@@ -1,4 +1,4 @@
-﻿namespace MyTelegram.Messenger.Services.Impl;
+namespace MyTelegram.Messenger.Services.Impl;
 
 public class DataCenterHelper(IOptions<MyTelegramMessengerServerOptions> options)
     : IDataCenterHelper, ITransientDependency
@@ -13,6 +13,16 @@ public class DataCenterHelper(IOptions<MyTelegramMessengerServerOptions> options
             return defaultDcId;
         }
 
+        return options.Value.ThisDcId;
+    }
+
+    public bool IsCdnDc(int dcId)
+    {
+        return options.Value.DcOptions?.Any(d => d.Id == dcId && d.Cdn) == true;
+    }
+
+    public int GetThisDcId()
+    {
         return options.Value.ThisDcId;
     }
 }

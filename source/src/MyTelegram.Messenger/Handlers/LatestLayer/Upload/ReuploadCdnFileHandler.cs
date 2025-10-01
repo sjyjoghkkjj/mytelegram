@@ -9,12 +9,17 @@ namespace MyTelegram.Messenger.Handlers.LatestLayer.Upload;
 /// 400 RSA_DECRYPT_FAILED Internal RSA decryption failed.
 /// See <a href="https://corefork.telegram.org/method/upload.reuploadCdnFile" />
 ///</summary>
-internal sealed class ReuploadCdnFileHandler : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestReuploadCdnFile, TVector<MyTelegram.Schema.IFileHash>>
+internal sealed class ReuploadCdnFileHandler(IDataCenterHelper dcHelper) : RpcResultObjectHandler<MyTelegram.Schema.Upload.RequestReuploadCdnFile, TVector<MyTelegram.Schema.IFileHash>>
 {
     protected override Task<TVector<MyTelegram.Schema.IFileHash>> HandleCoreAsync(IRequestInput input,
         MyTelegram.Schema.Upload.RequestReuploadCdnFile obj)
     {
-        // Minimal: acknowledge and return empty hashes (no-op CDN)
+        // Must be called on master DC
+        if (dcHelper.IsCdnDc(dcHelper.GetThisDcId()))
+        {
+            RpcErrors.RpcErrors400.CdnMethodInvalid.ThrowRpcError();
+        }
+        // Minimal: acknowledge and return empty hashes (placeholder)
         return Task.FromResult(new TVector<MyTelegram.Schema.IFileHash>());
     }
 }
