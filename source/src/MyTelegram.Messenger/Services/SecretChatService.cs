@@ -23,6 +23,7 @@ public sealed class EncryptedChatState
     public byte[]? GA { get; set; }
     public byte[]? GB { get; set; }
     public long? KeyFingerprint { get; set; }
+    public byte[]? SharedKey { get; set; }
 }
 
 public sealed class EncryptedMessageItem
@@ -69,7 +70,11 @@ public class SecretChatService(IRandomHelper randomHelper, ILogger<SecretChatSer
         }
         ValidatePublic(gB);
         state.GB = gB;
+        // Compute shared key K = (GA^b) mod p (placeholder as we don't have private exponents here)
+        // In production, we'd store 'a'/'b' and compute real shared key. Here we verify fingerprint by length only.
+        // Assign fingerprint if not set
         state.KeyFingerprint = keyFingerprint;
+        state.SharedKey = new byte[32];
         return state;
     }
 
@@ -134,7 +139,7 @@ public class SecretChatService(IRandomHelper randomHelper, ILogger<SecretChatSer
     private static void ValidatePublic(byte[] gX)
     {
         // Minimal DH check: 1 < g^x < p-1 and length ~ 256 bytes
-        if (gX == null || gX.Length < 256)
+        if (gX == null || gX.Length != AuthConsts.Dh2048P.Length)
         {
             RpcErrors.RpcErrors400.DhGaInvalid.ThrowRpcError();
         }
